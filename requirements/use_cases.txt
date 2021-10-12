@@ -1,0 +1,45 @@
+
+I have a new song idea
+1. Upload your song idea
+2. Add meta-data
+3. Associate ICP account or keep anonymous
+4. Receive 10,000 equity tokens and 10,000 governance tokens
+5. Song idea is published on CR platform
+
+I want to contribute to an idea
+1. Browse song ideas and find one you like
+2. Find the song version that matches your style
+3. Upload contribution mp3 file
+4. Enter how many equity tokens you want, if any
+5. Enter how many governance tokens you want, if any
+6. Enter how many ICP tokens you want, if any
+7. Submit contribution
+
+I want to invest in an idea
+1. Browse song ideas and find one you like
+2. Enter how many equity and/or governance tokens you want to buy
+3. Optionally lock the equity/governance token ration
+4. Pay with ICP tokens
+6. Receive song equity and/or governance tokens
+
+I own tokens
+* Set N equity tokens available for sale at specific price (ICP tokens)
+* Set M governance tokens available for sale at specific price
+* Set N+M equity and governance tokens (locked together) for sale at specific price
+
+I own song governance tokens
+* Manage contributions
+  1. Browse contributions
+  2. Vote to accept, reject, or counter-propose (voting lasts 7 days or until everyone votes)
+  3. (async) If democracy decission is accept -> make payment in ICP, or issue new song tokens
+* Manage agreements
+  1. Browse proposed agreements (pdf documents)
+  2. Vote to accept or reject
+* Convert to tradeable tokenized asset
+
+I am a Publisher
+* Propose new publishing agreements
+  1. Browse song versions, select song verion
+  2. Upload (propose) agreement
+* Browse agreements history
+* Make payments to song wallets for accepted agreements
