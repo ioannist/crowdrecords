@@ -26,6 +26,10 @@ I own tokens
 * Set N equity tokens available for sale at specific price (ICP tokens)
 * Set M governance tokens available for sale at specific price
 * Set N+M equity and governance tokens (locked together) for sale at specific price
+* Transfer equity or governance tokens from my account to another account
+
+I own copyright tokens
+* Set dillution limit, i.e. up to how many more equity tokens can be issued through governance
 
 I own song governance tokens
 * Manage contributions
