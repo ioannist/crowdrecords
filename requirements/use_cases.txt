@@ -1,19 +1,26 @@
 
 I have a new song idea
-1. Upload your song idea
-2. Add meta-data
-3. Associate ICP account or keep anonymous
-4. Receive 10,000 equity tokens and 10,000 governance tokens
-5. Song idea is published on CR platform
+1. Name of the song
+2. Upload seed (final version, immutable) mix + separate tracks
+3. Add meta-data
+4. Associate ICP account or keep anonymous
+5. Receive 10,000 equity tokens and 10,000 governance tokens
+6. Song idea is published on CR platform
 
 I want to contribute to an idea
-1. Browse song ideas and find one you like
-2. Find the song version that matches your style
-3. Upload contribution mp3 file
-4. Enter how many equity tokens you want, if any
-5. Enter how many governance tokens you want, if any
-6. Enter how many ICP tokens you want, if any
-7. Submit contribution
+1. Browse records (versions)
+A. Finds a record
+  2. Upload mix + track/s
+  3. Set DRAFT if appropriate
+  4. Enter how many equity tokens you want, if any
+  5. Enter how many governance tokens you want, if any
+  6. Enter how many ICP tokens you want, if any
+  7. Submit contribution
+  8. 1-week review period for contribution, Governance token holders vote yay/nay
+  9. IF accepted -> mint tokens and transfer to contributor, ELSE reject
+B. Creates a new record
+  1. Select contributions to include in the new record
+  2. Upload mix + track/s
 
 I want to invest in an idea
 1. Browse song ideas and find one you like
@@ -27,6 +34,7 @@ I own tokens
 * Set M governance tokens available for sale at specific price
 * Set N+M equity and governance tokens (locked together) for sale at specific price
 * Transfer equity or governance tokens from my account to another account
+* Dillute tokens / mint new tokens
 
 I own copyright tokens
 * Set dillution limit, i.e. up to how many more equity tokens can be issued through governance
