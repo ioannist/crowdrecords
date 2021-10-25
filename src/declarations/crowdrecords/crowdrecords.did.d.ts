@@ -1,2 +1,16 @@
 import type { Principal } from '@dfinity/principal';
-export interface _SERVICE { 'greet' : (arg_0: string) => Promise<string> }
+export interface NewProfile { 'username' : string, 'profileImage' : string }
+export interface Profile {
+  'coinWallet' : Array<string>,
+  'username' : string,
+  'userId' : UserId,
+  'profileImage' : string,
+  'createdDate' : bigint,
+  'recordWallet' : Array<string>,
+}
+export type UserId = Principal;
+export interface anon_class_9_1 {
+  'createUser' : (arg_0: NewProfile) => Promise<Principal>,
+  'getUserProfile' : () => Promise<[] | [Profile]>,
+}
+export interface _SERVICE extends anon_class_9_1 {}

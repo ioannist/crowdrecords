@@ -1,20 +1,37 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
     <title>crowdrecords</title>
-    <base href="/">
+    <base href="/" />
 
     <link type="text/css" rel="stylesheet" href="main.css" />
-</head>
-<body>
+  </head>
+  <body>
     <img src="logo.png" alt="DFINITY logo" />
-    <section>
-        <label for="name">Enter your name: &nbsp;</label>
-        <input id="name" alt="Name" type="text" />
-        <button id="clickMeBtn">Click Me!</button>
+    <!-- <section>
+      <label for="username">Enter your user name: &nbsp;</label>
+      <input id="username" alt="username" type="text" />
+      <label for="profileUrl">Enter your profile url: &nbsp;</label>
+      <input id="profileUrl" alt="Profile Url" type="text" />
+      <button id="clickMeBtn">Click Me!</button>
     </section>
-    <section id="greeting"></section>
-</body>
+    <section id="createUserTemp"></section> -->
+
+    <section>
+      <label for="username">Enter your user name: &nbsp;</label>
+      <input id="username" alt="username" type="text" />
+      <label for="profileUrl">Enter your profile url: &nbsp;</label>
+      <input id="profileUrl" alt="Profile Url" type="text" />
+      <button id="createActualUserButton">Create Actual user</button>
+    </section>
+    <section id="createUserResult"></section>
+
+    <section>
+      <label>Get your user data &nbsp;</label>
+      <button id="getUserButton">Click Me!</button>
+    </section>
+    <section id="getUserResult"></section>
+  </body>
 </html>

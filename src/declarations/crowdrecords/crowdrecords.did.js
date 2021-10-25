@@ -1,4 +1,21 @@
 export const idlFactory = ({ IDL }) => {
-  return IDL.Service({ 'greet' : IDL.Func([IDL.Text], [IDL.Text], []) });
+  const NewProfile = IDL.Record({
+    'username' : IDL.Text,
+    'profileImage' : IDL.Text,
+  });
+  const UserId = IDL.Principal;
+  const Profile = IDL.Record({
+    'coinWallet' : IDL.Vec(IDL.Text),
+    'username' : IDL.Text,
+    'userId' : UserId,
+    'profileImage' : IDL.Text,
+    'createdDate' : IDL.Int,
+    'recordWallet' : IDL.Vec(IDL.Text),
+  });
+  const anon_class_9_1 = IDL.Service({
+    'createUser' : IDL.Func([NewProfile], [IDL.Principal], []),
+    'getUserProfile' : IDL.Func([], [IDL.Opt(Profile)], []),
+  });
+  return anon_class_9_1;
 };
 export const init = ({ IDL }) => { return []; };
