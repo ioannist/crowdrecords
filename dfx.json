@@ -1,11 +1,15 @@
 {
   "canisters": {
-    "crowdrecords": {
-      "main": "src/crowdrecords/main.mo",
+    "users": {
+      "main": "src/users/main.mo",
+      "type": "motoko"
+    },
+    "tokens": {
+      "main": "src/tokens/main.mo",
       "type": "motoko"
     },
     "crowdrecords_assets": {
-      "dependencies": ["crowdrecords"],
+      "dependencies": ["users", "tokens"],
       "frontend": {
         "entrypoint": "src/crowdrecords_assets/src/index.html"
       },
@@ -17,8 +21,7 @@
     "build": {
       "args": "",
       "packtool": ""
-    },
-    "canister": "crowdrecords"
+    }
   },
   "dfx": "0.8.1",
   "networks": {

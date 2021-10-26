@@ -19,25 +19,18 @@ function initCanisterIds() {
   }
 
   const network =
-    process.env.DFX_NETWORK ||
-    (process.env.NODE_ENV === "production" ? "ic" : "local");
+    process.env.DFX_NETWORK || (process.env.NODE_ENV === "production" ? "ic" : "local");
 
   canisters = network === "local" ? localCanisters : prodCanisters;
 
   for (const canister in canisters) {
-    process.env[canister.toUpperCase() + "_CANISTER_ID"] =
-      canisters[canister][network];
+    process.env[canister.toUpperCase() + "_CANISTER_ID"] = canisters[canister][network];
   }
 }
 initCanisterIds();
 
 const isDevelopment = process.env.NODE_ENV !== "production";
-const asset_entry = path.join(
-  "src",
-  "crowdrecords_assets",
-  "src",
-  "index.html"
-);
+const asset_entry = path.join("src", "crowdrecords_assets", "src", "index.html");
 
 module.exports = {
   target: "web",
@@ -81,7 +74,7 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       template: path.join(__dirname, asset_entry),
-      cache: false
+      cache: false,
     }),
     new CopyPlugin({
       patterns: [
@@ -92,8 +85,9 @@ module.exports = {
       ],
     }),
     new webpack.EnvironmentPlugin({
-      NODE_ENV: 'development',
-      CROWDRECORDS_CANISTER_ID: canisters["crowdrecords"]
+      NODE_ENV: "development",
+      USERS_CANISTER_ID: canisters["users"],
+      TOKENS_CANISTER_ID: canisters["tokens"],
     }),
     new webpack.ProvidePlugin({
       Buffer: [require.resolve("buffer/"), "Buffer"],
@@ -113,6 +107,6 @@ module.exports = {
     },
     hot: true,
     contentBase: path.resolve(__dirname, "./src/crowdrecords_assets"),
-    watchContentBase: true
+    watchContentBase: true,
   },
 };

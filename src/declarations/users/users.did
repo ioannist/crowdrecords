@@ -1,0 +1,23 @@
+type anon_class_9_1 = 
+ service {
+   addRecord: (text) -> (bool);
+   checkIfUserLoogedIn: () -> (bool);
+   createUser: (NewProfile) -> (principal);
+   getUserProfile: () -> (opt Profile);
+ };
+type UserId = principal;
+type Profile = 
+ record {
+   coinWallet: vec text;
+   createdDate: int;
+   profileImage: text;
+   recordWallet: vec text;
+   userId: UserId;
+   username: text;
+ };
+type NewProfile = 
+ record {
+   profileImage: text;
+   username: text;
+ };
+service : () -> anon_class_9_1

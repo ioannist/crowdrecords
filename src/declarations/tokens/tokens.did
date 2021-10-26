@@ -1,0 +1,17 @@
+type anon_class_9_1 = 
+ service {
+   createNewToken: (NewToken) -> (nat32);
+ };
+type TokenType = 
+ variant {
+   copyright;
+   governance;
+ };
+type NewToken = 
+ record {
+   recordId: text;
+   symbol: text;
+   tokenType: TokenType;
+   totalSupply: nat;
+ };
+service : () -> anon_class_9_1
