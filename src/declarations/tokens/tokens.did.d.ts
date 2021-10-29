@@ -7,7 +7,9 @@ export interface NewToken {
 }
 export type TokenType = { 'governance' : null } |
   { 'copyright' : null };
-export interface anon_class_9_1 {
+export type UserId = Principal;
+export interface _SERVICE {
+  'addRecord' : (arg_0: string) => Promise<boolean>,
   'createNewToken' : (arg_0: NewToken) => Promise<number>,
+  'initializeEmptyValuesForUser' : (arg_0: UserId) => Promise<undefined>,
 }
-export interface _SERVICE extends anon_class_9_1 {}

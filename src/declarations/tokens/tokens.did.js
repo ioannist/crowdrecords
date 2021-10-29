@@ -9,9 +9,11 @@ export const idlFactory = ({ IDL }) => {
     'tokenType' : TokenType,
     'symbol' : IDL.Text,
   });
-  const anon_class_9_1 = IDL.Service({
+  const UserId = IDL.Principal;
+  return IDL.Service({
+    'addRecord' : IDL.Func([IDL.Text], [IDL.Bool], []),
     'createNewToken' : IDL.Func([NewToken], [IDL.Nat32], []),
+    'initializeEmptyValuesForUser' : IDL.Func([UserId], [], []),
   });
-  return anon_class_9_1;
 };
 export const init = ({ IDL }) => { return []; };

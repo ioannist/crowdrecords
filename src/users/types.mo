@@ -7,8 +7,6 @@ module {
    public type Profile = {
         userId:UserId;
         username: Text;
-        recordWallet: [Text];
-        coinWallet: [Text];
         profileImage: Text;
         createdDate: Int; 
     };

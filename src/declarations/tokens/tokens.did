@@ -1,7 +1,4 @@
-type anon_class_9_1 = 
- service {
-   createNewToken: (NewToken) -> (nat32);
- };
+type UserId = principal;
 type TokenType = 
  variant {
    copyright;
@@ -14,4 +11,8 @@ type NewToken =
    tokenType: TokenType;
    totalSupply: nat;
  };
-service : () -> anon_class_9_1
+service : {
+  addRecord: (text) -> (bool);
+  createNewToken: (NewToken) -> (nat32);
+  initializeEmptyValuesForUser: (UserId) -> ();
+}

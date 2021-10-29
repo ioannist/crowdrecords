@@ -5,6 +5,7 @@ import List "mo:base/List";
 import Types "./types";
 import Database "./database"; 
 import Principal "mo:base/Principal";
+import TokensCanister "canister:tokens";
 
 actor class() {
 
@@ -15,8 +16,9 @@ actor class() {
     type UserId = Types.UserId;
 
     public shared({ caller }) func createUser(profile : NewProfile) : async Principal {
-       directory.createNewUser(caller,profile); 
-       return caller;
+       directory.createNewUser(caller,profile);
+       await TokensCanister.initializeEmptyValuesForUser(caller);
+       caller; 
     };
 
     public shared({ caller }) func getUserProfile() : async ?Profile {
@@ -30,43 +32,8 @@ actor class() {
         return true;
     };
 
-    public shared({ caller }) func addRecord(recordId: Text) : async Bool {
-        directory.addRecord(caller,recordId);
+    public shared({ caller }) func whoAmI() : async Principal {
+        caller;
     };
     
-
-//     type NewRecord = {
-//         name : Text;
-//         number : Nat;
-//     };
-
-//     let rec : NewRecord = {
-//         name = "Parth";
-//         number = 98766332;
-//     }
-
-//     type VariantExample = {
-//         #name ;
-//         #tag : Text;
-//     };
-
-//     let vEx : VariantExample = {
-//         #name = "Parth";
-//         #tag = "Tags";
-//     };
-
-//     public func name() : async (Text)  {
-//         rec.name;
-//     };
-
-//     public func printVariant() : async (Text)  {
-//         variantExample;
-//     };
-
-
-//   public func print2Vals(): async (Bool ,Text) {
-//         (true,"das");
-//     };
-
-
 };

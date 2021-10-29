@@ -6,7 +6,7 @@ import Types "./types";
 import Database "./database"; 
 import Principal "mo:base/Principal";
 
-actor class() {
+actor Tokens {
 
     var directory: Database.Directory = Database.Directory();
 
@@ -21,38 +21,18 @@ actor class() {
        return directory.createNewTokens(caller,newToken); 
     };
 
-//     type NewRecord = {
-//         name : Text;
-//         number : Nat;
-//     };
+    public shared({ caller }) func addRecord(recordId: Text) : async Bool {
+        directory.addRecord(caller,recordId);
+    };
 
-//     let rec : NewRecord = {
-//         name = "Parth";
-//         number = 98766332;
-//     }
-
-//     type VariantExample = {
-//         #name ;
-//         #tag : Text;
-//     };
-
-//     let vEx : VariantExample = {
-//         #name = "Parth";
-//         #tag = "Tags";
-//     };
-
-//     public func name() : async (Text)  {
-//         rec.name;
-//     };
-
-//     public func printVariant() : async (Text)  {
-//         variantExample;
-//     };
-
-
-//   public func print2Vals(): async (Bool ,Text) {
-//         (true,"das");
-//     };
-
-
+    //This function only to be called from the canisters only this function doesn't needs to be called by user explicitly
+    public shared({ caller }) func initializeEmptyValuesForUser(userId: UserId): async (){
+        //hardcoding the id for user canister to limit access to this function
+        if(Principal.toText(caller) == "qoctq-giaaa-aaaaa-aaaea-cai") {
+            return;
+        }else{
+            directory.initializeEmptyValuesForUser(userId);
+        };
+    };
+    
 };

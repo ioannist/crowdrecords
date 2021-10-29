@@ -41,39 +41,5 @@ module {
             hashMap.get(userId); 
         };
 
-        public func getRecordsArray(userId: UserId): [Text]{
-            var record : ?Profile = hashMap.get(userId);
-            switch(record) {
-                case(null) {
-                    return [];
-                };
-                case(?record) {
-                    return record.recordWallet;
-                };
-            };
-        };
-
-        public func addRecord(userId: UserId,recordId: Text): Bool{
-            var record : ?Profile = hashMap.get(userId);
-            switch(record) {
-                case(null) {
-                    return false;
-                };
-                case(?record) {
-                    let recordArray = Array.append<Text>(record.recordWallet,[recordId]);
-                    let profile : Profile = {
-                        userId = record.userId;
-                        username = record.username;
-                        profileImage = record.profileImage;
-                        coinWallet= record.coinWallet;
-                        recordWallet= recordArray;
-                        createdDate=record.createdDate;
-                    };
-                    hashMap.put(userId,profile);
-                    return true;
-                };
-            };
-        };
-
     }
 };

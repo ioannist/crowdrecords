@@ -5,19 +5,17 @@ export const idlFactory = ({ IDL }) => {
   });
   const UserId = IDL.Principal;
   const Profile = IDL.Record({
-    'coinWallet' : IDL.Vec(IDL.Text),
     'username' : IDL.Text,
     'userId' : UserId,
     'profileImage' : IDL.Text,
     'createdDate' : IDL.Int,
-    'recordWallet' : IDL.Vec(IDL.Text),
   });
-  const anon_class_9_1 = IDL.Service({
-    'addRecord' : IDL.Func([IDL.Text], [IDL.Bool], []),
+  const anon_class_10_1 = IDL.Service({
     'checkIfUserLoogedIn' : IDL.Func([], [IDL.Bool], []),
     'createUser' : IDL.Func([NewProfile], [IDL.Principal], []),
     'getUserProfile' : IDL.Func([], [IDL.Opt(Profile)], []),
+    'whoAmI' : IDL.Func([], [IDL.Principal], []),
   });
-  return anon_class_9_1;
+  return anon_class_10_1;
 };
 export const init = ({ IDL }) => { return []; };

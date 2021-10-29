@@ -1,17 +1,15 @@
-type anon_class_9_1 = 
+type anon_class_10_1 = 
  service {
-   addRecord: (text) -> (bool);
    checkIfUserLoogedIn: () -> (bool);
    createUser: (NewProfile) -> (principal);
    getUserProfile: () -> (opt Profile);
+   whoAmI: () -> (principal);
  };
 type UserId = principal;
 type Profile = 
  record {
-   coinWallet: vec text;
    createdDate: int;
    profileImage: text;
-   recordWallet: vec text;
    userId: UserId;
    username: text;
  };
@@ -20,4 +18,4 @@ type NewProfile =
    profileImage: text;
    username: text;
  };
-service : () -> anon_class_9_1
+service : () -> anon_class_10_1
