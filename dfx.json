@@ -8,8 +8,12 @@
       "main": "src/tokens/main.mo",
       "type": "motoko"
     },
+    "records": {
+      "main": "src/records/main.mo",
+      "type": "motoko"
+    },
     "crowdrecords_assets": {
-      "dependencies": ["users", "tokens"],
+      "dependencies": ["users", "tokens", "records"],
       "frontend": {
         "entrypoint": "src/crowdrecords_assets/src/index.html"
       },
