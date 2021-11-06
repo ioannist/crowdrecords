@@ -9,6 +9,5 @@ import Principal "mo:base/Principal";
 actor Tokens {
 
     var directory: Database.Directory = Database.Directory();
-
     
 };

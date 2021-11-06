@@ -4,13 +4,17 @@ import HashMap "mo:base/HashMap";
 
 module {
     public type UserId = Principal;
+    public type TrackId = Nat32;
 
-    public type TokenType = {
-        #governance;#copyright 
-    };
+    public type NewTrackData = {
+        draft: Int;
+        independentTrack:Int; //this flag denotes if this track is a independent track or not, if it is independent then you can create a new record with this track as seed
+        trackLinks: [Text]; //link to the place where it is stored
+        trackHash: [Text]; //Hashes of the file to verify if they are the same that were uploaded
+    }
 
     public type Tracks = {
-        id: Nat32;
+        id: TrackId;
         userId: UserId;
         draft: Int;
         independentTrack:Int; //this flag denotes if this track is a independent track or not, if it is independent then you can create a new record with this track as seed
