@@ -5,14 +5,16 @@ import HashMap "mo:base/HashMap";
 module {
     public type UserId = Principal;
     public type TokenMap = HashMap.HashMap<UserId,Nat>;
+    public type RecordId = Nat32;
+    public type TokenId = Nat32;
 
     public type TokenType = {
         #governance;#copyright 
     };
 
     public type Token = {
-        id: Nat32;
-        recordId: Text;
+        id: TokenId;
+        recordId: RecordId;
         tokenType: TokenType;
         tokenMap: TokenMap;
         symbol: Text;
@@ -21,7 +23,7 @@ module {
     };
 
     public type NewToken = {
-        recordId: Text;
+        recordId: RecordId;
         tokenType: TokenType;
         symbol: Text;
         totalSupply: Nat;

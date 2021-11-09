@@ -14,20 +14,22 @@ module {
         type UserId = Types.UserId;
         type TokenMap = Types.TokenMap;
         type TokenType = Types.TokenType;
+        type RecordId = Types.RecordId;
+        type TokenId = Types.TokenId;
 
         //this is the hashmap which will store all the data of all the tokens and the tokens are identified by simple Nat32 number
         let totalTokenHashMap = HashMap.HashMap<Nat32, Token>(1, func (x: Nat32, y: Nat32): Bool { x == y }, func (a : Nat32) : Nat32 {a});
         
         //this stores the list of records that are linked to a particular person.
-        let userRecordList = HashMap.HashMap<UserId, [Text]>(1, func (x: UserId, y: UserId): Bool { x == y },Principal.hash);
+        let userRecordList = HashMap.HashMap<UserId, [RecordId]>(1, func (x: UserId, y: UserId): Bool { x == y },Principal.hash);
         
         //this stores the list of tokens that a user owns, it only stores the id of token and it doesn't store the number of tokens that a user owns.
-        let userTokenList = HashMap.HashMap<UserId, [Text]>(1, func (x: UserId, y: UserId): Bool { x == y }, Principal.hash);
+        let userTokenList = HashMap.HashMap<UserId, [TokenId]>(1, func (x: UserId, y: UserId): Bool { x == y }, Principal.hash);
 
         //This is the counter of the token id.
-        var lastId : Nat32 = 0;    
+        var lastId : TokenId = 0;    
        
-        public func createNewTokens(userId: UserId,newToken: NewToken): Nat32{
+        public func createNewTokens(userId: UserId,newToken: NewToken): TokenId{
             lastId += 1;    
             let tokenMap : TokenMap = HashMap.HashMap<UserId,Nat>(1, func (x: UserId, y: UserId): Bool { x == y }, Principal.hash);
             tokenMap.put(userId,newToken.totalSupply);
@@ -48,14 +50,14 @@ module {
         /*
         This function accepts recordId as argument and adds the record to the user's recordList
         */
-        public func addRecord(userId: UserId,recordId: Text): Bool{
-            var record : ?[Text] = userRecordList.get(userId);
+        public func addRecord(userId: UserId,recordId: RecordId): Bool{
+            var record : ?[RecordId] = userRecordList.get(userId);
             switch(record) {
                 case(null) {
                     return false;
                 };
                 case(?record) {
-                    var newRecord : [Text] = Array.append<Text>(record,[recordId]);
+                    var newRecord : [RecordId] = Array.append<RecordId>(record,[recordId]);
                     userRecordList.put(userId,newRecord);
                     return true;
                 };
@@ -65,14 +67,14 @@ module {
         /*
         This function accepts tokenId as argument and adds the tokenId to the user's TokenList
         */
-        public func addToken(userId: UserId,tokenId: Text): Bool{
-            var tokenArr : ?[Text] = userTokenList.get(userId);
+        public func addToken(userId: UserId,tokenId: TokenId): Bool{
+            var tokenArr : ?[TokenId] = userTokenList.get(userId);
             switch(tokenArr) {
                 case(null) {
                     return false;
                 };
                 case(?tokenArr) {
-                    var newTokenArr : [Text] = Array.append<Text>(tokenArr,[tokenId]);
+                    var newTokenArr : [TokenId] = Array.append<TokenId>(tokenArr,[tokenId]);
                     userTokenList.put(userId,newTokenArr);
                     return true;
                 };
@@ -84,7 +86,7 @@ module {
         empty entry is insterted for the user
         */
         public func initializeEmptyValuesForUser(userId: UserId){
-            var record : ?[Text] = userRecordList.get(userId);
+            var record : ?[RecordId] = userRecordList.get(userId);
             switch(record) {
                 case(null) {
                     userRecordList.put(userId,[]);
@@ -93,7 +95,7 @@ module {
                     return;
                 };
             };
-            var token : ?[Text] = userTokenList.get(userId);
+            var token : ?[TokenId] = userTokenList.get(userId);
             switch(record) {
                 case(null) {
                     userTokenList.put(userId,[]);
@@ -107,8 +109,8 @@ module {
         /*
         This function returns list of records that user owns tokens of
         */
-        public func getUserRecordList(userId: UserId): [Text]{
-            var record : ?[Text] = userRecordList.get(userId);
+        public func getUserRecordList(userId: UserId): [RecordId]{
+            var record : ?[RecordId] = userRecordList.get(userId);
             switch(record) {
                 case(null) {
                     return [];
@@ -122,8 +124,8 @@ module {
         /*
         This function returns list of tokens that user owns
         */
-        public func getUserTokenList(userId: UserId): [Text]{
-            var tokens : ?[Text] = userTokenList.get(userId);
+        public func getUserTokenList(userId: UserId): [TokenId]{
+            var tokens : ?[TokenId] = userTokenList.get(userId);
             switch(tokens) {
                 case(null) {
                     return [];

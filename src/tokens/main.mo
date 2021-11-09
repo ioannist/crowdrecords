@@ -15,13 +15,23 @@ actor Tokens {
     type UserId = Types.UserId;
     type TokenMap = Types.TokenMap;
     type TokenType = Types.TokenType;
+    type TokenId = Types.TokenId;
+    type RecordId = Types.RecordId;
 
 
-    public shared({ caller }) func createNewToken(newToken : NewToken) : async Nat32 {
-       return directory.createNewTokens(caller,newToken); 
+    public shared({ caller }) func createNewTokens(userId: UserId,communityToken: NewToken,governanceToken: NewToken) : async (TokenId,TokenId){
+        //hardcoding the id for user canister to limit access to this function
+        //This function is only to be called from records cannister
+        if(Principal.toText(caller) == "qjdve-lqaaa-aaaaa-aaaeq-cai") {
+            return (0,0);
+        }else{
+            let communityTokenId = directory.createNewTokens(userId,communityToken);
+            let governanceTokenId = directory.createNewTokens(userId,governanceToken);
+            (communityTokenId,governanceTokenId);
+        };
     };
 
-    public shared({ caller }) func addRecord(recordId: Text) : async Bool {
+    public shared({ caller }) func addRecord(recordId: RecordId) : async Bool {
         directory.addRecord(caller,recordId);
     };
 
