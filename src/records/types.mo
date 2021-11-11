@@ -12,6 +12,8 @@ module {
     public type UserId = Principal;
     public type TrackId = Nat32;
     public type RecordId = Nat32;
+    public type ContributionId = Nat32;
+    public type PollId = Nat32;
 
     public type NewTrackData = {
         draft: Int;
@@ -56,6 +58,7 @@ module {
         // icpFundsWallet: Principal;
         governanceToken: Nat32; //Id of governance token 
         communityToken: Nat32; //Id of community token
+        contributions: [ContributionId]; // this is the list of contributions that are done on this song.
     };
 
     public type TokenType = {
@@ -66,6 +69,55 @@ module {
         tokenType: TokenType;
         symbol: Text;
         totalSupply: Nat;
+    };
+
+    //This is a basic reward object which contains the requirement of the contributor
+    public type Reward = {
+        communityToken: Nat32;
+        governanceToken: Nat32;
+        icpToken: Nat32;
+    };
+
+    //A poll or a voting event where users will be voting according to their likings for a contribution 
+    public type Poll = {
+        pollId: PollId;
+        positiveVotes: [UserId];
+        negativeVotes: [UserId];
+        resultTime: Int;
+    };
+
+    /*
+    * This is the result of poll, it can be either one of these, by deafault it would be rejected.
+    * If nobody votes then the contribution will be rejected.
+    * 
+    * The polling result will be calculated at the end of the time given for voting and 
+    * the weightage of users vote will be considered by calculating the tokens owned by the user at the time of result declaration.
+    */
+    public type PollingResult = {
+        #accepted;#rejected;#pending;#tied; 
+    };
+    
+    //This is the new contribution object, it contians the info that we will recive from users
+    public type NewContribution = {
+        tracksId: [TrackId];
+        recordId: RecordId;
+        mixFile: Text; //This is the file which contains the mix of the contribtion and the orignal record
+        description: Text;
+        reward: Reward; //This is a reward object in the data type it doesn't refer to the reward insted it will have the value within the record
+    };
+
+    //This is the contribution object, which contains the meta data for contribution.
+    public type Contribution = {
+        id: ContributionId;
+        userId: UserId;
+        recordId: RecordId;
+        tracksId: [TrackId];
+        mixFile: Text; //This is the file which contains the mix of the contribtion and the orignal record
+        createdDate: Int;
+        description: Text;
+        reward: Reward; //This is a reward object in the data type it doesn't refer to the reward insted it will have the value within the record
+        pollId: PollId;
+        pollingResult: PollingResult;
     };
 
 };
