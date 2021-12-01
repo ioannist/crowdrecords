@@ -29,7 +29,7 @@ module {
         //This is the counter of the token id.
         var lastId : TokenId = 0;    
        
-        public func createNewTokens(userId: UserId,newToken: NewToken): TokenId{
+        public func createTokens(userId: UserId,newToken: NewToken): TokenId{
             lastId += 1;    
             let tokenMap : TokenMap = HashMap.HashMap<UserId,Nat>(1, func (x: UserId, y: UserId): Bool { x == y }, Principal.hash);
             tokenMap.put(userId,newToken.totalSupply);

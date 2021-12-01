@@ -1,5 +1,6 @@
-import { users, createActor } from "../../declarations/users";
+import { users, createActor, canisterId } from "../../declarations/users";
 import { AuthClient } from "@dfinity/auth-client";
+import { IDENTITY_PROVIDER_PATH } from "./config";
 
 document.getElementById("createActualUserButton").addEventListener("click", async () => {
   const username = document.getElementById("username").value.toString();
@@ -12,20 +13,23 @@ document.getElementById("createActualUserButton").addEventListener("click", asyn
 
 document.getElementById("getUserButton").addEventListener("click", async () => {
   // const userId = document.getElementById("userId").value.toString();
-  const user = await users.getUserProfile();
+  const user = await users.getUser();
   console.log("Createuser = ", user);
   console.log("User ID ", user[0].userId.toString());
   document.getElementById("getUserResult").innerText = "Check console";
 });
 
 const init = async () => {
-  document.getElementById("profileSection").style.display = true;
+  document.getElementById("profileSection").setAttribute("hidden", "hidden");
   const authClient = await AuthClient.create();
   if (await authClient.isAuthenticated()) {
+    console.log("initial authentication passes");
     handleAuthenticated(authClient);
   }
 
   const loginButton = document.getElementById("loginButton");
+  const loginDiv = document.getElementById("loginDiv");
+  loginDiv.removeAttribute("hidden");
 
   const days = BigInt(1);
   const hours = BigInt(24);
@@ -36,7 +40,8 @@ const init = async () => {
       onSuccess: async () => {
         handleAuthenticated(authClient);
       },
-      identityProvider: "http://localhost:7000/?canisterId=rwlgt-iiaaa-aaaaa-aaaaa-cai",
+      //Below is the identity provider path change it
+      identityProvider: IDENTITY_PROVIDER_PATH,
       // Maximum authorization expiration is 8 days
       maxTimeToLive: days * hours * nanoseconds,
     });
@@ -49,7 +54,8 @@ const init = async () => {
 
 async function handleAuthenticated(authClient) {
   const identity = await authClient.getIdentity();
-  const authanticatedUser = createActor(CAN, {
+  console.log("Identity = ", identity);
+  const authanticatedUser = createActor(canisterId, {
     agentOptions: {
       identity,
     },
@@ -57,11 +63,16 @@ async function handleAuthenticated(authClient) {
   profileData(authanticatedUser);
 }
 
-function profileData(authanticatedUser) {
-  document.getElementById("profileSection").style.display = false;
+async function profileData(authanticatedUser) {
   let profileSection = document.getElementById("profileSection");
   profileSection.removeAttribute("hidden");
-  document.getElementById("userPrincipal").value = authanticatedUser.whoAmI().toString();
+  (async function () {
+    const principal = await authanticatedUser.whoAmI();
+    console.log("Principal Object = ", principal);
+    document.getElementById("userPrincipal").value = principal.toString();
+  })();
+  let loginDiv = document.getElementById("loginDiv");
+  loginDiv.setAttribute("hidden", "hidden");
 }
 
 init();

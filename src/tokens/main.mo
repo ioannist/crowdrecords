@@ -19,14 +19,14 @@ actor Tokens {
     type RecordId = Types.RecordId;
 
 
-    public shared({ caller }) func createNewTokens(userId: UserId,communityToken: NewToken,governanceToken: NewToken) : async (TokenId,TokenId){
+    public shared({ caller }) func createTokens(userId: UserId,communityToken: NewToken,governanceToken: NewToken) : async (TokenId,TokenId){
         //hardcoding the id for user canister to limit access to this function
         //This function is only to be called from records cannister
         if(Principal.toText(caller) == "qjdve-lqaaa-aaaaa-aaaeq-cai") {
             return (0,0);
         }else{
-            let communityTokenId = directory.createNewTokens(userId,communityToken);
-            let governanceTokenId = directory.createNewTokens(userId,governanceToken);
+            let communityTokenId = directory.createTokens(userId,communityToken);
+            let governanceTokenId = directory.createTokens(userId,governanceToken);
             (communityTokenId,governanceTokenId);
         };
     };

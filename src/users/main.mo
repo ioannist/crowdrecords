@@ -21,7 +21,7 @@ actor class() {
        caller; 
     };
 
-    public shared({ caller }) func getUserProfile() : async ?Profile {
+    public shared({ caller }) func getUser() : async ?Profile {
        directory.getUser(caller); 
     };
 

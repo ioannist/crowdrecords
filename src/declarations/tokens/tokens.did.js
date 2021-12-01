@@ -15,7 +15,7 @@ export const idlFactory = ({ IDL }) => {
   const TokenId = IDL.Nat32;
   return IDL.Service({
     'addRecord' : IDL.Func([RecordId__1], [IDL.Bool], []),
-    'createNewTokens' : IDL.Func(
+    'createTokens' : IDL.Func(
         [UserId, NewToken, NewToken],
         [TokenId, TokenId],
         [],

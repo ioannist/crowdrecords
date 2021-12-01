@@ -13,10 +13,8 @@ export type TokenType = { 'governance' : null } |
 export type UserId = Principal;
 export interface _SERVICE {
   'addRecord' : (arg_0: RecordId__1) => Promise<boolean>,
-  'createNewTokens' : (
-      arg_0: UserId,
-      arg_1: NewToken,
-      arg_2: NewToken,
-    ) => Promise<[TokenId, TokenId]>,
+  'createTokens' : (arg_0: UserId, arg_1: NewToken, arg_2: NewToken) => Promise<
+      [TokenId, TokenId]
+    >,
   'initializeEmptyValuesForUser' : (arg_0: UserId) => Promise<undefined>,
 }

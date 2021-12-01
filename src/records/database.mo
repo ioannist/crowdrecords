@@ -21,17 +21,33 @@ module {
         type NewTokenData = Types.NewTokenData;
         type Contribution = Types.Contribution;
         type ContributionId = Types.ContributionId;
-        type PollId = Types.PollId;
+        type VotingId = Types.VotingId;
+        type Voting = Types.Voting;
         type Reward = Types.Reward;
+        type NewContribution = Types.NewContribution;
+        type VotingResults = Types.VotingResults;
 
 
         let DRAFT : Int = 1;
         let PUBLISHED : Int = 0;
 
         //this is the hashmap which will store all the data of all the tokens and the tokens are identified by simple Nat32 number
-        let allTracksList = HashMap.HashMap<Nat32, Tracks>(1, func (x: Nat32, y: Nat32): Bool { x == y }, func (a : Nat32) : Nat32 {a});
+        let allTracksList = HashMap.HashMap<TrackId, Tracks>(1, func (x: Nat32, y: Nat32): Bool { x == y }, func (a : Nat32) : Nat32 {a});
         //this is the hashmap which will store all the data of all the records
-        let allRecordsList = HashMap.HashMap<Nat32, Records>(1, func (x: Nat32, y: Nat32): Bool { x == y }, func (a : Nat32) : Nat32 {a});
+        let allRecordsList = HashMap.HashMap<RecordId, Records>(1, func (x: Nat32, y: Nat32): Bool { x == y }, func (a : Nat32) : Nat32 {a});
+
+        //The below list will hold all the contributions that are accepted by the community.
+        let acceptedContributions = HashMap.HashMap<ContributionId, Contribution>(1, func (x: Nat32, y: Nat32): Bool { x == y }, func (a : Nat32) : Nat32 {a});
+        /*
+            The below list will hold all the contributions that are currently under voting.
+            Any contribution that is not accepted or it's result is pending will reside in this particular array
+        */ 
+        let pendingContributions = HashMap.HashMap<ContributionId, Contribution>(1, func (x: Nat32, y: Nat32): Bool { x == y }, func (a : Nat32) : Nat32 {a});
+
+        //All the pending Votings will be stored in the following hashmap and once it's result is declared it will be stored into completedVoting HashMap
+        let pendingVotings = HashMap.HashMap<VotingId, Voting>(1, func (x: Nat32, y: Nat32): Bool { x == y }, func (a : Nat32) : Nat32 {a});
+        //All the votings will be stored in the following hashmap once it's result is anounced
+        let completedVotings = HashMap.HashMap<VotingId, Voting>(1, func (x: Nat32, y: Nat32): Bool { x == y }, func (a : Nat32) : Nat32 {a});
 
 
         //This is the counter of the track id.
@@ -40,8 +56,8 @@ module {
         var lastRecordId : RecordId = 0;    
         //This is the counter of the contribution id.
         var lastContributiondId : ContributionId = 0;    
-        //This is the counter of the polling id.
-        var pollIdId : PollId = 0;    
+        //This is the counter of the voting id.
+        var lastVotingId : VotingId = 0;    
         
        
 
@@ -117,11 +133,16 @@ module {
         };
 
 /*
-TODO :  Currently need to figure out effecient way to store the polls that are linked to the contributions as the number of polls would keep increasing in time
-Once the poll is completed it should be either deleted or offloaded to some other store which is not frequently accessed.
-
+TODO :  Currently need to figure out effecient way to store the Votings that are linked to the contributions as the number of Votings would keep increasing in time
+Once the Voting is completed it should be either deleted or offloaded to some other store which is not frequently accessed.
+*/
         //This function will take the published tracks and will create a contribution.
-        public func contributeTo(userId: UserId,newContribution: NewContribution): ContributionId{
+
+
+        //Currently THe function in the bottom is not complete and it will throw a lot of error.
+
+     /*   public func contributeTo(userId: UserId,newContribution: NewContribution): ContributionId{
+
             var track : ?Tracks = allTracksList.get(trackId);
             lastContributiondId += 1; 
             var contribtionId : ContributionId = lastContributiondId;
@@ -142,10 +163,10 @@ Once the poll is completed it should be either deleted or offloaded to some othe
                             mixFile = newContribution.mixFile;
                             description = newContribution.description;
                             reward = newContribution.reward;
-                            createdDate = Time.now();;
+                            createdDate = Time.now();
                             description: newContribution.description;
-                            pollId: PollId;
-                            pollingResult: #pending;
+                            votingId: VotingId;
+                            votingResults: VotingResults.pending;
 
                         };
                         return;
@@ -153,11 +174,13 @@ Once the poll is completed it should be either deleted or offloaded to some othe
                 };
             };
         };
-
 */
+
         //This function will create records
         //It will first genrate the id and then it will create the tokens and get their ids. Then at last it will create a new Record
-        public func createRecord(userId: UserId,governanceTokenData: NewTokenData,communityTokenData: NewTokenData,newRecords: NewRecords) : async RecordId{
+        public func createRecord(userId: UserId,governanceTokenData: NewTokenData,communityTokenData: NewTokenData,newRecords: NewRecords) : async 
+            
+            RecordId{
             lastRecordId += 1;
             var recordId : RecordId = lastRecordId;
            
@@ -175,7 +198,7 @@ Once the poll is completed it should be either deleted or offloaded to some othe
                 totalSupply = communityTokenData.totalSupply;
             };
 
-            var tokenIds : (Nat32,Nat32) = await TokensCanister.createNewTokens(userId,communityToken,governanceToken);
+            var tokenIds : (Nat32,Nat32) = await TokensCanister.createTokens(userId,communityToken,governanceToken);
             
             let record : Records = {
                 id = recordId;

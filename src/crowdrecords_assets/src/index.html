@@ -9,12 +9,31 @@
     <link type="text/css" rel="stylesheet" href="main.css" />
   </head>
   <body>
-    <section id="profileSection" hidden>
-      <label for="userPrincipal">User Principal &nbsp;</label>
-      <input id="userPrincipal" alt="User Principal" type="text" disabled />
-      <button id="logout">logout</button>
-    </section>
     <img src="logo.png" alt="DFINITY logo" />
+    <div id="profileSection">
+      <section>
+        <label for="userPrincipal">User Principal &nbsp;</label>
+        <input id="userPrincipal" alt="User Principal" type="text" disabled />
+        <button id="logout">logout</button>
+      </section>
+
+      <section>
+        <label for="username">Enter your user name: &nbsp;</label>
+        <input id="username" alt="username" type="text" />
+        <label for="profileUrl">Enter your profile url: &nbsp;</label>
+        <input id="profileUrl" alt="Profile Url" type="text" />
+        <button id="createActualUserButton">Create Actual user</button>
+      </section>
+
+      <section id="createUserResult"></section>
+
+      <section>
+        <label>Get your user data &nbsp;</label>
+        <button id="getUserButton">Click Me!</button>
+      </section>
+
+      <section id="getUserResult"></section>
+    </div>
     <!-- <section>
       <label for="username">Enter your user name: &nbsp;</label>
       <input id="username" alt="username" type="text" />
@@ -24,21 +43,9 @@
     </section>
     <section id="createUserTemp"></section> -->
 
-    <section>
-      <label for="username">Enter your user name: &nbsp;</label>
-      <input id="username" alt="username" type="text" />
-      <label for="profileUrl">Enter your profile url: &nbsp;</label>
-      <input id="profileUrl" alt="Profile Url" type="text" />
-      <button id="createActualUserButton">Create Actual user</button>
-    </section>
-    <section id="createUserResult"></section>
-
-    <section>
-      <label>Get your user data &nbsp;</label>
-      <button id="getUserButton">Click Me!</button>
-    </section>
-    <section id="getUserResult"></section>
-
-    <button type="button" id="loginButton">Log in</button>
+    <div id="loginDiv">
+      <label>Please Authenticate to continue</label>
+      <button type="button" id="loginButton">Log in</button>
+    </div>
   </body>
 </html>

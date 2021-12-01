@@ -13,7 +13,7 @@ module {
     public type TrackId = Nat32;
     public type RecordId = Nat32;
     public type ContributionId = Nat32;
-    public type PollId = Nat32;
+    public type VotingId = Nat32;
 
     public type NewTrackData = {
         draft: Int;
@@ -78,22 +78,22 @@ module {
         icpToken: Nat32;
     };
 
-    //A poll or a voting event where users will be voting according to their likings for a contribution 
-    public type Poll = {
-        pollId: PollId;
+    //A voting event where users will be voting according to their likings for a contribution 
+    public type Voting = {
+        VotingId: VotingId;
         positiveVotes: [UserId];
         negativeVotes: [UserId];
-        resultTime: Int;
+        resultTime: Int; //Set the date on which result needs to be declared
     };
 
     /*
-    * This is the result of poll, it can be either one of these, by deafault it would be rejected.
+    * This is the result of voting, it can be either one of these, by deafault it would be rejected.
     * If nobody votes then the contribution will be rejected.
     * 
-    * The polling result will be calculated at the end of the time given for voting and 
+    * The voteing result will be calculated at the end of the time given for voting and 
     * the weightage of users vote will be considered by calculating the tokens owned by the user at the time of result declaration.
     */
-    public type PollingResult = {
+    public type VotingResults = {
         #accepted;#rejected;#pending;#tied; 
     };
     
@@ -116,8 +116,8 @@ module {
         createdDate: Int;
         description: Text;
         reward: Reward; //This is a reward object in the data type it doesn't refer to the reward insted it will have the value within the record
-        pollId: PollId;
-        pollingResult: PollingResult;
+        votingId: VotingId;
+        votingResults: VotingResults;
     };
 
 };

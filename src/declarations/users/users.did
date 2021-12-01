@@ -2,7 +2,7 @@ type anon_class_10_1 =
  service {
    checkIfUserLoogedIn: () -> (bool);
    createUser: (NewProfile) -> (principal);
-   getUserProfile: () -> (opt Profile);
+   getUser: () -> (opt Profile);
    whoAmI: () -> (principal);
  };
 type UserId = principal;

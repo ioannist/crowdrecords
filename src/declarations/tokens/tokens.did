@@ -16,6 +16,6 @@ type NewToken =
  };
 service : {
   addRecord: (RecordId__1) -> (bool);
-  createNewTokens: (UserId, NewToken, NewToken) -> (TokenId, TokenId);
+  createTokens: (UserId, NewToken, NewToken) -> (TokenId, TokenId);
   initializeEmptyValuesForUser: (UserId) -> ();
 }

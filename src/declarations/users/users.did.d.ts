@@ -10,7 +10,7 @@ export type UserId = Principal;
 export interface anon_class_10_1 {
   'checkIfUserLoogedIn' : () => Promise<boolean>,
   'createUser' : (arg_0: NewProfile) => Promise<Principal>,
-  'getUserProfile' : () => Promise<[] | [Profile]>,
+  'getUser' : () => Promise<[] | [Profile]>,
   'whoAmI' : () => Promise<Principal>,
 }
 export interface _SERVICE extends anon_class_10_1 {}

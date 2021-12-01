@@ -13,7 +13,7 @@ export const idlFactory = ({ IDL }) => {
   const anon_class_10_1 = IDL.Service({
     'checkIfUserLoogedIn' : IDL.Func([], [IDL.Bool], []),
     'createUser' : IDL.Func([NewProfile], [IDL.Principal], []),
-    'getUserProfile' : IDL.Func([], [IDL.Opt(Profile)], []),
+    'getUser' : IDL.Func([], [IDL.Opt(Profile)], []),
     'whoAmI' : IDL.Func([], [IDL.Principal], []),
   });
   return anon_class_10_1;
