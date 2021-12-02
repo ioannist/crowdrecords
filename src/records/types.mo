@@ -80,7 +80,7 @@ module {
 
     //A voting event where users will be voting according to their likings for a contribution 
     public type Voting = {
-        VotingId: VotingId;
+        votingId: VotingId;
         positiveVotes: [UserId];
         negativeVotes: [UserId];
         resultTime: Int; //Set the date on which result needs to be declared

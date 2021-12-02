@@ -44,6 +44,9 @@ module {
         */ 
         let pendingContributions = HashMap.HashMap<ContributionId, Contribution>(1, func (x: Nat32, y: Nat32): Bool { x == y }, func (a : Nat32) : Nat32 {a});
 
+        let tempContributions = HashMap.HashMap<ContributionId, Contribution>(1, func (x: Nat32, y: Nat32): Bool { x == y }, func (a : Nat32) : Nat32 {a});
+
+
         //All the pending Votings will be stored in the following hashmap and once it's result is declared it will be stored into completedVoting HashMap
         let pendingVotings = HashMap.HashMap<VotingId, Voting>(1, func (x: Nat32, y: Nat32): Bool { x == y }, func (a : Nat32) : Nat32 {a});
         //All the votings will be stored in the following hashmap once it's result is anounced
@@ -60,74 +63,131 @@ module {
         var lastVotingId : VotingId = 0;    
         
        
-
+        //TO BE REMOVED
         //This function takes the data and saves it in the hastable,
         //If the entry with the id exists then it will update the data or else it will create a new entry
-        public func saveTrackDraft(userId: UserId,trackId: TrackId,newTrackData: NewTrackData): TrackId{
-            var track : ?Tracks = allTracksList.get(trackId);
-            switch(track) {
-                case(null) {
-                    lastTrackId += 1;
-                    let track : Tracks = {   
-                        id =  lastTrackId;
-                        userId = userId;
-                        draft = DRAFT;
-                        independentTrack = newTrackData.independentTrack; 
-                        previewFile = newTrackData.previewFile;
-                        trackLinks = newTrackData.trackLinks; 
-                        trackHash = newTrackData.trackHash; 
-                    }; 
-                    allTracksList.put(lastTrackId,track); 
-                    lastTrackId;
-                };
-                case(?track) {
-                    if(Principal.toText(track.userId) != Principal.toText(userId)){
-                        //send some error saying you are not allowed to access this data
-                        return 0;
-                    }else if(track.draft == PUBLISHED){
-                        //send some error saying it is already published 
-                        return 0;
-                    }else{
-                      var newTrackdata : Tracks = {
-                            id = trackId;
-                            userId = track.userId;
-                            draft = track.draft;
-                            previewFile = newTrackData.previewFile;
-                            independentTrack = newTrackData.independentTrack; 
-                            trackLinks = newTrackData.trackLinks; 
-                            trackHash = newTrackData.trackHash; 
-                        };
-                        allTracksList.put(trackId,newTrackdata);
-                        return trackId;
-                    };
-                };
+        // public func saveTrackDraft(userId: UserId,trackId: TrackId,newTrackData: NewTrackData): TrackId{
+        //     var track : ?Tracks = allTracksList.get(trackId);
+        //     switch(track) {
+        //         case(null) {
+        //             lastTrackId += 1;
+        //             let track : Tracks = {   
+        //                 id =  lastTrackId;
+        //                 userId = userId;
+        //                 draft = DRAFT;
+        //                 independentTrack = newTrackData.independentTrack; 
+        //                 previewFile = newTrackData.previewFile;
+        //                 trackLinks = newTrackData.trackLinks; 
+        //                 trackHash = newTrackData.trackHash; 
+        //             }; 
+        //             allTracksList.put(lastTrackId,track); 
+        //             lastTrackId;
+        //         };
+        //         case(?track) {
+        //             if(Principal.toText(track.userId) != Principal.toText(userId)){
+        //                 //send some error saying you are not allowed to access this data
+        //                 return 0;
+        //             }else if(track.draft == PUBLISHED){
+        //                 //send some error saying it is already published 
+        //                 return 0;
+        //             }else{
+        //               var newTrackdata : Tracks = {
+        //                     id = trackId;
+        //                     userId = track.userId;
+        //                     draft = track.draft;
+        //                     previewFile = newTrackData.previewFile;
+        //                     independentTrack = newTrackData.independentTrack; 
+        //                     trackLinks = newTrackData.trackLinks; 
+        //                     trackHash = newTrackData.trackHash; 
+        //                 };
+        //                 allTracksList.put(trackId,newTrackdata);
+        //                 return trackId;
+        //             };
+        //         };
+        //     };
+        // };
+
+        //TO BE REMOVED
+        //This function will publish the track with the data that was saved in the previous draft
+        // public func publishTrack(userId: UserId,trackId: TrackId){
+        //     var track : ?Tracks = allTracksList.get(trackId);
+        //     switch(track) {
+        //         case(null) {
+        //             return;
+        //         };
+        //         case(?track) {
+        //             if(Principal.toText(track.userId) != Principal.toText(userId)){
+        //                 //send some error saying you are not allowed to access this data
+        //                 return;
+        //             }else{
+        //                 var newTrackdata : Tracks = {
+        //                     id = track.id;
+        //                     userId = track.userId;
+        //                     draft = PUBLISHED;
+        //                     independentTrack = track.independentTrack; 
+        //                     trackLinks = track.trackLinks; 
+        //                     trackHash = track.trackHash; 
+        //                     previewFile = track.previewFile;
+        //                 };
+        //                 allTracksList.put(trackId,newTrackdata);
+        //                 return;
+        //             };
+        //         };
+        //     };
+        // };
+
+
+        //create a contribution object id in temp contribution
+        public func createContribution(userId: UserId,recordId : RecordId): ContributionId{
+            lastContributiondId += 1; 
+            var contributionId = lastContributiondId;
+            var contribution : Contribution = {
+                id = contributionId;
+                recordId = recordId;
+                userId = userId;
+                tracksId = [];
+                mixFile = "";
+                description = "";
+                reward = {communityToken=0;governanceToken=0;icpToken=0};
+                createdDate = Time.now();
+                votingId= 0;
+                votingResults= #pending;
             };
+            tempContributions.put(contributionId,contribution);
+            return contributionId;
         };
 
-        //This function will publish the track with the data that was saved in the previous draft
-        public func publishTrack(userId: UserId,trackId: TrackId){
-            var track : ?Tracks = allTracksList.get(trackId);
-            switch(track) {
-                case(null) {
+        //publishing a contribution object and moving it from temp to pending
+        public func publishContribution(userId: UserId,contributionId : ContributionId,resultDate : Int){
+            var contribution : ?Contribution = tempContributions.remove(contributionId);
+            switch(contribution){
+                case (null){
                     return;
                 };
-                case(?track) {
-                    if(Principal.toText(track.userId) != Principal.toText(userId)){
-                        //send some error saying you are not allowed to access this data
-                        return;
-                    }else{
-                        var newTrackdata : Tracks = {
-                            id = track.id;
-                            userId = track.userId;
-                            draft = PUBLISHED;
-                            independentTrack = track.independentTrack; 
-                            trackLinks = track.trackLinks; 
-                            trackHash = track.trackHash; 
-                            previewFile = track.previewFile;
-                        };
-                        allTracksList.put(trackId,newTrackdata);
-                        return;
+                case (?contribution){
+                    lastVotingId := lastVotingId + 1;
+                    var votingId = lastVotingId;
+                    var voting : Voting = {
+                        votingId = votingId;
+                        positiveVotes = [];
+                        negativeVotes = [];
+                        resultTime = resultDate;
                     };
+                    pendingVotings.put(votingId,voting);
+                    var newContribution : Contribution = {
+                        id = contributionId;
+                        recordId = contribution.recordId;
+                        userId = contribution.userId;
+                        tracksId = contribution.tracksId;
+                        mixFile = contribution.mixFile;
+                        description = contribution.description;
+                        reward = contribution.reward;
+                        createdDate = Time.now();
+                        votingId = votingId;
+                        votingResults= #pending;
+                    };
+                    pendingContributions.put(contributionId,newContribution);
+                    return;
                 };
             };
         };
