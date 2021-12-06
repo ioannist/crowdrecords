@@ -169,9 +169,9 @@ module {
                     var votingId = lastVotingId;
                     var voting : Voting = {
                         votingId = votingId;
-                        positiveVotes = [];
-                        negativeVotes = [];
-                        resultTime = resultDate;
+                        var positiveVotes = [];
+                        var negativeVotes = [];
+                        var resultTime = resultDate;
                     };
                     pendingVotings.put(votingId,voting);
                     var newContribution : Contribution = {
@@ -191,6 +191,26 @@ module {
                 };
             };
         };
+
+        //Voting function when users will vote on a contribution or event 
+        public func castVote(userId: UserId,votingId : VotingId, vote : Bool): ?Voting{
+            var voting : ?Voting = pendingVotings.get(votingId);
+            switch(voting){
+                case (null) {
+                    return null;
+                };
+                case (?voting){
+                    if(vote){
+                        voting.positiveVotes := Array.append<UserId>(voting.positiveVotes,[userId]);
+                    }else{
+                        voting.negativeVotes := Array.append<UserId>(voting.negativeVotes,[userId]);
+                    };
+                    pendingVotings.put(votingId,voting);
+                    return ?voting;
+                };
+            }
+        };
+
 
 /*
 TODO :  Currently need to figure out effecient way to store the Votings that are linked to the contributions as the number of Votings would keep increasing in time

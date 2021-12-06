@@ -2,6 +2,9 @@ import Principal "mo:base/Principal";
 import Array "mo:base/Array";
 import HashMap "mo:base/HashMap";
 
+/*
+    Making tracks a single track with basic properties 
+*/
 module {
 
     /*
@@ -18,19 +21,19 @@ module {
     public type NewTrackData = {
         draft: Int;
         independentTrack:Int; //this flag denotes if this track is a independent track or not, if it is independent then you can create a new record with this track as seed
-        trackLinks: [Text]; //link to the place where it is stored
-        trackHash: [Text]; //Hashes of the file to verify if they are the same that were uploaded
+        trackLinks: Text; //link to the place where it is stored
+        trackHash: Text; //Hashes of the file to verify if they are the same that were uploaded
         previewFile: Text; //This is the link of preview file that is mix of all the tracks
     };
 
     public type Tracks = {
         id: TrackId;
         userId: UserId;
-        draft: Int;
-        previewFile: Text; //This is the link of preview file that is mix of all the tracks
-        independentTrack:Int; //this flag denotes if this track is a independent track or not, if it is independent then you can create a new record with this track as seed
-        trackLinks: [Text]; //link to the place where it is stored
-        trackHash: [Text]; //Hashes of the file to verify if they are the same that were uploaded
+        // draft: Int;
+        // previewFile: Text; //This is the link of preview file that is mix of all the tracks
+        // independentTrack:Int; //this flag denotes if this track is a independent track or not, if it is independent then you can create a new record with this track as seed
+        trackLink: Text; //link to the place where it is stored
+        trackHash: Text; //Hashes of the file to verify if they are the same that were uploaded
     };
 
     public type NewRecords = {
@@ -80,6 +83,13 @@ module {
 
     //A voting event where users will be voting according to their likings for a contribution 
     public type Voting = {
+        votingId: VotingId;
+        var positiveVotes: [UserId];
+        var negativeVotes: [UserId];
+        var resultTime: Int; //Set the date on which result needs to be declared
+    };
+
+    public type FROZEN_Voting = {
         votingId: VotingId;
         positiveVotes: [UserId];
         negativeVotes: [UserId];
