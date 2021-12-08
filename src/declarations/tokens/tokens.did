@@ -9,13 +9,23 @@ type RecordId__1 = nat32;
 type RecordId = nat32;
 type NewToken = 
  record {
-   recordId: RecordId;
+   recordId: RecordId__1;
    symbol: text;
    tokenType: TokenType;
    totalSupply: nat;
  };
 service : {
-  addRecord: (RecordId__1) -> (bool);
+  addRecord: (RecordId) -> (bool);
+  addRecordToUserAccount: (RecordId) -> () oneway;
+  createTokenOffer: (nat, nat) -> () oneway;
   createTokens: (UserId, NewToken, NewToken) -> (TokenId, TokenId);
+  getRecordICPAccount: (RecordId) -> () oneway;
+  getTokenOffer: (nat, nat) -> () oneway;
+  getTransferHistory: () -> () oneway;
+  getUserRecordList: (UserId) -> (vec RecordId);
+  getUserTokenList: (UserId) -> (vec TokenId);
   initializeEmptyValuesForUser: (UserId) -> ();
+  tokenMinting: (UserId, nat) -> () oneway;
+  transferContributionReward: () -> () oneway;
+  transferTokens: (UserId) -> () oneway;
 }

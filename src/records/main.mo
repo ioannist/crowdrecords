@@ -13,7 +13,9 @@ actor Tokens {
     type FROZEN_Voting = Types.FROZEN_Voting;
     type Records = Types.Records;
     type RecordId = Types.RecordId;
+    type NewRecords = Types.NewRecords;
     type ContributionId = Types.ContributionId;
+    type UserId = Types.UserId;
 
     var directory: Database.Directory = Database.Directory();
     
@@ -27,9 +29,9 @@ actor Tokens {
 
 
     //This function is responsible for creating a contribution and it will return the id of the contribution
-    public shared({ caller }) func createContribution(userId: UserId,recordId : RecordId) : async (ContributionId) { 
+    public shared({ caller }) func createContribution(recordId : RecordId) : async (ContributionId) { 
         //A call will be made to db for creating a contribution and it will return contribution id.
-        directory.createContribution(caller,userId,recordId);
+        directory.createContribution(caller,recordId);
     };
 
     //This function is responsible for publishing a contribution

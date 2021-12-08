@@ -19,11 +19,12 @@ module {
     public type VotingId = Nat32;
 
     public type NewTrackData = {
-        draft: Int;
-        independentTrack:Int; //this flag denotes if this track is a independent track or not, if it is independent then you can create a new record with this track as seed
-        trackLinks: Text; //link to the place where it is stored
+        // draft: Int;
+        // independentTrack:Int; //this flag denotes if this track is a independent track or not, if it is independent then you can create a new record with this track as seed
+        trackLink: Text; //link to the place where it is stored
         trackHash: Text; //Hashes of the file to verify if they are the same that were uploaded
         previewFile: Text; //This is the link of preview file that is mix of all the tracks
+        trackCategory:Text;
     };
 
     public type Tracks = {
@@ -34,6 +35,7 @@ module {
         // independentTrack:Int; //this flag denotes if this track is a independent track or not, if it is independent then you can create a new record with this track as seed
         trackLink: Text; //link to the place where it is stored
         trackHash: Text; //Hashes of the file to verify if they are the same that were uploaded
+        trackCategory:Text;
     };
 
     public type NewRecords = {
