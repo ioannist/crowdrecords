@@ -138,6 +138,27 @@ module {
 
 
         //create a contribution object id in temp contribution
+        public func tempContributionId(userId: UserId,recordId : RecordId): ContributionId{
+            lastContributiondId += 1; 
+            var contributionId = lastContributiondId;
+            var contribution : Contribution = {
+                id = contributionId;
+                recordId = recordId;
+                userId = userId;
+                tracksId = [];
+                mixFile = "";
+                description = "";
+                reward = {communityToken=0;governanceToken=0;icpToken=0};
+                createdDate = Time.now();
+                votingId= 0;
+                votingResults= #pending;
+            };
+            tempContributions.put(contributionId,contribution);
+            return contributionId;
+        };
+
+
+        //create a contribution object id in temp contribution
         public func createContribution(userId: UserId,recordId : RecordId): ContributionId{
             lastContributiondId += 1; 
             var contributionId = lastContributiondId;
