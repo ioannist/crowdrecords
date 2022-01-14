@@ -17,15 +17,18 @@ actor Tokens {
     type TokenType = Types.TokenType;
     type TokenId = Types.TokenId;
     type RecordId = Types.RecordId;
+    type TreasuryId = Types.TreasuryId;
 
 
-    public shared({ caller }) func createTokens(userId: UserId,communityToken: NewToken,governanceToken: NewToken) : async (TokenId,TokenId){
+    public shared({ caller }) func createTokens(userId: UserId,communityToken: NewToken,governanceToken: NewToken) : async (TreasuryId){
         //hardcoding the id for user canister to limit access to this function
         //This function is only to be called from records cannister
         if(Principal.toText(caller) == "qjdve-lqaaa-aaaaa-aaaeq-cai") {
-            let communityTokenId = directory.createTokens(userId,communityToken);
-            let governanceTokenId = directory.createTokens(userId,governanceToken);
-            (communityTokenId,governanceTokenId);
+            let treasuryId = directory.createTreasury(userId,communityToken,governanceToken);
+            // let communityTokenId = directory.createTokens(userId,communityToken);
+            // let governanceTokenId = directory.createTokens(userId,governanceToken);
+            // (communityTokenId,governanceTokenId);
+            treasuryId;
         }else{
            return (0,0);
         };

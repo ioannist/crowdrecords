@@ -31,6 +31,12 @@ module {
         let DRAFT : Int = 1;
         let PUBLISHED : Int = 0;
 
+        //This will hold the tracks details temporarily for 48 hours.
+        //The age will be identified from the creation date of the track
+        let tempTracks = HashMap.HashMap<TrackId, Tracks>(1, func (x: Nat32, y: Nat32): Bool { x == y }, func (a : Nat32) : Nat32 {a});
+        //This will hold the contribution Ids for tempora
+        let tempContributions = HashMap.HashMap<ContributionId, Contribution>(1, func (x: Nat32, y: Nat32): Bool { x == y }, func (a : Nat32) : Nat32 {a});
+
         //this is the hashmap which will store all the data of all the tokens and the tokens are identified by simple Nat32 number
         let allTracksList = HashMap.HashMap<TrackId, Tracks>(1, func (x: Nat32, y: Nat32): Bool { x == y }, func (a : Nat32) : Nat32 {a});
         //this is the hashmap which will store all the data of all the records
@@ -44,7 +50,6 @@ module {
         */ 
         let pendingContributions = HashMap.HashMap<ContributionId, Contribution>(1, func (x: Nat32, y: Nat32): Bool { x == y }, func (a : Nat32) : Nat32 {a});
 
-        let tempContributions = HashMap.HashMap<ContributionId, Contribution>(1, func (x: Nat32, y: Nat32): Bool { x == y }, func (a : Nat32) : Nat32 {a});
 
 
         //All the pending Votings will be stored in the following hashmap and once it's result is declared it will be stored into completedVoting HashMap
@@ -62,7 +67,29 @@ module {
         //This is the counter of the voting id.
         var lastVotingId : VotingId = 0;    
         
-       
+        //get a temporary record ID
+        public func tempRecordId(): RecordId{
+            lastRecordId += 1; 
+            return lastRecordId;
+        };
+
+        //upload tracks to temporary hashtable
+        public func uploadTempTracks(userId: UserId, newTrackData: NewTrackData): ContributionId{
+            lastTrackId += 1; 
+            var trackId = lastTrackId;
+            var track : Track = {
+                id = trackId;
+                recordId = newTrackData.recordId;
+                userId = userId;
+                trackLink = newTrackData.trackLink;
+                trackHash = newTrackData.trackHash;
+                trackCategory = newTrackData.trackCategory;
+                createdDate = Time.now();
+            };
+            tempTracks.put(lastTrackId,track);
+            return lastTrackId;
+        };
+
         //TO BE REMOVED
         //This function takes the data and saves it in the hastable,
         //If the entry with the id exists then it will update the data or else it will create a new entry
@@ -138,24 +165,25 @@ module {
 
 
         //create a contribution object id in temp contribution
-        public func tempContributionId(userId: UserId,recordId : RecordId): ContributionId{
-            lastContributiondId += 1; 
-            var contributionId = lastContributiondId;
-            var contribution : Contribution = {
-                id = contributionId;
-                recordId = recordId;
-                userId = userId;
-                tracksId = [];
-                mixFile = "";
-                description = "";
-                reward = {communityToken=0;governanceToken=0;icpToken=0};
-                createdDate = Time.now();
-                votingId= 0;
-                votingResults= #pending;
-            };
-            tempContributions.put(contributionId,contribution);
-            return contributionId;
-        };
+        //TOBE: Removed 
+        // public func tempContributionId(userId: UserId,recordId : RecordId): ContributionId{
+        //     lastContributiondId += 1; 
+        //     var contributionId = lastContributiondId;
+        //     var contribution : Contribution = {
+        //         id = contributionId;
+        //         recordId = recordId;
+        //         userId = userId;
+        //         tracksId = [];
+        //         mixFile = "";
+        //         description = "";
+        //         reward = {communityToken=0;governanceToken=0;icpToken=0};
+        //         createdDate = Time.now();
+        //         votingId= 0;
+        //         votingResults= #pending;
+        //     };
+        //     tempContributions.put(contributionId,contribution);
+        //     return contributionId;
+        // };
 
 
         //create a contribution object id in temp contribution
@@ -230,6 +258,24 @@ module {
                     return ?voting;
                 };
             }
+        };
+
+        //uploading tracks to ICP for temp storage
+        public func tempUploadTracks(userId: UserId, newTrackData : NewTrackData): ContributionId{
+            lastTrackId += 1; 
+            var trackId = lastTrackId;
+            var track : Tracks = {
+                id = lastTrackId;
+                userId = userId;
+                recordId = newTrackData.recordId;
+                trackLink = newTrackData.trackLink;
+                trackHash = newTrackData.trackHash;
+                trackCategory = newTrackData.trackCategory;
+            };
+
+            tempTracks.put();
+            tempContributions.put(contributionId,contribution);
+            return contributionId;
         };
 
 

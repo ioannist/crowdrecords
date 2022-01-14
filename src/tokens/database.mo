@@ -16,6 +16,7 @@ module {
         type TokenType = Types.TokenType;
         type RecordId = Types.RecordId;
         type TokenId = Types.TokenId;
+        type TreasuryId = Types.TreasuryId;
 
         //this is the hashmap which will store all the data of all the tokens and the tokens are identified by simple Nat32 number
         let totalTokenHashMap = HashMap.HashMap<Nat32, Token>(1, func (x: Nat32, y: Nat32): Bool { x == y }, func (a : Nat32) : Nat32 {a});
@@ -28,7 +29,9 @@ module {
 
         //This is the counter of the token id.
         var lastId : TokenId = 0;    
-       
+
+        var treasuryId : TreasuryId = 0;
+
         public func createTokens(userId: UserId,newToken: NewToken): TokenId{
             lastId += 1;    
             let tokenMap : TokenMap = HashMap.HashMap<UserId,Nat>(1, func (x: UserId, y: UserId): Bool { x == y }, Principal.hash);
@@ -44,6 +47,58 @@ module {
             };
             totalTokenHashMap.put(lastId,token); 
             lastId;
+        };
+
+        //This function creates treasury and related tokens and stores them in the mapping
+        public func createTreasury(userId: UserId,copyrightToken: NewToken,governanceToken: NewToken): TreasuryId{
+            lastId += 1;    
+            let copyId : TokenId = lastId;    
+            lastId += 1;    
+            let governanceId : TokenId = lastId;    
+            
+            let copyToken : Token = {
+                id = copyId;
+                recordId = copyrightToken.recordId;
+                tokenType = copyrightToken.tokenType;
+                symbol = copyrightToken.symbol;
+                totalSupply = copyrightToken.totalSupply;
+                createdDate = Time.now();
+            };
+            totalTokenHashMap.put(copyId,copyToken); 
+
+            let govToken : Token = {
+                id = governanceId;
+                recordId = governanceToken.recordId;
+                tokenType = governanceToken.tokenType;
+                symbol = governanceToken.symbol;
+                totalSupply = governanceToken.totalSupply;
+                createdDate = Time.now();
+            };
+            totalTokenHashMap.put(governanceId,govToken); 
+            
+            //This is for treasury
+            let copyTokenMap : TokenMap = HashMap.HashMap<UserId,Nat>(1, func (x: UserId, y: UserId): Bool { x == y }, Principal.hash);
+            copyTokenMap.put(userId,copyToken.createrTokens);
+
+             //This is for treasury
+            let govTokenMap : TokenMap = HashMap.HashMap<UserId,Nat>(1, func (x: UserId, y: UserId): Bool { x == y }, Principal.hash);
+            govTokenMap.put(userId,govToken.createrTokens);
+            
+            treasuryId += 1;
+
+            let treasury : Treasury = {
+                id = treasuryId;
+                recordId = copyrightToken.recordId;
+                copyrightToken = copyId;
+                governanceToken = governanceId;
+                copyrightMapping = copyTokenMap;
+                governanceMapping = govTokenMap;
+                copyrightHolding = copyToken.treasuryTokens; // Count of amount of tokens the treasury has
+                governanceHolding = govToken.treasuryTokens; // Count of amount of tokens the treasury has
+                createdDate = Time.Now();
+            };
+
+            treasuryId;
         };
 
       

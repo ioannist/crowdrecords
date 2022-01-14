@@ -17,32 +17,58 @@ module {
     public type RecordId = Nat32;
     public type ContributionId = Nat32;
     public type VotingId = Nat32;
+    public type RecordCategoryId = Nat32;
+    public type TrackCategoryId = Nat32;
+    public type TreasuryId = Nat32;
+    
+    //
+    public type TrackCategory = {
+        name: Text;
+        id:TrackCategoryId;
+        icon: Text; //Icon of the category
+    };
 
     public type NewTrackData = {
+        recordId: RecordId;
         // draft: Int;
         // independentTrack:Int; //this flag denotes if this track is a independent track or not, if it is independent then you can create a new record with this track as seed
         trackLink: Text; //link to the place where it is stored
         trackHash: Text; //Hashes of the file to verify if they are the same that were uploaded
         previewFile: Text; //This is the link of preview file that is mix of all the tracks
-        trackCategory:Text;
+        trackCategory:TrackCategoryId;
     };
 
     public type Tracks = {
         id: TrackId;
         userId: UserId;
+        recordId: RecordId;
         // draft: Int;
         // previewFile: Text; //This is the link of preview file that is mix of all the tracks
         // independentTrack:Int; //this flag denotes if this track is a independent track or not, if it is independent then you can create a new record with this track as seed
         trackLink: Text; //link to the place where it is stored
         trackHash: Text; //Hashes of the file to verify if they are the same that were uploaded
-        trackCategory:Text;
+        trackCategory:TrackCategoryId;
+        createdDate:Int; // Time stamp of when the track was uploaded
     };
+
+    public type RecordCategory = {
+        name: Text;
+        id: RecordCategoryId;
+        icon: Text; //Icon of the category
+    };
+
+    /*
+    For creation of new record:
+    1. A temp record id is genrated.
+    2. All the tracks are uploaded one by one to IPFS and the track data is stored temporarily in the canister with the record ID
+    3. Then once all the data is filled and create button is clicked it just transfers of the tracks from temporary store to database
+    4. If nothing happens then after 48 hour a cron will execute and remove everything from the temp db
+    */
 
     public type NewRecords = {
         name: Text;
-        //Seed id is the id of track that is at the seeed of the song
         //If seed is not finalized then default value should be -1
-        seedId: TrackId;
+        seedId: ContributionId; // SeedId will be the seed contribution that is collection of base tracks 
         tracks: [Tracks];
         peerVersion: Nat32; //This refers to the id of record who seed has been used for creating this version if none then it will be -1
         createdDate: Int;
@@ -55,14 +81,16 @@ module {
     public type Records = {
         id: RecordId;
         name: Text;
-        seedId: TrackId;
+        seedId: ContributionId; // SeedId will be the seed contribution that is collection of base tracks 
         tracks: [Tracks];
         peerVersion: RecordId; //This refers to the id of record who seed has been used for creating this version if none then it will be -1
         createdDate: Int;
         previewFile: Text; //This is the link of preview file that is mix of all the tracks
+        recordCategory: RecordCategoryId;
         // icpFundsWallet: Principal;
-        governanceToken: Nat32; //Id of governance token 
-        communityToken: Nat32; //Id of community token
+        treasuryId: TreasuryId; // Treasury Id is the replacement for the governance token id and community token id
+        // governanceToken: Nat32; //Id of governance token 
+        // communityToken: Nat32; //Id of community token
         contributions: [ContributionId]; // this is the list of contributions that are done on this song.
     };
 
