@@ -17,6 +17,7 @@ module {
         type RecordId = Types.RecordId;
         type TokenId = Types.TokenId;
         type TreasuryId = Types.TreasuryId;
+        type Treasury = Types.Treasury;
 
         //this is the hashmap which will store all the data of all the tokens and the tokens are identified by simple Nat32 number
         let totalTokenHashMap = HashMap.HashMap<Nat32, Token>(1, func (x: Nat32, y: Nat32): Bool { x == y }, func (a : Nat32) : Nat32 {a});
@@ -78,11 +79,11 @@ module {
             
             //This is for treasury
             let copyTokenMap : TokenMap = HashMap.HashMap<UserId,Nat>(1, func (x: UserId, y: UserId): Bool { x == y }, Principal.hash);
-            copyTokenMap.put(userId,copyToken.createrTokens);
+            copyTokenMap.put(userId,copyrightToken.createrTokens);
 
              //This is for treasury
             let govTokenMap : TokenMap = HashMap.HashMap<UserId,Nat>(1, func (x: UserId, y: UserId): Bool { x == y }, Principal.hash);
-            govTokenMap.put(userId,govToken.createrTokens);
+            govTokenMap.put(userId,governanceToken.createrTokens);
             
             treasuryId += 1;
 
@@ -93,9 +94,9 @@ module {
                 governanceToken = governanceId;
                 copyrightMapping = copyTokenMap;
                 governanceMapping = govTokenMap;
-                copyrightHolding = copyToken.treasuryTokens; // Count of amount of tokens the treasury has
-                governanceHolding = govToken.treasuryTokens; // Count of amount of tokens the treasury has
-                createdDate = Time.Now();
+                copyrightHolding = copyrightToken.treasuryTokens; // Count of amount of tokens the treasury has
+                governanceHolding = governanceToken.treasuryTokens; // Count of amount of tokens the treasury has
+                createdDate = Time.now();
             };
 
             treasuryId;

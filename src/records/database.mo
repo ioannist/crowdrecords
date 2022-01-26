@@ -26,7 +26,7 @@ module {
         type Reward = Types.Reward;
         type NewContribution = Types.NewContribution;
         type VotingResults = Types.VotingResults;
-
+        type TreasuryId = Types.TreasuryId;
 
         let DRAFT : Int = 1;
         let PUBLISHED : Int = 0;
@@ -34,8 +34,12 @@ module {
         //This will hold the tracks details temporarily for 48 hours.
         //The age will be identified from the creation date of the track
         let tempTracks = HashMap.HashMap<TrackId, Tracks>(1, func (x: Nat32, y: Nat32): Bool { x == y }, func (a : Nat32) : Nat32 {a});
+        
+        //–––––––––––––––
+        //Curently no need to hold the contribution into temporary hash map
         //This will hold the contribution Ids for tempora
-        let tempContributions = HashMap.HashMap<ContributionId, Contribution>(1, func (x: Nat32, y: Nat32): Bool { x == y }, func (a : Nat32) : Nat32 {a});
+        // let tempContributions = HashMap.HashMap<ContributionId, Contribution>(1, func (x: Nat32, y: Nat32): Bool { x == y }, func (a : Nat32) : Nat32 {a});
+        //–––––––––––––––
 
         //this is the hashmap which will store all the data of all the tokens and the tokens are identified by simple Nat32 number
         let allTracksList = HashMap.HashMap<TrackId, Tracks>(1, func (x: Nat32, y: Nat32): Bool { x == y }, func (a : Nat32) : Nat32 {a});
@@ -77,7 +81,7 @@ module {
         public func uploadTempTracks(userId: UserId, newTrackData: NewTrackData): ContributionId{
             lastTrackId += 1; 
             var trackId = lastTrackId;
-            var track : Track = {
+            var track : Tracks = {
                 id = trackId;
                 recordId = newTrackData.recordId;
                 userId = userId;
@@ -185,61 +189,135 @@ module {
         //     return contributionId;
         // };
 
-
-        //create a contribution object id in temp contribution
-        public func createContribution(userId: UserId,recordId : RecordId): ContributionId{
+        //This function is responsible to create records and the seed contribution
+        public func createRecord(userId : UserId, newRecord: NewRecords,newContribution : NewContribution, communityTokenData : NewTokenData, governanceTokenData : NewTokenData): async (RecordId){
+            lastRecordId += 1;
+            var recordId = lastRecordId;
+            
             lastContributiondId += 1; 
             var contributionId = lastContributiondId;
+            //This configs are only for seed contribution
             var contribution : Contribution = {
                 id = contributionId;
                 recordId = recordId;
                 userId = userId;
-                tracksId = [];
-                mixFile = "";
-                description = "";
+                tracksId = newContribution.tracksId;
+                mixFile = newContribution.mixFile;
+                description = newContribution.description;
                 reward = {communityToken=0;governanceToken=0;icpToken=0};
                 createdDate = Time.now();
-                votingId= 0;
-                votingResults= #pending;
+                votingId = 0;
+                votingResults= #accepted;
             };
-            tempContributions.put(contributionId,contribution);
-            return contributionId;
+            //Seed contribution is directly accepted as a contribution no need to have a voting
+            acceptedContributions.put(contributionId,contribution);
+ 
+            //Transfer the tracks from the temp into the alltrackslist
+            for(trackId in Iter.fromArray(newContribution.tracksId)){
+                let trackData : ?Tracks = tempTracks.remove(trackId);
+                switch(trackData){
+                    case (null){
+                        var a : Nat32 = 0;
+                    };
+                    case (?trackData){
+                        allTracksList.put(trackId,trackData);
+                    };
+                }
+            };
+           
+            var governanceToken = {
+                recordId = recordId;
+                tokenType = #governance;
+                symbol = governanceTokenData.symbol;
+                totalSupply = governanceTokenData.totalSupply;
+                createrTokens = governanceTokenData.createrTokens;
+                treasuryTokens = governanceTokenData.treasuryTokens;
+            };
+
+            var communityToken = {
+                recordId = recordId;
+                tokenType = #copyright;
+                symbol = communityTokenData.symbol;
+                totalSupply = communityTokenData.totalSupply;
+                createrTokens = communityTokenData.createrTokens;
+                treasuryTokens = communityTokenData.treasuryTokens;
+            };
+
+            var treasuryId : TreasuryId = await TokensCanister.createTokens(userId,communityToken,governanceToken);
+            
+            let record : Records = {
+                contributions = [];
+                createdDate = Time.now();
+                id = recordId;
+                name = newRecord.name;
+                peerVersion = newRecord.peerVersion;
+                previewFile = newRecord.previewFile; 
+                recordCategory = newRecord.recordCategory;
+                seedId = newRecord.seedId;
+                tracks = newRecord.tracks;
+                // icpFundsWallet = new Principal();
+                // communityToken = tokenIds.0; //The first value in the data that is retured is the id of the communityToken.
+                // governanceToken = tokenIds.1; //The second value in the data is the id of governance token.
+                treasuryId = treasuryId;
+            };
+            allRecordsList.put(recordId,record);
+            return recordId;
         };
 
+        //create a contribution object id in temp contribution
+        // public func createContribution(userId: UserId,recordId : RecordId): ContributionId{
+        //     lastContributiondId += 1; 
+        //     var contributionId = lastContributiondId;
+        //     var contribution : Contribution = {
+        //         id = contributionId;
+        //         recordId = recordId;
+        //         userId = userId;
+        //         tracksId = [];
+        //         mixFile = "";
+        //         description = "";
+        //         reward = {communityToken=0;governanceToken=0;icpToken=0};
+        //         createdDate = Time.now();
+        //         votingId= 0;
+        //         votingResults= #pending;
+        //     };
+        //     tempContributions.put(contributionId,contribution);
+        //     return contributionId;
+        // };
+
         //publishing a contribution object and moving it from temp to pending
-        public func publishContribution(userId: UserId,contributionId : ContributionId,resultDate : Int){
-            var contribution : ?Contribution = tempContributions.remove(contributionId);
-            switch(contribution){
-                case (null){
-                    return;
-                };
-                case (?contribution){
-                    lastVotingId := lastVotingId + 1;
-                    var votingId = lastVotingId;
-                    var voting : Voting = {
-                        votingId = votingId;
-                        var positiveVotes = [];
-                        var negativeVotes = [];
-                        var resultTime = resultDate;
-                    };
-                    pendingVotings.put(votingId,voting);
-                    var newContribution : Contribution = {
-                        id = contributionId;
-                        recordId = contribution.recordId;
-                        userId = contribution.userId;
-                        tracksId = contribution.tracksId;
-                        mixFile = contribution.mixFile;
-                        description = contribution.description;
-                        reward = contribution.reward;
-                        createdDate = Time.now();
-                        votingId = votingId;
-                        votingResults= #pending;
-                    };
-                    pendingContributions.put(contributionId,newContribution);
-                    return;
-                };
-            };
-        };
+        // public func publishContribution(userId: UserId,contributionId : ContributionId,resultDate : Int){
+        //     var contribution : ?Contribution = tempContributions.remove(contributionId);
+        //     switch(contribution){
+        //         case (null){
+        //             return;
+        //         };
+        //         case (?contribution){
+        //             lastVotingId := lastVotingId + 1;
+        //             var votingId = lastVotingId;
+        //             var voting : Voting = {
+        //                 votingId = votingId;
+        //                 var positiveVotes = [];
+        //                 var negativeVotes = [];
+        //                 var resultTime = resultDate;
+        //             };
+        //             pendingVotings.put(votingId,voting);
+        //             var newContribution : Contribution = {
+        //                 id = contributionId;
+        //                 recordId = contribution.recordId;
+        //                 userId = contribution.userId;
+        //                 tracksId = contribution.tracksId;
+        //                 mixFile = contribution.mixFile;
+        //                 description = contribution.description;
+        //                 reward = contribution.reward;
+        //                 createdDate = Time.now();
+        //                 votingId = votingId;
+        //                 votingResults= #pending;
+        //             };
+        //             pendingContributions.put(contributionId,newContribution);
+        //             return;
+        //         };
+        //     };
+        // };
 
         //Voting function when users will vote on a contribution or event 
         public func castVote(userId: UserId,votingId : VotingId, vote : Bool): ?Voting{
@@ -261,22 +339,22 @@ module {
         };
 
         //uploading tracks to ICP for temp storage
-        public func tempUploadTracks(userId: UserId, newTrackData : NewTrackData): ContributionId{
-            lastTrackId += 1; 
-            var trackId = lastTrackId;
-            var track : Tracks = {
-                id = lastTrackId;
-                userId = userId;
-                recordId = newTrackData.recordId;
-                trackLink = newTrackData.trackLink;
-                trackHash = newTrackData.trackHash;
-                trackCategory = newTrackData.trackCategory;
-            };
+        // public func tempUploadTracks(userId: UserId, newTrackData : NewTrackData): ContributionId{
+        //     lastTrackId += 1; 
+        //     var trackId = lastTrackId;
+        //     var track : Tracks = {
+        //         id = lastTrackId;
+        //         userId = userId;
+        //         recordId = newTrackData.recordId;
+        //         trackLink = newTrackData.trackLink;
+        //         trackHash = newTrackData.trackHash;
+        //         trackCategory = newTrackData.trackCategory;
+        //     };
 
-            tempTracks.put();
-            tempContributions.put(contributionId,contribution);
-            return contributionId;
-        };
+        //     tempTracks.put();
+        //     tempContributions.put(contributionId,contribution);
+        //     return contributionId;
+        // };
 
 
 /*
@@ -325,43 +403,43 @@ Once the Voting is completed it should be either deleted or offloaded to some ot
 
         //This function will create records
         //It will first genrate the id and then it will create the tokens and get their ids. Then at last it will create a new Record
-        public func createRecord(userId: UserId,governanceTokenData: NewTokenData,communityTokenData: NewTokenData,newRecords: NewRecords) : async 
+        // public func createRecord(userId: UserId,governanceTokenData: NewTokenData,communityTokenData: NewTokenData,newRecords: NewRecords) : async 
             
-            RecordId{
-            lastRecordId += 1;
-            var recordId : RecordId = lastRecordId;
+        //     RecordId{
+        //     lastRecordId += 1;
+        //     var recordId : RecordId = lastRecordId;
            
-            var governanceToken = {
-                recordId = recordId;
-                tokenType = governanceTokenData.tokenType;
-                symbol = governanceTokenData.symbol;
-                totalSupply = governanceTokenData.totalSupply;
-            };
+        //     var governanceToken = {
+        //         recordId = recordId;
+        //         tokenType = governanceTokenData.tokenType;
+        //         symbol = governanceTokenData.symbol;
+        //         totalSupply = governanceTokenData.totalSupply;
+        //     };
 
-            var communityToken = {
-                recordId = recordId;
-                tokenType = communityTokenData.tokenType;
-                symbol = communityTokenData.symbol;
-                totalSupply = communityTokenData.totalSupply;
-            };
+        //     var communityToken = {
+        //         recordId = recordId;
+        //         tokenType = communityTokenData.tokenType;
+        //         symbol = communityTokenData.symbol;
+        //         totalSupply = communityTokenData.totalSupply;
+        //     };
 
-            var tokenIds : (Nat32,Nat32) = await TokensCanister.createTokens(userId,communityToken,governanceToken);
+        //     var tokenIds : (Nat32,Nat32) = await TokensCanister.createTokens(userId,communityToken,governanceToken);
             
-            let record : Records = {
-                id = recordId;
-                name = newRecords.name;
-                seedId = newRecords.seedId;
-                tracks = newRecords.tracks;
-                peerVersion = newRecords.peerVersion;
-                createdDate = Time.now();
-                previewFile = newRecords.previewFile; 
-                // icpFundsWallet = new Principal();
-                communityToken = tokenIds.0; //The first value in the data that is retured is the id of the communityToken.
-                governanceToken = tokenIds.1; //The second value in the data is the id of governance token.
-                contributions = [];
-            };
-            allRecordsList.put(recordId,record);
-            recordId;
-        };
+        //     let record : Records = {
+        //         id = recordId;
+        //         name = newRecords.name;
+        //         seedId = newRecords.seedId;
+        //         tracks = newRecords.tracks;
+        //         peerVersion = newRecords.peerVersion;
+        //         createdDate = Time.now();
+        //         previewFile = newRecords.previewFile; 
+        //         // icpFundsWallet = new Principal();
+        //         communityToken = tokenIds.0; //The first value in the data that is retured is the id of the communityToken.
+        //         governanceToken = tokenIds.1; //The second value in the data is the id of governance token.
+        //         contributions = [];
+        //     };
+        //     allRecordsList.put(recordId,record);
+        //     recordId;
+        // };
    }
 }

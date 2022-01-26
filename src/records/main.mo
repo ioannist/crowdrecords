@@ -16,30 +16,33 @@ actor Tokens {
     type NewRecords = Types.NewRecords;
     type ContributionId = Types.ContributionId;
     type UserId = Types.UserId;
+    type NewContribution = Types.NewContribution;
+    type NewTokenData = Types.NewTokenData;
 
     var directory: Database.Directory = Database.Directory();
     
     //This function is responsible for creating a new record
-    public shared({ caller }) func createRecord(newRecord : NewRecords) { 
+    public shared({ caller }) func createRecord(newRecord: NewRecords,newContribution : NewContribution, communityTokenData : NewTokenData, governanceTokenData : NewTokenData) : async (RecordId){ 
         //A call will be made to db for creating a record
         //it will return record detial and record id.
-    
+        await directory.createRecord(caller,newRecord,newContribution,communityTokenData,governanceTokenData);
+        // return 0;
         //Here we will call method of token cannister to mint tokens for this records.
     };
 
 
     //This function is responsible for creating a contribution and it will return the id of the contribution
-    public shared({ caller }) func createContribution(recordId : RecordId) : async (ContributionId) { 
+    /*public shared({ caller }) func createContribution(recordId : RecordId) : async (ContributionId) { 
         //A call will be made to db for creating a contribution and it will return contribution id.
         directory.createContribution(caller,recordId);
-    };
+    };*/
 
     //This function is responsible for publishing a contribution
-    public shared({ caller }) func publishContribution(contributionId : ContributionId,resultDate : Int) { 
+    /*public shared({ caller }) func publishContribution(contributionId : ContributionId,resultDate : Int) { 
         //A call will be made to db for publishing the contribution.
         //Then a cron will be set to execute at the time of result declaration.
         directory.publishContribution(caller,contributionId,resultDate);
-    };
+    };*/
 
     //This function is a cron function which will periodically check for voting that are going to be completed and then saves the result into db
     public shared({ caller }) func contributionVotingCron() { 
@@ -54,10 +57,10 @@ actor Tokens {
             };
             case(?voting){
                 let frozedVoting : FROZEN_Voting = {
-                    votingId : voting.votingId;
-                    positiveVotes : voting.positiveVotes;
-                    negativeVotes : voting.negativeVotes;
-                    resultTime : voting.resultTime;
+                    votingId = voting.votingId;
+                    positiveVotes = voting.positiveVotes;
+                    negativeVotes = voting.negativeVotes;
+                    resultTime = voting.resultTime;
                 };
                 return ?frozedVoting;
             }

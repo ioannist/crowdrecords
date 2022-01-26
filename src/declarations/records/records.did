@@ -1,2 +1,56 @@
+type VotingId__1 = nat32;
+type VotingId = nat32;
+type UserId = principal;
+type TrackId = nat32;
+type Reward = 
+ record {
+   communityToken: nat32;
+   governanceToken: nat32;
+   icpToken: nat32;
+ };
+type RecordId__1 = nat32;
+type RecordId = nat32;
+type RecordCategoryId = nat32;
+type NewTokenData = 
+ record {
+   createrTokens: nat;
+   symbol: text;
+   totalSupply: nat;
+   treasuryTokens: nat;
+ };
+type NewRecords = 
+ record {
+   name: text;
+   peerVersion: nat32;
+   previewFile: text;
+   recordCategory: RecordCategoryId;
+   seedId: ContributionId;
+   tracks: vec TrackId;
+ };
+type NewContribution = 
+ record {
+   description: text;
+   mixFile: text;
+   recordId: RecordId__1;
+   reward: Reward;
+   tracksId: vec TrackId;
+ };
+type FROZEN_Voting = 
+ record {
+   negativeVotes: vec UserId;
+   positiveVotes: vec UserId;
+   resultTime: int;
+   votingId: VotingId__1;
+ };
+type ContributionId = nat32;
 service : {
+  contractVotingCron: () -> () oneway;
+  contributionVotingCron: () -> () oneway;
+  createRecord: (NewRecords, NewContribution, NewTokenData, NewTokenData) ->
+   (RecordId);
+  getRecord: (RecordId) -> () oneway;
+  proposeContract: (RecordId) -> () oneway;
+  royaltyDistributionCron: () -> () oneway;
+  voteForContract: () -> () oneway;
+  voteForContribution: (VotingId, bool) -> (opt FROZEN_Voting);
 }

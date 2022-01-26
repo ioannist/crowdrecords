@@ -7,21 +7,20 @@ export const idlFactory = ({ IDL }) => {
     'copyright' : IDL.Null,
   });
   const NewToken = IDL.Record({
+    'createrTokens' : IDL.Nat,
     'totalSupply' : IDL.Nat,
     'recordId' : RecordId__1,
     'tokenType' : TokenType,
+    'treasuryTokens' : IDL.Nat,
     'symbol' : IDL.Text,
   });
+  const TreasuryId = IDL.Nat32;
   const TokenId = IDL.Nat32;
   return IDL.Service({
     'addRecord' : IDL.Func([RecordId], [IDL.Bool], []),
     'addRecordToUserAccount' : IDL.Func([RecordId], [], ['oneway']),
     'createTokenOffer' : IDL.Func([IDL.Nat, IDL.Nat], [], ['oneway']),
-    'createTokens' : IDL.Func(
-        [UserId, NewToken, NewToken],
-        [TokenId, TokenId],
-        [],
-      ),
+    'createTokens' : IDL.Func([UserId, NewToken, NewToken], [TreasuryId], []),
     'getRecordICPAccount' : IDL.Func([RecordId], [], ['oneway']),
     'getTokenOffer' : IDL.Func([IDL.Nat, IDL.Nat], [], ['oneway']),
     'getTransferHistory' : IDL.Func([], [], ['oneway']),

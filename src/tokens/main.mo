@@ -30,7 +30,7 @@ actor Tokens {
             // (communityTokenId,governanceTokenId);
             treasuryId;
         }else{
-           return (0,0);
+           return 0;
         };
     };
 

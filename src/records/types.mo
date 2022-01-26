@@ -68,10 +68,12 @@ module {
     public type NewRecords = {
         name: Text;
         //If seed is not finalized then default value should be -1
-        seedId: ContributionId; // SeedId will be the seed contribution that is collection of base tracks 
-        tracks: [Tracks];
+        //seedId: ContributionId; // SeedId will be the seed contribution that is collection of base tracks 
+        tracks: [TrackId];
         peerVersion: Nat32; //This refers to the id of record who seed has been used for creating this version if none then it will be -1
-        createdDate: Int;
+        // createdDate: Int; //This will be calculated by the server
+        seedId: ContributionId;
+        recordCategory: RecordCategoryId;
         // icpFundsWallet: Principal;
         // governanceToken: Nat32; //Id of governance token 
         // communityToken: Nat32; //Id of community token
@@ -82,7 +84,7 @@ module {
         id: RecordId;
         name: Text;
         seedId: ContributionId; // SeedId will be the seed contribution that is collection of base tracks 
-        tracks: [Tracks];
+        tracks: [TrackId];
         peerVersion: RecordId; //This refers to the id of record who seed has been used for creating this version if none then it will be -1
         createdDate: Int;
         previewFile: Text; //This is the link of preview file that is mix of all the tracks
@@ -99,10 +101,13 @@ module {
     };
 
     public type NewTokenData = {
-        tokenType: TokenType;
+        // tokenType: TokenType; // the token type would be set by system
         symbol: Text;
         totalSupply: Nat;
+        createrTokens: Nat;
+        treasuryTokens: Nat;
     };
+
 
     //This is a basic reward object which contains the requirement of the contributor
     public type Reward = {

@@ -1,38 +1,38 @@
 {
-  "canisters": {
-    "users": {
-      "main": "src/users/main.mo",
-      "type": "motoko"
+    "canisters": {
+        "users": {
+            "main": "src/users/main.mo",
+            "type": "motoko"
+        },
+        "tokens": {
+            "main": "src/tokens/main.mo",
+            "type": "motoko"
+        },
+        "records": {
+            "main": "src/records/main.mo",
+            "type": "motoko"
+        },
+        "crowdrecords_assets": {
+            "dependencies": ["users", "tokens", "records"],
+            "frontend": {
+                "entrypoint": "src/crowdrecords_assets/src/index.html"
+            },
+            "source": ["src/crowdrecords_assets/assets", "dist/crowdrecords_assets/"],
+            "type": "assets"
+        }
     },
-    "tokens": {
-      "main": "src/tokens/main.mo",
-      "type": "motoko"
+    "defaults": {
+        "build": {
+            "args": "",
+            "packtool": ""
+        }
     },
-    "records": {
-      "main": "src/records/main.mo",
-      "type": "motoko"
+    "dfx": "0.8.4",
+    "networks": {
+        "local": {
+            "bind": "127.0.0.1:8000",
+            "type": "ephemeral"
+        }
     },
-    "crowdrecords_assets": {
-      "dependencies": ["users", "tokens", "records"],
-      "frontend": {
-        "entrypoint": "src/crowdrecords_assets/src/index.html"
-      },
-      "source": ["src/crowdrecords_assets/assets", "dist/crowdrecords_assets/"],
-      "type": "assets"
-    }
-  },
-  "defaults": {
-    "build": {
-      "args": "",
-      "packtool": ""
-    }
-  },
-  "dfx": "0.8.1",
-  "networks": {
-    "local": {
-      "bind": "127.0.0.1:8000",
-      "type": "ephemeral"
-    }
-  },
-  "version": 1
+    "version": 1
 }

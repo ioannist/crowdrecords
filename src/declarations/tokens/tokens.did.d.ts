@@ -1,8 +1,10 @@
 import type { Principal } from '@dfinity/principal';
 export interface NewToken {
+  'createrTokens' : bigint,
   'totalSupply' : bigint,
   'recordId' : RecordId__1,
   'tokenType' : TokenType,
+  'treasuryTokens' : bigint,
   'symbol' : string,
 }
 export type RecordId = number;
@@ -10,13 +12,14 @@ export type RecordId__1 = number;
 export type TokenId = number;
 export type TokenType = { 'governance' : null } |
   { 'copyright' : null };
+export type TreasuryId = number;
 export type UserId = Principal;
 export interface _SERVICE {
   'addRecord' : (arg_0: RecordId) => Promise<boolean>,
   'addRecordToUserAccount' : (arg_0: RecordId) => Promise<undefined>,
   'createTokenOffer' : (arg_0: bigint, arg_1: bigint) => Promise<undefined>,
   'createTokens' : (arg_0: UserId, arg_1: NewToken, arg_2: NewToken) => Promise<
-      [TokenId, TokenId]
+      TreasuryId
     >,
   'getRecordICPAccount' : (arg_0: RecordId) => Promise<undefined>,
   'getTokenOffer' : (arg_0: bigint, arg_1: bigint) => Promise<undefined>,
