@@ -30,6 +30,19 @@ export const idlFactory = ({ IDL }) => {
     'symbol' : IDL.Text,
   });
   const RecordId = IDL.Nat32;
+  const TreasuryId = IDL.Nat32;
+  const Records = IDL.Record({
+    'id' : RecordId__1,
+    'treasuryId' : TreasuryId,
+    'recordCategory' : RecordCategoryId,
+    'contributions' : IDL.Vec(ContributionId),
+    'peerVersion' : RecordId__1,
+    'tracks' : IDL.Vec(TrackId),
+    'name' : IDL.Text,
+    'createdDate' : IDL.Int,
+    'seedId' : ContributionId,
+    'previewFile' : IDL.Text,
+  });
   const VotingId = IDL.Nat32;
   const UserId = IDL.Principal;
   const VotingId__1 = IDL.Nat32;
@@ -47,6 +60,7 @@ export const idlFactory = ({ IDL }) => {
         [RecordId],
         [],
       ),
+    'getAllRecords' : IDL.Func([], [IDL.Vec(Records)], []),
     'getRecord' : IDL.Func([RecordId], [], ['oneway']),
     'proposeContract' : IDL.Func([RecordId], [], ['oneway']),
     'royaltyDistributionCron' : IDL.Func([], [], ['oneway']),

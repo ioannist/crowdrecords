@@ -2,6 +2,7 @@ import Array "mo:base/Array";
 import HashMap "mo:base/HashMap";
 import Iter "mo:base/Iter";
 import Option "mo:base/Option";
+import List "mo:base/List";
 import Principal "mo:base/Principal";
 import Types "./types";
 import Time "mo:base/Time";
@@ -262,6 +263,29 @@ module {
             };
             allRecordsList.put(recordId,record);
             return recordId;
+        };
+
+        //! TEST : This function is for testing purpose to get all the records
+        public func getAllRecords(): async ([Records]){
+            
+            var recordList : [Records] = [];
+
+            //Transfer the tracks from the temp into the alltrackslist
+            for(key in allRecordsList.keys()){
+                let recordData : ?Records = allRecordsList.get(key);
+                switch(recordData){
+                    case (null){
+                        var a : Nat32 = 0;
+                    };
+                    case (?recordData){
+                        recordList := Array.append<Records>(recordList,[recordData]);
+                        // recordList := List.append<Records>(List.fromArray<Records>([recordData]),recordList);
+                        // var a = List.push(recordData,recordList);
+                    };
+                }
+            };
+
+            return recordList;
         };
 
         //create a contribution object id in temp contribution

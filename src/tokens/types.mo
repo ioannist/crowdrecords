@@ -44,4 +44,16 @@ module {
         createdDate: Int;
     };
 
+    //You cannot return hashmap or any object that has hashmap outside of cannister
+    //This is for test purpoes remove when no longer refered
+    public type TreasuryFrozenData = {
+        id: TreasuryId;
+        recordId: RecordId;
+        copyrightToken: TokenId;
+        governanceToken: TokenId;
+        copyrightHolding: Nat;
+        governanceHolding: Nat;
+        createdDate: Int;
+    };
+
 };

@@ -2,6 +2,7 @@ import { users, createActor, canisterId } from "../../declarations/users";
 import { records } from "../../declarations/records";
 import { AuthClient } from "@dfinity/auth-client";
 import { IDENTITY_PROVIDER_PATH } from "./config";
+import { tokens } from "../../declarations/tokens";
 
 const createRecord = async () => {
     console.log("creating record");
@@ -44,6 +45,42 @@ const createRecord = async () => {
         })
         .catch((err) => {
             console.log(err);
+        });
+};
+
+const fetchAllRecords = async () => {
+    console.log("creating record");
+    await records
+        .getAllRecords()
+        .then((res) => {
+            console.log("All records ", res);
+        })
+        .catch((err) => {
+            console.log("All records ", err);
+        });
+};
+
+const getAllTokens = async () => {
+    console.log("Getting all the tokens");
+    await tokens
+        .getAllTokens()
+        .then((res) => {
+            console.log("All tokens ", res);
+        })
+        .catch((err) => {
+            console.log("All tokens ", err);
+        });
+};
+
+const getAllTreasury = async () => {
+    console.log("Getting all the treasury");
+    await tokens
+        .getAllTreasury()
+        .then((res) => {
+            console.log("All treasury ", res);
+        })
+        .catch((err) => {
+            console.log("All treasury ", err);
         });
 };
 
@@ -122,3 +159,6 @@ async function profileData(authanticatedUser) {
 
 init();
 createRecord();
+fetchAllRecords();
+getAllTokens();
+getAllTreasury();

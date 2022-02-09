@@ -5,6 +5,7 @@ import Option "mo:base/Option";
 import Principal "mo:base/Principal";
 import Types "./types";
 import Time "mo:base/Time";
+import P "mo:⛔";
 
 module {
     public class Directory() {  
@@ -18,10 +19,14 @@ module {
         type TokenId = Types.TokenId;
         type TreasuryId = Types.TreasuryId;
         type Treasury = Types.Treasury;
+        type TreasuryFrozenData = Types.TreasuryFrozenData;
 
         //this is the hashmap which will store all the data of all the tokens and the tokens are identified by simple Nat32 number
         let totalTokenHashMap = HashMap.HashMap<Nat32, Token>(1, func (x: Nat32, y: Nat32): Bool { x == y }, func (a : Nat32) : Nat32 {a});
-        
+
+        //this is the hashmap which will store all the data of all the tokens and the tokens are identified by simple Nat32 number
+        let totalTreasuryHashMap = HashMap.HashMap<Nat32, Treasury>(1, func (x: Nat32, y: Nat32): Bool { x == y }, func (a : Nat32) : Nat32 {a});
+
         //this stores the list of records that are linked to a particular person.
         let userRecordList = HashMap.HashMap<UserId, [RecordId]>(1, func (x: UserId, y: UserId): Bool { x == y },Principal.hash);
         
@@ -98,8 +103,60 @@ module {
                 governanceHolding = governanceToken.treasuryTokens; // Count of amount of tokens the treasury has
                 createdDate = Time.now();
             };
+            totalTreasuryHashMap.put(treasuryId,treasury);
 
-            treasuryId;
+            return treasuryId;
+        };
+
+        //! TEST : This function is for testing purpose to get all the treasury
+        public func getAllTreasury(): ([TreasuryFrozenData]){
+            
+            var treasuryList : [TreasuryFrozenData] = [];
+
+            //Transfer the tracks from the temp into the alltrackslist
+            for(key in totalTreasuryHashMap.keys()){
+                let treasuryData : ?Treasury = totalTreasuryHashMap.get(key);
+                switch(treasuryData){
+                    case (null){
+                        var a : Nat32 = 0;
+                    };
+                    case (?treasuryData){
+                        treasuryList := Array.append<TreasuryFrozenData>(treasuryList,[{
+                            id = treasuryData.id;
+                            recordId = treasuryData.recordId;
+                            copyrightToken = treasuryData.copyrightToken;
+                            governanceToken = treasuryData.governanceToken;
+                            copyrightHolding = treasuryData.copyrightHolding;
+                            governanceHolding = treasuryData.governanceHolding;
+                            createdDate = treasuryData.createdDate;
+                        }]);
+                    };
+                }
+            };
+            P.debugPrint(debug_show("Text",treasuryList));
+            return treasuryList;
+        };
+
+        //! TEST : This function is for testing purpose to get all the Tokens
+        public func getAllTokens(): async ([Token]){
+            
+            var tokenList : [Token] = [];
+            var count : Nat = 0;
+            //Transfer the tracks from the temp into the alltrackslist
+            for(key in totalTokenHashMap.keys()){
+                let tokenData : ?Token = totalTokenHashMap.get(key);
+                switch(tokenData){
+                    case (null){
+                        var a : Nat32 = 0;
+                    };
+                    case (?tokenData){
+                        count := count + 1; 
+                        tokenList := Array.append<Token>(tokenList,[tokenData]);
+                    };
+                }
+            };
+
+            return tokenList;
         };
 
       

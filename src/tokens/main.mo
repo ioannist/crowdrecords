@@ -5,6 +5,7 @@ import List "mo:base/List";
 import Types "./types";
 import Database "./database"; 
 import Principal "mo:base/Principal";
+import P "mo:⛔";
 
 actor Tokens {
 
@@ -18,17 +19,25 @@ actor Tokens {
     type TokenId = Types.TokenId;
     type RecordId = Types.RecordId;
     type TreasuryId = Types.TreasuryId;
+    type TreasuryFrozenData = Types.TreasuryFrozenData;
 
+
+    //Function for testing to get all treasury list
+    public query func getAllTreasury() : async ([TreasuryFrozenData]){
+        let treasury = directory.getAllTreasury();
+        return treasury;
+    };
 
     public shared({ caller }) func createTokens(userId: UserId,communityToken: NewToken,governanceToken: NewToken) : async (TreasuryId){
         //hardcoding the id for user canister to limit access to this function
         //This function is only to be called from records cannister
-        if(Principal.toText(caller) == "qjdve-lqaaa-aaaaa-aaaeq-cai") {
+        if(Principal.toText(caller) == "ryjl3-tyaaa-aaaaa-aaaba-cai") {
+            P.debugPrint(debug_show("text", (caller,communityToken)));
             let treasuryId = directory.createTreasury(userId,communityToken,governanceToken);
             // let communityTokenId = directory.createTokens(userId,communityToken);
             // let governanceTokenId = directory.createTokens(userId,governanceToken);
             // (communityTokenId,governanceTokenId);
-            treasuryId;
+            return treasuryId;
         }else{
            return 0;
         };
@@ -36,6 +45,10 @@ actor Tokens {
 
     public shared({ caller }) func addRecord(recordId: RecordId) : async Bool {
         directory.addRecord(caller,recordId);
+    };
+
+    public shared({ caller }) func getAllTokens() : async ([Token]) {
+        return await directory.getAllTokens();
     };
 
     //This function only to be called from the canisters only this function doesn't needs to be called by user explicitly

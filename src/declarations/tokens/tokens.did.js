@@ -14,13 +14,38 @@ export const idlFactory = ({ IDL }) => {
     'treasuryTokens' : IDL.Nat,
     'symbol' : IDL.Text,
   });
+  const TreasuryId__1 = IDL.Nat32;
+  const TokenId__1 = IDL.Nat32;
+  const Token = IDL.Record({
+    'id' : TokenId__1,
+    'createdDate' : IDL.Int,
+    'totalSupply' : IDL.Nat,
+    'recordId' : RecordId__1,
+    'tokenType' : TokenType,
+    'symbol' : IDL.Text,
+  });
   const TreasuryId = IDL.Nat32;
+  const TreasuryFrozenData = IDL.Record({
+    'id' : TreasuryId,
+    'governanceToken' : TokenId__1,
+    'copyrightToken' : TokenId__1,
+    'createdDate' : IDL.Int,
+    'copyrightHolding' : IDL.Nat,
+    'recordId' : RecordId__1,
+    'governanceHolding' : IDL.Nat,
+  });
   const TokenId = IDL.Nat32;
   return IDL.Service({
     'addRecord' : IDL.Func([RecordId], [IDL.Bool], []),
     'addRecordToUserAccount' : IDL.Func([RecordId], [], ['oneway']),
     'createTokenOffer' : IDL.Func([IDL.Nat, IDL.Nat], [], ['oneway']),
-    'createTokens' : IDL.Func([UserId, NewToken, NewToken], [TreasuryId], []),
+    'createTokens' : IDL.Func(
+        [UserId, NewToken, NewToken],
+        [TreasuryId__1],
+        [],
+      ),
+    'getAllTokens' : IDL.Func([], [IDL.Vec(Token)], []),
+    'getAllTreasury' : IDL.Func([], [IDL.Vec(TreasuryFrozenData)], ['query']),
     'getRecordICPAccount' : IDL.Func([RecordId], [], ['oneway']),
     'getTokenOffer' : IDL.Func([IDL.Nat, IDL.Nat], [], ['oneway']),
     'getTransferHistory' : IDL.Func([], [], ['oneway']),

@@ -1,12 +1,26 @@
 type VotingId__1 = nat32;
 type VotingId = nat32;
 type UserId = principal;
+type TreasuryId = nat32;
 type TrackId = nat32;
 type Reward = 
  record {
    communityToken: nat32;
    governanceToken: nat32;
    icpToken: nat32;
+ };
+type Records = 
+ record {
+   contributions: vec ContributionId;
+   createdDate: int;
+   id: RecordId__1;
+   name: text;
+   peerVersion: RecordId__1;
+   previewFile: text;
+   recordCategory: RecordCategoryId;
+   seedId: ContributionId;
+   tracks: vec TrackId;
+   treasuryId: TreasuryId;
  };
 type RecordId__1 = nat32;
 type RecordId = nat32;
@@ -48,6 +62,7 @@ service : {
   contributionVotingCron: () -> () oneway;
   createRecord: (NewRecords, NewContribution, NewTokenData, NewTokenData) ->
    (RecordId);
+  getAllRecords: () -> (vec Records);
   getRecord: (RecordId) -> () oneway;
   proposeContract: (RecordId) -> () oneway;
   royaltyDistributionCron: () -> () oneway;

@@ -48,6 +48,10 @@ actor Tokens {
     public shared({ caller }) func contributionVotingCron() { 
     };
 
+    public shared({ caller }) func getAllRecords() : async ([Records]){ 
+        await directory.getAllRecords();
+    };
+
     public shared({ caller }) func voteForContribution(votingId : VotingId, vote : Bool) : async ?FROZEN_Voting {
         let voting : ?Voting = directory.castVote(caller,votingId,vote);
 
