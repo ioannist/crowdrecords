@@ -12,7 +12,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract RecordContract is ERC1155Supply {
     //----------------------Permanent Uri code---------------------//
 
-    // Optional mapping for token URIs
+    /*  // Optional mapping for token URIs
     mapping(uint256 => string) private _tokenURIs;
 
     mapping(uint256 => bool) private _permanentURI;
@@ -60,7 +60,7 @@ contract RecordContract is ERC1155Supply {
         );
 
         return _tokenURIs[tokenId];
-    }
+    } */
 
     //----------------------Records Related code---------------------//
 
@@ -70,19 +70,25 @@ contract RecordContract is ERC1155Supply {
     uint256 newTokenId = 1;
     uint256 public constant CRD = 1;
 
+    mapping(string => bool) govTokenName;
+    mapping(string => bool) commTokenName;
+
+    struct Token {
+        string name;
+        string symbol;
+        string image;
+        uint256 seedId;
+        uint256 parentId;
+        string recordCategory;
+        uint256 creationDate;
+        uint256 communityToken;
+        uint256 governanceToken;
+    }
+
     mapping(uint256 => uint256) tokenType;
 
     constructor() ERC1155("https://something.com/{id}") {
-        _mint(
-            msg.sender,
-            CRD,
-            10**18,
-            "ipfs://crowd.com/sdsfdnsfn038r93gf7dasdasd"
-        );
-    }
-
-    function getUri(uint256 id) public view returns (string memory) {
-        return uri(id);
+        _mint(msg.sender, CRD, 10**18, "https://crowdrecords.com");
     }
 
     function sendTo(
@@ -125,6 +131,14 @@ contract RecordContract is ERC1155Supply {
         );
     }
 
+    /**
+     * @dev This function creats new record
+     * @param govTokenSupply This is the total supply of governance token
+     * @param communityTokenSupply This is the total supply of community token
+     * @param communityTokenSupply This is the total supply of community token
+     * @param govUri this is hash of the preview file
+     * @param description this is the description of the new contriution that is created.
+     */
     function createNewRecord(
         uint256 govTokenSupply,
         uint256 communityTokenSupply,
