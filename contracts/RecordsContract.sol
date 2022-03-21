@@ -9,7 +9,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 // ERC 721 blance[adress] => 1 contract // records
 // ERC 1155
 
-contract RecordContract is ERC1155Supply {
+contract RecordsContract is ERC1155Supply {
     //----------------------Permanent Uri code---------------------//
 
     /*  // Optional mapping for token URIs
@@ -64,16 +64,12 @@ contract RecordContract is ERC1155Supply {
 
     //----------------------Records Related code---------------------//
 
-    uint256 public constant GOVERNANCE = 1;
-    uint256 public constant COPYRIGHT = 2;
-    uint256 public constant RECORDS = 3;
-    uint256 newTokenId = 1;
-    uint256 public constant CRD = 1;
+    uint256 newTokenId = 0;
 
-    mapping(string => bool) govTokenName;
-    mapping(string => bool) commTokenName;
+    mapping(string => bool) recordTokenSymbol;
+    mapping(uint256 => RecordToken) recordData;
 
-    struct Token {
+    struct RecordToken {
         string name;
         string symbol;
         string image;
@@ -81,15 +77,21 @@ contract RecordContract is ERC1155Supply {
         uint256 parentId;
         string recordCategory;
         uint256 creationDate;
-        uint256 communityToken;
-        uint256 governanceToken;
+        // uint256 communityToken;
+        // uint256 governanceToken;
     }
 
-    mapping(uint256 => uint256) tokenType;
+    event RecordCreated(
+        string name,
+        string symbol,
+        string image,
+        uint256 seedId,
+        uint256 parentId,
+        string recordCategory,
+        uint256 creationDate
+    );
 
-    constructor() ERC1155("https://something.com/{id}") {
-        _mint(msg.sender, CRD, 10**18, "https://crowdrecords.com");
-    }
+    constructor() ERC1155("https://something.com/{id}") {}
 
     function sendTo(
         uint256 tokenId,
@@ -133,44 +135,47 @@ contract RecordContract is ERC1155Supply {
 
     /**
      * @dev This function creats new record
-     * @param govTokenSupply This is the total supply of governance token
-     * @param communityTokenSupply This is the total supply of community token
-     * @param communityTokenSupply This is the total supply of community token
-     * @param govUri this is hash of the preview file
-     * @param description this is the description of the new contriution that is created.
+     * @param name This is the total supply of governance token
+     * @param symbol This is the total supply of community token
+     * @param image This is the total supply of community token
+     * @param seedId this is hash of the preview file
+     * @param recordCategory this is hash of the preview file
      */
     function createNewRecord(
-        uint256 govTokenSupply,
-        uint256 communityTokenSupply,
-        string memory govUri,
-        string memory commUri,
-        string memory recordUri
-    )
-        public
-        returns (
-            uint256 govToken,
-            uint256 commToken,
-            uint256 recordId
-        )
-    {
-        uint256 govToken = newTokenId++;
-        _mint(msg.sender, newTokenId, govTokenSupply * 10**9, "");
-        _setTokenURI(newTokenId, govUri);
-        _lockTokenURI(newTokenId);
-        tokenType[newTokenId] = COPYRIGHT;
-
-        uint256 commToken = newTokenId++;
-        _mint(msg.sender, newTokenId, communityTokenSupply * 10**9, "");
-        _setTokenURI(newTokenId, commUri);
-        _lockTokenURI(newTokenId);
-        tokenType[newTokenId] = GOVERNANCE;
+        string memory symbol,
+        string memory name,
+        string memory image,
+        string memory recordCategory,
+        uint256 seedId
+    ) public returns (uint256 recordId) {
+        require(recordTokenSymbol[symbol] == false, "SYMBOL_ALREADY_IN_USE");
 
         uint256 recordId = newTokenId++;
-        _mint(msg.sender, newTokenId, 1, "");
-        _setTokenURI(newTokenId, recordUri);
-        _lockTokenURI(newTokenId);
-        tokenType[newTokenId] = RECORDS;
+        _mint(msg.sender, recordId, 1, "");
 
-        return (govToken, commToken, recordId);
+        RecordToken memory recordToken = RecordToken({
+            name: name,
+            symbol: symbol,
+            image: image,
+            seedId: seedId,
+            parentId: 0,
+            recordCategory: recordCategory,
+            creationDate: block.timestamp
+        });
+
+        recordTokenSymbol[symbol] = true;
+        recordData[recordId] = recordToken;
+
+        emit RecordCreated({
+            name: name,
+            symbol: symbol,
+            image: image,
+            seedId: seedId,
+            parentId: 0,
+            recordCategory: recordCategory,
+            creationDate: block.timestamp
+        });
+
+        return (recordId);
     }
 }

@@ -36,8 +36,8 @@ The following are the name and scope of the Contracts
     3. previewFile
     4. recordId
     5. roughMix (Boolean)
-    6. communityTokenReward
-    7. governanceTokenReward
+   // 6. communityTokenReward => Voting
+   // 7. governanceTokenReward => Voting
     8. status (Pending | Accepted | Rejected)
     9. description
 
@@ -51,4 +51,5 @@ The following are the name and scope of the Contracts
     1. fileHash
     2. fileLink
     3. category
-    4. contributorId
+    4. contributorId 
+    5. recordId
