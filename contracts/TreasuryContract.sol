@@ -13,7 +13,7 @@ import "./RecordsContract.sol";
 contract TreasuryContract is ERC1155Supply {
     uint256 public constant CRD = 1;
     uint256 private LastTokenId = 1;
-    address RECORDS_CONTRACT_ADDRESS;
+    address public RECORDS_CONTRACT_ADDRESS;
     address OWNER;
 
     struct Token {

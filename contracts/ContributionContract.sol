@@ -83,7 +83,7 @@ contract ContributionContract is ERC721 {
     using Counters for Counters.Counter;
     Counters.Counter private _contributionIds;
     address OWNER;
-    address VOTING_CONTRACT_ADDRESS;
+    address public VOTING_CONTRACT_ADDRESS;
 
     event ContributionCreate(
         uint256 contributionId,

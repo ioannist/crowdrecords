@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 
 contract VotingContract {
     uint256 VOTING_INTERVAL = 25;
-    address CONTRIBUTION_CONTRACT_ADDRESS;
+    address public CONTRIBUTION_CONTRACT_ADDRESS;
     address OWNER;
 
     event createContributionBallot(
@@ -26,6 +26,14 @@ contract VotingContract {
         uint256 newGovernanceReward,
         uint256 newCommunityReward
     );
+
+    event counterOfferAction(
+        uint256 contributionId,
+        address voterId,
+        uint256 newGovernanceReward,
+        uint256 newCommunityReward,
+        uint256 status
+    ); // status will be => either ACCEPTED = 2 | REJECTED = 3
 
     // Voting structure containing yes and no addresses with reward amount
     struct Ballot {
@@ -240,24 +248,37 @@ contract VotingContract {
                     .status == 1
             ) {
                 if (action) {
-                    contributionVoting[contributionId]
-                        .communityReward = contributionCounterOfferMap[
-                        contributionId
-                    ][counterOfferIds[i]].newCommunityReward;
-                    contributionVoting[contributionId]
-                        .governanceReward = contributionCounterOfferMap[
+                    uint256 newGovernanceReward = contributionCounterOfferMap[
                         contributionId
                     ][counterOfferIds[i]].newGovernanceReward;
+                    uint256 newCommunityReward = contributionCounterOfferMap[
+                        contributionId
+                    ][counterOfferIds[i]].newCommunityReward;
+
+                    //Set new reward for the contribution
+                    contributionVoting[contributionId]
+                        .communityReward = newCommunityReward;
+                    contributionVoting[contributionId]
+                        .governanceReward = newGovernanceReward;
+
                     contributionVoting[contributionId].yes.push(
                         counterOfferIds[i]
                     ); //The counter offer ids are the addresses of the user who proposed the offer
                     contributionCounterOfferMap[contributionId][
                         counterOfferIds[i]
                     ].status = 2;
+                    emit counterOfferAction(
+                        contributionId,
+                        msg.sender,
+                        newGovernanceReward,
+                        newCommunityReward,
+                        2
+                    );
                 } else {
                     contributionVoting[contributionId].no.push(
                         counterOfferIds[i]
-                    ); //The counter offer ids are the addresses of the user who proposed the offer
+                    );
+                    //The counter offer ids are the addresses of the user who proposed the offer
                     contributionCounterOfferMap[contributionId][
                         counterOfferIds[i]
                     ].status = 3;

@@ -87,12 +87,12 @@ contract TracksContract is ERC721 {
         _baseURIextended = baseURI_;
     }
 
-    /**
-     * @dev This function will be called by the user to create a new contribution
-     * @param filehash Id of tracks that are part of this contribution
-     * @param fileLink this is preview file of the contribution
-     * @param category this is hash of the preview file
-     */
+    // /**
+    //  * @dev This function will be called by the user to create a new contribution
+    //  * @param filehash Id of tracks that are part of this contribution
+    //  * @param fileLink this is preview file of the contribution
+    //  * @param category this is hash of the preview file
+    //  */
     function createNewTrack(string memory uri) public returns (uint256) {
         _tokenIds.increment();
 
