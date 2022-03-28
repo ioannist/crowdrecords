@@ -85,6 +85,19 @@ contract ContributionContract is ERC721 {
     address OWNER;
     address public VOTING_CONTRACT_ADDRESS;
 
+    /**
+        @dev this is Contribution Create event this event will be emited when a new contribution is created.
+        @param contributionId it is the unique identifier for the contribution
+        @param tracks are id of the tracks that are part of this contribution, you will have to manually fetch the tracks data from trackId once you do the indexing. 
+        @param createdAt createdAt is indicates the time of creation of the contribution
+        @param previewFile this is the file that contains the mix of the contribution also known as preview file
+        @param previewFileHash this is the hash of the preview file to make sure the previewFile is not temperd with 
+        @param recordId this is the id of the record to which the contribution belongd to
+        @param seedContribution this flag determines if the contribution is a seed contribution or not
+        @param roughMix this flag determines if the contribution is a new contribution, with new tracks or is it just mix of all the previous tracks
+        @param status this is status of the contribution that is in PENDING or ACCEPTED or REJECTED // status (PENDING = 1 | ACCEPTED = 2| REJECTED = 3)
+        @param description the description of record that is in text format 
+     */
     event ContributionCreate(
         uint256 contributionId,
         uint256[] tracks,
@@ -105,7 +118,7 @@ contract ContributionContract is ERC721 {
         string previewFileHash;
         uint256 recordId;
         bool seedContribution;
-        bool roughMix; // 1 if rough mix or else 0
+        bool roughMix; // true if rough mix or else false
         uint256 status; // status (PENDING = 1 | ACCEPTED = 2| REJECTED = 3)
         string description;
     }

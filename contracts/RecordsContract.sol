@@ -81,6 +81,16 @@ contract RecordsContract is ERC1155Supply {
         // uint256 governanceToken;
     }
 
+    /**
+        @dev this is Record Create event this event will be emited when a new record is created.
+        @param name Name of the record that is created by the user 
+        @param symbol This is the Sybol of the record, that is the shorthand version of the name
+        @param image This is the link for the image of the record
+        @param seedId seed id, this is the id of the seed contribution
+        @param parentId This is the parent Id of the record, that is if the record is a new version of exisitng song
+        @param recordCategory this is the category of the record
+        @param creationDate This is the date of creation of the record
+     */
     event RecordCreated(
         string name,
         string symbol,

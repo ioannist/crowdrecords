@@ -25,6 +25,15 @@ contract TreasuryContract is ERC1155Supply {
         uint256 tokenId;
     }
 
+    /**
+        @dev this is event which is created when a token transfer takes place
+        @param from This is the address of sender 
+        @param to This is the address of reciver 
+        @param transferDate This is the date of the transfer
+        @param tokenId This is the id of the token that is being transfered 
+        @param amount This is the amount of token transfered 
+        @param symbol This is the symbol of the token that were transfered
+     */
     event TokenTransfer(
         address from,
         address to,
@@ -33,6 +42,16 @@ contract TreasuryContract is ERC1155Supply {
         uint256 amount,
         string symbol
     );
+
+    /**
+        @dev this is event which is created when new governance token is created (NEW CREATION Not MINITING)
+        @param recordId This is the record Id to which this token belongs to 
+        @param name This is the name of the token
+        @param symbol This is the symbol of the governance token
+        @param image This is the image of the token 
+        @param creationDate This is the creation date of the token 
+        @param tokenId This is the id of token that is newly created tokens 
+     */
     event NewGovernanceTokenCreated(
         uint256 recordId,
         string name,
@@ -41,6 +60,16 @@ contract TreasuryContract is ERC1155Supply {
         uint256 creationDate,
         uint256 tokenId
     );
+
+    /**
+        @dev this is event which is created when new comunnity token is created (NEW CREATION Not MINITING)
+        @param recordId This is the record Id to which this token belongs to 
+        @param name This is the name of the token
+        @param symbol This is the symbol of the governance token
+        @param image This is the image of the token 
+        @param creationDate This is the creation date of the token 
+        @param tokenId This is the id of token that is newly created tokens 
+     */
     event NewCommunityTokenCreated(
         uint256 recordId,
         string name,
@@ -122,6 +151,7 @@ contract TreasuryContract is ERC1155Supply {
         LastTokenId++;
         uint256 newTokenId = LastTokenId;
 
+        // Here minting of new tokens is done. And those are sent directly into the treasury
         _mint(address(this), newTokenId, userBalance - totalSupply * 10**9, "");
         emit TokenTransfer({
             from: address(this),
@@ -132,6 +162,7 @@ contract TreasuryContract is ERC1155Supply {
             symbol: symbol
         });
 
+        // The user requested amount of tokens is genrated and send to his account
         _mint(msg.sender, newTokenId, userBalance * 10**9, "");
         emit TokenTransfer({
             from: address(this),

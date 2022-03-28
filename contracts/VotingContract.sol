@@ -6,6 +6,14 @@ contract VotingContract {
     address public CONTRIBUTION_CONTRACT_ADDRESS;
     address OWNER;
 
+    /**
+        @dev this event will be genrated when a new contribution is created and it needs to go through the voting cycle
+        @param contributionId This is the id of the contribution that is linked to this ballot 
+        @param owner This is the address of the owner of this ballot or the creator of the contribution
+        @param governanceReward This is the reward amount requested by the contributor
+        @param communityReward This is the reward amount requested by the contributor
+        @param votingEndBlock This is the block at which the voting ends 
+     */
     event createContributionBallot(
         uint256 contributionId,
         address owner,
@@ -14,12 +22,25 @@ contract VotingContract {
         uint256 votingEndBlock
     );
 
+    /**
+        @dev this is event which is created when a user votes for a contribution
+        @param contributionId This is the id of the contribution that is linked to this ballot 
+        @param voterId This is the id of the voter who's vote it is
+        @param vote This is the state of the vote, wether it was positive or negative
+     */
     event voteForContribution(
         uint256 contributionId,
         address voterId,
         bool vote
     );
 
+    /**
+        @dev this is event which is created when a user proposes counter offer
+        @param contributionId This is the id of the contribution that is linked to this ballot 
+        @param voterId This is the id of the voter who's vote it is
+        @param newGovernanceReward This is the new reward amount counter offered by the voter
+        @param newCommunityReward This is the new reward amount counter offered by the voter
+     */
     event counterOfferForContribution(
         uint256 contributionId,
         address voterId,
@@ -27,6 +48,14 @@ contract VotingContract {
         uint256 newCommunityReward
     );
 
+    /**
+        @dev this is event which is created when the owner of the ballot takes action on a specific counter offer
+        @param contributionId This is the id of the contribution that is linked to this ballot 
+        @param voterId This is the id of the voter who's vote it is
+        @param newGovernanceReward This is the new reward amount counter offered by the voter
+        @param newCommunityReward This is the new reward amount counter offered by the voter
+        @param status This is the status of the counter offer that is => either ACCEPTED = 2 | REJECTED = 3
+     */
     event counterOfferAction(
         uint256 contributionId,
         address voterId,
