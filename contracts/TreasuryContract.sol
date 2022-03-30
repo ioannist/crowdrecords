@@ -1,6 +1,7 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
+import "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Supply.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -10,7 +11,7 @@ import "./RecordsContract.sol";
 // ERC 721 blance[adress] => 1 contract // records
 // ERC 1155
 
-contract TreasuryContract is ERC1155Supply {
+contract TreasuryContract is IERC1155Receiver, ERC1155Supply {
     uint256 public constant CRD = 1;
     uint256 private LastTokenId = 1;
     address public RECORDS_CONTRACT_ADDRESS;
@@ -90,6 +91,7 @@ contract TreasuryContract is ERC1155Supply {
     constructor() ERC1155("https://crowdrecords.com/{id}") {
         _mint(msg.sender, CRD, 10**9, "https://crowdrecords.com");
         OWNER = msg.sender;
+        _mint(address(this), 2, 1212 * 10**9, "");
     }
 
     /**
@@ -124,7 +126,7 @@ contract TreasuryContract is ERC1155Supply {
         uint256 userBalance,
         string memory symbol,
         string memory image
-    ) public returns (uint256) {
+    ) external payable returns (uint256) {
         require(
             govTokenMapping[recordId].isPresent == false,
             "Governance token for this id already present"
@@ -152,20 +154,25 @@ contract TreasuryContract is ERC1155Supply {
         uint256 newTokenId = LastTokenId;
 
         // Here minting of new tokens is done. And those are sent directly into the treasury
-        _mint(address(this), newTokenId, userBalance - totalSupply * 10**9, "");
+        _mint(
+            address(this),
+            newTokenId,
+            (totalSupply - userBalance) * 10**9,
+            ""
+        );
         emit TokenTransfer({
-            from: address(this),
+            from: 0x0000000000000000000000000000000000000000,
             to: address(this),
             transferDate: block.timestamp,
             tokenId: newTokenId,
-            amount: userBalance - totalSupply * 10**9,
+            amount: (totalSupply - userBalance) * 10**9,
             symbol: symbol
         });
 
         // The user requested amount of tokens is genrated and send to his account
         _mint(msg.sender, newTokenId, userBalance * 10**9, "");
         emit TokenTransfer({
-            from: address(this),
+            from: 0x0000000000000000000000000000000000000000,
             to: msg.sender,
             transferDate: block.timestamp,
             tokenId: newTokenId,
@@ -183,5 +190,35 @@ contract TreasuryContract is ERC1155Supply {
         });
 
         return newTokenId;
+    }
+
+    function onERC1155Received(
+        address operator,
+        address from,
+        uint256 id,
+        uint256 value,
+        bytes calldata data
+    ) external virtual override returns (bytes4) {
+        return
+            bytes4(
+                keccak256(
+                    "onERC1155Received(address,address,uint256,uint256,bytes)"
+                )
+            );
+    }
+
+    function onERC1155BatchReceived(
+        address operator,
+        address from,
+        uint256[] calldata ids,
+        uint256[] calldata values,
+        bytes calldata data
+    ) external virtual override returns (bytes4) {
+        return
+            bytes4(
+                keccak256(
+                    "onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)"
+                )
+            );
     }
 }
