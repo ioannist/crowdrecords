@@ -15,7 +15,10 @@ contract TreasuryContract is IERC1155Receiver, ERC1155Supply {
     uint256 public constant CRD = 1;
     uint256 private LastTokenId = 1;
     address public RECORDS_CONTRACT_ADDRESS;
+    address public VOTING_CONTRACT_ADDRESS;
     address OWNER;
+    string private PREFIX_GOVERNANCE = "CRDG_";
+    string private PREFIX_COMMUNITY = "CRD_";
 
     struct Token {
         uint256 recordId;
@@ -47,7 +50,6 @@ contract TreasuryContract is IERC1155Receiver, ERC1155Supply {
     /**
         @dev this is event which is created when new governance token is created (NEW CREATION Not MINITING)
         @param recordId This is the record Id to which this token belongs to 
-        @param name This is the name of the token
         @param symbol This is the symbol of the governance token
         @param image This is the image of the token 
         @param creationDate This is the creation date of the token 
@@ -55,7 +57,6 @@ contract TreasuryContract is IERC1155Receiver, ERC1155Supply {
      */
     event NewGovernanceTokenCreated(
         uint256 recordId,
-        string name,
         string symbol,
         string image,
         uint256 creationDate,
@@ -65,7 +66,6 @@ contract TreasuryContract is IERC1155Receiver, ERC1155Supply {
     /**
         @dev this is event which is created when new comunnity token is created (NEW CREATION Not MINITING)
         @param recordId This is the record Id to which this token belongs to 
-        @param name This is the name of the token
         @param symbol This is the symbol of the governance token
         @param image This is the image of the token 
         @param creationDate This is the creation date of the token 
@@ -73,11 +73,26 @@ contract TreasuryContract is IERC1155Receiver, ERC1155Supply {
      */
     event NewCommunityTokenCreated(
         uint256 recordId,
-        string name,
         string symbol,
         string image,
         uint256 creationDate,
         uint256 tokenId
+    );
+
+    /**
+        @dev this is event which is genrated when a contribution voting has came to an end and the contribution is accepted
+        @param to This the address of the winner or the owner of the contribution 
+        @param recordId This is the id of the record to which this contribution relates to 
+        @param contributionId This is the id of the contribution to which the record is related to 
+        @param rewardGovernance The reward amount for governance tokens 
+        @param rewardCommunity The reward amount for comunity tokens
+     */
+    event ContributionRewardTransfered(
+        address to,
+        uint256 recordId,
+        uint256 contributionId,
+        uint256 rewardGovernance,
+        uint256 rewardCommunity
     );
 
     mapping(uint256 => Token) govTokenMapping;
@@ -91,7 +106,6 @@ contract TreasuryContract is IERC1155Receiver, ERC1155Supply {
     constructor() ERC1155("https://crowdrecords.com/{id}") {
         _mint(msg.sender, CRD, 10**9, "https://crowdrecords.com");
         OWNER = msg.sender;
-        _mint(address(this), 2, 1212 * 10**9, "");
     }
 
     /**
@@ -103,13 +117,57 @@ contract TreasuryContract is IERC1155Receiver, ERC1155Supply {
     }
 
     /**
-     * @dev This function sets the Voting Contract address
+     * @dev Modifier to check if the sender is authorized to create tokens for this record.
+     */
+    modifier canCreateToken(
+        uint256 recordId,
+        uint256 totalSupply,
+        uint256 userBalance
+    ) {
+        require(
+            totalSupply / 2 > userBalance,
+            "Treasury should have at least 50% of the total supply"
+        );
+
+        RecordsContract recordsContract = RecordsContract(
+            RECORDS_CONTRACT_ADDRESS
+        );
+
+        uint256 balance = recordsContract.balanceOf(msg.sender, recordId);
+
+        require(balance > 0, "You are not the owner of the record");
+        _;
+    }
+
+    /**
+     * @dev Modifier to check that if the sender is the voting contract or not.
+     */
+    modifier onlyVotingContract() {
+        require(
+            msg.sender == VOTING_CONTRACT_ADDRESS,
+            "You are not authorized for this action"
+        );
+        _;
+    }
+
+    /**
+     * @dev This function sets the Records Contract address
      */
     function setRecordsContractAddress(address newRecordsContractAddress)
         public
         ownerOnly
     {
         RECORDS_CONTRACT_ADDRESS = newRecordsContractAddress;
+    }
+
+    /**
+     * @dev This function sets the Voting Contract address
+     */
+    function setVotingContractAddress(address newVotingContractAddress)
+        public
+        ownerOnly
+    {
+        VOTING_CONTRACT_ADDRESS = newVotingContractAddress;
     }
 
     /**
@@ -126,7 +184,16 @@ contract TreasuryContract is IERC1155Receiver, ERC1155Supply {
         uint256 userBalance,
         string memory symbol,
         string memory image
-    ) external payable returns (uint256) {
+    )
+        external
+        payable
+        returns (
+            // canCreateToken(recordId, totalSupply, userBalance)
+            uint256
+        )
+    {
+        symbol = string(bytes.concat(bytes(PREFIX_GOVERNANCE), bytes(symbol)));
+
         require(
             govTokenMapping[recordId].isPresent == false,
             "Governance token for this id already present"
@@ -153,30 +220,28 @@ contract TreasuryContract is IERC1155Receiver, ERC1155Supply {
         LastTokenId++;
         uint256 newTokenId = LastTokenId;
 
+        uint256 treasuryAmount = (totalSupply - userBalance);
+        uint256 userAmount = userBalance;
+
         // Here minting of new tokens is done. And those are sent directly into the treasury
-        _mint(
-            address(this),
-            newTokenId,
-            (totalSupply - userBalance) * 10**9,
-            ""
-        );
+        _mint(address(this), newTokenId, treasuryAmount, "");
         emit TokenTransfer({
             from: 0x0000000000000000000000000000000000000000,
             to: address(this),
             transferDate: block.timestamp,
             tokenId: newTokenId,
-            amount: (totalSupply - userBalance) * 10**9,
+            amount: treasuryAmount,
             symbol: symbol
         });
 
         // The user requested amount of tokens is genrated and send to his account
-        _mint(msg.sender, newTokenId, userBalance * 10**9, "");
+        _mint(msg.sender, newTokenId, userAmount, "");
         emit TokenTransfer({
             from: 0x0000000000000000000000000000000000000000,
             to: msg.sender,
             transferDate: block.timestamp,
             tokenId: newTokenId,
-            amount: userBalance * 10**9,
+            amount: userAmount,
             symbol: symbol
         });
 
@@ -189,7 +254,73 @@ contract TreasuryContract is IERC1155Receiver, ERC1155Supply {
             tokenId: newTokenId
         });
 
+        //Map the recordId with the
+        govTokenMapping[recordId] = token;
+
         return newTokenId;
+    }
+
+    /**
+     * @dev This function is called only by the voting contract once the voting ends
+     * @param to This is the recivers address
+     * @param recordId This is the recordId to which the contribution belongs to
+     * @param contributionId this is the contribution id to which the user has won
+     * @param rewardGovernance this is the amout of Governance token that needs to be transfered
+     * @param rewardCommunity this is the amout of comunity token that needs to be transfered
+     */
+    function transferRewardAmount(
+        address to,
+        uint256 recordId,
+        uint256 contributionId,
+        uint256 rewardGovernance,
+        uint256 rewardCommunity
+    ) external payable onlyVotingContract {
+        _setApprovalForAll(address(this), VOTING_CONTRACT_ADDRESS, true);
+        if (rewardGovernance > 0) {
+            safeTransferFrom(
+                address(this),
+                to,
+                govTokenMapping[recordId].tokenId,
+                rewardGovernance,
+                ""
+            );
+
+            emit TokenTransfer({
+                from: address(this),
+                to: to,
+                transferDate: block.timestamp,
+                tokenId: govTokenMapping[recordId].tokenId,
+                amount: rewardGovernance,
+                symbol: govTokenMapping[recordId].symbol
+            });
+        }
+
+        if (rewardCommunity > 0) {
+            safeTransferFrom(
+                address(this),
+                to,
+                commTokenMapping[recordId].tokenId,
+                rewardCommunity,
+                ""
+            );
+
+            emit TokenTransfer({
+                from: address(this),
+                to: to,
+                transferDate: block.timestamp,
+                tokenId: commTokenMapping[recordId].tokenId,
+                amount: rewardCommunity,
+                symbol: commTokenMapping[recordId].symbol
+            });
+        }
+
+        emit ContributionRewardTransfered({
+            to: to,
+            recordId: recordId,
+            contributionId: contributionId,
+            rewardGovernance: rewardGovernance,
+            rewardCommunity: rewardCommunity
+        });
     }
 
     function onERC1155Received(
