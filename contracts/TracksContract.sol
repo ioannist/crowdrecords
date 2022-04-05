@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract TracksContract is ERC721 {
     //----------------------Permanent Uri code---------------------//
-    using Strings for uint256;
+    /*     using Strings for uint256;
 
     // Optional mapping for token URIs
     mapping(uint256 => string) private _tokenURIs;
@@ -77,30 +77,69 @@ contract TracksContract is ERC721 {
         // If there is a baseURI but no tokenURI, concatenate the tokenID to the baseURI.
         return string(abi.encodePacked(base, tokenId.toString()));
     }
-
+ */
     //----------------------Tracks Related code---------------------//
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
 
-    //Keep the baseURI empty if you want to have different URIs without any structure
-    constructor(string memory baseURI_) ERC721("Tracks", "TRKS") {
-        _baseURIextended = baseURI_;
+    struct Tracks {
+        string filehash;
+        string filelink;
+        string category;
+        uint256 creationDate;
     }
 
-    // /**
-    //  * @dev This function will be called by the user to create a new contribution
-    //  * @param filehash Id of tracks that are part of this contribution
-    //  * @param fileLink this is preview file of the contribution
-    //  * @param category this is hash of the preview file
-    //  */
-    function createNewTrack(string memory uri) public returns (uint256) {
+    /**
+     * @dev This is emited when a new track is created
+     * @param trackId This is the id of the track
+     * @param filehash This is hash of the file
+     * @param filelink This is the link to the file
+     * @param category this is hash of the preview file
+     * @param creationDate this is hash of the preview file
+     */
+    event TrackCreated(
+        uint256 trackId,
+        string filehash,
+        string filelink,
+        string category,
+        uint256 creationDate
+    );
+
+    //Keep the baseURI empty if you want to have different URIs without any structure
+    constructor() ERC721("Tracks", "CRD_TRKS") {
+        // _baseURIextended = baseURI_;
+    }
+
+    /**
+     * @dev This function will be called by the user to create a new contribution
+     * @param filehash Id of tracks that are part of this contribution
+     * @param filelink this is preview file of the contribution
+     * @param category this is hash of the preview file
+     */
+    function createNewTrack(
+        string memory filehash,
+        string memory filelink,
+        string memory category
+    ) public returns (uint256) {
         _tokenIds.increment();
 
         uint256 newTrackId = _tokenIds.current();
         _mint(msg.sender, newTrackId);
-        _permanentURI[newTrackId] = false;
-        _setTokenURI(newTrackId, uri);
-        _lockTokenURI(newTrackId);
+        Tracks memory track = Tracks({
+            filehash: filehash,
+            filelink: filelink,
+            category: category,
+            creationDate: block.timestamp
+        });
+
+        emit TrackCreated({
+            filehash: filehash,
+            filelink: filelink,
+            category: category,
+            trackId: newTrackId,
+            creationDate: track.creationDate
+        });
+
         return newTrackId;
     }
 }

@@ -98,7 +98,7 @@ contract ContributionContract is ERC721 {
         @param status this is status of the contribution that is in PENDING or ACCEPTED or REJECTED // status (PENDING = 1 | ACCEPTED = 2| REJECTED = 3)
         @param description the description of record that is in text format 
      */
-    event ContributionCreate(
+    event ContributionCreated(
         uint256 contributionId,
         uint256[] tracks,
         uint256 createdAt,
@@ -197,7 +197,7 @@ contract ContributionContract is ERC721 {
 
         contributionData[contributionId] = contribution;
 
-        emit ContributionCreate(
+        emit ContributionCreated(
             contributionId,
             contribution.tracks,
             contribution.createdAt,
@@ -248,7 +248,7 @@ contract ContributionContract is ERC721 {
 
         contributionData[contributionId] = contribution;
 
-        emit ContributionCreate(
+        emit ContributionCreated(
             contributionId,
             contribution.tracks,
             contribution.createdAt,
