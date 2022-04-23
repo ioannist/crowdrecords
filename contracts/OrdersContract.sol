@@ -5,6 +5,7 @@ import "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Supply.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "./RecordsContract.sol";
 import "./TreasuryContract.sol";
 
@@ -16,7 +17,7 @@ contract OrdersContract {
 
     struct Order {
         bool isClosed;
-        bool isLocked;
+        bool isLockedInRatio;
         address seller;
         uint256 creationDate;
         uint256 communityTokenId;
@@ -31,7 +32,7 @@ contract OrdersContract {
         @dev this is event which is created when a user creates order to sell his tokens
         @param saleId this is the Id of the sale order
         @param seller this is the address of the owner or the sale order
-        @param isLocked this is denotes wether the user wants to sell the token individually or in a ratio
+        @param isLockedInRatio the is denotes wether the user wants to sell the token individually or in a ratio
         @param creationDate this is the creation date of the sale order
         @param communityTokenId this is the community token id that is involved in the sale
         @param communityTokenAmount this is the comunity token amount for sale
@@ -43,7 +44,7 @@ contract OrdersContract {
     event SaleOrder(
         uint256 saleId,
         address seller,
-        bool isLocked,
+        bool isLockedInRatio,
         uint256 creationDate,
         uint256 communityTokenId,
         uint256 communityTokenAmount,
@@ -117,7 +118,7 @@ contract OrdersContract {
      * @dev This function is called to create a new saleOrder
      */
     function createSaleOrder(
-        bool isLocked,
+        bool isLockedInRatio,
         uint256 communityTokenId,
         uint256 communityTokenAmount,
         uint256 communityTokenPrice,
@@ -132,6 +133,8 @@ contract OrdersContract {
         TreasuryContract treasuryContract = TreasuryContract(
             TREASURY_CONTRACT_ADDRESS
         );
+
+        //need to have allowance of the seller's token with ordersContract acting as a spender
         if (communityTokenAmount > 0) {
             treasuryContract.safeTransferFrom(
                 msg.sender,
@@ -155,7 +158,7 @@ contract OrdersContract {
         Order memory order = Order({
             isClosed: false,
             seller: msg.sender,
-            isLocked: isLocked,
+            isLockedInRatio: isLockedInRatio,
             creationDate: block.timestamp,
             communityTokenId: communityTokenId,
             communityTokenAmount: communityTokenAmount,
@@ -170,7 +173,7 @@ contract OrdersContract {
         emit SaleOrder({
             saleId: orderId,
             seller: order.seller,
-            isLocked: isLocked,
+            isLockedInRatio: isLockedInRatio,
             creationDate: order.creationDate,
             communityTokenId: communityTokenId,
             communityTokenAmount: communityTokenAmount,
@@ -195,6 +198,77 @@ contract OrdersContract {
         require(orderBook[orderId].isClosed == true, "Is already closed");
 
         Order memory order = orderBook[orderId];
+
+        TreasuryContract treasuryContract = TreasuryContract(
+            TREASURY_CONTRACT_ADDRESS
+        );
+        if (order.communityTokenAmount > 0) {
+            treasuryContract.safeTransferFrom(
+                msg.sender,
+                address(this),
+                order.communityTokenId,
+                order.communityTokenAmount,
+                "Sale order"
+            );
+        }
+
+        if (order.governanceTokenAmount > 0) {
+            treasuryContract.safeTransferFrom(
+                msg.sender,
+                address(this),
+                order.governanceTokenId,
+                order.governanceTokenAmount,
+                "Sale order"
+            );
+        }
+
+        orderBook[orderId].isClosed = true;
+
+        emit SaleClose({saleId: saleId, creationDate: block.timestamp});
+    }
+
+    /**
+     * @dev This function is called to cancle the existing sale order
+     */
+    function purchaseSaleOrder(
+        uint256 saleId,
+        uint256 governanceTokenAmount,
+        uint256 communityTokenAmount
+    ) public {
+        require(
+            orderBook[orderId].seller != msg.sender,
+            "you cannot purchase your own tokens"
+        );
+
+        require(orderBook[orderId].isClosed == true, "Is already closed");
+
+        Order memory order = orderBook[orderId];
+
+        if (order.isLockedInRatio) {
+            require(
+                order.communityTokenAmount > 0,
+                "You cannot have 0 community token amount"
+            );
+
+            require(
+                order.governanceTokenAmount > 0,
+                "You cannot have 0 governance token amount"
+            );
+
+            require(
+                SafeMath.div(
+                    communityTokenAmount,
+                    governanceTokenAmount,
+                    "Invalid ratio"
+                ) ==
+                    SafeMath.div(
+                        order.communityTokenAmount,
+                        order.governanceTokenAmount,
+                        "Invalid ratio"
+                    ),
+                "Invalid Ratio"
+            );
+        }
 
         TreasuryContract treasuryContract = TreasuryContract(
             TREASURY_CONTRACT_ADDRESS

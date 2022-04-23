@@ -19,6 +19,8 @@ contract TreasuryContract is IERC1155Receiver, ERC1155Supply {
     address OWNER;
     string private PREFIX_GOVERNANCE = "CRDG_";
     string private PREFIX_COMMUNITY = "CRD_";
+    uint8 private TOKEN_TYPE_COMMUNITY = 0;
+    uint8 private TOKEN_TYPE_GOVERNANCE = 1;
 
     struct Token {
         uint256 recordId;
@@ -27,6 +29,14 @@ contract TreasuryContract is IERC1155Receiver, ERC1155Supply {
         uint256 creationDate;
         bool isPresent;
         uint256 tokenId;
+    }
+
+    struct NewTokenData {
+        uint256 recordId;
+        uint256 totalSupply;
+        uint256 userBalance;
+        string symbol;
+        string image;
     }
 
     /**
@@ -47,37 +57,41 @@ contract TreasuryContract is IERC1155Receiver, ERC1155Supply {
         string symbol
     );
 
+
     /**
         @dev this is event which is created when new governance token is created (NEW CREATION Not MINITING)
         @param recordId This is the record Id to which this token belongs to 
         @param symbol This is the symbol of the governance token
         @param image This is the image of the token 
         @param creationDate This is the creation date of the token 
+        @param tokenAmount This is the amount of token that are created 
         @param tokenId This is the id of token that is newly created tokens 
-     */
-    event NewGovernanceTokenCreated(
+        @param tokenType This is the type of the token that is created => For governance 1 and for copyright 0  
+      */
+    event NewTokenCreated(
         uint256 recordId,
         string symbol,
         string image,
         uint256 creationDate,
-        uint256 tokenId
+        uint256 tokenAmount,
+        uint256 tokenId,
+        uint8 tokenType
     );
 
     /**
-        @dev this is event which is created when new comunnity token is created (NEW CREATION Not MINITING)
+        @dev this is event which is created when new governance token is minted after the voting is done
         @param recordId This is the record Id to which this token belongs to 
-        @param symbol This is the symbol of the governance token
-        @param image This is the image of the token 
         @param creationDate This is the creation date of the token 
+        @param tokenAmount This is the amount of token that are created 
         @param tokenId This is the id of token that is newly created tokens 
-     */
-    event NewCommunityTokenCreated(
+      */
+    event TokenMinted(
         uint256 recordId,
-        string symbol,
-        string image,
+        uint256 tokenId,
         uint256 creationDate,
-        uint256 tokenId
+        uint256 tokenAmount
     );
+
 
     /**
         @dev this is event which is genrated when a contribution voting has came to an end and the contribution is accepted
@@ -120,12 +134,10 @@ contract TreasuryContract is IERC1155Receiver, ERC1155Supply {
      * @dev Modifier to check if the sender is authorized to create tokens for this record.
      */
     modifier canCreateToken(
-        uint256 recordId,
-        uint256 totalSupply,
-        uint256 userBalance
+        NewTokenData memory newTokenData
     ) {
         require(
-            totalSupply / 2 > userBalance,
+            newTokenData.totalSupply / 2 > newTokenData.userBalance,
             "Treasury should have at least 50% of the total supply"
         );
 
@@ -133,7 +145,7 @@ contract TreasuryContract is IERC1155Receiver, ERC1155Supply {
             RECORDS_CONTRACT_ADDRESS
         );
 
-        uint256 balance = recordsContract.balanceOf(msg.sender, recordId);
+        uint256 balance = recordsContract.balanceOf(msg.sender, newTokenData.recordId);
 
         require(balance > 0, "You are not the owner of the record");
         _;
@@ -172,92 +184,174 @@ contract TreasuryContract is IERC1155Receiver, ERC1155Supply {
 
     /**
      * @dev This function creats new governance tokens for specified record
-     * @param recordId This is the recordId that for new token
-     * @param totalSupply This is the total supply of governance token
-     * @param userBalance This is the amount of tokens that user wants to keep to himself
-     * @param symbol This is the symbol of the gvernance token
-     * @param image this is image of the gov token.
+     * @param newTokenData This contains all the parameters needed to create a new governance token that are
+     * - recordId This is the recordId that for new token
+     * - totalSupply This is the total supply of governance token
+     * - userBalance This is the amount of tokens that user wants to keep to himself
+     * - symbol This is the symbol of the gvernance token
+     * - image this is image of the gov token.
      */
     function createNewGovernanceToken(
-        uint256 recordId,
-        uint256 totalSupply,
-        uint256 userBalance,
-        string memory symbol,
-        string memory image
+        NewTokenData memory newTokenData
     )
         external
         payable
+            canCreateToken(newTokenData)
         returns (
-            // canCreateToken(recordId, totalSupply, userBalance)
             uint256
         )
     {
-        symbol = string(bytes.concat(bytes(PREFIX_GOVERNANCE), bytes(symbol)));
 
+        {
+            bytes memory preString = abi.encodePacked(PREFIX_GOVERNANCE);
+            newTokenData.symbol = string(abi.encodePacked(preString, newTokenData.symbol));
+        }
+        
         require(
-            govTokenMapping[recordId].isPresent == false,
+            govTokenMapping[newTokenData.recordId].isPresent == false,
             "Governance token for this id already present"
         );
 
         require(
-            govTokenSym[symbol] == false,
+            govTokenSym[newTokenData.symbol] == false,
             "Governance token with this SYMBOL already present"
         );
-
-        require(
-            totalSupply / 2 > userBalance,
-            "Treasury should have at least 50% of the total supply"
-        );
-
-        RecordsContract recordsContract = RecordsContract(
-            RECORDS_CONTRACT_ADDRESS
-        );
-
-        uint256 balance = recordsContract.balanceOf(msg.sender, recordId);
-
-        require(balance > 0, "You are not the owner of the record");
 
         LastTokenId++;
         uint256 newTokenId = LastTokenId;
 
-        uint256 treasuryAmount = (totalSupply - userBalance);
-        uint256 userAmount = userBalance;
+        //Map the recordId with the
+        govTokenMapping[newTokenData.recordId] = createToken(newTokenData, newTokenId,TOKEN_TYPE_GOVERNANCE);
+
+        return newTokenId;
+    }
+
+    /**
+     * @dev This function creats new community tokens for specified record
+     * @param newTokenData This contains all the parameters needed to create a new community token that are
+     * - recordId This is the recordId that for new token
+     * - totalSupply This is the total supply of community token
+     * - userBalance This is the amount of tokens that user wants to keep to himself
+     * - symbol This is the symbol of the community token
+     * - image this is image of the gov token.
+     */
+    function createNewCommunityToken(
+        NewTokenData memory newTokenData
+    )
+        external
+        payable
+            canCreateToken(newTokenData)
+        returns (
+            uint256
+        )
+    {
+
+        {
+            bytes memory preString = abi.encodePacked(PREFIX_COMMUNITY);
+            newTokenData.symbol = string(abi.encodePacked(preString, newTokenData.symbol));
+        }
+        
+        require(
+            commTokenMapping[newTokenData.recordId].isPresent == false,
+            "Governance token for this id already present"
+        );
+
+        require(
+            commTokenSym[newTokenData.symbol] == false,
+            "Governance token with this SYMBOL already present"
+        );
+
+        LastTokenId++;
+        uint256 newTokenId = LastTokenId;
+
+        //Map the recordId with the
+        commTokenMapping[newTokenData.recordId] = createToken(newTokenData, newTokenId,TOKEN_TYPE_COMMUNITY);
+
+        return newTokenId;
+    }
+
+    /**
+     * @dev This function is an internal use only function whoes role is to create a new token of specified type
+     * @param newTokenData This contains all the parameters needed to create a new community token that are
+     * - recordId This is the recordId that for new token
+     * - totalSupply This is the total supply of community token
+     * - userBalance This is the amount of tokens that user wants to keep to himself
+     * - symbol This is the symbol of the community token
+     * - image this is image of the gov token.
+     * @param newTokenId This is the Id of the token to create
+     * @param tokenType This is the type of token that is to be created such as community or governance
+     */
+    function createToken (NewTokenData memory newTokenData,uint256 newTokenId,uint8 tokenType) private returns(Token memory){
+
+        uint256 treasuryAmount = (newTokenData.totalSupply - newTokenData.userBalance);
+        uint256 userAmount = newTokenData.userBalance;
 
         // Here minting of new tokens is done. And those are sent directly into the treasury
         _mint(address(this), newTokenId, treasuryAmount, "");
-        emit TokenTransfer({
-            from: 0x0000000000000000000000000000000000000000,
-            to: address(this),
-            transferDate: block.timestamp,
-            tokenId: newTokenId,
-            amount: treasuryAmount,
-            symbol: symbol
-        });
 
         // The user requested amount of tokens is genrated and send to his account
         _mint(msg.sender, newTokenId, userAmount, "");
-        emit TokenTransfer({
-            from: 0x0000000000000000000000000000000000000000,
-            to: msg.sender,
-            transferDate: block.timestamp,
-            tokenId: newTokenId,
-            amount: userAmount,
-            symbol: symbol
-        });
 
         Token memory token = Token({
-            recordId: recordId,
-            symbol: symbol,
-            image: image,
+            recordId: newTokenData.recordId,
+            symbol: newTokenData.symbol,
+            image: newTokenData.image,
             creationDate: block.timestamp,
             isPresent: true,
             tokenId: newTokenId
         });
+        
+        emit NewTokenCreated({
+            recordId : newTokenData.recordId,
+            symbol : newTokenData.symbol,
+            image : newTokenData.image,
+            creationDate : token.creationDate,
+            tokenAmount : newTokenData.totalSupply,
+            tokenId : newTokenId,
+            tokenType : tokenType
+        });
 
-        //Map the recordId with the
-        govTokenMapping[recordId] = token;
+        return token;
+    }
 
-        return newTokenId;
+    /**
+     * @dev This function creats new community tokens for specified record
+     * @param recordId This is the id of the record to which the token belongs to
+     * @param tokenId This is the id of the which is to be minted
+     * @param tokenAmount This is the amount that is to be minted
+     */
+    function mintTokens(
+        uint256 recordId,
+        uint256 tokenId,
+        uint256 tokenAmount
+    )
+        external
+        payable
+            onlyVotingContract
+    {
+
+        require(
+            commTokenMapping[recordId].isPresent == true ||
+            govTokenMapping[recordId].isPresent == true,
+            "Invalid record "
+        );
+
+        require(
+            commTokenMapping[recordId].tokenId == tokenId ||
+            govTokenMapping[recordId].tokenId == tokenId,
+            "Invalid tokens"
+        );
+
+            // Here minting of new tokens is done. And those are sent directly into the treasury
+        _mint(address(this), tokenId, tokenAmount, "Token minted through voting process");
+
+        emit TokenMinted({
+            recordId : recordId,
+            tokenId : tokenId,
+            creationDate : block.timestamp,
+            tokenAmount : tokenAmount
+        });
+
     }
 
     /**
@@ -285,14 +379,6 @@ contract TreasuryContract is IERC1155Receiver, ERC1155Supply {
                 ""
             );
 
-            emit TokenTransfer({
-                from: address(this),
-                to: to,
-                transferDate: block.timestamp,
-                tokenId: govTokenMapping[recordId].tokenId,
-                amount: rewardGovernance,
-                symbol: govTokenMapping[recordId].symbol
-            });
         }
 
         if (rewardCommunity > 0) {
@@ -304,14 +390,6 @@ contract TreasuryContract is IERC1155Receiver, ERC1155Supply {
                 ""
             );
 
-            emit TokenTransfer({
-                from: address(this),
-                to: to,
-                transferDate: block.timestamp,
-                tokenId: commTokenMapping[recordId].tokenId,
-                amount: rewardCommunity,
-                symbol: commTokenMapping[recordId].symbol
-            });
         }
 
         emit ContributionRewardTransfered({
