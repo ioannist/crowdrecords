@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Supply.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./RecordsContract.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 // ERC 20 balance[adress] => 2 contracts // governance and comunity
 // ERC 721 blance[adress] => 1 contract // records
@@ -57,7 +58,6 @@ contract TreasuryContract is IERC1155Receiver, ERC1155Supply {
         string symbol
     );
 
-
     /**
         @dev this is event which is created when new governance token is created (NEW CREATION Not MINITING)
         @param recordId This is the record Id to which this token belongs to 
@@ -91,7 +91,6 @@ contract TreasuryContract is IERC1155Receiver, ERC1155Supply {
         uint256 creationDate,
         uint256 tokenAmount
     );
-
 
     /**
         @dev this is event which is genrated when a contribution voting has came to an end and the contribution is accepted
@@ -133,9 +132,7 @@ contract TreasuryContract is IERC1155Receiver, ERC1155Supply {
     /**
      * @dev Modifier to check if the sender is authorized to create tokens for this record.
      */
-    modifier canCreateToken(
-        NewTokenData memory newTokenData
-    ) {
+    modifier canCreateToken(NewTokenData memory newTokenData) {
         require(
             newTokenData.totalSupply / 2 > newTokenData.userBalance,
             "Treasury should have at least 50% of the total supply"
@@ -145,7 +142,10 @@ contract TreasuryContract is IERC1155Receiver, ERC1155Supply {
             RECORDS_CONTRACT_ADDRESS
         );
 
-        uint256 balance = recordsContract.balanceOf(msg.sender, newTokenData.recordId);
+        uint256 balance = recordsContract.balanceOf(
+            msg.sender,
+            newTokenData.recordId
+        );
 
         require(balance > 0, "You are not the owner of the record");
         _;
@@ -191,22 +191,19 @@ contract TreasuryContract is IERC1155Receiver, ERC1155Supply {
      * - symbol This is the symbol of the gvernance token
      * - image this is image of the gov token.
      */
-    function createNewGovernanceToken(
-        NewTokenData memory newTokenData
-    )
+    function createNewGovernanceToken(NewTokenData memory newTokenData)
         external
         payable
-            canCreateToken(newTokenData)
-        returns (
-            uint256
-        )
+        canCreateToken(newTokenData)
+        returns (uint256)
     {
-
         {
             bytes memory preString = abi.encodePacked(PREFIX_GOVERNANCE);
-            newTokenData.symbol = string(abi.encodePacked(preString, newTokenData.symbol));
+            newTokenData.symbol = string(
+                abi.encodePacked(preString, newTokenData.symbol)
+            );
         }
-        
+
         require(
             govTokenMapping[newTokenData.recordId].isPresent == false,
             "Governance token for this id already present"
@@ -221,7 +218,11 @@ contract TreasuryContract is IERC1155Receiver, ERC1155Supply {
         uint256 newTokenId = LastTokenId;
 
         //Map the recordId with the
-        govTokenMapping[newTokenData.recordId] = createToken(newTokenData, newTokenId,TOKEN_TYPE_GOVERNANCE);
+        govTokenMapping[newTokenData.recordId] = createToken(
+            newTokenData,
+            newTokenId,
+            TOKEN_TYPE_GOVERNANCE
+        );
 
         return newTokenId;
     }
@@ -235,22 +236,19 @@ contract TreasuryContract is IERC1155Receiver, ERC1155Supply {
      * - symbol This is the symbol of the community token
      * - image this is image of the gov token.
      */
-    function createNewCommunityToken(
-        NewTokenData memory newTokenData
-    )
+    function createNewCommunityToken(NewTokenData memory newTokenData)
         external
         payable
-            canCreateToken(newTokenData)
-        returns (
-            uint256
-        )
+        canCreateToken(newTokenData)
+        returns (uint256)
     {
-
         {
             bytes memory preString = abi.encodePacked(PREFIX_COMMUNITY);
-            newTokenData.symbol = string(abi.encodePacked(preString, newTokenData.symbol));
+            newTokenData.symbol = string(
+                abi.encodePacked(preString, newTokenData.symbol)
+            );
         }
-        
+
         require(
             commTokenMapping[newTokenData.recordId].isPresent == false,
             "Governance token for this id already present"
@@ -265,7 +263,11 @@ contract TreasuryContract is IERC1155Receiver, ERC1155Supply {
         uint256 newTokenId = LastTokenId;
 
         //Map the recordId with the
-        commTokenMapping[newTokenData.recordId] = createToken(newTokenData, newTokenId,TOKEN_TYPE_COMMUNITY);
+        commTokenMapping[newTokenData.recordId] = createToken(
+            newTokenData,
+            newTokenId,
+            TOKEN_TYPE_COMMUNITY
+        );
 
         return newTokenId;
     }
@@ -281,9 +283,13 @@ contract TreasuryContract is IERC1155Receiver, ERC1155Supply {
      * @param newTokenId This is the Id of the token to create
      * @param tokenType This is the type of token that is to be created such as community or governance
      */
-    function createToken (NewTokenData memory newTokenData,uint256 newTokenId,uint8 tokenType) private returns(Token memory){
-
-        uint256 treasuryAmount = (newTokenData.totalSupply - newTokenData.userBalance);
+    function createToken(
+        NewTokenData memory newTokenData,
+        uint256 newTokenId,
+        uint8 tokenType
+    ) private returns (Token memory) {
+        uint256 treasuryAmount = (newTokenData.totalSupply -
+            newTokenData.userBalance);
         uint256 userAmount = newTokenData.userBalance;
 
         // Here minting of new tokens is done. And those are sent directly into the treasury
@@ -300,15 +306,15 @@ contract TreasuryContract is IERC1155Receiver, ERC1155Supply {
             isPresent: true,
             tokenId: newTokenId
         });
-        
+
         emit NewTokenCreated({
-            recordId : newTokenData.recordId,
-            symbol : newTokenData.symbol,
-            image : newTokenData.image,
-            creationDate : token.creationDate,
-            tokenAmount : newTokenData.totalSupply,
-            tokenId : newTokenId,
-            tokenType : tokenType
+            recordId: newTokenData.recordId,
+            symbol: newTokenData.symbol,
+            image: newTokenData.image,
+            creationDate: token.creationDate,
+            tokenAmount: newTokenData.totalSupply,
+            tokenId: newTokenId,
+            tokenType: tokenType
         });
 
         return token;
@@ -324,34 +330,33 @@ contract TreasuryContract is IERC1155Receiver, ERC1155Supply {
         uint256 recordId,
         uint256 tokenId,
         uint256 tokenAmount
-    )
-        external
-        payable
-            onlyVotingContract
-    {
-
+    ) external payable onlyVotingContract {
         require(
             commTokenMapping[recordId].isPresent == true ||
-            govTokenMapping[recordId].isPresent == true,
+                govTokenMapping[recordId].isPresent == true,
             "Invalid record "
         );
 
         require(
             commTokenMapping[recordId].tokenId == tokenId ||
-            govTokenMapping[recordId].tokenId == tokenId,
+                govTokenMapping[recordId].tokenId == tokenId,
             "Invalid tokens"
         );
 
-            // Here minting of new tokens is done. And those are sent directly into the treasury
-        _mint(address(this), tokenId, tokenAmount, "Token minted through voting process");
+        // Here minting of new tokens is done. And those are sent directly into the treasury
+        _mint(
+            address(this),
+            tokenId,
+            tokenAmount,
+            "Token minted through voting process"
+        );
 
         emit TokenMinted({
-            recordId : recordId,
-            tokenId : tokenId,
-            creationDate : block.timestamp,
-            tokenAmount : tokenAmount
+            recordId: recordId,
+            tokenId: tokenId,
+            creationDate: block.timestamp,
+            tokenAmount: tokenAmount
         });
-
     }
 
     /**
@@ -378,7 +383,6 @@ contract TreasuryContract is IERC1155Receiver, ERC1155Supply {
                 rewardGovernance,
                 ""
             );
-
         }
 
         if (rewardCommunity > 0) {
@@ -389,7 +393,6 @@ contract TreasuryContract is IERC1155Receiver, ERC1155Supply {
                 rewardCommunity,
                 ""
             );
-
         }
 
         emit ContributionRewardTransfered({
@@ -399,6 +402,19 @@ contract TreasuryContract is IERC1155Receiver, ERC1155Supply {
             rewardGovernance: rewardGovernance,
             rewardCommunity: rewardCommunity
         });
+    }
+
+    /**
+     * @dev This function returns the amount of total tokens that are in circulation
+     * @param tokenId This is the token whoes circulating supply you  want to find out
+     */
+    function totalCicultingSupply(uint256 tokenId) external returns (uint256) {
+        uint256 totalCirculatingBalance = SafeMath.sub(
+            totalSupply(tokenId),
+            balanceOf(address(this), tokenId)
+        );
+
+        return totalCirculatingBalance;
     }
 
     function onERC1155Received(

@@ -202,6 +202,7 @@ contract OrdersContract {
         TreasuryContract treasuryContract = TreasuryContract(
             TREASURY_CONTRACT_ADDRESS
         );
+        //--- Need to have additional checks for balance of the sale and also to deduct the tokens from the sale struct
         if (order.communityTokenAmount > 0) {
             treasuryContract.safeTransferFrom(
                 msg.sender,
@@ -210,6 +211,7 @@ contract OrdersContract {
                 order.communityTokenAmount,
                 "Sale order"
             );
+
         }
 
         if (order.governanceTokenAmount > 0) {
