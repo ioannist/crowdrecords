@@ -28,14 +28,6 @@ contract BaseVotingContract {
     }
 
     /**
-     * @dev Modifier to check that the person who accesses a specific function is the owner himself.
-     */
-    modifier ownerOnly() {
-        require(msg.sender == OWNER, "You are not authorized for this action");
-        _;
-    }
-
-    /**
      * @dev This modifier checks if a ballot is open for voting or has the time expired
      */
     modifier _checkIfBallotIsOpen(uint256 votingBallotId) {
@@ -60,7 +52,7 @@ contract BaseVotingContract {
     /**
      * @dev Modifier to check that the person who accesses a specific function is the owner himself.
      */
-    modifier ownerOnly() {
+    modifier _ownerOnly() {
         require(msg.sender == OWNER, "You are not authorized for this action");
         _;
     }
@@ -107,7 +99,7 @@ contract BaseVotingContract {
     function _setTreasuryContractAddress(address newTreasuryContractAddress)
         internal
         virtual
-        onlyOwner
+        _ownerOnly
     {
         TREASURY_CONTRACT_ADDRESS = newTreasuryContractAddress;
     }
@@ -118,6 +110,8 @@ contract BaseVotingContract {
      * @param vote this is the state of the vote, if true than it means the vote is in favour of the ballot
      */
     function _castVote(uint256 votingBallotId, bool vote)
+        internal
+        virtual
         _checkIfBallotIsOpen(votingBallotId)
         _checkIfOwnerAllowed(votingBallotId)
     {
@@ -180,6 +174,7 @@ contract BaseVotingContract {
             "Result already declared"
         );
 
+        address[] memory yesList = votingMap[votingBallotId].yes;
         uint256[] memory idList = new uint256[](yesList.length);
         for (uint256 i = 0; i < yesList.length; i++) {
             idList[i] = tokenId;
@@ -197,7 +192,7 @@ contract BaseVotingContract {
 
         uint256 totalYes = 0;
         for (uint256 i = 0; i < yesList.length; i++) {
-            totalYes += noBalanceList[i];
+            totalYes += yesBalanceList[i];
         }
 
         // uint256[] memory noBalanceList = treasuryContract.balanceOfBatch(
@@ -217,13 +212,13 @@ contract BaseVotingContract {
             uint256 totalCirculatingSupply = treasuryContract
                 .totalCicultingSupply(tokenId);
 
-            uint8 winRatio = SafeMath.div(
+            uint256 winRatio = SafeMath.div(
                 totalYes,
                 totalCirculatingSupply,
                 "Some problem with circulating supply"
             );
 
-            if (winRatio > 0.66) {
+            if (winRatio > SafeMath.div(33, 55)) {
                 return true;
             } else {
                 return false;

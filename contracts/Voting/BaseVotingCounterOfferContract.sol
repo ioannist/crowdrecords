@@ -75,6 +75,6 @@ contract BaseVotingCounterOfferContract is BaseVotingContract {
         address user,
         bool vote
     ) internal _shouldHaveCreatedCounterOffer(votingBallotId) {
-        super._castVote(votingBallotId, vote, user);
+        super._castVoteForOther(votingBallotId, vote, user);
     }
 }
