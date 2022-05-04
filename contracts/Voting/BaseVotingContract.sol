@@ -66,7 +66,7 @@ contract BaseVotingContract {
                 alreadyVoted[votingBallotId][msg.sender] == false,
                 "You have already voted"
             );
-        } else {
+        } else if (msg.sender == votingMap[votingBallotId].owner) {
             revert("Owner cannot vote");
         }
         _;

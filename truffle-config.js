@@ -78,6 +78,8 @@ module.exports = {
         // timeout: 100000
     },
 
+    contracts_directory: "./contracts/",
+    contracts_build_directory: "./build/",
     // Configure your compilers
     compilers: {
         solc: {
@@ -114,3 +116,4 @@ module.exports = {
     // }
     // }
 };
+

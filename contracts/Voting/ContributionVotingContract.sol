@@ -2,12 +2,14 @@
 pragma solidity ^0.8.0;
 
 import "./BaseVotingCounterOfferContract.sol";
+import "../TreasuryContract.sol";
 
-contract VotingContract is BaseVotingCounterOfferContract {
+contract ContributionVotingContract is BaseVotingCounterOfferContract {
     //This is the struct that contains the reward data of the contribution
     struct ContributionReward {
         address requester;
         uint256 contributionId;
+        uint256 recordId;
         uint256 ballotId;
         uint256 communityReward;
         uint256 communityTokenId;
@@ -26,6 +28,7 @@ contract VotingContract is BaseVotingCounterOfferContract {
     event ContributionBallotCreated(
         address requester,
         uint256 contributionId,
+        uint256 recordId,
         uint256 communityReward,
         uint256 communityTokenId,
         uint256 governanceReward,
@@ -77,9 +80,20 @@ contract VotingContract is BaseVotingCounterOfferContract {
         uint256 status
     ); // status will be => either ACCEPTED = 2 | REJECTED = 3
 
-    mapping(uint256 => ContributionReward) RewardMapping;
+    /**
+        @dev this event is genrated when result of a ballot is declared
+        @param contributionId This is the id of the contribution that is linked to this ballot 
+        @param ballotId this is the ballot Id for which result is declared 
+        @param result this is the status of the result //either true if user won that is he recived more than 66% of votes or false if user lost 
+     */
+    event BallotResult(uint256 contributionId, uint256 ballotId, bool result);
+
+    mapping(uint256 => ContributionReward) rewardMapping;
+    //Bellow mapping is ContributionId => User's address => Counter Offer data
     mapping(uint256 => mapping(address => CounterOffer)) contributionCounterOfferMap;
-    mapping(uint256 => address[]) contributionCounterOfferList; //This contains all the keys of the mapping of the counterOfferMapping.
+    //This contains all the keys (The key's are users address) of the mapping of the counterOfferMapping.
+    mapping(uint256 => address[]) contributionCounterOfferList;
+    address public CONTRIBUTION_CONTRACT_ADDRESS;
 
     constructor(uint8 votingInterval) BaseVotingContract() {
         VOTING_BLOCK_PERIOD = votingInterval;
@@ -89,9 +103,19 @@ contract VotingContract is BaseVotingCounterOfferContract {
      * @dev This function sets the treasury Contract address
      */
     function setTreasuryContractAddress(address newTreasuryContractAddress)
-        public
+        external
+        _ownerOnly
     {
         _setTreasuryContractAddress(newTreasuryContractAddress);
+    }
+
+    /**
+     * @dev Sets the contribution contract address so that the voting ballot for contritbution can be restricted only to a certain contract that is the contribution contract
+     */
+    function setContributionContractAddress(
+        address newContributionContractAddress
+    ) public _ownerOnly {
+        CONTRIBUTION_CONTRACT_ADDRESS = newContributionContractAddress;
     }
 
     /**
@@ -99,14 +123,14 @@ contract VotingContract is BaseVotingCounterOfferContract {
      */
     function createContributionVotingBallot(
         uint256 contributionId,
-        address contributionCreator,
+        uint256 recordId,
         uint256 govReward,
         uint256 govTokenId,
         uint256 commReward,
         uint256 commTokenId
     ) public {
         require(
-            RewardMapping[contributionId].isPresent == false,
+            rewardMapping[contributionId].isPresent == false,
             "Voting is already created"
         );
 
@@ -115,6 +139,7 @@ contract VotingContract is BaseVotingCounterOfferContract {
         ContributionReward memory contributionReward = ContributionReward({
             requester: msg.sender,
             contributionId: contributionId,
+            recordId: recordId,
             ballotId: ballotId,
             communityReward: commReward,
             communityTokenId: commTokenId,
@@ -126,6 +151,7 @@ contract VotingContract is BaseVotingCounterOfferContract {
         emit ContributionBallotCreated({
             requester: msg.sender,
             contributionId: contributionId,
+            recordId: recordId,
             communityReward: commReward,
             communityTokenId: commTokenId,
             governanceReward: govReward,
@@ -133,7 +159,7 @@ contract VotingContract is BaseVotingCounterOfferContract {
             ballotId: ballotId
         });
 
-        RewardMapping[contributionId] = contributionReward;
+        rewardMapping[contributionId] = contributionReward;
     }
 
     /**
@@ -142,11 +168,11 @@ contract VotingContract is BaseVotingCounterOfferContract {
      * @param vote this is the state of the vote, if true than it means the vote is in favour of the ballot
      */
     function castVoteForContribution(uint256 contributionId, bool vote) public {
-        super._castVote(RewardMapping[contributionId].ballotId, vote);
+        super._castVote(rewardMapping[contributionId].ballotId, vote);
 
         emit ContributionVoting({
             contributionId: contributionId,
-            ballotId: RewardMapping[contributionId].ballotId,
+            ballotId: rewardMapping[contributionId].ballotId,
             voter: msg.sender,
             vote: vote
         });
@@ -164,10 +190,10 @@ contract VotingContract is BaseVotingCounterOfferContract {
         uint256 newGovernanceReward
     )
         public
-        _checkIfOwnerAllowed(RewardMapping[contributionId].ballotId)
-        _checkIfBallotIsOpen(RewardMapping[contributionId].ballotId)
+        _checkIfOwnerAllowed(rewardMapping[contributionId].ballotId)
+        _checkIfBallotIsOpen(rewardMapping[contributionId].ballotId)
     {
-        _createCounterOffer(RewardMapping[contributionId].ballotId);
+        _createCounterOffer(rewardMapping[contributionId].ballotId);
 
         //Create counter offer object and push it into array
         CounterOffer memory offer = CounterOffer({
@@ -213,9 +239,9 @@ contract VotingContract is BaseVotingCounterOfferContract {
                     ][counterOfferIds[i]].newCommunityReward;
 
                     //Set new reward for the contribution
-                    RewardMapping[contributionId]
+                    rewardMapping[contributionId]
                         .communityReward = newCommunityReward;
-                    RewardMapping[contributionId]
+                    rewardMapping[contributionId]
                         .governanceReward = newGovernanceReward;
 
                     contributionCounterOfferMap[contributionId][
@@ -223,7 +249,7 @@ contract VotingContract is BaseVotingCounterOfferContract {
                     ].status = 2;
 
                     super._counterOfferAction(
-                        RewardMapping[contributionId].ballotId,
+                        rewardMapping[contributionId].ballotId,
                         counterOfferIds[i],
                         true
                     );
@@ -236,7 +262,7 @@ contract VotingContract is BaseVotingCounterOfferContract {
                     );
                 } else {
                     super._counterOfferAction(
-                        RewardMapping[contributionId].ballotId,
+                        rewardMapping[contributionId].ballotId,
                         counterOfferIds[i],
                         false
                     );
@@ -246,6 +272,55 @@ contract VotingContract is BaseVotingCounterOfferContract {
                     ].status = 3;
                 }
             }
+        }
+    }
+
+    /**
+     * @dev This function can be called from external source and also from within the contract
+     * @param contributionId this is the id of the contribution to which the winner is to be decleared
+     */
+    function declareWinner(uint256 contributionId) external {
+        address[] memory counterOfferList = contributionCounterOfferList[
+            contributionId
+        ];
+        for (uint256 i = 0; i < counterOfferList.length; i++) {
+            if (
+                contributionCounterOfferMap[contributionId][counterOfferList[i]]
+                    .status == 1
+            ) {
+                super._counterOfferAction(
+                    rewardMapping[contributionId].ballotId,
+                    counterOfferList[i],
+                    false
+                );
+                //The counter offer ids are the addresses of the user who proposed the offer
+                contributionCounterOfferMap[contributionId][counterOfferList[i]]
+                    .status = 3;
+            }
+        }
+        bool result = _declareWinner(
+            rewardMapping[contributionId].ballotId,
+            rewardMapping[contributionId].governanceTokenId
+        );
+
+        emit BallotResult(
+            contributionId,
+            rewardMapping[contributionId].ballotId,
+            result
+        );
+
+        if (result) {
+            //Transfer the reward amount to user
+            TreasuryContract treasuryContract = TreasuryContract(
+                TREASURY_CONTRACT_ADDRESS
+            );
+            treasuryContract.transferRewardAmount(
+                rewardMapping[contributionId].requester,
+                rewardMapping[contributionId].recordId,
+                contributionId,
+                rewardMapping[contributionId].governanceReward,
+                rewardMapping[contributionId].communityReward
+            );
         }
     }
 }

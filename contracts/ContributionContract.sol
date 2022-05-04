@@ -3,87 +3,15 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "./votingContract.sol";
+import "./voting/ContributionVotingContract.sol";
 
 contract ContributionContract is ERC721 {
-    //----------------------Permanent Uri code---------------------//
-    /*  using Strings for uint256;
-
-    // Optional mapping for token URIs
-    mapping(uint256 => string) private _tokenURIs;
-
-    mapping(uint256 => bool) private _permanentURI;
-
-    // Base URI
-    string private _baseURIextended;
-
-    function _setContirbutionURI(uint256 tokenId, string memory _tokenURI)
-        internal
-        virtual
-    {
-        require(
-            _exists(tokenId),
-            "ERC721Metadata: URI set of nonexistent token"
-        );
-
-        require(
-            _permanentURI[tokenId] != true,
-            "ERC721Metadata: Metadata is not editable now"
-        );
-
-        _tokenURIs[tokenId] = _tokenURI;
-    }
-
-    function _lockContributionURI(uint256 tokenId) public virtual {
-        require(
-            _exists(tokenId),
-            "ERC721Metadata: URI set of nonexistent token"
-        );
-
-        require(
-            _permanentURI[tokenId] == false,
-            "ERC721Metadata: Metadata is already set to not editable"
-        );
-
-        _permanentURI[tokenId] = true;
-    }
-
-    function _baseURI() internal view virtual override returns (string memory) {
-        return _baseURIextended;
-    }
-
-    function _contributionURI(uint256 tokenId)
-        public
-        view
-        virtual
-        returns (string memory)
-    {
-        require(
-            _exists(tokenId),
-            "ERC721Metadata: URI query for nonexistent token"
-        );
-
-        string memory _tokenURI = _tokenURIs[tokenId];
-        string memory base = _baseURI();
-
-        // If there is no base URI, return the token URI.
-        if (bytes(base).length == 0) {
-            return _tokenURI;
-        }
-        // If both are set, concatenate the baseURI and tokenURI (via abi.encodePacked).
-        if (bytes(_tokenURI).length > 0) {
-            return string(abi.encodePacked(base, _tokenURI));
-        }
-        // If there is a baseURI but no tokenURI, concatenate the tokenID to the baseURI.
-        return string(abi.encodePacked(base, tokenId.toString()));
-    } */
-
     //----------------------Contribution Related code---------------------//
 
     using Counters for Counters.Counter;
     Counters.Counter private _contributionIds;
     address OWNER;
-    address public VOTING_CONTRACT_ADDRESS;
+    address public CONTRIBUTION_VOTING_CONTRACT_ADDRESS;
 
     /**
         @dev this is Contribution Create event this event will be emited when a new contribution is created.
@@ -125,7 +53,7 @@ contract ContributionContract is ERC721 {
 
     mapping(uint256 => Contribution) contributionData;
 
-    constructor(string memory baseURI_) ERC721("Contributions", "CTRB") {
+    constructor() ERC721("Contributions", "CTRB") {
         // _baseURIextended = baseURI_;
         OWNER = msg.sender;
     }
@@ -141,11 +69,10 @@ contract ContributionContract is ERC721 {
     /**
      * @dev This function sets the Voting Contract address
      */
-    function setVotingContractAddress(address newVotingContractAddress)
-        public
-        ownerOnly
-    {
-        VOTING_CONTRACT_ADDRESS = newVotingContractAddress;
+    function setContributionVotingContractAddress(
+        address newVotingContractAddress
+    ) public ownerOnly {
+        CONTRIBUTION_VOTING_CONTRACT_ADDRESS = newVotingContractAddress;
     }
 
     /**
@@ -168,19 +95,25 @@ contract ContributionContract is ERC721 {
         bool roughMix,
         string memory description,
         uint256 communityReward,
-        uint256 governanceReward
+        uint256 communityTokenId,
+        uint256 governanceReward,
+        uint256 governanceTokenId
     ) public returns (uint256) {
         _contributionIds.increment();
 
         uint256 contributionId = _contributionIds.current();
         _mint(msg.sender, contributionId);
 
-        VotingContract votingContract = VotingContract(VOTING_CONTRACT_ADDRESS);
-        votingContract.createContributionVotingBallot(
+        ContributionVotingContract contributionVotingContract = ContributionVotingContract(
+                CONTRIBUTION_VOTING_CONTRACT_ADDRESS
+            );
+        contributionVotingContract.createContributionVotingBallot(
             contributionId,
-            msg.sender,
+            recordId,
             governanceReward,
-            communityReward
+            governanceTokenId,
+            communityReward,
+            communityTokenId
         );
 
         Contribution memory contribution = Contribution({

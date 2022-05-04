@@ -16,7 +16,7 @@ contract TreasuryContract is IERC1155Receiver, ERC1155Supply {
     uint256 public constant CRD = 1;
     uint256 private LastTokenId = 1;
     address public RECORDS_CONTRACT_ADDRESS;
-    address public VOTING_CONTRACT_ADDRESS;
+    address public CONTRIBUTION_VOTING_CONTRACT_ADDRESS;
     address OWNER;
     string private PREFIX_GOVERNANCE = "CRDG_";
     string private PREFIX_COMMUNITY = "CRD_";
@@ -154,9 +154,9 @@ contract TreasuryContract is IERC1155Receiver, ERC1155Supply {
     /**
      * @dev Modifier to check that if the sender is the voting contract or not.
      */
-    modifier onlyVotingContract() {
+    modifier onlyContributionVotingContract() {
         require(
-            msg.sender == VOTING_CONTRACT_ADDRESS,
+            msg.sender == CONTRIBUTION_VOTING_CONTRACT_ADDRESS,
             "You are not authorized for this action"
         );
         _;
@@ -175,11 +175,10 @@ contract TreasuryContract is IERC1155Receiver, ERC1155Supply {
     /**
      * @dev This function sets the Voting Contract address
      */
-    function setVotingContractAddress(address newVotingContractAddress)
-        public
-        ownerOnly
-    {
-        VOTING_CONTRACT_ADDRESS = newVotingContractAddress;
+    function setContributionVotingContractAddress(
+        address newVotingContractAddress
+    ) public ownerOnly {
+        CONTRIBUTION_VOTING_CONTRACT_ADDRESS = newVotingContractAddress;
     }
 
     /**
@@ -288,6 +287,8 @@ contract TreasuryContract is IERC1155Receiver, ERC1155Supply {
         uint256 newTokenId,
         uint8 tokenType
     ) private returns (Token memory) {
+        //!Add check for the totalsupply > userBalance
+
         uint256 treasuryAmount = (newTokenData.totalSupply -
             newTokenData.userBalance);
         uint256 userAmount = newTokenData.userBalance;
@@ -330,7 +331,7 @@ contract TreasuryContract is IERC1155Receiver, ERC1155Supply {
         uint256 recordId,
         uint256 tokenId,
         uint256 tokenAmount
-    ) external payable onlyVotingContract {
+    ) external payable onlyContributionVotingContract {
         require(
             commTokenMapping[recordId].isPresent == true ||
                 govTokenMapping[recordId].isPresent == true,
@@ -373,8 +374,12 @@ contract TreasuryContract is IERC1155Receiver, ERC1155Supply {
         uint256 contributionId,
         uint256 rewardGovernance,
         uint256 rewardCommunity
-    ) external payable onlyVotingContract {
-        _setApprovalForAll(address(this), VOTING_CONTRACT_ADDRESS, true);
+    ) external payable onlyContributionVotingContract {
+        _setApprovalForAll(
+            address(this),
+            CONTRIBUTION_VOTING_CONTRACT_ADDRESS,
+            true
+        );
         if (rewardGovernance > 0) {
             safeTransferFrom(
                 address(this),
@@ -408,7 +413,11 @@ contract TreasuryContract is IERC1155Receiver, ERC1155Supply {
      * @dev This function returns the amount of total tokens that are in circulation
      * @param tokenId This is the token whoes circulating supply you  want to find out
      */
-    function totalCicultingSupply(uint256 tokenId) external returns (uint256) {
+    function totalCicultingSupply(uint256 tokenId)
+        public
+        view
+        returns (uint256)
+    {
         uint256 totalCirculatingBalance = SafeMath.sub(
             totalSupply(tokenId),
             balanceOf(address(this), tokenId)

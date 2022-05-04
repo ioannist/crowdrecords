@@ -1,13 +1,24 @@
-const ContributionContract = artifacts.require("../contracts/ContributionContract");
-const RecordsContract = artifacts.require("../contracts/RecordsContract");
-const TracksContract = artifacts.require("../contracts/TracksContract");
-const TreasuryContract = artifacts.require("../contracts/TreasuryContract");
-const VotingContract = artifacts.require("../contracts/VotingContract");
+const ContributionContract = artifacts.require("../contracts/ContributionContract.sol");
+const RecordsContract = artifacts.require("../contracts/RecordsContract.sol");
+const TracksContract = artifacts.require("../contracts/TracksContract.sol");
+const TreasuryContract = artifacts.require("../contracts/TreasuryContract.sol");
+const ContributionVotingContract = artifacts.require(
+    "../contracts/voting/ContributionVotingContract.sol"
+);
+const OrdersContract = artifacts.require("../contracts/OrdersContract.sol");
 
-module.exports = function (deployer) {
-    deployer.deploy(ContributionContract, "https://crowdrecords.com");
-    deployer.deploy(RecordsContract);
-    deployer.deploy(TracksContract, "https://crowdrecords.com");
-    deployer.deploy(TreasuryContract);
-    deployer.deploy(VotingContract);
+module.exports = async (deployer) => {
+    await deployer.deploy(ContributionContract);
+    let contributionContract = await ContributionContract.deployed();
+    await deployer.deploy(RecordsContract);
+    let recordsContract = await RecordsContract.deployed();
+    await deployer.deploy(TracksContract);
+    let tracksContract = await TracksContract.deployed();
+    await deployer.deploy(TreasuryContract);
+    let treasuryContract = await TreasuryContract.deployed();
+    await deployer.deploy(ContributionVotingContract, 20);
+    let contributionVotingContract = await ContributionVotingContract.deployed();
+    await deployer.deploy(OrdersContract);
+    let ordersContract = await OrdersContract.deployed();
 };
+
