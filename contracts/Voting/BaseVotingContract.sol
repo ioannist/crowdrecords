@@ -63,10 +63,10 @@ contract BaseVotingContract {
     modifier _checkIfOwnerAllowed(uint256 votingBallotId) {
         if (votingMap[votingBallotId].canOwnerVote) {
             require(
-                alreadyVoted[votingBallotId][msg.sender] == false,
+                alreadyVoted[votingBallotId][tx.origin] == false,
                 "You have already voted"
             );
-        } else if (msg.sender == votingMap[votingBallotId].owner) {
+        } else if (tx.origin == votingMap[votingBallotId].owner) {
             revert("Owner cannot vote");
         }
         _;
@@ -80,7 +80,7 @@ contract BaseVotingContract {
         votingId++;
 
         VotingBallot memory voting = VotingBallot({
-            owner: msg.sender,
+            owner: tx.origin,
             yes: new address[](0),
             no: new address[](0),
             votingEndBlock: block.number + VOTING_BLOCK_PERIOD,
@@ -115,7 +115,7 @@ contract BaseVotingContract {
         _checkIfBallotIsOpen(votingBallotId)
         _checkIfOwnerAllowed(votingBallotId)
     {
-        _castVotePrivate(votingBallotId, vote, msg.sender);
+        _castVotePrivate(votingBallotId, vote, tx.origin);
     }
 
     /**
@@ -143,12 +143,12 @@ contract BaseVotingContract {
         address voter
     ) private {
         if (vote) {
-            votingMap[votingBallotId].yes.push(msg.sender);
+            votingMap[votingBallotId].yes.push(tx.origin);
         } else {
-            votingMap[votingBallotId].no.push(msg.sender);
+            votingMap[votingBallotId].no.push(tx.origin);
         }
 
-        alreadyVoted[votingBallotId][msg.sender] = true;
+        alreadyVoted[votingBallotId][tx.origin] = true;
     }
 
     /**
@@ -212,13 +212,17 @@ contract BaseVotingContract {
             uint256 totalCirculatingSupply = treasuryContract
                 .totalCicultingSupply(tokenId);
 
-            uint256 winRatio = SafeMath.div(
-                totalYes,
-                totalCirculatingSupply,
-                "Some problem with circulating supply"
-            );
+            totalCirculatingSupply =
+                totalCirculatingSupply -
+                treasuryContract.balanceOf(
+                    votingMap[votingBallotId].owner,
+                    tokenId
+                );
 
-            if (winRatio > SafeMath.div(33, 55)) {
+            uint256 winRatio = ((totalYes * 100) / totalCirculatingSupply);
+
+            //This will check for 2 / 3 ratio for yes votes
+            if (winRatio > (6600 / 100)) {
                 return true;
             } else {
                 return false;

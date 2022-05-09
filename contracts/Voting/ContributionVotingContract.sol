@@ -99,6 +99,14 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
         VOTING_BLOCK_PERIOD = votingInterval;
     }
 
+    modifier _onlyContributionContract() {
+        require(
+            msg.sender == CONTRIBUTION_CONTRACT_ADDRESS,
+            "You are not contribution contract"
+        );
+        _;
+    }
+
     /**
      * @dev This function sets the treasury Contract address
      */
@@ -128,7 +136,7 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
         uint256 govTokenId,
         uint256 commReward,
         uint256 commTokenId
-    ) public {
+    ) public _onlyContributionContract {
         require(
             rewardMapping[contributionId].isPresent == false,
             "Voting is already created"
@@ -137,7 +145,7 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
         uint256 ballotId = _createVoting(false);
 
         ContributionReward memory contributionReward = ContributionReward({
-            requester: msg.sender,
+            requester: tx.origin,
             contributionId: contributionId,
             recordId: recordId,
             ballotId: ballotId,
