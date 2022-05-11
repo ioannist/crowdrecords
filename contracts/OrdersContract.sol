@@ -1,8 +1,5 @@
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
-import "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
-import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Supply.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
@@ -67,7 +64,7 @@ contract OrdersContract {
         @param governanceTokenAmount this is the comunity token amount for sale
         @param governanceTokenPrice this is the price of sinle token
      */
-    event BuySale(
+    event SaleBought(
         uint256 saleId,
         address seller,
         address buyer,
@@ -119,6 +116,7 @@ contract OrdersContract {
      */
     function createSaleOrder(
         bool isLockedInRatio,
+        uint256 recordId,
         uint256 communityTokenId,
         uint256 communityTokenAmount,
         uint256 communityTokenPrice,
@@ -126,18 +124,39 @@ contract OrdersContract {
         uint256 governanceTokenAmount,
         uint256 governanceTokenPrice
     ) public returns (uint256 saleOrderId) {
-        uint256 newOrderId = orderId;
-        orderId++;
-
-        // Any extra validation for the order ratio
         TreasuryContract treasuryContract = TreasuryContract(
             TREASURY_CONTRACT_ADDRESS
         );
 
+        require(
+            treasuryContract.getCommunityTokenId(recordId) == communityTokenId,
+            "Invalid community token id"
+        );
+        require(
+            treasuryContract.getGovernanceTokenId(recordId) ==
+                governanceTokenId,
+            "Invalid governance token id"
+        );
+
+        if (isLockedInRatio) {
+            require(
+                communityTokenAmount > 0,
+                "You cannot have 0 community token amount"
+            );
+
+            require(
+                governanceTokenAmount > 0,
+                "You cannot have 0 governance token amount"
+            );
+        }
+
+        uint256 newOrderId = orderId;
+        orderId++;
+
         //need to have allowance of the seller's token with ordersContract acting as a spender
         if (communityTokenAmount > 0) {
             treasuryContract.safeTransferFrom(
-                msg.sender,
+                tx.origin,
                 address(this),
                 communityTokenId,
                 communityTokenAmount,
@@ -147,7 +166,7 @@ contract OrdersContract {
 
         if (governanceTokenAmount > 0) {
             treasuryContract.safeTransferFrom(
-                msg.sender,
+                tx.origin,
                 address(this),
                 governanceTokenId,
                 governanceTokenAmount,
@@ -157,7 +176,7 @@ contract OrdersContract {
 
         Order memory order = Order({
             isClosed: false,
-            seller: msg.sender,
+            seller: tx.origin,
             isLockedInRatio: isLockedInRatio,
             creationDate: block.timestamp,
             communityTokenId: communityTokenId,
@@ -183,19 +202,19 @@ contract OrdersContract {
             governanceTokenPrice: governanceTokenPrice
         });
 
-        return orderId;
+        return newOrderId;
     }
 
     /**
      * @dev This function is called to cancle the existing sale order
      */
-    function cancleSaleOrder(uint256 saleId) public {
+    function cancelSaleOrder(uint256 saleId) public {
         require(
             orderBook[orderId].seller == msg.sender,
             "you are unauthorized for this action"
         );
 
-        require(orderBook[orderId].isClosed == true, "Is already closed");
+        require(orderBook[orderId].isClosed == false, "Is already closed");
 
         Order memory order = orderBook[orderId];
 
@@ -211,7 +230,6 @@ contract OrdersContract {
                 order.communityTokenAmount,
                 "Sale order"
             );
-
         }
 
         if (order.governanceTokenAmount > 0) {
@@ -235,28 +253,30 @@ contract OrdersContract {
     function purchaseSaleOrder(
         uint256 saleId,
         uint256 governanceTokenAmount,
-        uint256 communityTokenAmount
+        uint256 governanceTokenPrice,
+        uint256 communityTokenAmount,
+        uint256 communityTokenPrice
     ) public {
         require(
             orderBook[orderId].seller != msg.sender,
             "you cannot purchase your own tokens"
         );
 
-        require(orderBook[orderId].isClosed == true, "Is already closed");
+        require(orderBook[orderId].isClosed == false, "Is already closed");
 
         Order memory order = orderBook[orderId];
 
+        //This will check if the amount to purchase is less or equal than the order that is generated
+        require(
+            order.communityTokenAmount >= communityTokenAmount,
+            "Community token amount is insufficent"
+        );
+        require(
+            order.governanceTokenAmount >= governanceTokenAmount,
+            "Governance token amount is insufficent"
+        );
+
         if (order.isLockedInRatio) {
-            require(
-                order.communityTokenAmount > 0,
-                "You cannot have 0 community token amount"
-            );
-
-            require(
-                order.governanceTokenAmount > 0,
-                "You cannot have 0 governance token amount"
-            );
-
             require(
                 SafeMath.div(
                     communityTokenAmount,
@@ -275,7 +295,14 @@ contract OrdersContract {
         TreasuryContract treasuryContract = TreasuryContract(
             TREASURY_CONTRACT_ADDRESS
         );
+        //Token purchase check for price
+        //Token purchase transfer the CRD tokens from users account
+        //Deduct the commission of platform
         if (order.communityTokenAmount > 0) {
+            require(
+                order.communityTokenPrice <= communityTokenPrice,
+                "Community token price is below asking price"
+            );
             treasuryContract.safeTransferFrom(
                 msg.sender,
                 address(this),
@@ -286,6 +313,10 @@ contract OrdersContract {
         }
 
         if (order.governanceTokenAmount > 0) {
+            require(
+                order.governanceTokenPrice <= governanceTokenPrice,
+                "Governance token price is below asking price"
+            );
             treasuryContract.safeTransferFrom(
                 msg.sender,
                 address(this),
@@ -295,8 +326,64 @@ contract OrdersContract {
             );
         }
 
-        orderBook[orderId].isClosed = true;
+        emit SaleBought({
+            saleId: saleId,
+            seller: order.seller,
+            buyer: msg.sender,
+            creationDate: block.timestamp,
+            communityTokenId: order.communityTokenId,
+            communityTokenAmount: order.communityTokenAmount,
+            communityTokenPrice: order.communityTokenPrice,
+            governanceTokenId: order.governanceTokenId,
+            governanceTokenAmount: order.governanceTokenAmount,
+            governanceTokenPrice: order.governanceTokenPrice
+        });
 
-        emit SaleClose({saleId: saleId, creationDate: block.timestamp});
+        order.communityTokenAmount =
+            order.communityTokenAmount -
+            communityTokenAmount;
+
+        order.governanceTokenAmount =
+            order.governanceTokenAmount -
+            governanceTokenAmount;
+
+        if (
+            order.communityTokenAmount == 0 && order.governanceTokenAmount == 0
+        ) {
+            orderBook[orderId].isClosed = true;
+            emit SaleClose({saleId: saleId, creationDate: block.timestamp});
+        }
+    }
+
+    /**
+    Below code are for transfer of tokens from ERC1155 standard contract
+     */
+    function onERC1155Received(
+        address,
+        address,
+        uint256,
+        uint256,
+        bytes memory
+    ) public virtual returns (bytes4) {
+        return this.onERC1155Received.selector;
+    }
+
+    function onERC1155BatchReceived(
+        address,
+        address,
+        uint256[] memory,
+        uint256[] memory,
+        bytes memory
+    ) public virtual returns (bytes4) {
+        return this.onERC1155BatchReceived.selector;
+    }
+
+    function onERC721Received(
+        address,
+        address,
+        uint256,
+        bytes memory
+    ) public virtual returns (bytes4) {
+        return this.onERC721Received.selector;
     }
 }

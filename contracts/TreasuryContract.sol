@@ -410,6 +410,40 @@ contract TreasuryContract is IERC1155Receiver, ERC1155Supply {
     }
 
     /**
+     * @dev This function gives you the community token id of the recordId that you pass
+     * @param recordId This is the Id of the token that you want to check
+     */
+    function getCommunityTokenId(uint256 recordId)
+        public
+        view
+        returns (uint256)
+    {
+        Token memory token = commTokenMapping[recordId];
+        if (token.isPresent) {
+            return token.tokenId;
+        } else {
+            revert("Invalid record id");
+        }
+    }
+
+    /**
+     * @dev This function gives you the governance token id of the recordId that you pass
+     * @param recordId This is the Id of the token that you want to check
+     */
+    function getGovernanceTokenId(uint256 recordId)
+        public
+        view
+        returns (uint256)
+    {
+        Token memory token = govTokenMapping[recordId];
+        if (token.isPresent) {
+            return token.tokenId;
+        } else {
+            revert("Invalid record id");
+        }
+    }
+
+    /**
      * @dev This function returns the amount of total tokens that are in circulation
      * @param tokenId This is the token whoes circulating supply you  want to find out
      */
