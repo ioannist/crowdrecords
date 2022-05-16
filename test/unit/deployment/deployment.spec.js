@@ -39,6 +39,10 @@ contract("Deployment", function () {
                 this.treasuryContract.address
         );
         assert(
+            (await this.contributionVotingContract.ORDER_CONTRACT_ADDRESS()) ===
+                this.ordersContract.address
+        );
+        assert(
             (await this.ordersContract.TREASURY_CONTRACT_ADDRESS()) ===
                 this.treasuryContract.address
         );

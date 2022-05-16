@@ -6,6 +6,8 @@ const {
     RECORD_ID,
     COMMUNITY_TOKEN_ID,
     GOVERNANCE_TOKEN_ID,
+    COMMUNITY_TOKEN_BALANCE_USER1,
+    GOVERNANCE_TOKEN_BALANCE_USER1,
 } = require("./generateTokens");
 const helper = require("../../utils/helper");
 let tryCatch = require("../../utils/exception").tryCatch;
@@ -17,7 +19,7 @@ let {
     VOTING_INTERVAL_BLOCKS,
 } = require("../../utils/helper");
 
-contract("Orders", function () {
+contract("Not Ratio Locked Sales", function () {
     before(setup);
     before(generateTokens);
 
@@ -28,42 +30,6 @@ contract("Orders", function () {
     });
     afterEach(async function () {
         await helper.revertToSnapshot(snapshotId);
-    });
-
-    it("User can create lock sale request and cancel it", async function () {
-        await this.treasuryContract.setApprovalForAll(this.ordersContract.address, true);
-
-        let trx = await this.ordersContract.createSaleOrder(
-            true,
-            RECORD_ID,
-            COMMUNITY_TOKEN_ID,
-            100,
-            1,
-            GOVERNANCE_TOKEN_ID,
-            5,
-            2
-        );
-        checkIfEventEmitted(trx?.logs, "SaleOrder", "SaleOrder event not generated");
-        checkIfEventData(
-            trx?.logs,
-            "SaleOrder",
-            "SaleOrder event generated but data mismatch error",
-            {
-                seller: await helper.getEthAccount(0),
-                isLockedInRatio: true,
-            }
-        );
-        let saleId = trx?.logs[0].args.saleId;
-        trx = await this.ordersContract.cancelSaleOrder(saleId);
-        checkIfEventEmitted(trx?.logs, "SaleClose", "SaleClose event not generated");
-        checkIfEventData(
-            trx?.logs,
-            "SaleClose",
-            "SaleClose event generated but data mismatch error",
-            {
-                saleId: saleId,
-            }
-        );
     });
 
     it("User can create normal sale request and cancel it", async function () {
@@ -101,6 +67,22 @@ contract("Orders", function () {
                 saleId: saleId,
             }
         );
+
+        assert(
+            (await this.treasuryContract.balanceOf(
+                await helper.getEthAccount(0),
+                COMMUNITY_TOKEN_ID
+            )) == COMMUNITY_TOKEN_BALANCE_USER1,
+            "The community tokens of the canceled sale have not returned"
+        );
+
+        assert(
+            (await this.treasuryContract.balanceOf(
+                await helper.getEthAccount(0),
+                GOVERNANCE_TOKEN_ID
+            )) == GOVERNANCE_TOKEN_BALANCE_USER1,
+            "The governance tokens of the canceled sale have not returned"
+        );
     });
 
     it("Sale tokens should belong to single record only", async function () {
@@ -119,8 +101,22 @@ contract("Orders", function () {
         );
     });
 
-    it("Should able to purchase non locked asset", async function () {
+    it("Should able to purchase non locked asset and sale should close", async function () {
+        //Seller Approval
         await this.treasuryContract.setApprovalForAll(this.ordersContract.address, true);
+        //Purchaser Approval
+        await this.treasuryContract.setApprovalForAll(this.ordersContract.address, true, {
+            from: await helper.getEthAccount(1),
+        });
+
+        //Transferring CRD token so other account can purchase the tokens
+        await this.treasuryContract.safeTransferFrom(
+            await helper.getEthAccount(0),
+            await helper.getEthAccount(1),
+            await this.treasuryContract.CRD(),
+            100000,
+            "0x0"
+        );
 
         let trx = await this.ordersContract.createSaleOrder(
             false,
@@ -144,12 +140,13 @@ contract("Orders", function () {
             }
         );
 
+        //-----------------------------------------------------------------------------//
+        // Here we are performing partial transfer
+        // That is we will only purchase some amount of the order
         trx = await this.ordersContract.purchaseSaleOrder(
             saleId, //SaleId
             1, //governanceTokenAmount
-            1, //governanceTokenPrice
             50, //communityTokenAmount
-            1, //communityTokenPrice
             { from: await helper.getEthAccount(1) }
         );
 
@@ -164,29 +161,55 @@ contract("Orders", function () {
         );
 
         assert(
-            (await treasuryContract.balanceOf(await helper.getEthAccount(1), COMMUNITY_TOKEN_ID)) ==
-                50,
+            (await this.treasuryContract.balanceOf(
+                await helper.getEthAccount(1),
+                COMMUNITY_TOKEN_ID
+            )) == 50,
             "Final balance after community token transfer doesn't match"
         );
 
         assert(
-            (await treasuryContract.balanceOf(
+            (await this.treasuryContract.balanceOf(
                 await helper.getEthAccount(1),
                 GOVERNANCE_TOKEN_ID
             )) == 1,
             "Final balance after governance token transfer doesn't match"
         );
 
-        // trx = await this.ordersContract.cancelSaleOrder(trx?.logs[0].args.saleId);
-        // checkIfEventEmitted(trx?.logs, "SaleClose", "SaleClose event not generated");
-        // checkIfEventData(
-        //     trx?.logs,
-        //     "SaleClose",
-        //     "SaleClose event generated but data mismatch error",
-        //     {
-        //         saleId: trx?.logs[0].args.saleId,
-        //     }
-        // );
+        //-----------------------------------------------------------------------------//
+        // Here we will purchase all the remaining asset and it should result in sale close event genration
+        trx = await this.ordersContract.purchaseSaleOrder(
+            saleId, //SaleId
+            4, //governanceTokenAmount
+            50, //communityTokenAmount
+            { from: await helper.getEthAccount(1) }
+        );
+
+        assert(
+            (await this.treasuryContract.balanceOf(
+                await helper.getEthAccount(1),
+                COMMUNITY_TOKEN_ID
+            )) == 100,
+            "Final balance after community token transfer doesn't match"
+        );
+
+        assert(
+            (await this.treasuryContract.balanceOf(
+                await helper.getEthAccount(1),
+                GOVERNANCE_TOKEN_ID
+            )) == 5,
+            "Final balance after governance token transfer doesn't match"
+        );
+
+        checkIfEventEmitted(trx?.logs, "SaleClose", "SaleClose event not generated");
+        checkIfEventData(
+            trx?.logs,
+            "SaleClose",
+            "SaleClose event generated but data mismatch error",
+            {
+                saleId: trx?.logs[0].args.saleId,
+            }
+        );
     });
 });
 

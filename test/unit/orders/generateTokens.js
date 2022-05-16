@@ -4,6 +4,8 @@ let NEW_CONTRIBUTION_1_ID = 2;
 let RECORD_ID = 1;
 let COMMUNITY_TOKEN_ID = 2;
 let GOVERNANCE_TOKEN_ID = 3;
+let GOVERNANCE_TOKEN_BALANCE_USER1 = 450000;
+let COMMUNITY_TOKEN_BALANCE_USER1 = 450000;
 
 async function generateTokens() {
     await this.contributionContract.createSeedContribution(
@@ -13,8 +15,20 @@ async function generateTokens() {
         "This is the description for the record"
     );
     await this.recordsContract.createNewRecord("Test", "image.png", "Cat1", SEED_CONTRIBUTION_ID);
-    await this.treasuryContract.createNewCommunityToken([1, 1000000, 450000, "Test", "image.png"]);
-    await this.treasuryContract.createNewGovernanceToken([1, 1000000, 450000, "Test", "image.png"]);
+    await this.treasuryContract.createNewCommunityToken([
+        1,
+        1000000,
+        COMMUNITY_TOKEN_BALANCE_USER1,
+        "Test",
+        "image.png",
+    ]);
+    await this.treasuryContract.createNewGovernanceToken([
+        1,
+        1000000,
+        GOVERNANCE_TOKEN_BALANCE_USER1,
+        "Test",
+        "image.png",
+    ]);
 }
 
 module.exports = {
@@ -23,6 +37,8 @@ module.exports = {
     RECORD_ID,
     COMMUNITY_TOKEN_ID,
     GOVERNANCE_TOKEN_ID,
+    GOVERNANCE_TOKEN_BALANCE_USER1,
+    COMMUNITY_TOKEN_BALANCE_USER1,
     generateTokens,
 };
 

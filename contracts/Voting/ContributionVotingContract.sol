@@ -118,6 +118,16 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
     }
 
     /**
+     * @dev This function sets the treasury Contract address
+     */
+    function setOrderContractAddress(address newOrderContractAddress)
+        external
+        _ownerOnly
+    {
+        _setOrderContractAddress(newOrderContractAddress);
+    }
+
+    /**
      * @dev Sets the contribution contract address so that the voting ballot for contritbution can be restricted only to a certain contract that is the contribution contract
      */
     function setContributionContractAddress(
@@ -142,7 +152,7 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
             "Voting is already created"
         );
 
-        uint256 ballotId = _createVoting(false);
+        uint256 ballotId = _createVoting(true);
 
         ContributionReward memory contributionReward = ContributionReward({
             requester: tx.origin,

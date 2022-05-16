@@ -182,5 +182,7 @@ contract("Voting", function () {
             { result: true }
         );
     });
+
+    //Declaring winner, user should win and the creator of contribution's token and the tokens in sale are ignored in voting result : Multi Person Vote
 });
 

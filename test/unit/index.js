@@ -1,6 +1,6 @@
 contract("Unit Tests", function () {
-    // require("./deployment/deployment.spec");
-    // require("./voting/voting.spec");
-    require("./orders/orders.spec");
+    require("./deployment");
+    // require("./voting");
+    require("./orders");
 });
 

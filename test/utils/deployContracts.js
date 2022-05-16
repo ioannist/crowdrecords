@@ -27,6 +27,7 @@ async function setup() {
 
     await contributionVotingContract.setTreasuryContractAddress(treasuryContract.address);
     await contributionVotingContract.setContributionContractAddress(contributionContract.address);
+    await contributionVotingContract.setOrderContractAddress(ordersContract.address);
 
     await ordersContract.setTreasuryContractAddress(treasuryContract.address);
     await treasuryContract.setContributionVotingContractAddress(contributionVotingContract.address);

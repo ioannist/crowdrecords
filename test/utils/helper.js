@@ -150,8 +150,7 @@ exports.checkIfEventData = (logs, eventName, errorMessage, data) => {
     for (i in logs) {
         if (logs[i].event == eventName) {
             for (k in data) {
-                if (data[k] != logs[i].args[k]) {
-                    //If data miss matches then throw error
+                if (data[k]?.toString() != logs[i].args[k]?.toString()) {
                     return assert(false, errorMessage);
                 }
             }

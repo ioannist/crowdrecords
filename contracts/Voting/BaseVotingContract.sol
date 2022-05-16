@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 
 import "../TreasuryContract.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "../OrdersContract.sol";
 
 contract BaseVotingContract {
     struct VotingBallot {
@@ -17,6 +18,7 @@ contract BaseVotingContract {
 
     uint256 VOTING_BLOCK_PERIOD = 25;
     address public TREASURY_CONTRACT_ADDRESS;
+    address public ORDER_CONTRACT_ADDRESS;
     address OWNER;
 
     uint256 votingId = 0;
@@ -105,6 +107,17 @@ contract BaseVotingContract {
     }
 
     /**
+     * @dev This function sets the treasury Contract address
+     */
+    function _setOrderContractAddress(address newOrderContractAddress)
+        internal
+        virtual
+        _ownerOnly
+    {
+        ORDER_CONTRACT_ADDRESS = newOrderContractAddress;
+    }
+
+    /**
      * @dev This function is called by any user to cast vote
      * @param votingBallotId this is the id of the ballot for which user is voting
      * @param vote this is the state of the vote, if true than it means the vote is in favour of the ballot
@@ -185,6 +198,11 @@ contract BaseVotingContract {
             TREASURY_CONTRACT_ADDRESS
         );
 
+        uint256 tokenInSale = treasuryContract.balanceOf(
+            ORDER_CONTRACT_ADDRESS,
+            tokenId
+        );
+
         uint256[] memory yesBalanceList = treasuryContract.balanceOfBatch(
             votingMap[votingBallotId].yes,
             idList
@@ -212,12 +230,8 @@ contract BaseVotingContract {
             uint256 totalCirculatingSupply = treasuryContract
                 .totalCicultingSupply(tokenId);
 
-            totalCirculatingSupply =
-                totalCirculatingSupply -
-                treasuryContract.balanceOf(
-                    votingMap[votingBallotId].owner,
-                    tokenId
-                );
+            // We will deduct the tokens that are in sale contract fromthe total circulating supply
+            totalCirculatingSupply = totalCirculatingSupply - tokenInSale;
 
             uint256 winRatio = ((totalYes * 100) / totalCirculatingSupply);
 

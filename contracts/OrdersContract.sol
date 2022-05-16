@@ -10,6 +10,7 @@ contract OrdersContract {
     address public RECORDS_CONTRACT_ADDRESS;
     address public VOTING_CONTRACT_ADDRESS;
     address public TREASURY_CONTRACT_ADDRESS;
+    uint8 TRANSACTION_FEE = 50; //This is 0.50%
     address OWNER;
 
     struct Order {
@@ -224,8 +225,8 @@ contract OrdersContract {
         //--- Need to have additional checks for balance of the sale and also to deduct the tokens from the sale struct
         if (order.communityTokenAmount > 0) {
             treasuryContract.safeTransferFrom(
-                msg.sender,
                 address(this),
+                order.seller,
                 order.communityTokenId,
                 order.communityTokenAmount,
                 "Sale order"
@@ -234,8 +235,8 @@ contract OrdersContract {
 
         if (order.governanceTokenAmount > 0) {
             treasuryContract.safeTransferFrom(
-                msg.sender,
                 address(this),
+                order.seller,
                 order.governanceTokenId,
                 order.governanceTokenAmount,
                 "Sale order"
@@ -253,9 +254,7 @@ contract OrdersContract {
     function purchaseSaleOrder(
         uint256 saleId,
         uint256 governanceTokenAmount,
-        uint256 governanceTokenPrice,
-        uint256 communityTokenAmount,
-        uint256 communityTokenPrice
+        uint256 communityTokenAmount
     ) public {
         require(
             orderBook[orderId].seller != msg.sender,
@@ -277,52 +276,52 @@ contract OrdersContract {
         );
 
         if (order.isLockedInRatio) {
-            require(
-                SafeMath.div(
-                    communityTokenAmount,
-                    governanceTokenAmount,
-                    "Invalid ratio"
-                ) ==
+            //Multiply bigger value to make sure that we have proper ratio.
+            //As if we don't do that then something like 3/2 and 5/4 will be considers same and they will result in a false positive
+            if (order.communityTokenAmount > order.governanceTokenAmount) {
+                require(
                     SafeMath.div(
-                        order.communityTokenAmount,
-                        order.governanceTokenAmount,
+                        communityTokenAmount * 100,
+                        governanceTokenAmount,
                         "Invalid ratio"
-                    ),
-                "Invalid Ratio"
-            );
+                    ) ==
+                        SafeMath.div(
+                            order.communityTokenAmount * 100,
+                            order.governanceTokenAmount,
+                            "Invalid ratio"
+                        ),
+                    "Invalid Ratio"
+                );
+            } else {
+                require(
+                    SafeMath.div(
+                        governanceTokenAmount * 100,
+                        communityTokenAmount,
+                        "Invalid ratio"
+                    ) ==
+                        SafeMath.div(
+                            order.governanceTokenAmount * 100,
+                            order.communityTokenAmount,
+                            "Invalid ratio"
+                        ),
+                    "Invalid Ratio"
+                );
+            }
         }
 
-        TreasuryContract treasuryContract = TreasuryContract(
-            TREASURY_CONTRACT_ADDRESS
-        );
-        //Token purchase check for price
-        //Token purchase transfer the CRD tokens from users account
-        //Deduct the commission of platform
         if (order.communityTokenAmount > 0) {
-            require(
-                order.communityTokenPrice <= communityTokenPrice,
-                "Community token price is below asking price"
-            );
-            treasuryContract.safeTransferFrom(
-                msg.sender,
-                address(this),
-                order.communityTokenId,
-                order.communityTokenAmount,
-                "Sale order"
+            _transferTokensAndTransactionCharge(
+                communityTokenAmount,
+                order.communityTokenPrice,
+                order.communityTokenId
             );
         }
 
         if (order.governanceTokenAmount > 0) {
-            require(
-                order.governanceTokenPrice <= governanceTokenPrice,
-                "Governance token price is below asking price"
-            );
-            treasuryContract.safeTransferFrom(
-                msg.sender,
-                address(this),
-                order.governanceTokenId,
-                order.governanceTokenAmount,
-                "Sale order"
+            _transferTokensAndTransactionCharge(
+                governanceTokenAmount,
+                order.governanceTokenPrice,
+                order.governanceTokenId
             );
         }
 
@@ -332,10 +331,10 @@ contract OrdersContract {
             buyer: msg.sender,
             creationDate: block.timestamp,
             communityTokenId: order.communityTokenId,
-            communityTokenAmount: order.communityTokenAmount,
+            communityTokenAmount: communityTokenAmount,
             communityTokenPrice: order.communityTokenPrice,
             governanceTokenId: order.governanceTokenId,
-            governanceTokenAmount: order.governanceTokenAmount,
+            governanceTokenAmount: governanceTokenAmount,
             governanceTokenPrice: order.governanceTokenPrice
         });
 
@@ -350,9 +349,51 @@ contract OrdersContract {
         if (
             order.communityTokenAmount == 0 && order.governanceTokenAmount == 0
         ) {
-            orderBook[orderId].isClosed = true;
+            order.isClosed = true;
             emit SaleClose({saleId: saleId, creationDate: block.timestamp});
         }
+        orderBook[orderId] = order;
+    }
+
+    /// @notice This is only for internal use
+    /// @dev This function is responsible to transfer the tokens at the time of purchase and it is also responsible for transfering the fees.
+    /// @param tokenAmount This is the amount of token to transfer
+    /// @param tokenPrice This is the token price at which the tokens are being sold at
+    /// @param tokenId this is the ID of the token to transfer
+    function _transferTokensAndTransactionCharge(
+        uint256 tokenAmount,
+        uint256 tokenPrice,
+        uint256 tokenId
+    ) internal {
+        uint256 transactionAmount = (tokenAmount * tokenPrice);
+        uint256 transactionFee = (transactionAmount * TRANSACTION_FEE) / 1000;
+
+        TreasuryContract treasuryContract = TreasuryContract(
+            TREASURY_CONTRACT_ADDRESS
+        );
+        treasuryContract.safeTransferFrom(
+            msg.sender,
+            address(this),
+            treasuryContract.CRD(),
+            transactionFee,
+            "Sale transaction fee"
+        );
+
+        treasuryContract.safeTransferFrom(
+            msg.sender,
+            address(this),
+            treasuryContract.CRD(),
+            transactionAmount,
+            "Sale token price amount transfer to seller"
+        );
+
+        treasuryContract.safeTransferFrom(
+            address(this),
+            msg.sender,
+            tokenId,
+            tokenAmount,
+            "Sale token transfer to buyer"
+        );
     }
 
     /**
