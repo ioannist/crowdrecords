@@ -6,6 +6,7 @@ const ContributionVotingContract = artifacts.require(
     "../contracts/voting/ContributionVotingContract.sol"
 );
 const OrdersContract = artifacts.require("../contracts/OrdersContract.sol");
+const AgreementContract = artifacts.require("../contracts/AgreementContract.sol");
 
 const { VOTING_INTERVAL_BLOCKS } = require("./helper");
 
@@ -18,6 +19,7 @@ async function setup() {
         VOTING_INTERVAL_BLOCKS
     );
     let ordersContract = await OrdersContract.deployed();
+    let agreementContract = await AgreementContract.deployed();
 
     await contributionContract.setContributionVotingContractAddress(
         contributionVotingContract.address
@@ -32,12 +34,16 @@ async function setup() {
     await ordersContract.setTreasuryContractAddress(treasuryContract.address);
     await treasuryContract.setContributionVotingContractAddress(contributionVotingContract.address);
 
+    await agreementContract.setTreasuryContractAddress(treasuryContract.address);
+    await agreementContract.setOrderContractAddress(ordersContract.address);
+
     this.tracksContract = tracksContract;
     this.contributionContract = contributionContract;
     this.recordsContract = recordsContract;
     this.treasuryContract = treasuryContract;
     this.contributionVotingContract = contributionVotingContract;
     this.ordersContract = ordersContract;
+    this.agreementContract = agreementContract;
 }
 
 module.exports = setup;

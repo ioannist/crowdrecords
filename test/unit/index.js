@@ -1,6 +1,8 @@
 contract("Unit Tests", function () {
     require("./deployment");
     // require("./voting");
-    require("./orders");
+    // require("./orders");
+    // require("./gasCost");
+    require("./agreement");
 });
 

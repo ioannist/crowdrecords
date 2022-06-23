@@ -228,7 +228,7 @@ contract BaseVotingContract {
 
         if (totalYes > 0) {
             uint256 totalCirculatingSupply = treasuryContract
-                .totalCicultingSupply(tokenId);
+                .totalCirculatingSupply(tokenId);
 
             // We will deduct the tokens that are in sale contract fromthe total circulating supply
             totalCirculatingSupply = totalCirculatingSupply - tokenInSale;

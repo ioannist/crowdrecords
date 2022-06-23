@@ -128,6 +128,20 @@ exports.getEthAccount = (accountNumber) => {
     });
 };
 
+exports.getEthBalanceForAccount = (accountNumber) => {
+    return new Promise(async (resolve, reject) => {
+        let accounts = await web3.eth.getAccounts();
+        if (accounts) {
+            if (accountNumber > accounts.length) return reject(undefined);
+
+            return resolve(
+                await web3.utils.fromWei(await web3.eth.getBalance(accounts[accountNumber]))
+            );
+        }
+        return reject(accounts);
+    });
+};
+
 /**
  *
  * @param {Array} logs

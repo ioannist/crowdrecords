@@ -6,13 +6,14 @@ import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Supply.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./RecordsContract.sol";
+import "./ERC1155/SnapshotERC1155.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 // ERC 20 balance[adress] => 2 contracts // governance and comunity
 // ERC 721 blance[adress] => 1 contract // records
 // ERC 1155
 
-contract TreasuryContract is IERC1155Receiver, ERC1155Supply {
+contract TreasuryContract is IERC1155Receiver, SnapshotERC1155 {
     uint256 public constant CRD = 1;
     uint256 private LastTokenId = 1;
     address public RECORDS_CONTRACT_ADDRESS;
@@ -115,9 +116,9 @@ contract TreasuryContract is IERC1155Receiver, ERC1155Supply {
     mapping(string => bool) commTokenSym;
 
     // By default URI to crowdrecords domain
-    // 9 decimal points supported
+    // 18 decimal points supported
     constructor() ERC1155("https://crowdrecords.com/{id}") {
-        _mint(msg.sender, CRD, 10**9, "https://crowdrecords.com");
+        _mint(msg.sender, CRD, 1000000 * 10**18, "https://crowdrecords.com");
         OWNER = msg.sender;
     }
 
@@ -447,7 +448,7 @@ contract TreasuryContract is IERC1155Receiver, ERC1155Supply {
      * @dev This function returns the amount of total tokens that are in circulation
      * @param tokenId This is the token whoes circulating supply you  want to find out
      */
-    function totalCicultingSupply(uint256 tokenId)
+    function totalCirculatingSupply(uint256 tokenId)
         public
         view
         returns (uint256)
@@ -458,6 +459,10 @@ contract TreasuryContract is IERC1155Receiver, ERC1155Supply {
         );
 
         return totalCirculatingBalance;
+    }
+
+    function snapshot() public returns (uint256 snapshotId) {
+        return _snapshot();
     }
 
     function onERC1155Received(

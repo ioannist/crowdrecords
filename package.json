@@ -21,8 +21,8 @@
     },
     "homepage": "https://github.com/ioannist/crowdrecords#readme",
     "dependencies": {
+        "@ethersproject/bignumber": "^5.6.2",
         "@openzeppelin/contracts": "^4.5.0",
         "ganache": "^7.0.5"
     }
 }
-

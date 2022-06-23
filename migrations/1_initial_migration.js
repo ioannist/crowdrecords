@@ -6,6 +6,7 @@ const ContributionVotingContract = artifacts.require(
     "../contracts/voting/ContributionVotingContract.sol"
 );
 const OrdersContract = artifacts.require("../contracts/OrdersContract.sol");
+const AgreementContract = artifacts.require("../contracts/AgreementContract.sol");
 
 module.exports = async (deployer) => {
     await deployer.deploy(ContributionContract);
@@ -18,7 +19,11 @@ module.exports = async (deployer) => {
     let treasuryContract = await TreasuryContract.deployed();
     await deployer.deploy(ContributionVotingContract, 20);
     let contributionVotingContract = await ContributionVotingContract.deployed();
+
     await deployer.deploy(OrdersContract);
     let ordersContract = await OrdersContract.deployed();
+
+    await deployer.deploy(AgreementContract, 20);
+    let agreementContract = await AgreementContract.deployed();
 };
 

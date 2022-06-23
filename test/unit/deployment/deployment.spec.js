@@ -19,6 +19,7 @@ contract("Deployment", function () {
         assert(this.treasuryContract.address !== "");
         assert(this.contributionVotingContract.address !== "");
         assert(this.ordersContract.address !== "");
+        assert(this.agreementContract.address !== "");
     });
 
     it("All address set", async function () {
@@ -49,6 +50,14 @@ contract("Deployment", function () {
         assert(
             (await this.treasuryContract.CONTRIBUTION_VOTING_CONTRACT_ADDRESS()) ===
                 this.contributionVotingContract.address
+        );
+
+        assert(
+            (await this.agreementContract.TREASURY_CONTRACT_ADDRESS()) ===
+                this.treasuryContract.address
+        );
+        assert(
+            (await this.agreementContract.ORDER_CONTRACT_ADDRESS()) === this.ordersContract.address
         );
     });
 });
