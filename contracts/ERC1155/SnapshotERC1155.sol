@@ -20,6 +20,7 @@ abstract contract SnapshotERC1155 is ERC1155Supply {
 
     mapping(address => mapping(uint256 => Snapshots))
         private _accountBalanceSnapshots;
+
     mapping(uint256 => Snapshots) private _totalSupplySnapshots;
 
     // Snapshot ids increase monotonically, with the first value being 1. An id of 0 is invalid.
@@ -113,8 +114,6 @@ abstract contract SnapshotERC1155 is ERC1155Supply {
         uint256[] memory amounts,
         bytes memory data
     ) internal virtual override {
-        super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
-
         if (from == address(0)) {
             // mint
             _updateAccountSnapshot(to, ids);
@@ -128,6 +127,7 @@ abstract contract SnapshotERC1155 is ERC1155Supply {
             _updateAccountSnapshot(from, ids);
             _updateAccountSnapshot(to, ids);
         }
+        super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
     }
 
     function _valueAt(uint256 snapshotId, Snapshots storage snapshots)
