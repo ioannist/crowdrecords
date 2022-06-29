@@ -32,7 +32,7 @@ contract AgreementContract is BaseVotingContract {
     event RoyaltyPayment(
         uint256 recordId,
         uint256 totalSupplyEther,
-        uint256 dividendAmountEther,
+        uint256 dividendAmountWei,
         uint256 dividendId,
         uint256 tokenId,
         uint256 dividendPerTokenWei,
@@ -48,7 +48,7 @@ contract AgreementContract is BaseVotingContract {
 
     struct DividendData {
         uint256 totalSupplyEther;
-        uint256 dividendAmountEther;
+        uint256 dividendAmountWei;
         uint256 dividendId;
         uint256 tokenId;
         uint256 dividendPerTokenWei;
@@ -249,7 +249,7 @@ contract AgreementContract is BaseVotingContract {
 
         DividendData memory dividend = DividendData({
             totalSupplyEther: totalSupply / 1 ether,
-            dividendAmountEther: amount,
+            dividendAmountWei: amount,
             dividendId: dividendId,
             dividendPerTokenWei: amount / (totalSupply / 1 ether),
             tokenId: tokenId,
@@ -259,7 +259,7 @@ contract AgreementContract is BaseVotingContract {
         emit RoyaltyPayment({
             recordId: recordId,
             totalSupplyEther: dividend.totalSupplyEther,
-            dividendAmountEther: dividend.dividendAmountEther,
+            dividendAmountWei: dividend.dividendAmountWei,
             dividendId: dividend.dividendId,
             tokenId: dividend.tokenId,
             dividendPerTokenWei: dividend.dividendPerTokenWei,
@@ -321,18 +321,19 @@ contract AgreementContract is BaseVotingContract {
                 rewardAmount,
                 "Royalty payment claim"
             );
-            // totalReward = rewardAmount + totalReward;
+            totalReward = rewardAmount + totalReward;
             newClaimIndex++;
         }
+
         require(totalReward > 0, "Reward needs to be greater than 0");
 
-        treasuryContract.safeTransferFrom(
-            address(this),
-            msg.sender,
-            treasuryContract.CRD(),
-            totalReward,
-            "Royalty payment claim"
-        );
+        // treasuryContract.safeTransferFrom(
+        //     address(this),
+        //     msg.sender,
+        //     treasuryContract.CRD(),
+        //     totalReward,
+        //     "Royalty payment claim"
+        // );
     }
 
     /**
@@ -354,14 +355,14 @@ contract AgreementContract is BaseVotingContract {
             tokenId
         );
 
-        return dividend.dividendPerTokenWei * tokenBal;
+        return dividend.dividendPerTokenWei * (tokenBal / 1 ether);
     }
 
     /**
      * @dev
      */
     function _getNewClaimIndex(uint256[] memory dividendIdArray, address user)
-        public
+        internal
         view
         returns (uint256)
     {
@@ -392,8 +393,10 @@ contract AgreementContract is BaseVotingContract {
             low > 0 &&
             dividendClaimMapping[dividendIdArray[low - 1]][user] == false
         ) return low - 1;
-        else if (dividendClaimMapping[dividendIdArray[low]][user] == true)
-            return low + 1;
+        else if (
+            low < dividendIdArray.length &&
+            dividendClaimMapping[dividendIdArray[low]][user] == true
+        ) return low + 1;
         else return low;
     }
 
