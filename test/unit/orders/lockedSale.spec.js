@@ -23,6 +23,19 @@ contract("Ratio Locked Sales", function () {
     before(setup);
     before(generateTokens);
 
+    //Todo : Test cases
+    // creating buy request and locking CRD
+    // create buy user from multiple user and locking CRD and checking the total
+    //creating buy sale without sufficient CRD
+    //completing a buy order
+    // trying to complete buy order without sufficient token
+    // trying to complete buy order but only have sufficient COMMUNITY token
+    // trying to complete buy order but only have sufficient GOVERNANCE token
+    // trying to fullfill order with incorrect ratio
+    // trying to purchase token of different records in single sale
+    //checking if the events are being emited during the order creation
+    //checking if the events are being emited during order fullfill
+
     let snapShot, snapshotId;
     beforeEach(async function () {
         snapShot = await helper.takeSnapshot();
@@ -35,7 +48,7 @@ contract("Ratio Locked Sales", function () {
     it("User can create lock sale request and cancel it", async function () {
         await this.treasuryContract.setApprovalForAll(this.ordersContract.address, true);
 
-        let trx = await this.ordersContract.createSaleOrder(
+        let trx = await this.ordersContract.createBuyOrder(
             true,
             RECORD_ID,
             COMMUNITY_TOKEN_ID,
@@ -45,23 +58,23 @@ contract("Ratio Locked Sales", function () {
             5,
             2
         );
-        checkIfEventEmitted(trx?.logs, "SaleOrder", "SaleOrder event not generated");
+        checkIfEventEmitted(trx?.logs, "BuyOrder", "BuyOrder event not generated");
         checkIfEventData(
             trx?.logs,
-            "SaleOrder",
-            "SaleOrder event generated but data mismatch error",
+            "BuyOrder",
+            "BuyOrder event generated but data mismatch error",
             {
-                seller: await helper.getEthAccount(0),
+                buyer: await helper.getEthAccount(0),
                 isLockedInRatio: true,
             }
         );
         let saleId = trx?.logs[0].args.saleId;
-        trx = await this.ordersContract.cancelSaleOrder(saleId);
-        checkIfEventEmitted(trx?.logs, "SaleClose", "SaleClose event not generated");
+        trx = await this.ordersContract.cancelBuyOrder(saleId);
+        checkIfEventEmitted(trx?.logs, "BuyClose", "BuyClose event not generated");
         checkIfEventData(
             trx?.logs,
-            "SaleClose",
-            "SaleClose event generated but data mismatch error",
+            "BuyClose",
+            "BuyClose event generated but data mismatch error",
             {
                 saleId: saleId,
             }
@@ -87,7 +100,7 @@ contract("Ratio Locked Sales", function () {
     it("Sale tokens should belong to single record only", async function () {
         await this.treasuryContract.setApprovalForAll(this.ordersContract.address, true);
         await tryCatch(
-            this.ordersContract.createSaleOrder(
+            this.ordersContract.createBuyOrder(
                 true,
                 RECORD_ID,
                 COMMUNITY_TOKEN_ID,
@@ -117,7 +130,7 @@ contract("Ratio Locked Sales", function () {
             "0x0"
         );
 
-        let trx = await this.ordersContract.createSaleOrder(
+        let trx = await this.ordersContract.createBuyOrder(
             true,
             RECORD_ID,
             COMMUNITY_TOKEN_ID,
@@ -128,11 +141,11 @@ contract("Ratio Locked Sales", function () {
             2
         );
         let saleId = trx?.logs[0].args.saleId;
-        checkIfEventEmitted(trx?.logs, "SaleOrder", "SaleOrder event not generated");
+        checkIfEventEmitted(trx?.logs, "BuyOrder", "BuyOrder event not generated");
         checkIfEventData(
             trx?.logs,
-            "SaleOrder",
-            "SaleOrder event generated but data mismatch error",
+            "BuyOrder",
+            "BuyOrder event generated but data mismatch error",
             {
                 seller: await helper.getEthAccount(0),
                 isLockedInRatio: true,
@@ -141,7 +154,7 @@ contract("Ratio Locked Sales", function () {
 
         // Here we are performing wrong ratio transfer it should be reject.
         await tryCatch(
-            this.ordersContract.purchaseSaleOrder(
+            this.ordersContract.purchaseBuyOrder(
                 saleId, //SaleId
                 1, //governanceTokenAmount
                 50, //communityTokenAmount
@@ -167,7 +180,7 @@ contract("Ratio Locked Sales", function () {
             "0x0"
         );
 
-        let trx = await this.ordersContract.createSaleOrder(
+        let trx = await this.ordersContract.createBuyOrder(
             true,
             RECORD_ID,
             COMMUNITY_TOKEN_ID,
@@ -178,11 +191,11 @@ contract("Ratio Locked Sales", function () {
             2
         );
         let saleId = trx?.logs[0].args.saleId;
-        checkIfEventEmitted(trx?.logs, "SaleOrder", "SaleOrder event not generated");
+        checkIfEventEmitted(trx?.logs, "BuyOrder", "BuyOrder event not generated");
         checkIfEventData(
             trx?.logs,
-            "SaleOrder",
-            "SaleOrder event generated but data mismatch error",
+            "BuyOrder",
+            "BuyOrder event generated but data mismatch error",
             {
                 seller: await helper.getEthAccount(0),
                 isLockedInRatio: true,
@@ -192,7 +205,7 @@ contract("Ratio Locked Sales", function () {
         //-----------------------------------------------------------------------------//
         // Here we are performing partial transfer
         // That is we will only purchase some amount of the order
-        trx = await this.ordersContract.purchaseSaleOrder(
+        trx = await this.ordersContract.purchaseBuyOrder(
             saleId, //SaleId
             4, //governanceTokenAmount
             80, //communityTokenAmount
@@ -227,7 +240,7 @@ contract("Ratio Locked Sales", function () {
 
         //-----------------------------------------------------------------------------//
         // Here we will purchase all the remaining asset and it should result in sale close event genration
-        trx = await this.ordersContract.purchaseSaleOrder(
+        trx = await this.ordersContract.purchaseBuyOrder(
             saleId, //SaleId
             1, //governanceTokenAmount
             20, //communityTokenAmount
@@ -250,11 +263,11 @@ contract("Ratio Locked Sales", function () {
             "Final balance after governance token transfer doesn't match"
         );
 
-        checkIfEventEmitted(trx?.logs, "SaleClose", "SaleClose event not generated");
+        checkIfEventEmitted(trx?.logs, "OrderClose", "OrderClose event not generated");
         checkIfEventData(
             trx?.logs,
-            "SaleClose",
-            "SaleClose event generated but data mismatch error",
+            "OrderClose",
+            "OrderClose event generated but data mismatch error",
             {
                 saleId: trx?.logs[0].args.saleId,
             }
