@@ -90,6 +90,7 @@ contract AgreementContract is BaseVotingContract {
     mapping(uint256 => DividendData) dividendDataMapping;
     //dividendId => userAddress => bool
     mapping(uint256 => mapping(address => bool)) dividendClaimMapping;
+    mapping(uint256 => mapping(address => bool)) dividendClaimMapping2;
 
     constructor(uint8 votingInterval) BaseVotingContract() {
         VOTING_BLOCK_PERIOD = votingInterval;
@@ -256,6 +257,11 @@ contract AgreementContract is BaseVotingContract {
             snapshotId: treasuryContract.snapshot()
         });
 
+        require(
+            dividend.dividendPerTokenWei > 0,
+            "Insufficient amount, please try again with greater amount"
+        );
+
         emit RoyaltyPayment({
             recordId: recordId,
             totalSupplyEther: dividend.totalSupplyEther,
@@ -297,7 +303,7 @@ contract AgreementContract is BaseVotingContract {
             "Can only claim once"
         );
 
-        while (newClaimIndex < dividendIdArray.length) {
+        for (; newClaimIndex < dividendIdArray.length; newClaimIndex++) {
             uint256 rewardAmount = _calculateSingleRoyaltyAmount(
                 dividendIdArray[newClaimIndex],
                 tokenId
@@ -310,30 +316,32 @@ contract AgreementContract is BaseVotingContract {
                 userAddress: msg.sender
             });
 
-            dividendClaimMapping[dividendIdArray[newClaimIndex]][
-                msg.sender
-            ] = true;
+            uint256 index = dividendIdArray[newClaimIndex];
+            dividendClaimMapping[index][msg.sender] = true;
 
-            treasuryContract.safeTransferFrom(
-                address(this),
-                msg.sender,
-                treasuryContract.CRD(),
-                rewardAmount,
-                "Royalty payment claim"
-            );
             totalReward = rewardAmount + totalReward;
-            newClaimIndex++;
         }
 
-        require(totalReward > 0, "Reward needs to be greater than 0");
+        //If the total is not bigger then 0 then it means that user doesn't have any pending claim
+        // require(totalReward > 0, "You have no pending claims");
 
-        // treasuryContract.safeTransferFrom(
-        //     address(this),
-        //     msg.sender,
-        //     treasuryContract.CRD(),
-        //     totalReward,
-        //     "Royalty payment claim"
-        // );
+        /**
+            //! When you uncomment the below code then it just causes the crash without a proper reason, here we expect crash to return "You have no pending claims" but instead it just throws error with
+            -Transaction: 0x5896b98d557a472e4f0063783b9e8bcf8ce7982de710c1c3c69c727e9989066a exited with an error (status 0) after consuming all gas.
+            -     Please check that the transaction:
+            -     - satisfies all conditions set by Solidity `assert` statements.
+            -     - has enough gas to execute the full transaction.
+            -     - does not trigger an invalid opcode by other means (ex: accessing an array out of bounds).
+       */
+        // require(false, "You have no pending claims");
+
+        treasuryContract.safeTransferFrom(
+            address(this),
+            msg.sender,
+            treasuryContract.CRD(),
+            totalReward,
+            "Royalty payment claim"
+        );
     }
 
     /**
@@ -354,6 +362,10 @@ contract AgreementContract is BaseVotingContract {
             dividend.snapshotId,
             tokenId
         );
+
+        if (tokenBal == 0) {
+            return 0;
+        }
 
         return dividend.dividendPerTokenWei * (tokenBal / 1 ether);
     }
@@ -399,44 +411,6 @@ contract AgreementContract is BaseVotingContract {
         ) return low + 1;
         else return low;
     }
-
-    // // This is map based on recordId => user address => Divided Amount to claim
-    // mapping(uint256 => mapping(address => uint256)) divedendMapping;
-
-    // // 1 => usera add => 0
-
-    // /**
-    //  * @dev This function is for testing purpose for distributing the royalty payment
-    //  */
-    // function payAmount(
-    //     address[] calldata addressArray,
-    //     uint256 amount,
-    //     uint256 tokenId
-    // ) public returns (uint256) {
-    //     TreasuryContract treasuryContract = TreasuryContract(
-    //         TREASURY_CONTRACT_ADDRESS
-    //     );
-    //     uint256 totalSupply = treasuryContract.totalCirculatingSupply(tokenId);
-    //     uint256 perUser = amount / totalSupply;
-    //     // uint256 totalWIthUsers = 0;
-    //     for (uint256 i = 0; i < addressArray.length; i++) {
-    //         treasuryContract.safeTransferFrom(
-    //             msg.sender,
-    //             addressArray[i],
-    //             tokenId,
-    //             perUser,
-    //             "Reward"
-    //         );
-    //         // totalWIthUsers += treasuryContract.balanceOf(
-    //         //     addressArray[i],
-    //         //     tokenId
-    //         // );
-    //     }
-    //     // require(
-    //     //     totalSupply == totalWIthUsers,
-    //     //     "The user address array is not comprehensive"
-    //     // );
-    // }
 
     function onERC1155Received(
         address operator,
