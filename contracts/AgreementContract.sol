@@ -21,6 +21,7 @@ contract AgreementContract is BaseVotingContract {
     event AgreementCreated(
         address requester,
         uint256 recordId,
+        uint256 agreementId,
         uint256 ballotId,
         uint256 tokenId,
         string contractLink,
@@ -30,6 +31,7 @@ contract AgreementContract is BaseVotingContract {
     );
 
     event RoyaltyPayment(
+        uint256 agreementId,
         uint256 recordId,
         uint256 totalSupplyEther,
         uint256 dividendAmountWei,
@@ -40,6 +42,7 @@ contract AgreementContract is BaseVotingContract {
     );
 
     event RoyaltyPaymentClaimed(
+        uint256 agreementId,
         uint256 dividendId,
         uint256 recordId,
         uint256 rewardAmount,
@@ -84,13 +87,12 @@ contract AgreementContract is BaseVotingContract {
     mapping(uint256 => uint256[]) recordAgreementList;
 
     uint256 dividendId = 0;
-    //RecordId => array of dividends
+    //agreementId => array of dividends
     mapping(uint256 => uint256[]) dividendListMapping;
     //Dividend id => dividend data
     mapping(uint256 => DividendData) dividendDataMapping;
     //dividendId => userAddress => bool
     mapping(uint256 => mapping(address => bool)) dividendClaimMapping;
-    mapping(uint256 => mapping(address => bool)) dividendClaimMapping2;
 
     constructor(uint8 votingInterval) BaseVotingContract() {
         VOTING_BLOCK_PERIOD = votingInterval;
@@ -109,12 +111,12 @@ contract AgreementContract is BaseVotingContract {
     /**
      * @dev This function sets the treasury Contract address
      */
-    function setOrderContractAddress(address newOrderContractAddress)
-        external
-        _ownerOnly
-    {
-        _setOrderContractAddress(newOrderContractAddress);
-    }
+    // function setOrderContractAddress(address newOrderContractAddress)
+    //     external
+    //     _ownerOnly
+    // {
+    //     _setOrderContractAddress(newOrderContractAddress);
+    // }
 
     /**
      * @dev This function will create a new agreement voting ballot
@@ -151,6 +153,7 @@ contract AgreementContract is BaseVotingContract {
             requester: tx.origin,
             recordId: recordId,
             ballotId: ballotId,
+            agreementId: agreeId,
             tokenId: tokenId,
             contractLink: contractLink,
             contractHash: contractHash,
@@ -206,33 +209,18 @@ contract AgreementContract is BaseVotingContract {
         }
     }
 
-    /**
-     * @dev This function can be called from external source and also from within the contract
-     * @param agreementId this is the id of the agreement of which the winner is to be declared
-     */
-    function transferRoyaltyPayment(uint256 agreementId) external {
-        bool result = _declareWinner(
-            agreementMap[agreementId].ballotId,
-            agreementMap[agreementId].tokenId
-        );
-
-        emit BallotResult(
-            agreementId,
-            agreementMap[agreementId].ballotId,
-            result
-        );
-
-        if (result) {
-            // activate the reward payment.
-        }
-    }
-
     //-------------------------TEST----------------------------//
 
     /**
      * @dev This function is for testing purpose for distributing the royalty payment
      */
-    function payRoyaltyAmount(uint256 recordId, uint256 amount) public {
+    function payRoyaltyAmount(
+        /* uint256 recordId, */
+        uint256 agreementId,
+        uint256 amount
+    ) public {
+        require(agreementMap[agreementId].isActive, "Invalid agreement id");
+        uint256 recordId = agreementMap[agreementId].recordId;
         dividendId += 1;
         TreasuryContract treasuryContract = TreasuryContract(
             TREASURY_CONTRACT_ADDRESS
@@ -263,6 +251,7 @@ contract AgreementContract is BaseVotingContract {
         );
 
         emit RoyaltyPayment({
+            agreementId: agreementId,
             recordId: recordId,
             totalSupplyEther: dividend.totalSupplyEther,
             dividendAmountWei: dividend.dividendAmountWei,
@@ -272,15 +261,16 @@ contract AgreementContract is BaseVotingContract {
             snapshotId: dividend.snapshotId
         });
 
-        dividendListMapping[recordId].push(dividendId);
+        dividendListMapping[agreementId].push(dividendId);
         dividendDataMapping[dividendId] = dividend;
     }
 
     /**
      * @dev This function is for testing purpose for distributing the royalty payment
      */
-    function claimRoyaltyAmount(uint256 recordId) public {
-        uint256[] memory dividendIdArray = dividendListMapping[recordId];
+    function claimRoyaltyAmount(uint256 agreementId) public {
+        uint256[] memory dividendIdArray = dividendListMapping[agreementId];
+        uint256 recordId = agreementMap[agreementId].recordId;
 
         require(dividendIdArray.length > 0, "No royalty payments created yet");
 
@@ -312,6 +302,7 @@ contract AgreementContract is BaseVotingContract {
             emit RoyaltyPaymentClaimed({
                 dividendId: dividendIdArray[newClaimIndex],
                 recordId: recordId,
+                agreementId: agreementId,
                 rewardAmount: rewardAmount,
                 userAddress: msg.sender
             });

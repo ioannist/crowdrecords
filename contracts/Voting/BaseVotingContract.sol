@@ -18,7 +18,7 @@ contract BaseVotingContract {
 
     uint256 VOTING_BLOCK_PERIOD = 25;
     address public TREASURY_CONTRACT_ADDRESS;
-    address public ORDER_CONTRACT_ADDRESS;
+    // address public ORDER_CONTRACT_ADDRESS;
     address OWNER;
 
     uint256 votingId = 0;
@@ -32,7 +32,7 @@ contract BaseVotingContract {
     /**
      * @dev This modifier checks if a ballot is open for voting or has the time expired
      */
-    modifier _checkIfBallotIsOpen(uint256 votingBallotId) {
+    modifier _checkIfBallotIsOpen(uint256 votingBallotId, address voter) {
         require(
             votingMap[votingBallotId].isPresent == true,
             "No ballot with your id is found"
@@ -44,7 +44,7 @@ contract BaseVotingContract {
         );
 
         require(
-            alreadyVoted[votingBallotId][msg.sender] == false,
+            alreadyVoted[votingBallotId][voter] == false,
             "You have already voted"
         );
 
@@ -109,13 +109,13 @@ contract BaseVotingContract {
     /**
      * @dev This function sets the treasury Contract address
      */
-    function _setOrderContractAddress(address newOrderContractAddress)
-        internal
-        virtual
-        _ownerOnly
-    {
-        ORDER_CONTRACT_ADDRESS = newOrderContractAddress;
-    }
+    // function _setOrderContractAddress(address newOrderContractAddress)
+    //     internal
+    //     virtual
+    //     _ownerOnly
+    // {
+    //     ORDER_CONTRACT_ADDRESS = newOrderContractAddress;
+    // }
 
     /**
      * @dev This function is called by any user to cast vote
@@ -125,7 +125,7 @@ contract BaseVotingContract {
     function _castVote(uint256 votingBallotId, bool vote)
         internal
         virtual
-        _checkIfBallotIsOpen(votingBallotId)
+        _checkIfBallotIsOpen(votingBallotId, msg.sender)
         _checkIfOwnerAllowed(votingBallotId)
     {
         _castVotePrivate(votingBallotId, vote, tx.origin);
@@ -140,7 +140,7 @@ contract BaseVotingContract {
         uint256 votingBallotId,
         bool vote,
         address voter
-    ) internal _checkIfBallotIsOpen(votingBallotId) {
+    ) internal _checkIfBallotIsOpen(votingBallotId, voter) {
         _castVotePrivate(votingBallotId, vote, voter);
     }
 
@@ -156,12 +156,12 @@ contract BaseVotingContract {
         address voter
     ) private {
         if (vote) {
-            votingMap[votingBallotId].yes.push(tx.origin);
+            votingMap[votingBallotId].yes.push(voter);
         } else {
-            votingMap[votingBallotId].no.push(tx.origin);
+            votingMap[votingBallotId].no.push(voter);
         }
 
-        alreadyVoted[votingBallotId][tx.origin] = true;
+        alreadyVoted[votingBallotId][voter] = true;
     }
 
     /**
@@ -198,10 +198,10 @@ contract BaseVotingContract {
             TREASURY_CONTRACT_ADDRESS
         );
 
-        uint256 tokenInSale = treasuryContract.balanceOf(
-            ORDER_CONTRACT_ADDRESS,
-            tokenId
-        );
+        // uint256 tokenInSale = treasuryContract.balanceOf(
+        //     ORDER_CONTRACT_ADDRESS,
+        //     tokenId
+        // );
 
         uint256[] memory yesBalanceList = treasuryContract.balanceOfBatch(
             votingMap[votingBallotId].yes,
@@ -231,7 +231,7 @@ contract BaseVotingContract {
                 .totalCirculatingSupply(tokenId);
 
             // We will deduct the tokens that are in sale contract fromthe total circulating supply
-            totalCirculatingSupply = totalCirculatingSupply - tokenInSale;
+            // totalCirculatingSupply = totalCirculatingSupply - tokenInSale;
 
             uint256 winRatio = ((totalYes * 100) / totalCirculatingSupply);
 

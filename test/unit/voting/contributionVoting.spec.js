@@ -30,6 +30,18 @@ contract("Voting", function () {
         await helper.revertToSnapshot(snapshotId);
     });
 
+    //Todo : test cases
+    //Creating a voting for contribution
+    //Creating a voting for contribution withour valid contribution
+    //Voting for contribution without token
+    //Voting for contribution successfully
+    // Checking if events are emited on voting creation
+    //Creating a voting for contribution
+    // checking if event is emited on voting
+    //checking for correct winner
+    // checking for token transfer after winning
+    // cheking for token status after losing
+
     it("User can vote and event is emitted", async function () {
         const trx = await this.contributionVotingContract.castVoteForContribution(
             NEW_CONTRIBUTION_1_ID,

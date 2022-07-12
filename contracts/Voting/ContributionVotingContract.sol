@@ -120,12 +120,12 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
     /**
      * @dev This function sets the treasury Contract address
      */
-    function setOrderContractAddress(address newOrderContractAddress)
-        external
-        _ownerOnly
-    {
-        _setOrderContractAddress(newOrderContractAddress);
-    }
+    // function setOrderContractAddress(address newOrderContractAddress)
+    //     external
+    //     _ownerOnly
+    // {
+    //     _setOrderContractAddress(newOrderContractAddress);
+    // }
 
     /**
      * @dev Sets the contribution contract address so that the voting ballot for contritbution can be restricted only to a certain contract that is the contribution contract
@@ -209,7 +209,7 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
     )
         public
         _checkIfOwnerAllowed(rewardMapping[contributionId].ballotId)
-        _checkIfBallotIsOpen(rewardMapping[contributionId].ballotId)
+        _checkIfBallotIsOpen(rewardMapping[contributionId].ballotId, msg.sender)
     {
         _createCounterOffer(rewardMapping[contributionId].ballotId);
 

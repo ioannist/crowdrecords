@@ -26,15 +26,15 @@ contract("Ratio Locked Sales", function () {
     //Todo : Test cases
     // creating buy request and locking CRD
     // create buy user from multiple user and locking CRD and checking the total
-    //creating buy sale without sufficient CRD
+    //creating buy sale without sufficient CRD, expect revert
     //completing a buy order
-    // trying to complete buy order without sufficient token
-    // trying to complete buy order but only have sufficient COMMUNITY token
-    // trying to complete buy order but only have sufficient GOVERNANCE token
-    // trying to fullfill order with incorrect ratio
-    // trying to purchase token of different records in single sale
-    //checking if the events are being emited during the order creation
-    //checking if the events are being emited during order fullfill
+    // trying to complete buy order without sufficient token, expect revert
+    // trying to complete buy order but only have sufficient COMMUNITY token, expect revert
+    // trying to complete buy order but only have sufficient GOVERNANCE token, expect revert
+    // trying to fullfil order with incorrect ratio, expect revert
+    // trying to purchase token of different records in single sale, expect revert
+    // checking if the events are being emitted during the order creation
+    // checking if the events are being emitted during order fullfil
 
     let snapShot, snapshotId;
     beforeEach(async function () {

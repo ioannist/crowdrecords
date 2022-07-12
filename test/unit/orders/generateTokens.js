@@ -1,12 +1,12 @@
 const helper = require("../../utils/helper");
-const { BigNumber } = require("@ethersproject/bignumber");
+const BN = require("bn.js");
 let SEED_CONTRIBUTION_ID = 1;
 let NEW_CONTRIBUTION_1_ID = 2;
 let RECORD_ID = 1;
 let COMMUNITY_TOKEN_ID = 2;
 let GOVERNANCE_TOKEN_ID = 3;
-let GOVERNANCE_TOKEN_BALANCE_USER1 = BigNumber.from("450000000000000000000000");
-let COMMUNITY_TOKEN_BALANCE_USER1 = BigNumber.from("450000000000000000000000");
+let GOVERNANCE_TOKEN_BALANCE_USER1 = new BN("450000000000000000000000");
+let COMMUNITY_TOKEN_BALANCE_USER1 = new BN("450000000000000000000000");
 
 async function generateTokens() {
     await this.contributionContract.createSeedContribution(
@@ -17,15 +17,15 @@ async function generateTokens() {
     );
     await this.recordsContract.createNewRecord("Test", "image.png", "Cat1", SEED_CONTRIBUTION_ID);
     await this.treasuryContract.createNewCommunityToken([
-        1,
-        BigNumber.from("1000000000000000000000000"),
+        RECORD_ID,
+        await web3.utils.toWei("1000000"),
         COMMUNITY_TOKEN_BALANCE_USER1,
         "Test",
         "image.png",
     ]);
     await this.treasuryContract.createNewGovernanceToken([
-        1,
-        BigNumber.from("1000000000000000000000000"),
+        RECORD_ID,
+        await web3.utils.toWei("1000000"),
         GOVERNANCE_TOKEN_BALANCE_USER1,
         "Test",
         "image.png",

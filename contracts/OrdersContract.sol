@@ -171,15 +171,16 @@ contract OrdersContract {
         }
 
         //Calculate the total CRD required for the deal and then transfer them
-        uint256 governanceTotal = governanceTokenAmount * governanceTokenPrice;
-        uint256 communityTotal = communityTokenAmount * communityTokenPrice;
+        uint256[] memory tokenTotal;
+        tokenTotal[0] = governanceTokenAmount * governanceTokenPrice;
+        tokenTotal[1] = communityTokenAmount * communityTokenPrice;
 
         //Transferring the CRD token into contract to lock it
         treasuryContract.safeTransferFrom(
             tx.origin,
             address(this),
             treasuryContract.CRD(),
-            communityTotal + governanceTotal,
+            tokenTotal[1] + tokenTotal[0],
             "Sale order"
         );
 
@@ -197,7 +198,7 @@ contract OrdersContract {
             governanceTokenId: governanceTokenId,
             governanceTokenAmount: governanceTokenAmount,
             governanceTokenPrice: governanceTokenPrice,
-            crdBalance: governanceTotal + communityTotal
+            crdBalance: tokenTotal[0] + tokenTotal[1]
         });
 
         orderBook[orderId] = order;
@@ -213,7 +214,7 @@ contract OrdersContract {
             governanceTokenId: governanceTokenId,
             governanceTokenAmount: governanceTokenAmount,
             governanceTokenPrice: governanceTokenPrice,
-            crdBalance: governanceTotal + communityTotal
+            crdBalance: tokenTotal[0] + tokenTotal[1]
         });
 
         return newOrderId;
