@@ -118,16 +118,6 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
     }
 
     /**
-     * @dev This function sets the treasury Contract address
-     */
-    // function setOrderContractAddress(address newOrderContractAddress)
-    //     external
-    //     _ownerOnly
-    // {
-    //     _setOrderContractAddress(newOrderContractAddress);
-    // }
-
-    /**
      * @dev Sets the contribution contract address so that the voting ballot for contritbution can be restricted only to a certain contract that is the contribution contract
      */
     function setContributionContractAddress(
@@ -186,6 +176,10 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
      * @param vote this is the state of the vote, if true than it means the vote is in favour of the ballot
      */
     function castVoteForContribution(uint256 contributionId, bool vote) public {
+        require(
+            rewardMapping[contributionId].isPresent == true,
+            "Invalid contribution id"
+        );
         super._castVote(rewardMapping[contributionId].ballotId, vote);
 
         emit ContributionVoting({

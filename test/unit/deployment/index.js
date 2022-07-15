@@ -1,4 +1,4 @@
-contract("Deployment", function () {
+describe("Deployment", function () {
     require("./deployment.spec");
 });
 

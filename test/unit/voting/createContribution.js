@@ -40,10 +40,10 @@ async function createContribution() {
         RECORD_ID,
         false,
         "Test description",
-        await web3.utils.toWei("1000"),
         this.rewardCommunityToken,
-        await web3.utils.toWei("1000"),
+        COMMUNITY_TOKEN_ID,
         this.rewardGovernanceToken,
+        GOVERNANCE_TOKEN_ID,
         {
             from: this.contributionOwner,
         }

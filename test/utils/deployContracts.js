@@ -8,6 +8,11 @@ const ContributionVotingContract = artifacts.require(
 const OrdersContract = artifacts.require("../contracts/OrdersContract.sol");
 const AgreementContract = artifacts.require("../contracts/AgreementContract.sol");
 
+const BaseVotingContractMock = artifacts.require("../contracts/Mocks/BaseVotingContractMock.sol");
+const BaseVotingCounterOfferContractMock = artifacts.require(
+    "../contracts/Mocks/BaseVotingCounterOfferContractMock.sol"
+);
+
 const { VOTING_INTERVAL_BLOCKS } = require("./helper");
 
 async function setup() {
@@ -20,6 +25,8 @@ async function setup() {
     );
     let ordersContract = await OrdersContract.deployed();
     let agreementContract = await AgreementContract.deployed();
+    let baseVotingContractMock = await BaseVotingContractMock.deployed();
+    let baseVotingCounterOfferContractMock = await BaseVotingCounterOfferContractMock.deployed();
 
     await contributionContract.setContributionVotingContractAddress(
         contributionVotingContract.address
@@ -29,13 +36,16 @@ async function setup() {
 
     await contributionVotingContract.setTreasuryContractAddress(treasuryContract.address);
     await contributionVotingContract.setContributionContractAddress(contributionContract.address);
-    await contributionVotingContract.setOrderContractAddress(ordersContract.address);
+    // await contributionVotingContract.setOrderContractAddress(ordersContract.address);
 
     await ordersContract.setTreasuryContractAddress(treasuryContract.address);
     await treasuryContract.setContributionVotingContractAddress(contributionVotingContract.address);
 
     await agreementContract.setTreasuryContractAddress(treasuryContract.address);
-    await agreementContract.setOrderContractAddress(ordersContract.address);
+    // await agreementContract.setOrderContractAddress(ordersContract.address);
+
+    await baseVotingContractMock.setTreasuryContractAddress(treasuryContract.address);
+    await baseVotingCounterOfferContractMock.setTreasuryContractAddress(treasuryContract.address);
 
     this.tracksContract = tracksContract;
     this.contributionContract = contributionContract;
@@ -44,6 +54,8 @@ async function setup() {
     this.contributionVotingContract = contributionVotingContract;
     this.ordersContract = ordersContract;
     this.agreementContract = agreementContract;
+    this.baseVotingContractMock = baseVotingContractMock;
+    this.baseVotingCounterOfferContractMock = baseVotingCounterOfferContractMock;
 }
 
 module.exports = setup;
