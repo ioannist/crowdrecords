@@ -6,18 +6,17 @@ const {
     RECORD_ID,
     COMMUNITY_TOKEN_ID,
     GOVERNANCE_TOKEN_ID,
-    GOVERNANCE_TOKEN_BALANCE_USER1,
     COMMUNITY_TOKEN_BALANCE_USER1,
+    GOVERNANCE_TOKEN_BALANCE_USER1,
 } = require("./generateTokens");
 const helper = require("../../utils/helper");
-let tryCatch = require("../../utils/exception").tryCatch;
-let errTypes = require("../../utils/exception").errTypes;
-let {
-    checkIfEventEmitted,
-    advanceMultipleBlocks,
-    checkIfEventData,
-    VOTING_INTERVAL_BLOCKS,
-} = require("../../utils/helper");
+const chai = require("chai");
+const BN = require("bn.js");
+const expectEvent = require("@openzeppelin/test-helpers/src/expectEvent");
+const { expectRevert } = require("@openzeppelin/test-helpers");
+const chaiAsPromised = require("chai-as-promised");
+chai.use(chaiAsPromised);
+const expect = chai.expect;
 
 contract("Ratio Locked Sales", function () {
     before(setup);
@@ -36,6 +35,7 @@ contract("Ratio Locked Sales", function () {
     // checking if the events are being emitted during the order creation
     // checking if the events are being emitted during order fullfil
 
+    const CRDTokenId = 1;
     let snapShot, snapshotId;
     beforeEach(async function () {
         snapShot = await helper.takeSnapshot();
@@ -52,226 +52,186 @@ contract("Ratio Locked Sales", function () {
             true,
             RECORD_ID,
             COMMUNITY_TOKEN_ID,
-            100,
+            await web3.utils.toWei("100"),
             1,
             GOVERNANCE_TOKEN_ID,
-            5,
+            await web3.utils.toWei("5"),
             2
         );
-        checkIfEventEmitted(trx?.logs, "BuyOrder", "BuyOrder event not generated");
-        checkIfEventData(
-            trx?.logs,
-            "BuyOrder",
-            "BuyOrder event generated but data mismatch error",
-            {
-                buyer: await helper.getEthAccount(0),
-                isLockedInRatio: true,
-            }
-        );
+        expectEvent(trx, "BuyOrder", {
+            buyer: await helper.getEthAccount(0),
+            isLockedInRatio: true,
+        });
+
         let saleId = trx?.logs[0].args.saleId;
         trx = await this.ordersContract.cancelBuyOrder(saleId);
-        checkIfEventEmitted(trx?.logs, "BuyClose", "BuyClose event not generated");
-        checkIfEventData(
-            trx?.logs,
-            "BuyClose",
-            "BuyClose event generated but data mismatch error",
-            {
-                saleId: saleId,
-            }
-        );
 
-        assert(
-            (await this.treasuryContract.balanceOf(
-                await helper.getEthAccount(0),
-                COMMUNITY_TOKEN_ID
-            )) == COMMUNITY_TOKEN_BALANCE_USER1,
-            "The community tokens of the canceled sale have not returned"
-        );
+        expectEvent(trx, "OrderClose", {
+            saleId: saleId,
+        });
 
-        assert(
-            (await this.treasuryContract.balanceOf(
-                await helper.getEthAccount(0),
-                GOVERNANCE_TOKEN_ID
-            )) == GOVERNANCE_TOKEN_BALANCE_USER1,
-            "The governance tokens of the canceled sale have not returned"
-        );
+        //The CRD tokens that were transferred to ordersContract needs to be returned
+        await expect(
+            this.treasuryContract.balanceOf(await helper.getEthAccount(0), CRDTokenId)
+        ).to.eventually.be.bignumber.equals(await web3.utils.toWei("1000000"));
     });
 
     it("Sale tokens should belong to single record only", async function () {
         await this.treasuryContract.setApprovalForAll(this.ordersContract.address, true);
-        await tryCatch(
+        await expect(
             this.ordersContract.createBuyOrder(
                 true,
                 RECORD_ID,
                 COMMUNITY_TOKEN_ID,
-                100,
+                await web3.utils.toWei("100"),
                 1,
                 GOVERNANCE_TOKEN_ID + 2, //Invalid Governance token id
-                5,
+                await web3.utils.toWei("5"),
                 2
             )
-        );
-    });
-
-    it("Should not be able to purchase locked asset if the ratio is wrong", async function () {
-        //Seller Approval
-        await this.treasuryContract.setApprovalForAll(this.ordersContract.address, true);
-        //Purchaser Approval
-        await this.treasuryContract.setApprovalForAll(this.ordersContract.address, true, {
-            from: await helper.getEthAccount(1),
-        });
-
-        //Transferring CRD token so other account can purchase the tokens
-        await this.treasuryContract.safeTransferFrom(
-            await helper.getEthAccount(0),
-            await helper.getEthAccount(1),
-            await this.treasuryContract.CRD(),
-            100000,
-            "0x0"
-        );
-
-        let trx = await this.ordersContract.createBuyOrder(
-            true,
-            RECORD_ID,
-            COMMUNITY_TOKEN_ID,
-            100,
-            1,
-            GOVERNANCE_TOKEN_ID,
-            5,
-            2
-        );
-        let saleId = trx?.logs[0].args.saleId;
-        checkIfEventEmitted(trx?.logs, "BuyOrder", "BuyOrder event not generated");
-        checkIfEventData(
-            trx?.logs,
-            "BuyOrder",
-            "BuyOrder event generated but data mismatch error",
-            {
-                seller: await helper.getEthAccount(0),
-                isLockedInRatio: true,
-            }
-        );
-
-        // Here we are performing wrong ratio transfer it should be reject.
-        await tryCatch(
-            this.ordersContract.purchaseBuyOrder(
-                saleId, //SaleId
-                1, //governanceTokenAmount
-                50, //communityTokenAmount
-                { from: await helper.getEthAccount(1) }
+        ).to.eventually.be.rejectedWith("Invalid governance token id");
+        await expect(
+            this.ordersContract.createBuyOrder(
+                true,
+                RECORD_ID,
+                COMMUNITY_TOKEN_ID + 2, //Invalid Community token id
+                await web3.utils.toWei("100"),
+                1,
+                GOVERNANCE_TOKEN_ID,
+                await web3.utils.toWei("5"),
+                2
             )
-        );
+        ).to.eventually.be.rejectedWith("Invalid community token id");
     });
 
-    it("Should able to purchase locked asset and sale should close", async function () {
-        //Seller Approval
-        await this.treasuryContract.setApprovalForAll(this.ordersContract.address, true);
-        //Purchaser Approval
-        await this.treasuryContract.setApprovalForAll(this.ordersContract.address, true, {
-            from: await helper.getEthAccount(1),
+    describe("With locked asset purchase order", function () {
+        let snapShot2, snapshotId2;
+        beforeEach(async function () {
+            snapShot2 = await helper.takeSnapshot();
+            snapshotId2 = snapShot2["result"];
+
+            this.user1 = await helper.getEthAccount(0);
+            this.user2 = await helper.getEthAccount(1);
+
+            //Seller Approval
+            await this.treasuryContract.setApprovalForAll(this.ordersContract.address, true);
+            //Purchaser Approval
+            await this.treasuryContract.setApprovalForAll(this.ordersContract.address, true, {
+                from: this.user2,
+            });
+
+            //Transferring CRD token to user2
+            await this.treasuryContract.safeTransferFrom(
+                this.user1,
+                this.user2,
+                CRDTokenId,
+                await web3.utils.toWei("100000"),
+                "0x0"
+            );
+
+            let trx = await this.ordersContract.createBuyOrder(
+                true,
+                RECORD_ID,
+                COMMUNITY_TOKEN_ID,
+                await web3.utils.toWei("100"),
+                1,
+                GOVERNANCE_TOKEN_ID,
+                await web3.utils.toWei("5"),
+                2,
+                { from: this.user2 }
+            );
+            this.saleId = trx?.logs[0].args.saleId;
+        });
+        afterEach(async function () {
+            await helper.revertToSnapshot(snapshotId2);
         });
 
-        //Transferring CRD token so other account can purchase the tokens
-        await this.treasuryContract.safeTransferFrom(
-            await helper.getEthAccount(0),
-            await helper.getEthAccount(1),
-            await this.treasuryContract.CRD(),
-            100000,
-            "0x0"
-        );
+        it("Should not be able to purchase locked asset if the ratio is wrong", async function () {
+            // Here we are performing wrong ratio transfer it should be reject.
+            await expect(
+                this.ordersContract.acceptBuyOrder(
+                    this.saleId, //SaleId
+                    await web3.utils.toWei("1"), //governanceTokenAmount
+                    await web3.utils.toWei("50"), //communityTokenAmount
+                    { from: this.user1 }
+                )
+            ).to.eventually.be.rejectedWith("Invalid Ratio");
 
-        let trx = await this.ordersContract.createBuyOrder(
-            true,
-            RECORD_ID,
-            COMMUNITY_TOKEN_ID,
-            100,
-            1,
-            GOVERNANCE_TOKEN_ID,
-            5,
-            2
-        );
-        let saleId = trx?.logs[0].args.saleId;
-        checkIfEventEmitted(trx?.logs, "BuyOrder", "BuyOrder event not generated");
-        checkIfEventData(
-            trx?.logs,
-            "BuyOrder",
-            "BuyOrder event generated but data mismatch error",
-            {
-                seller: await helper.getEthAccount(0),
-                isLockedInRatio: true,
-            }
-        );
+            await expect(
+                this.ordersContract.acceptBuyOrder(
+                    this.saleId, //SaleId
+                    await web3.utils.toWei("1"), //governanceTokenAmount
+                    await web3.utils.toWei("1"), //communityTokenAmount
+                    { from: this.user1 }
+                )
+            ).to.eventually.be.rejectedWith("Invalid Ratio");
+        });
 
-        //-----------------------------------------------------------------------------//
-        // Here we are performing partial transfer
-        // That is we will only purchase some amount of the order
-        trx = await this.ordersContract.purchaseBuyOrder(
-            saleId, //SaleId
-            4, //governanceTokenAmount
-            80, //communityTokenAmount
-            { from: await helper.getEthAccount(1) }
-        );
+        it("Trying to purchase more than available", async function () {
+            // Here we are performing wrong ratio transfer it should be reject.
+            await expect(
+                this.ordersContract.acceptBuyOrder(
+                    this.saleId, //SaleId
+                    await web3.utils.toWei("100"), //governanceTokenAmount
+                    await web3.utils.toWei("5"), //communityTokenAmount
+                    { from: this.user1 }
+                )
+            ).to.eventually.be.rejectedWith("Governance token amount is insufficient");
 
-        checkIfEventEmitted(trx?.logs, "SaleBought", "SaleBought event not generated");
-        checkIfEventData(
-            trx?.logs,
-            "SaleBought",
-            "SaleBought event generated but data mismatch error",
-            {
-                saleId: saleId,
-            }
-        );
+            await expect(
+                this.ordersContract.acceptBuyOrder(
+                    this.saleId, //SaleId
+                    await web3.utils.toWei("1"), //governanceTokenAmount
+                    await web3.utils.toWei("500"), //communityTokenAmount
+                    { from: this.user1 }
+                )
+            ).to.eventually.be.rejectedWith("Community token amount is insufficient");
+        });
 
-        assert(
-            (await this.treasuryContract.balanceOf(
-                await helper.getEthAccount(1),
-                COMMUNITY_TOKEN_ID
-            )) == 80,
-            "Final balance after community token transfer doesn't match"
-        );
+        it("Should able to purchase locked asset and sale should close", async function () {
+            //-----------------------------------------------------------------------------//
+            // Here we are performing partial transfer
+            // That is we will only purchase some amount of the order
+            trx = await this.ordersContract.acceptBuyOrder(
+                this.saleId, //SaleId
+                await web3.utils.toWei("4"), //governanceTokenAmount
+                await web3.utils.toWei("80"), //communityTokenAmount
+                { from: this.user1 }
+            );
 
-        assert(
-            (await this.treasuryContract.balanceOf(
-                await helper.getEthAccount(1),
-                GOVERNANCE_TOKEN_ID
-            )) == 4,
-            "Final balance after governance token transfer doesn't match"
-        );
+            expectEvent(trx, "SaleBought", {
+                saleId: this.saleId,
+            });
 
-        //-----------------------------------------------------------------------------//
-        // Here we will purchase all the remaining asset and it should result in sale close event genration
-        trx = await this.ordersContract.purchaseBuyOrder(
-            saleId, //SaleId
-            1, //governanceTokenAmount
-            20, //communityTokenAmount
-            { from: await helper.getEthAccount(1) }
-        );
+            await expect(
+                this.treasuryContract.balanceOf(this.user2, COMMUNITY_TOKEN_ID)
+            ).to.eventually.be.bignumber.equals(await web3.utils.toWei("80"));
 
-        assert(
-            (await this.treasuryContract.balanceOf(
-                await helper.getEthAccount(1),
-                COMMUNITY_TOKEN_ID
-            )) == 100,
-            "Final balance after community token transfer doesn't match"
-        );
+            await expect(
+                this.treasuryContract.balanceOf(this.user2, GOVERNANCE_TOKEN_ID)
+            ).to.eventually.be.bignumber.equals(await web3.utils.toWei("4"));
 
-        assert(
-            (await this.treasuryContract.balanceOf(
-                await helper.getEthAccount(1),
-                GOVERNANCE_TOKEN_ID
-            )) == 5,
-            "Final balance after governance token transfer doesn't match"
-        );
+            //-----------------------------------------------------------------------------//
+            // Here we will purchase all the remaining asset and it should result in sale close event genration
+            trx = await this.ordersContract.acceptBuyOrder(
+                this.saleId, //SaleId
+                await web3.utils.toWei("1"), //governanceTokenAmount
+                await web3.utils.toWei("20"), //communityTokenAmount
+                { from: this.user1 }
+            );
 
-        checkIfEventEmitted(trx?.logs, "OrderClose", "OrderClose event not generated");
-        checkIfEventData(
-            trx?.logs,
-            "OrderClose",
-            "OrderClose event generated but data mismatch error",
-            {
+            await expect(
+                this.treasuryContract.balanceOf(this.user2, COMMUNITY_TOKEN_ID)
+            ).to.eventually.be.bignumber.equals(await web3.utils.toWei("100"));
+
+            await expect(
+                this.treasuryContract.balanceOf(this.user2, GOVERNANCE_TOKEN_ID)
+            ).to.eventually.be.bignumber.equals(await web3.utils.toWei("5"));
+
+            expectEvent(trx, "OrderClose", {
                 saleId: trx?.logs[0].args.saleId,
-            }
-        );
+            });
+        });
     });
 });
 

@@ -247,7 +247,7 @@ contract("BaseVotingCounterOfferContract", function () {
             await helper.revertToSnapshot(snapshotId2);
         });
 
-        it("Creating a voting ballot, try's to vote after counter offer, expect revert", async function () {
+        it("Creating a voting ballot, Tries to vote after counter offer, expect revert", async function () {
             await this.baseVotingCounterOfferContractMock.createBallot(true, { from: this.user2 });
 
             await this.baseVotingCounterOfferContractMock.castVote(this.ballotId, true, {
@@ -263,7 +263,7 @@ contract("BaseVotingCounterOfferContract", function () {
             ).to.eventually.rejectedWith("You have already given a counter offer");
         });
 
-        it("Creating a voting ballot, try's to create counter offer after vote, expect revert", async function () {
+        it("Creating a voting ballot, Tries to create counter offer after vote, expect revert", async function () {
             await this.baseVotingCounterOfferContractMock.createBallot(true, { from: this.user2 });
 
             await this.baseVotingCounterOfferContractMock.castVote(this.ballotId, true, {
@@ -279,7 +279,7 @@ contract("BaseVotingCounterOfferContract", function () {
             ).to.eventually.rejectedWith("You have already voted");
         });
 
-        it("Creating a voting ballot, try's to create 2 counter offers, expect revert", async function () {
+        it("Creating a voting ballot, Tries to create 2 counter offers, expect revert", async function () {
             await this.baseVotingCounterOfferContractMock.createBallot(true, { from: this.user2 });
 
             await this.baseVotingCounterOfferContractMock.castVote(this.ballotId, true, {
@@ -355,7 +355,7 @@ contract("BaseVotingCounterOfferContract", function () {
             });
         });
 
-        it("Owner of ballot try's to take action without counter offer, expect revert", async function () {
+        it("Owner of ballot Tries to take action without counter offer, expect revert", async function () {
             await this.baseVotingCounterOfferContractMock.createBallot(true, { from: this.user2 });
 
             await this.baseVotingCounterOfferContractMock.castVote(this.ballotId, true, {

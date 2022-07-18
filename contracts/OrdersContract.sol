@@ -171,7 +171,7 @@ contract OrdersContract {
         }
 
         //Calculate the total CRD required for the deal and then transfer them
-        uint256[] memory tokenTotal;
+        uint256[2] memory tokenTotal;
         tokenTotal[0] = governanceTokenAmount * governanceTokenPrice;
         tokenTotal[1] = communityTokenAmount * communityTokenPrice;
 
@@ -256,10 +256,17 @@ contract OrdersContract {
         });
     }
 
+    event DEBUG(
+        uint256 amount,
+        uint256 fees,
+        uint256 totalCRD,
+        uint256 otherTest
+    );
+
     /**
-     * @dev This function is called to cancle the existing sale order
+     * @dev This function is called to accept the existing buy order
      */
-    function purchaseBuyOrder(
+    function acceptBuyOrder(
         uint256 saleId,
         uint256 governanceTokenAmount,
         uint256 communityTokenAmount
@@ -271,7 +278,7 @@ contract OrdersContract {
 
         require(orderBook[orderId].isClosed == false, "Is already closed");
 
-        Order memory order = orderBook[orderId];
+        Order storage order = orderBook[orderId];
 
         //This will check if the amount to purchase is less or equal than the order that is generated
         require(
@@ -291,12 +298,12 @@ contract OrdersContract {
                     SafeMath.div(
                         communityTokenAmount * 100,
                         governanceTokenAmount,
-                        "Invalid ratio"
+                        "Invalid Ratio"
                     ) ==
                         SafeMath.div(
                             order.communityTokenAmount * 100,
                             order.governanceTokenAmount,
-                            "Invalid ratio"
+                            "Invalid Ratio"
                         ),
                     "Invalid Ratio"
                 );
@@ -305,12 +312,12 @@ contract OrdersContract {
                     SafeMath.div(
                         governanceTokenAmount * 100,
                         communityTokenAmount,
-                        "Invalid ratio"
+                        "Invalid Ratio"
                     ) ==
                         SafeMath.div(
                             order.governanceTokenAmount * 100,
                             order.communityTokenAmount,
-                            "Invalid ratio"
+                            "Invalid Ratio"
                         ),
                     "Invalid Ratio"
                 );
@@ -370,7 +377,7 @@ contract OrdersContract {
             order.governanceTokenAmount -
             governanceTokenAmount;
 
-        order.crdBalance = order.crdBalance - (amount + fees);
+        order.crdBalance = order.crdBalance - amount - fees;
 
         if (
             order.communityTokenAmount == 0 && order.governanceTokenAmount == 0
@@ -382,7 +389,6 @@ contract OrdersContract {
                 remainingBalance: 0
             });
         }
-        orderBook[orderId] = order;
     }
 
     /// @notice This is only for internal use
@@ -400,7 +406,9 @@ contract OrdersContract {
         //then it would transfer the CRD tokens from contract account to sellers account after deducting the transaction fees.
 
         uint256 transactionAmount = (tokenAmount * tokenPrice);
-        uint256 transactionFee = (transactionAmount * TRANSACTION_FEE) / 1000;
+        uint256 transactionFee = (transactionAmount * TRANSACTION_FEE) / 10000;
+        //Removing the transaction fee from the transaction amount
+        transactionAmount = transactionAmount - transactionFee;
 
         TreasuryContract treasuryContract = TreasuryContract(
             TREASURY_CONTRACT_ADDRESS
@@ -418,7 +426,7 @@ contract OrdersContract {
             address(this),
             msg.sender,
             treasuryContract.CRD(),
-            transactionAmount - transactionFee,
+            transactionAmount,
             "Sale token price amount transfer to seller"
         );
 

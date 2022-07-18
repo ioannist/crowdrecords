@@ -21,7 +21,7 @@ contract TracksContract is ERC721 {
      * @param trackId This is the id of the track
      * @param filehash This is hash of the file
      * @param filelink This is the link to the file
-     * @param category this is hash of the preview file
+     * @param category this is the category of song
      * @param creationDate this is hash of the preview file
      */
     event TrackCreated(
@@ -32,6 +32,8 @@ contract TracksContract is ERC721 {
         uint256 creationDate
     );
 
+    mapping(uint256 => Tracks) public tracksData;
+
     //Keep the baseURI empty if you want to have different URIs without any structure
     constructor() ERC721("Tracks", "CRD_TRKS") {
         // _baseURIextended = baseURI_;
@@ -39,9 +41,9 @@ contract TracksContract is ERC721 {
 
     /**
      * @dev This function will be called by the user to create a new contribution
-     * @param filehash Id of tracks that are part of this contribution
+     * @param filehash This is hash of the file
      * @param filelink this is preview file of the contribution
-     * @param category this is hash of the preview file
+     * @param category this is the category of song
      */
     function createNewTrack(
         string memory filehash,
@@ -58,6 +60,8 @@ contract TracksContract is ERC721 {
             category: category,
             creationDate: block.timestamp
         });
+
+        tracksData[newTrackId] = track;
 
         emit TrackCreated({
             filehash: filehash,

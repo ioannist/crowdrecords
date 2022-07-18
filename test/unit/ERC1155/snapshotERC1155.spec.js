@@ -1,14 +1,14 @@
-const { expectEvent, expectRevert } = require("@openzeppelin/test-helpers");
+const ERC20SnapshotMock = artifacts.require("ERC20SnapshotMock");
+const setup = require("../../utils/deployContracts");
+const helper = require("../../utils/helper");
 const chai = require("chai");
 const BN = require("bn.js");
+const expectEvent = require("@openzeppelin/test-helpers/src/expectEvent");
+const expectRevert = require("@openzeppelin/test-helpers/src/expectRevert");
 const chaiBN = require("chai-bn")(BN);
 const chaiAsPromised = require("chai-as-promised");
-const helper = require("../../utils/helper");
-const expect = chai.expect;
-const ERC20SnapshotMock = artifacts.require("ERC20SnapshotMock");
-
-chai.use(chaiBN);
 chai.use(chaiAsPromised);
+const expect = chai.expect;
 
 contract("SnapshotERC1155", function () {
     let initialHolder;
@@ -22,12 +22,19 @@ contract("SnapshotERC1155", function () {
 
     const uri = "DummyURI";
 
+    let snapShot, snapshotId;
     beforeEach(async function () {
+        snapShot = await helper.takeSnapshot();
+        snapshotId = snapShot["result"];
+
         initialHolder = await helper.getEthAccount(0);
         recipient = await helper.getEthAccount(1);
         other = await helper.getEthAccount(2);
 
         this.token = await ERC20SnapshotMock.new(uri, initialHolder, initialSupply);
+    });
+    afterEach(async function () {
+        await helper.revertToSnapshot(snapshotId);
     });
 
     describe("snapshot", function () {

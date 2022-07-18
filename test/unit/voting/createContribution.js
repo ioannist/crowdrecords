@@ -41,9 +41,7 @@ async function createContribution() {
         false,
         "Test description",
         this.rewardCommunityToken,
-        COMMUNITY_TOKEN_ID,
         this.rewardGovernanceToken,
-        GOVERNANCE_TOKEN_ID,
         {
             from: this.contributionOwner,
         }

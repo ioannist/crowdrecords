@@ -53,6 +53,10 @@ contract("All Contract Deployment", function () {
             this.recordsContract.address
         );
 
+        expect(this.recordsContract.CONTRIBUTION_CONTRACT_ADDRESS()).eventually.to.be.equal(
+            this.contributionContract.address
+        );
+
         expect(
             this.contributionVotingContract.CONTRIBUTION_CONTRACT_ADDRESS()
         ).eventually.to.be.equal(this.contributionContract.address);

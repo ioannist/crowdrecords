@@ -133,9 +133,7 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
         uint256 contributionId,
         uint256 recordId,
         uint256 govReward,
-        uint256 govTokenId,
-        uint256 commReward,
-        uint256 commTokenId
+        uint256 commReward
     ) public _onlyContributionContract {
         require(
             rewardMapping[contributionId].isPresent == false,
@@ -143,6 +141,13 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
         );
 
         uint256 ballotId = _createVoting(true);
+
+        TreasuryContract treasuryContract = TreasuryContract(
+            TREASURY_CONTRACT_ADDRESS
+        );
+
+        uint256 govTokenId = treasuryContract.getCommunityTokenId(recordId);
+        uint256 commTokenId = treasuryContract.getGovernanceTokenId(recordId);
 
         ContributionReward memory contributionReward = ContributionReward({
             requester: tx.origin,

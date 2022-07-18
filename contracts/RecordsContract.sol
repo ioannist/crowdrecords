@@ -4,6 +4,7 @@ import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Supply.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "./interface/IContribution.sol";
 
 // ERC 20 balance[adress] => 2 contracts // governance and comunity
 // ERC 721 blance[adress] => 1 contract // records
@@ -12,7 +13,13 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract RecordsContract is ERC1155Supply {
     uint256 newTokenId = 0;
 
-    mapping(uint256 => RecordToken) recordData;
+    // This mapping contains data of record
+    mapping(uint256 => RecordToken) public recordData;
+    // This mapping contains if seed data id is being used or not
+    mapping(uint256 => bool) public seedIdUsed;
+
+    address OWNER;
+    address public CONTRIBUTION_CONTRACT_ADDRESS;
 
     struct RecordToken {
         string name;
@@ -43,50 +50,30 @@ contract RecordsContract is ERC1155Supply {
         uint256 creationDate
     );
 
-    constructor() ERC1155("https://something.com/{id}") {}
-
-    function sendTo(
-        uint256 tokenId,
-        uint256 amount,
-        address reciver
-    ) public {
-        safeTransferFrom(msg.sender, reciver, tokenId, amount, "");
-    }
-
-    function exchangeTokens(
-        uint256 senderTokenId,
-        uint256 sendingAmount,
-        uint256 recivingTokenId,
-        uint256 recivingAmount,
-        address reciver
-    ) public {
-        require(
-            balanceOf(reciver, recivingTokenId) > recivingAmount,
-            "insufficiant balance"
-        );
-        require(
-            balanceOf(msg.sender, senderTokenId) > sendingAmount,
-            "insufficiant balance"
-        );
-
-        safeTransferFrom(
-            msg.sender,
-            reciver,
-            senderTokenId,
-            sendingAmount,
-            "0"
-        );
-        safeTransferFrom(
-            reciver,
-            msg.sender,
-            recivingTokenId,
-            recivingAmount,
-            "0"
-        );
+    constructor() ERC1155("https://something.com/{id}") {
+        OWNER = msg.sender;
     }
 
     /**
-     * @dev This function creats new record
+     * @dev Modifier to check that the person who accesses a specific function is the owner of contract himself.
+     */
+    modifier ownerOnly() {
+        require(msg.sender == OWNER, "You are not authorized for this action");
+        _;
+    }
+
+    /**
+     * @dev This function sets the Voting Contract address
+     */
+    function setContributionContractAddress(address contributionContractAddress)
+        public
+        ownerOnly
+    {
+        CONTRIBUTION_CONTRACT_ADDRESS = contributionContractAddress;
+    }
+
+    /**
+     * @dev This function creates new record
      * @param name This is the total supply of governance token
      * @param image This is the total supply of community token
      * @param seedId this is hash of the preview file
@@ -101,6 +88,25 @@ contract RecordsContract is ERC1155Supply {
         newTokenId++;
         uint256 recordId = newTokenId;
         _mint(msg.sender, recordId, 1, "");
+
+        require(seedIdUsed[seedId] == false, "Seed already used");
+
+        IContribution contributionContract = IContribution(
+            CONTRIBUTION_CONTRACT_ADDRESS
+        );
+
+        IContribution.Contribution memory contribution = contributionContract
+            .getContributionData(seedId);
+
+        require(
+            contribution.isPresent == true,
+            "No contribution with this id is found"
+        );
+
+        require(
+            contribution.seedContribution == true,
+            "Contribution needs to be seed contribution"
+        );
 
         RecordToken memory recordToken = RecordToken({
             name: name,

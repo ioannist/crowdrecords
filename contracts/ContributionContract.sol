@@ -49,9 +49,10 @@ contract ContributionContract is ERC721 {
         bool roughMix; // true if rough mix or else false
         uint256 status; // status (PENDING = 1 | ACCEPTED = 2| REJECTED = 3)
         string description;
+        bool isPresent;
     }
 
-    mapping(uint256 => Contribution) contributionData;
+    mapping(uint256 => Contribution) public contributionData;
 
     constructor() ERC721("Contributions", "CTRB") {
         // _baseURIextended = baseURI_;
@@ -76,6 +77,18 @@ contract ContributionContract is ERC721 {
     }
 
     /**
+     * @dev This function returns contribution data
+     * @param contributionId Id of the contribution whose data you want
+     */
+    function getContributionData(uint256 contributionId)
+        public
+        view
+        returns (Contribution memory contribution)
+    {
+        return contributionData[contributionId];
+    }
+
+    /**
      * @dev This function will be called by the user to create a new contribution
      * @param tracks Id of tracks that are part of this contribution
      * @param previewFile this is preview file of the contribution
@@ -95,9 +108,7 @@ contract ContributionContract is ERC721 {
         bool roughMix,
         string memory description,
         uint256 communityReward,
-        uint256 communityTokenId,
-        uint256 governanceReward,
-        uint256 governanceTokenId
+        uint256 governanceReward
     ) public returns (uint256) {
         _contributionIds.increment();
 
@@ -111,9 +122,7 @@ contract ContributionContract is ERC721 {
             contributionId,
             recordId,
             governanceReward,
-            governanceTokenId,
-            communityReward,
-            communityTokenId
+            communityReward
         );
 
         Contribution memory contribution = Contribution({
@@ -125,7 +134,8 @@ contract ContributionContract is ERC721 {
             roughMix: roughMix,
             status: 1,
             description: description,
-            seedContribution: false
+            seedContribution: false,
+            isPresent: true
         });
 
         contributionData[contributionId] = contribution;
@@ -165,8 +175,6 @@ contract ContributionContract is ERC721 {
         uint256 contributionId = _contributionIds.current();
         _mint(msg.sender, contributionId);
 
-        bool seedContribution;
-
         Contribution memory contribution = Contribution({
             tracks: tracks,
             createdAt: block.timestamp,
@@ -176,7 +184,8 @@ contract ContributionContract is ERC721 {
             roughMix: false,
             status: 2,
             description: description,
-            seedContribution: true
+            seedContribution: true,
+            isPresent: true
         });
 
         contributionData[contributionId] = contribution;
