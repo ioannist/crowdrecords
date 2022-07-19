@@ -55,6 +55,56 @@ contract("AgreementContract", function () {
         });
     });
 
+    it("Creating agreement vote, losing the vote and declaring winner", async function () {
+        const user1 = await helper.getEthAccount(0);
+        const user2 = await helper.getEthAccount(1);
+        const CRDToken = await this.treasuryContract.CRD();
+
+        const agreementId = 1;
+        await this.agreementContract.createAgreement(RECORD_ID, "Some link", "some hash", {
+            from: user2,
+        });
+
+        const trx = await this.agreementContract.castVoteForAgreement(agreementId, false);
+        await expectEvent(trx, "AgreementVoting", { vote: false });
+
+        await helper.advanceMultipleBlocks(50);
+
+        const winner = await this.agreementContract.declareWinner(agreementId);
+
+        await expectEvent(winner, "BallotResult", {
+            agreementId: new BN(agreementId),
+            result: false,
+        });
+    });
+
+    it("Trying to pay royalty to a rejected agreement", async function () {
+        const user1 = await helper.getEthAccount(0);
+        const user2 = await helper.getEthAccount(1);
+        const CRDToken = await this.treasuryContract.CRD();
+
+        const agreementId = 1;
+        await this.agreementContract.createAgreement(RECORD_ID, "Some link", "some hash", {
+            from: user2,
+        });
+
+        const trx = await this.agreementContract.castVoteForAgreement(agreementId, false);
+        await expectEvent(trx, "AgreementVoting", { vote: false });
+
+        await helper.advanceMultipleBlocks(50);
+
+        const winner = await this.agreementContract.declareWinner(agreementId);
+
+        await expectEvent(winner, "BallotResult", {
+            agreementId: new BN(agreementId),
+            result: false,
+        });
+
+        await expect(
+            this.agreementContract.payRoyaltyAmount(agreementId, await web3.utils.toWei("1000"))
+        ).to.eventually.be.rejectedWith("Invalid agreement id");
+    });
+
     describe("After winning the voting for agreement contract", async function () {
         let snapShot, snapshotId;
         beforeEach(async function () {
@@ -64,20 +114,23 @@ contract("AgreementContract", function () {
             this.user1 = await helper.getEthAccount(0);
             this.user2 = await helper.getEthAccount(1);
 
-            this.agreementId = 1;
+            this.firstAgreementId = 1;
             await this.agreementContract.createAgreement(RECORD_ID, "Some link", "some hash", {
                 from: this.user2,
             });
 
-            const trx = await this.agreementContract.castVoteForAgreement(this.agreementId, true);
+            const trx = await this.agreementContract.castVoteForAgreement(
+                this.firstAgreementId,
+                true
+            );
             await expectEvent(trx, "AgreementVoting", { vote: true });
 
             await helper.advanceMultipleBlocks(50);
 
-            const winner = await this.agreementContract.declareWinner(this.agreementId);
+            const winner = await this.agreementContract.declareWinner(this.firstAgreementId);
 
             await expectEvent(winner, "BallotResult", {
-                agreementId: new BN(this.agreementId),
+                agreementId: new BN(this.firstAgreementId),
                 result: true,
             });
         });
@@ -102,18 +155,42 @@ contract("AgreementContract", function () {
             await this.treasuryContract.setApprovalForAll(this.agreementContract.address, true);
 
             const receipt = await this.agreementContract.payRoyaltyAmount(
-                RECORD_ID,
+                this.firstAgreementId,
                 singleRewardAmount
             );
 
-            await this.agreementContract.payRoyaltyAmount(RECORD_ID, singleRewardAmount);
-            await this.agreementContract.payRoyaltyAmount(RECORD_ID, singleRewardAmount);
-            await this.agreementContract.payRoyaltyAmount(RECORD_ID, singleRewardAmount);
-            await this.agreementContract.payRoyaltyAmount(RECORD_ID, singleRewardAmount);
-            await this.agreementContract.payRoyaltyAmount(RECORD_ID, singleRewardAmount);
-            await this.agreementContract.payRoyaltyAmount(RECORD_ID, singleRewardAmount);
-            await this.agreementContract.payRoyaltyAmount(RECORD_ID, singleRewardAmount);
-            await this.agreementContract.payRoyaltyAmount(RECORD_ID, singleRewardAmount);
+            await this.agreementContract.payRoyaltyAmount(
+                this.firstAgreementId,
+                singleRewardAmount
+            );
+            await this.agreementContract.payRoyaltyAmount(
+                this.firstAgreementId,
+                singleRewardAmount
+            );
+            await this.agreementContract.payRoyaltyAmount(
+                this.firstAgreementId,
+                singleRewardAmount
+            );
+            await this.agreementContract.payRoyaltyAmount(
+                this.firstAgreementId,
+                singleRewardAmount
+            );
+            await this.agreementContract.payRoyaltyAmount(
+                this.firstAgreementId,
+                singleRewardAmount
+            );
+            await this.agreementContract.payRoyaltyAmount(
+                this.firstAgreementId,
+                singleRewardAmount
+            );
+            await this.agreementContract.payRoyaltyAmount(
+                this.firstAgreementId,
+                singleRewardAmount
+            );
+            await this.agreementContract.payRoyaltyAmount(
+                this.firstAgreementId,
+                singleRewardAmount
+            );
 
             await expect(
                 this.treasuryContract.balanceOf(this.agreementContract.address, CRDToken)
@@ -137,7 +214,10 @@ contract("AgreementContract", function () {
 
             await this.treasuryContract.setApprovalForAll(this.agreementContract.address, true);
 
-            await this.agreementContract.payRoyaltyAmount(RECORD_ID, singleRewardAmount);
+            await this.agreementContract.payRoyaltyAmount(
+                this.firstAgreementId,
+                singleRewardAmount
+            );
 
             await expect(
                 this.treasuryContract.balanceOf(this.agreementContract.address, CRDToken)
@@ -171,7 +251,7 @@ contract("AgreementContract", function () {
 
             it("Should emit RoyaltyPayment", async function () {
                 const payRoyaltyResult = await this.agreementContract.payRoyaltyAmount(
-                    RECORD_ID,
+                    this.firstAgreementId,
                     this.singleRewardAmount
                 );
 
@@ -180,7 +260,7 @@ contract("AgreementContract", function () {
 
             it("Should emit RoyaltyPayment with correct amount", async function () {
                 const payRoyaltyResult = await this.agreementContract.payRoyaltyAmount(
-                    RECORD_ID,
+                    this.firstAgreementId,
                     this.singleRewardAmount
                 );
 
@@ -198,10 +278,13 @@ contract("AgreementContract", function () {
             });
 
             it("Should emit RoyaltyPaymentClaimed", async function () {
-                await this.agreementContract.payRoyaltyAmount(RECORD_ID, this.singleRewardAmount);
+                await this.agreementContract.payRoyaltyAmount(
+                    this.firstAgreementId,
+                    this.singleRewardAmount
+                );
 
                 const claimRoyaltyResult = await this.agreementContract.claimRoyaltyAmount(
-                    RECORD_ID,
+                    this.firstAgreementId,
                     {
                         from: this.user2,
                     }
@@ -211,10 +294,13 @@ contract("AgreementContract", function () {
             });
 
             it("Should emit RoyaltyPaymentClaimed with correct amount", async function () {
-                await this.agreementContract.payRoyaltyAmount(RECORD_ID, this.singleRewardAmount);
+                await this.agreementContract.payRoyaltyAmount(
+                    this.firstAgreementId,
+                    this.singleRewardAmount
+                );
 
                 const claimRoyaltyResult = await this.agreementContract.claimRoyaltyAmount(
-                    RECORD_ID,
+                    this.firstAgreementId,
                     {
                         from: this.user2,
                     }
@@ -229,10 +315,13 @@ contract("AgreementContract", function () {
             });
 
             it("trying to claim reward twice should revert", async function () {
-                await this.agreementContract.payRoyaltyAmount(RECORD_ID, this.singleRewardAmount);
+                await this.agreementContract.payRoyaltyAmount(
+                    this.firstAgreementId,
+                    this.singleRewardAmount
+                );
 
                 const claimRoyaltyResult = await this.agreementContract.claimRoyaltyAmount(
-                    RECORD_ID,
+                    this.firstAgreementId,
                     {
                         from: this.user2,
                     }
@@ -246,7 +335,7 @@ contract("AgreementContract", function () {
                 });
 
                 await expect(
-                    this.agreementContract.claimRoyaltyAmount(RECORD_ID, {
+                    this.agreementContract.claimRoyaltyAmount(this.firstAgreementId, {
                         from: this.user2,
                     })
                 ).to.be.rejectedWith("You have no pending claims");
@@ -267,30 +356,11 @@ contract("AgreementContract", function () {
         it("Claiming without reward payment, transaction should revert", async function () {
             const user2 = await helper.getEthAccount(1);
             await expect(
-                this.agreementContract.claimRoyaltyAmount(RECORD_ID, {
+                this.agreementContract.claimRoyaltyAmount(this.firstAgreementId, {
                     from: user2,
                 })
             ).to.be.rejectedWith("No royalty payments created yet");
         });
-
-        //TODO : test cases
-        //// distributing royalty then claiming royalty then distributing then again claiming
-        //// claiming royalty without distribution
-        //// distributing royalty claiming royalty and then again claiming royalty
-        //// checking if the event is emited when distributing royalty
-        //// checking if the event is emited when distributing royalty and claiming royalty
-        //// checking for x event emits when x royalty claims are made
-        //// checking for y events when y royalty are distributed
-        //// distribution of royalty and claiming complete amount from treasury and checking nothing is left within it
-        //// When distributor tries to pay really small amount that the dividendPerToken in wei is equals to 0, expect revert
-        //if a agreement is being passed by the voting or not
-        //Here it will transfer the community tokens from user1 to user2 so that user2 can be eligible for reward
-        //Then the user1 pays the royalty amount for the record
-        //Then the user2 triggers a claim function to claim the reward
-        // distribution of royalty by more than 2 parties and single claimee
-        // distribution of royalty by single party and more than 3 claimee
-        // distribution of royalty by more than 2 parties and more than 3 claimee
-        // distribution of royalty when only 1 is eligible and then distributing again but this time more user are eligible
 
         it("Claiming Royalty : Single user royalty claim", async function () {
             const user1 = await helper.getEthAccount(0);
@@ -315,14 +385,29 @@ contract("AgreementContract", function () {
 
             await this.treasuryContract.setApprovalForAll(this.agreementContract.address, true);
 
-            await this.agreementContract.payRoyaltyAmount(RECORD_ID, singleRewardAmount);
-            await this.agreementContract.payRoyaltyAmount(RECORD_ID, singleRewardAmount);
-            await this.agreementContract.payRoyaltyAmount(RECORD_ID, singleRewardAmount);
-            await this.agreementContract.payRoyaltyAmount(RECORD_ID, singleRewardAmount);
+            await this.agreementContract.payRoyaltyAmount(
+                this.firstAgreementId,
+                singleRewardAmount
+            );
+            await this.agreementContract.payRoyaltyAmount(
+                this.firstAgreementId,
+                singleRewardAmount
+            );
+            await this.agreementContract.payRoyaltyAmount(
+                this.firstAgreementId,
+                singleRewardAmount
+            );
+            await this.agreementContract.payRoyaltyAmount(
+                this.firstAgreementId,
+                singleRewardAmount
+            );
 
-            const claimRoyaltyResult = await this.agreementContract.claimRoyaltyAmount(RECORD_ID, {
-                from: user2,
-            });
+            const claimRoyaltyResult = await this.agreementContract.claimRoyaltyAmount(
+                this.firstAgreementId,
+                {
+                    from: user2,
+                }
+            );
 
             await expect(
                 this.treasuryContract.balanceOf(user2, CRDToken)
@@ -354,17 +439,32 @@ contract("AgreementContract", function () {
 
             await this.treasuryContract.setApprovalForAll(this.agreementContract.address, true);
 
-            await this.agreementContract.payRoyaltyAmount(RECORD_ID, singleRewardAmount);
-            await this.agreementContract.payRoyaltyAmount(RECORD_ID, singleRewardAmount);
-            await this.agreementContract.payRoyaltyAmount(RECORD_ID, singleRewardAmount);
-            await this.agreementContract.payRoyaltyAmount(RECORD_ID, singleRewardAmount);
+            await this.agreementContract.payRoyaltyAmount(
+                this.firstAgreementId,
+                singleRewardAmount
+            );
+            await this.agreementContract.payRoyaltyAmount(
+                this.firstAgreementId,
+                singleRewardAmount
+            );
+            await this.agreementContract.payRoyaltyAmount(
+                this.firstAgreementId,
+                singleRewardAmount
+            );
+            await this.agreementContract.payRoyaltyAmount(
+                this.firstAgreementId,
+                singleRewardAmount
+            );
 
-            let claimRoyaltyResult = await this.agreementContract.claimRoyaltyAmount(RECORD_ID, {
-                from: user2,
-            });
+            let claimRoyaltyResult = await this.agreementContract.claimRoyaltyAmount(
+                this.firstAgreementId,
+                {
+                    from: user2,
+                }
+            );
             expectEvent(claimRoyaltyResult, "RoyaltyPaymentClaimed");
 
-            await this.agreementContract.claimRoyaltyAmount(RECORD_ID, {
+            await this.agreementContract.claimRoyaltyAmount(this.firstAgreementId, {
                 from: user1,
             });
 
@@ -398,10 +498,13 @@ contract("AgreementContract", function () {
             await this.treasuryContract.setApprovalForAll(this.agreementContract.address, true);
 
             //Distributing first time
-            await this.agreementContract.payRoyaltyAmount(RECORD_ID, singleRewardAmount);
+            await this.agreementContract.payRoyaltyAmount(
+                this.firstAgreementId,
+                singleRewardAmount
+            );
 
             //Claiming for user2 for first time
-            await this.agreementContract.claimRoyaltyAmount(RECORD_ID, {
+            await this.agreementContract.claimRoyaltyAmount(this.firstAgreementId, {
                 from: user2,
             });
 
@@ -411,10 +514,13 @@ contract("AgreementContract", function () {
             ).eventually.to.be.bignumber.equal(firstTimeRewardForUser2);
 
             //Distributing for second time
-            await this.agreementContract.payRoyaltyAmount(RECORD_ID, singleRewardAmount);
+            await this.agreementContract.payRoyaltyAmount(
+                this.firstAgreementId,
+                singleRewardAmount
+            );
 
             //Claiming for user2 for second time
-            await this.agreementContract.claimRoyaltyAmount(RECORD_ID, {
+            await this.agreementContract.claimRoyaltyAmount(this.firstAgreementId, {
                 from: user2,
             });
 
@@ -448,10 +554,13 @@ contract("AgreementContract", function () {
             await this.treasuryContract.setApprovalForAll(this.agreementContract.address, true);
 
             //Distributing first time
-            await this.agreementContract.payRoyaltyAmount(RECORD_ID, singleRewardAmount);
+            await this.agreementContract.payRoyaltyAmount(
+                this.firstAgreementId,
+                singleRewardAmount
+            );
 
             //Claiming for user2 for first time
-            await this.agreementContract.claimRoyaltyAmount(RECORD_ID, {
+            await this.agreementContract.claimRoyaltyAmount(this.firstAgreementId, {
                 from: user2,
             });
 
@@ -461,10 +570,13 @@ contract("AgreementContract", function () {
             ).eventually.to.be.bignumber.equal(firstTimeRewardForUser2);
 
             //Distributing for second time
-            await this.agreementContract.payRoyaltyAmount(RECORD_ID, singleRewardAmount);
+            await this.agreementContract.payRoyaltyAmount(
+                this.firstAgreementId,
+                singleRewardAmount
+            );
 
             //Claiming for user2 for second time
-            await this.agreementContract.claimRoyaltyAmount(RECORD_ID, {
+            await this.agreementContract.claimRoyaltyAmount(this.firstAgreementId, {
                 from: user2,
             });
 
@@ -474,7 +586,7 @@ contract("AgreementContract", function () {
             ).eventually.to.be.bignumber.equal(secondTimeRewardForUser2);
 
             //Claiming for user1 for First time : DIVIDEND id 1 and 2
-            await this.agreementContract.claimRoyaltyAmount(RECORD_ID, {
+            await this.agreementContract.claimRoyaltyAmount(this.firstAgreementId, {
                 from: user1,
             });
 
@@ -512,7 +624,10 @@ contract("AgreementContract", function () {
                 await this.treasuryContract.setApprovalForAll(this.agreementContract.address, true);
 
                 //Distributing first time
-                await this.agreementContract.payRoyaltyAmount(RECORD_ID, this.singleRewardAmount);
+                await this.agreementContract.payRoyaltyAmount(
+                    this.firstAgreementId,
+                    this.singleRewardAmount
+                );
             });
             afterEach(async function () {
                 await helper.revertToSnapshot(snapshotId2);
@@ -530,7 +645,7 @@ contract("AgreementContract", function () {
                 );
 
                 // User3 owns tokens but that is after the reward distribution.
-                await this.agreementContract.claimRoyaltyAmount(RECORD_ID, {
+                await this.agreementContract.claimRoyaltyAmount(this.firstAgreementId, {
                     from: this.user3,
                 });
 
@@ -542,13 +657,13 @@ contract("AgreementContract", function () {
 
             it("User not eligible for reward tries to claim twice, CRD balance should remain 0 and then second time expect revert ", async function () {
                 //User tries to make claim on to a record in which user doesn't have any reward, transaction successfully completes with 0 CRD being transferred
-                await this.agreementContract.claimRoyaltyAmount(RECORD_ID, {
+                await this.agreementContract.claimRoyaltyAmount(this.firstAgreementId, {
                     from: this.user3,
                 });
 
                 // User 3 tries to claim the reward which he is not eligible for second time and expects revert
                 await expect(
-                    this.agreementContract.claimRoyaltyAmount(RECORD_ID, {
+                    this.agreementContract.claimRoyaltyAmount(this.firstAgreementId, {
                         from: this.user3,
                     })
                 ).to.eventually.be.rejectedWith("You have no pending claims");
@@ -556,7 +671,7 @@ contract("AgreementContract", function () {
 
             it("Eligible user tries to claim twice, successful first time and then revert", async function () {
                 //Claiming for user for first time
-                await this.agreementContract.claimRoyaltyAmount(RECORD_ID, {
+                await this.agreementContract.claimRoyaltyAmount(this.firstAgreementId, {
                     from: this.user2,
                 });
 
@@ -569,7 +684,7 @@ contract("AgreementContract", function () {
 
                 //Trying to claim second time without new payment being distributed
                 await expect(
-                    this.agreementContract.claimRoyaltyAmount(RECORD_ID, {
+                    this.agreementContract.claimRoyaltyAmount(this.firstAgreementId, {
                         from: this.user2,
                     })
                 ).to.eventually.be.rejectedWith("You have no pending claims");
@@ -589,11 +704,14 @@ contract("AgreementContract", function () {
                 );
 
                 //Distributing first time
-                await this.agreementContract.payRoyaltyAmount(RECORD_ID, this.singleRewardAmount);
+                await this.agreementContract.payRoyaltyAmount(
+                    this.firstAgreementId,
+                    this.singleRewardAmount
+                );
 
                 // User 3 owns tokens but that is after the reward distribution.
                 // He cannot claim the reward as he isn't eligible for it
-                await this.agreementContract.claimRoyaltyAmount(RECORD_ID, {
+                await this.agreementContract.claimRoyaltyAmount(this.firstAgreementId, {
                     from: this.user3,
                 });
 
@@ -628,6 +746,224 @@ contract("AgreementContract", function () {
             ).to.eventually.rejectedWith(
                 "Insufficient amount, please try again with greater amount"
             );
+        });
+    });
+
+    describe("Royalty distribution: with multiple distributors", function () {
+        let snapShot2;
+        let snapshotId2;
+
+        beforeEach(async function () {
+            snapShot2 = await helper.takeSnapshot();
+            snapshotId2 = snapShot2["result"];
+
+            this.user1 = await helper.getEthAccount(0);
+            this.user2 = await helper.getEthAccount(1);
+            this.user3 = await helper.getEthAccount(2);
+            this.user4 = await helper.getEthAccount(4);
+            this.CRDToken = await this.treasuryContract.CRD();
+            this.singleRewardAmount = await web3.utils.toWei("5000");
+            this.communityTokenOwnedByUser2 = await web3.utils.toWei("5000");
+            this.communityTokenOwnedByUser3 = await web3.utils.toWei("5000");
+            this.communityTokenOwnedByUser4 = await web3.utils.toWei("5000");
+            this.baseCRDTokens = await web3.utils.toWei("5000");
+
+            await this.treasuryContract.setApprovalForAll(this.agreementContract.address, true);
+
+            //Transfer community token to user2 so he can make claims
+            await this.treasuryContract.safeTransferFrom(
+                this.user1,
+                this.user2,
+                COMMUNITY_TOKEN_ID,
+                this.communityTokenOwnedByUser2,
+                "0xa165"
+            );
+
+            await this.treasuryContract.safeTransferFrom(
+                this.user1,
+                this.user2,
+                this.CRDToken,
+                this.baseCRDTokens,
+                "0xa165"
+            );
+
+            //Transfer community token to user3 so he can make claims
+            await this.treasuryContract.safeTransferFrom(
+                this.user1,
+                this.user3,
+                COMMUNITY_TOKEN_ID,
+                this.communityTokenOwnedByUser3,
+                "0xa165"
+            );
+
+            await this.treasuryContract.safeTransferFrom(
+                this.user1,
+                this.user3,
+                this.CRDToken,
+                this.baseCRDTokens,
+                "0xa165"
+            );
+
+            //Transfer community token to user4 so he can make claims
+            await this.treasuryContract.safeTransferFrom(
+                this.user1,
+                this.user4,
+                COMMUNITY_TOKEN_ID,
+                this.communityTokenOwnedByUser4,
+                "0xa165"
+            );
+
+            await this.treasuryContract.safeTransferFrom(
+                this.user1,
+                this.user4,
+                this.CRDToken,
+                this.baseCRDTokens,
+                "0xa165"
+            );
+
+            await expect(
+                this.treasuryContract.balanceOf(this.user2, COMMUNITY_TOKEN_ID)
+            ).to.eventually.be.bignumber.equals(this.communityTokenOwnedByUser2);
+
+            await expect(
+                this.treasuryContract.balanceOf(this.user3, COMMUNITY_TOKEN_ID)
+            ).to.eventually.be.bignumber.equals(this.communityTokenOwnedByUser3);
+
+            await expect(
+                this.treasuryContract.balanceOf(this.user4, COMMUNITY_TOKEN_ID)
+            ).to.eventually.be.bignumber.equals(this.communityTokenOwnedByUser4);
+
+            await this.treasuryContract.setApprovalForAll(this.agreementContract.address, true, {
+                from: this.user1,
+            });
+            await this.treasuryContract.setApprovalForAll(this.agreementContract.address, true, {
+                from: this.user2,
+            });
+            await this.treasuryContract.setApprovalForAll(this.agreementContract.address, true, {
+                from: this.user3,
+            });
+            await this.treasuryContract.setApprovalForAll(this.agreementContract.address, true, {
+                from: this.user4,
+            });
+        });
+        afterEach(async function () {
+            await helper.revertToSnapshot(snapshotId2);
+        });
+
+        it("3 distributors, 3 agreements, 1 record, 3 claimee", async function () {
+            const agreementOne = 1;
+            const agreementTwo = 2;
+            const agreementThree = 3;
+            const rewardForUser2 = await web3.utils.toWei("55.555555555555555");
+            const rewardForUser3 = await web3.utils.toWei("111.11111111111111");
+            await this.agreementContract.createAgreement(RECORD_ID, "Some link", "some hash", {
+                from: this.user1,
+            });
+            await this.agreementContract.createAgreement(RECORD_ID, "Some link", "some hash", {
+                from: this.user2,
+            });
+            await this.agreementContract.createAgreement(RECORD_ID, "Some link", "some hash", {
+                from: this.user3,
+            });
+
+            await this.agreementContract.castVoteForAgreement(agreementOne, true);
+            await this.agreementContract.castVoteForAgreement(agreementTwo, true);
+            await this.agreementContract.castVoteForAgreement(agreementThree, true);
+
+            await helper.advanceMultipleBlocks(50);
+
+            await this.agreementContract.declareWinner(agreementOne);
+            await this.agreementContract.declareWinner(agreementTwo);
+            await this.agreementContract.declareWinner(agreementThree);
+
+            //Multiple user distributes royalty and single claims
+            await this.agreementContract.payRoyaltyAmount(agreementOne, this.singleRewardAmount, {
+                from: this.user1,
+            });
+            await this.agreementContract.payRoyaltyAmount(agreementTwo, this.singleRewardAmount, {
+                from: this.user2,
+            });
+            await this.agreementContract.payRoyaltyAmount(agreementThree, this.singleRewardAmount, {
+                from: this.user3,
+            });
+
+            // User3 and User1 makes claims on different agreements
+            await this.agreementContract.claimRoyaltyAmount(agreementOne, {
+                from: this.user1,
+            });
+            await this.agreementContract.claimRoyaltyAmount(agreementThree, {
+                from: this.user2,
+            });
+
+            //Checking individual user balance and it should be increased after distribution of reward
+            await expect(
+                this.treasuryContract.balanceOf(this.user2, this.CRDToken)
+            ).eventually.to.be.bignumber.equal(rewardForUser2);
+
+            //User1 distributes one more royalty
+            await this.agreementContract.payRoyaltyAmount(agreementOne, this.singleRewardAmount, {
+                from: this.user1,
+            });
+            // User3 claims and he has 3 pending royalty payouts
+            await this.agreementContract.claimRoyaltyAmount(agreementOne, {
+                from: this.user3,
+            });
+
+            await expect(
+                this.treasuryContract.balanceOf(this.user3, this.CRDToken)
+            ).eventually.to.be.bignumber.equal(rewardForUser3);
+        });
+
+        it("3 distributor accounts, 1 agreements, 1 record, 3 claimee", async function () {
+            const agreementOne = 1;
+            const rewardForUser2 = new BN(await web3.utils.toWei("55.555555555555555"));
+            const rewardForUser3 = new BN(await web3.utils.toWei("111.11111111111111"));
+            await this.agreementContract.createAgreement(RECORD_ID, "Some link", "some hash", {
+                from: this.user1,
+            });
+            await this.agreementContract.createAgreement(RECORD_ID, "Some link", "some hash", {
+                from: this.user2,
+            });
+            await this.agreementContract.createAgreement(RECORD_ID, "Some link", "some hash", {
+                from: this.user3,
+            });
+
+            await this.agreementContract.castVoteForAgreement(agreementOne, true);
+
+            await helper.advanceMultipleBlocks(50);
+
+            await this.agreementContract.declareWinner(agreementOne);
+
+            //Multiple user distributes royalty and single claims
+            await this.agreementContract.payRoyaltyAmount(agreementOne, this.singleRewardAmount, {
+                from: this.user1,
+            });
+
+            // User3 and User1 makes claims on different agreements
+            await this.agreementContract.claimRoyaltyAmount(agreementOne, {
+                from: this.user1,
+            });
+            await this.agreementContract.claimRoyaltyAmount(agreementOne, {
+                from: this.user2,
+            });
+
+            //Checking individual user balance and it should be increased after distribution of reward
+            await expect(
+                this.treasuryContract.balanceOf(this.user2, this.CRDToken)
+            ).eventually.to.be.bignumber.equal(rewardForUser2.add(new BN(this.baseCRDTokens)));
+
+            //User1 distributes one more royalty
+            await this.agreementContract.payRoyaltyAmount(agreementOne, this.singleRewardAmount, {
+                from: this.user1,
+            });
+            // User3 claims and he has 3 pending royalty payouts
+            await this.agreementContract.claimRoyaltyAmount(agreementOne, {
+                from: this.user3,
+            });
+
+            await expect(
+                this.treasuryContract.balanceOf(this.user3, this.CRDToken)
+            ).eventually.to.be.bignumber.equal(rewardForUser3.add(new BN(this.baseCRDTokens)));
         });
     });
 });
