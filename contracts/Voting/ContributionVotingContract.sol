@@ -140,14 +140,14 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
             "Voting is already created"
         );
 
-        uint256 ballotId = _createVoting(true);
-
         TreasuryContract treasuryContract = TreasuryContract(
             TREASURY_CONTRACT_ADDRESS
         );
 
         uint256 govTokenId = treasuryContract.getCommunityTokenId(recordId);
         uint256 commTokenId = treasuryContract.getGovernanceTokenId(recordId);
+
+        uint256 ballotId = _createVoting(true, govTokenId);
 
         ContributionReward memory contributionReward = ContributionReward({
             requester: tx.origin,
@@ -300,6 +300,9 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
         address[] memory counterOfferList = contributionCounterOfferList[
             contributionId
         ];
+
+        //! we should remove the below for loop as we don't need loop through all the offers
+        //! as we are only calculating the votes that are accepted and rest are considered as false
         for (uint256 i = 0; i < counterOfferList.length; i++) {
             if (
                 contributionCounterOfferMap[contributionId][counterOfferList[i]]
@@ -315,10 +318,7 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
                     .status = 3;
             }
         }
-        bool result = _declareWinner(
-            rewardMapping[contributionId].ballotId,
-            rewardMapping[contributionId].governanceTokenId
-        );
+        bool result = _declareWinner(rewardMapping[contributionId].ballotId);
 
         emit BallotResult(
             contributionId,

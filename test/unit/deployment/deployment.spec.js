@@ -12,10 +12,10 @@ const { expectEvent, expectRevert } = require("@openzeppelin/test-helpers");
 chai.use(chaiBN);
 chai.use(chaiAsPromised);
 
-contract("All Contract Deployment", function () {
+contract("All Contract Deployment", function() {
     before(setup);
     let snapShot, snapshotId;
-    beforeEach(async function () {
+    beforeEach(async function() {
         const initialHolder = await helper.getEthAccount(0);
         const recipient = await helper.getEthAccount(1);
         const other = await helper.getEthAccount(2);
@@ -30,11 +30,11 @@ contract("All Contract Deployment", function () {
         snapshotId = snapShot["result"];
         this.token = await ERC20SnapshotMock.new(uri, initialHolder, initialSupply);
     });
-    afterEach(async function () {
+    afterEach(async function() {
         await timeMachine.revertToSnapshot(snapshotId);
     });
 
-    it("Should deploy all contracts", async function () {
+    it("Should deploy all contracts", async function() {
         expect(this.tracksContract.address).to.not.equal("");
         expect(this.contributionContract.address).to.not.equal("");
         expect(this.recordsContract.address).to.not.equal("");
@@ -44,7 +44,7 @@ contract("All Contract Deployment", function () {
         expect(this.agreementContract.address).to.not.equal("");
     });
 
-    it("All address set", async function () {
+    it("All address set", async function() {
         expect(
             this.contributionContract.CONTRIBUTION_VOTING_CONTRACT_ADDRESS()
         ).eventually.to.be.equal(this.contributionVotingContract.address);
@@ -83,6 +83,21 @@ contract("All Contract Deployment", function () {
         expect(
             this.baseVotingCounterOfferContractMock.TREASURY_CONTRACT_ADDRESS()
         ).eventually.to.be.equal(this.treasuryContract.address);
+
+        expect(this.votingHubContract.TREASURY_CONTRACT_ADDRESS()).eventually.to.be.equal(
+            this.treasuryContract.address
+        );
+
+        expect(this.votingHubContract.VOTING_CONTRACTS_ADDRESS(0)).eventually.to.be.equal(
+            this.contributionVotingContract.address
+        );
+        expect(this.votingHubContract.VOTING_CONTRACTS_ADDRESS(1)).eventually.to.be.equal(
+            this.agreementContract.address
+        );
+
+        expect(this.treasuryContract.VOTING_HUB_ADDRESS()).eventually.to.be.equal(
+            this.votingHubContract.address
+        );
     });
 });
 

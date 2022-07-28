@@ -15,52 +15,55 @@ const chaiAsPromised = require("chai-as-promised");
 const expectEvent = require("@openzeppelin/test-helpers/src/expectEvent");
 const expect = chai.expect;
 
-contract("BaseVotingContract", function () {
+contract("BaseVotingContract", function() {
     before(setup);
     before(createContribution);
+    before(async function() {
+        await this.votingHubContract.addVotingContract(this.baseVotingContractMock.address);
+    });
 
     let snapShot, snapshotId;
-    beforeEach(async function () {
+    beforeEach(async function() {
         snapShot = await helper.takeSnapshot();
         snapshotId = snapShot["result"];
     });
-    afterEach(async function () {
+    afterEach(async function() {
         await helper.revertToSnapshot(snapshotId);
     });
 
-    it("Creating a voting ballot owner cannot vote", async function () {
+    it("Creating a voting ballot owner cannot vote", async function() {
         const ballotId = 1;
-        await this.baseVotingContractMock.createBallot(false);
+        await this.baseVotingContractMock.createBallot(false, COMMUNITY_TOKEN_ID);
 
         await expect(
             this.baseVotingContractMock.castVote(ballotId, true)
         ).to.eventually.be.rejectedWith("Owner cannot vote");
     });
 
-    it("Creating a voting ballot owner can vote", async function () {
+    it("Creating a voting ballot owner can vote", async function() {
         const ballotId = 1;
-        await this.baseVotingContractMock.createBallot(true);
+        await this.baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID);
 
         await this.baseVotingContractMock.castVote(ballotId, true);
     });
 
-    it("Creating a voting ballot, single voter and declaring winner, ballot win", async function () {
+    it("Creating a voting ballot, single voter and declaring winner, ballot win", async function() {
         const ballotId = 1;
         const user1 = await helper.getEthAccount(0);
         const user2 = await helper.getEthAccount(1);
         const user3 = await helper.getEthAccount(2);
 
-        await this.baseVotingContractMock.createBallot(true, { from: user2 });
+        await this.baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID, { from: user2 });
 
         await this.baseVotingContractMock.castVote(ballotId, true, { from: user1 });
 
         await helper.advanceMultipleBlocks(70);
 
-        let trx = await this.baseVotingContractMock.declareWinner(ballotId, COMMUNITY_TOKEN_ID);
+        let trx = await this.baseVotingContractMock.declareWinner(ballotId);
         await expectEvent(trx, "BallotResult", { ballotId: new BN(ballotId), result: true });
     });
 
-    it("Creating a voting ballot, single voter and declaring winner, ballot lose", async function () {
+    it("Creating a voting ballot, single voter and declaring winner, ballot lose", async function() {
         const ballotId = 1;
         const user1 = await helper.getEthAccount(0);
         const user2 = await helper.getEthAccount(1);
@@ -74,17 +77,17 @@ contract("BaseVotingContract", function () {
             "0xa165"
         );
 
-        await this.baseVotingContractMock.createBallot(true, { from: user2 });
+        await this.baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID, { from: user2 });
 
         await this.baseVotingContractMock.castVote(ballotId, true, { from: user3 });
 
         await helper.advanceMultipleBlocks(70);
 
-        let trx = await this.baseVotingContractMock.declareWinner(ballotId, COMMUNITY_TOKEN_ID);
+        let trx = await this.baseVotingContractMock.declareWinner(ballotId);
         await expectEvent(trx, "BallotResult", { ballotId: new BN(ballotId), result: false });
     });
 
-    it("Creating a voting ballot, ballot win with 67%", async function () {
+    it("Creating a voting ballot, ballot win with 67%", async function() {
         const ballotId = 1;
         const user1 = await helper.getEthAccount(0);
         const user2 = await helper.getEthAccount(1);
@@ -98,17 +101,17 @@ contract("BaseVotingContract", function () {
             "0xa165"
         );
 
-        await this.baseVotingContractMock.createBallot(true, { from: user2 });
+        await this.baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID, { from: user2 });
 
         await this.baseVotingContractMock.castVote(ballotId, true, { from: user3 });
 
         await helper.advanceMultipleBlocks(70);
 
-        let trx = await this.baseVotingContractMock.declareWinner(ballotId, COMMUNITY_TOKEN_ID);
+        let trx = await this.baseVotingContractMock.declareWinner(ballotId);
         await expectEvent(trx, "BallotResult", { ballotId: new BN(ballotId), result: true });
     });
 
-    it("Creating a voting ballot, ballot lose with 65%", async function () {
+    it("Creating a voting ballot, ballot lose with 65%", async function() {
         const ballotId = 1;
         const user1 = await helper.getEthAccount(0);
         const user2 = await helper.getEthAccount(1);
@@ -122,17 +125,17 @@ contract("BaseVotingContract", function () {
             "0xa165"
         );
 
-        await this.baseVotingContractMock.createBallot(true, { from: user2 });
+        await this.baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID, { from: user2 });
 
         await this.baseVotingContractMock.castVote(ballotId, true, { from: user3 });
 
         await helper.advanceMultipleBlocks(70);
 
-        let trx = await this.baseVotingContractMock.declareWinner(ballotId, COMMUNITY_TOKEN_ID);
+        let trx = await this.baseVotingContractMock.declareWinner(ballotId);
         await expectEvent(trx, "BallotResult", { ballotId: new BN(ballotId), result: false });
     });
 
-    it("Creating a voting ballot, multiple voter and declaring winner, ballot win", async function () {
+    it("Creating a voting ballot, multiple voter and declaring winner, ballot win", async function() {
         const ballotId = 1;
         const user1 = await helper.getEthAccount(0);
         const user2 = await helper.getEthAccount(1);
@@ -154,18 +157,18 @@ contract("BaseVotingContract", function () {
             "0xa165"
         );
 
-        await this.baseVotingContractMock.createBallot(true, { from: user2 });
+        await this.baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID, { from: user2 });
 
         await this.baseVotingContractMock.castVote(ballotId, true);
         await this.baseVotingContractMock.castVote(ballotId, true, { from: user3 });
 
         await helper.advanceMultipleBlocks(30);
 
-        let trx = await this.baseVotingContractMock.declareWinner(ballotId, COMMUNITY_TOKEN_ID);
+        let trx = await this.baseVotingContractMock.declareWinner(ballotId);
         await expectEvent(trx, "BallotResult", { ballotId: new BN(ballotId), result: true });
     });
 
-    it("Creating a voting ballot, multiple voter and declaring winner, ballot lose", async function () {
+    it("Creating a voting ballot, multiple voter and declaring winner, ballot lose", async function() {
         const ballotId = 1;
         const user1 = await helper.getEthAccount(0);
         const user2 = await helper.getEthAccount(1);
@@ -187,14 +190,204 @@ contract("BaseVotingContract", function () {
             "0xa165"
         );
 
-        await this.baseVotingContractMock.createBallot(true, { from: user2 });
+        await this.baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID, { from: user2 });
 
         await this.baseVotingContractMock.castVote(ballotId, true, { from: user2 });
         await this.baseVotingContractMock.castVote(ballotId, true, { from: user3 });
 
         await helper.advanceMultipleBlocks(30);
 
-        let trx = await this.baseVotingContractMock.declareWinner(ballotId, COMMUNITY_TOKEN_ID);
+        let trx = await this.baseVotingContractMock.declareWinner(ballotId);
+        await expectEvent(trx, "BallotResult", { ballotId: new BN(ballotId), result: false });
+    });
+
+    it("Moving tokens between 2 accounts after voting, should lose", async function() {
+        const ballotId = 1;
+        const user1 = await helper.getEthAccount(0);
+        const user2 = await helper.getEthAccount(1);
+        const user3 = await helper.getEthAccount(2);
+        const user4 = await helper.getEthAccount(3);
+
+        await this.treasuryContract.safeTransferFrom(
+            user1,
+            user2,
+            COMMUNITY_TOKEN_ID,
+            await web3.utils.toWei("5000"),
+            "0xa165"
+        );
+
+        await this.treasuryContract.safeTransferFrom(
+            user1,
+            user3,
+            COMMUNITY_TOKEN_ID,
+            await web3.utils.toWei("5000"),
+            "0xa165"
+        );
+
+        await this.baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID, { from: user2 });
+
+        await this.baseVotingContractMock.castVote(ballotId, true, { from: user1 });
+        await this.baseVotingContractMock.castVote(ballotId, true, { from: user2 });
+        await this.baseVotingContractMock.castVote(ballotId, true, { from: user3 });
+
+        await this.treasuryContract.safeTransferFrom(
+            user1,
+            user4,
+            COMMUNITY_TOKEN_ID,
+            await web3.utils.toWei("200000"),
+            "0xa165"
+        );
+
+        await helper.advanceMultipleBlocks(30);
+
+        let trx = await this.baseVotingContractMock.declareWinner(ballotId);
+        await expectEvent(trx, "BallotResult", { ballotId: new BN(ballotId), result: false });
+    });
+
+    it("Moving tokens between 2 accounts after ballot expired, should win", async function() {
+        const ballotId = 1;
+        const user1 = await helper.getEthAccount(0);
+        const user2 = await helper.getEthAccount(1);
+        const user3 = await helper.getEthAccount(2);
+        const user4 = await helper.getEthAccount(3);
+
+        await this.treasuryContract.safeTransferFrom(
+            user1,
+            user2,
+            COMMUNITY_TOKEN_ID,
+            await web3.utils.toWei("5000"),
+            "0xa165"
+        );
+
+        await this.treasuryContract.safeTransferFrom(
+            user1,
+            user3,
+            COMMUNITY_TOKEN_ID,
+            await web3.utils.toWei("5000"),
+            "0xa165"
+        );
+
+        await this.baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID, { from: user2 });
+
+        await this.baseVotingContractMock.castVote(ballotId, true, { from: user1 });
+        await this.baseVotingContractMock.castVote(ballotId, true, { from: user2 });
+        await this.baseVotingContractMock.castVote(ballotId, true, { from: user3 });
+
+        await helper.advanceMultipleBlocks(30);
+
+        await this.treasuryContract.safeTransferFrom(
+            user1,
+            user4,
+            COMMUNITY_TOKEN_ID,
+            await web3.utils.toWei("200000"),
+            "0xa165"
+        );
+
+        let trx = await this.baseVotingContractMock.declareWinner(ballotId);
+        await expectEvent(trx, "BallotResult", { ballotId: new BN(ballotId), result: true });
+    });
+
+    it("Moving tokens between 2 accounts after voting, should win", async function() {
+        const ballotId = 1;
+        const user1 = await helper.getEthAccount(0);
+        const user2 = await helper.getEthAccount(1);
+        const user3 = await helper.getEthAccount(2);
+        const user4 = await helper.getEthAccount(3);
+
+        await this.treasuryContract.safeTransferFrom(
+            user1,
+            user2,
+            COMMUNITY_TOKEN_ID,
+            await web3.utils.toWei("5000"),
+            "0xa165"
+        );
+
+        await this.treasuryContract.safeTransferFrom(
+            user1,
+            user3,
+            COMMUNITY_TOKEN_ID,
+            await web3.utils.toWei("5000"),
+            "0xa165"
+        );
+
+        await this.treasuryContract.safeTransferFrom(
+            user1,
+            user4,
+            COMMUNITY_TOKEN_ID,
+            await web3.utils.toWei("5000"),
+            "0xa165"
+        );
+
+        await this.baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID, { from: user2 });
+
+        await this.baseVotingContractMock.castVote(ballotId, false, { from: user1 });
+        await this.baseVotingContractMock.castVote(ballotId, true, { from: user4 });
+        await this.baseVotingContractMock.castVote(ballotId, true, { from: user2 });
+        await this.baseVotingContractMock.castVote(ballotId, true, { from: user3 });
+
+        await this.treasuryContract.safeTransferFrom(
+            user1,
+            user4,
+            COMMUNITY_TOKEN_ID,
+            await web3.utils.toWei("300000"),
+            "0xa165"
+        );
+
+        await helper.advanceMultipleBlocks(30);
+
+        let trx = await this.baseVotingContractMock.declareWinner(ballotId);
+        await expectEvent(trx, "BallotResult", { ballotId: new BN(ballotId), result: true });
+    });
+
+    it("Moving tokens between 2 accounts after voting, should lose", async function() {
+        const ballotId = 1;
+        const user1 = await helper.getEthAccount(0);
+        const user2 = await helper.getEthAccount(1);
+        const user3 = await helper.getEthAccount(2);
+        const user4 = await helper.getEthAccount(3);
+
+        await this.treasuryContract.safeTransferFrom(
+            user1,
+            user2,
+            COMMUNITY_TOKEN_ID,
+            await web3.utils.toWei("5000"),
+            "0xa165"
+        );
+
+        await this.treasuryContract.safeTransferFrom(
+            user1,
+            user3,
+            COMMUNITY_TOKEN_ID,
+            await web3.utils.toWei("5000"),
+            "0xa165"
+        );
+
+        await this.treasuryContract.safeTransferFrom(
+            user1,
+            user4,
+            COMMUNITY_TOKEN_ID,
+            await web3.utils.toWei("5000"),
+            "0xa165"
+        );
+
+        await this.baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID, { from: user2 });
+
+        await this.baseVotingContractMock.castVote(ballotId, false, { from: user1 });
+        await this.baseVotingContractMock.castVote(ballotId, true, { from: user4 });
+        await this.baseVotingContractMock.castVote(ballotId, true, { from: user2 });
+        await this.baseVotingContractMock.castVote(ballotId, true, { from: user3 });
+
+        await helper.advanceMultipleBlocks(30);
+
+        await this.treasuryContract.safeTransferFrom(
+            user1,
+            user4,
+            COMMUNITY_TOKEN_ID,
+            await web3.utils.toWei("300000"),
+            "0xa165"
+        );
+
+        let trx = await this.baseVotingContractMock.declareWinner(ballotId);
         await expectEvent(trx, "BallotResult", { ballotId: new BN(ballotId), result: false });
     });
 });

@@ -130,12 +130,13 @@ contract AgreementContract is BaseVotingContract {
         agreementCurrentId++;
         uint256 agreeId = agreementCurrentId;
 
-        uint256 ballotId = _createVoting(true);
-
         TreasuryContract treasuryContract = TreasuryContract(
             TREASURY_CONTRACT_ADDRESS
         );
+
         uint256 tokenId = treasuryContract.getGovernanceTokenId(recordId);
+
+        uint256 ballotId = _createVoting(true, tokenId);
 
         Agreement memory agreement = Agreement({
             requester: tx.origin,
@@ -191,10 +192,7 @@ contract AgreementContract is BaseVotingContract {
      * @param agreementId this is the id of the agreement of which the winner is to be decleared
      */
     function declareWinner(uint256 agreementId) external {
-        bool result = _declareWinner(
-            agreementMap[agreementId].ballotId,
-            agreementMap[agreementId].tokenId
-        );
+        bool result = _declareWinner(agreementMap[agreementId].ballotId);
 
         emit BallotResult(
             agreementId,
@@ -383,8 +381,8 @@ contract AgreementContract is BaseVotingContract {
                 user
             ];
 
-            //If claimStatus is false then it means that there are some elements that are yet to be claimed so we will go
-            //down and search there
+            //If claimStatus is false then it means that there are some elements that are yet to be claimed
+            //so we will go down and search there
             if (!claimStatus && high != mid) {
                 high = mid;
             } else {

@@ -27,8 +27,8 @@ contract BaseVotingContractMock is BaseVotingContract {
         _setTreasuryContractAddress(newTreasuryContractAddress);
     }
 
-    function createBallot(bool canOwnerVote) public {
-        _createVoting(canOwnerVote);
+    function createBallot(bool canOwnerVote, uint256 tokenId) public {
+        _createVoting(canOwnerVote, tokenId);
     }
 
     function castVote(uint256 ballotId, bool vote) public {
@@ -43,8 +43,8 @@ contract BaseVotingContractMock is BaseVotingContract {
         _castVoteForOther(ballotId, vote, voter);
     }
 
-    function declareWinner(uint256 ballotId, uint256 tokenId) public {
-        bool result = _declareWinner(ballotId, tokenId);
+    function declareWinner(uint256 ballotId) public {
+        bool result = _declareWinner(ballotId);
         emit BallotResult(ballotId, result);
     }
 }

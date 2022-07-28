@@ -13,6 +13,8 @@ const BaseVotingCounterOfferContractMock = artifacts.require(
     "../contracts/Mocks/BaseVotingCounterOfferContractMock.sol"
 );
 
+const VotingHubContract = artifacts.require("../contracts/Mocks/VotingHubContract.sol");
+
 const { VOTING_INTERVAL_BLOCKS } = require("./helper");
 
 async function setup() {
@@ -27,6 +29,7 @@ async function setup() {
     let agreementContract = await AgreementContract.deployed();
     let baseVotingContractMock = await BaseVotingContractMock.deployed();
     let baseVotingCounterOfferContractMock = await BaseVotingCounterOfferContractMock.deployed();
+    let votingHubContract = await VotingHubContract.deployed();
 
     await contributionContract.setContributionVotingContractAddress(
         contributionVotingContract.address
@@ -49,6 +52,12 @@ async function setup() {
     await baseVotingContractMock.setTreasuryContractAddress(treasuryContract.address);
     await baseVotingCounterOfferContractMock.setTreasuryContractAddress(treasuryContract.address);
 
+    await votingHubContract.setTreasuryContractAddress(treasuryContract.address);
+    await votingHubContract.addVotingContract(contributionVotingContract.address);
+    await votingHubContract.addVotingContract(agreementContract.address);
+
+    await treasuryContract.setVotingHubContract(votingHubContract.address);
+
     this.tracksContract = tracksContract;
     this.contributionContract = contributionContract;
     this.recordsContract = recordsContract;
@@ -58,6 +67,7 @@ async function setup() {
     this.agreementContract = agreementContract;
     this.baseVotingContractMock = baseVotingContractMock;
     this.baseVotingCounterOfferContractMock = baseVotingCounterOfferContractMock;
+    this.votingHubContract = votingHubContract;
 }
 
 module.exports = setup;

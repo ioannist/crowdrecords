@@ -9,6 +9,8 @@ import "./RecordsContract.sol";
 import "./ERC1155/SnapshotERC1155.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
+import "./voting/VotingHubContract.sol";
+
 // ERC 20 balance[adress] => 2 contracts // governance and comunity
 // ERC 721 blance[adress] => 1 contract // records
 // ERC 1155
@@ -18,6 +20,7 @@ contract TreasuryContract is IERC1155Receiver, SnapshotERC1155 {
     uint256 private LastTokenId = 1;
     address public RECORDS_CONTRACT_ADDRESS;
     address public CONTRIBUTION_VOTING_CONTRACT_ADDRESS;
+    address public VOTING_HUB_ADDRESS;
     address OWNER;
     string private PREFIX_GOVERNANCE = "CRDG_";
     string private PREFIX_COMMUNITY = "CRD_";
@@ -171,6 +174,16 @@ contract TreasuryContract is IERC1155Receiver, SnapshotERC1155 {
         ownerOnly
     {
         RECORDS_CONTRACT_ADDRESS = newRecordsContractAddress;
+    }
+
+    /**
+     * @dev This function sets the Records Contract address
+     */
+    function setVotingHubContract(address newVotingHubContract)
+        public
+        ownerOnly
+    {
+        VOTING_HUB_ADDRESS = newVotingHubContract;
     }
 
     /**
@@ -463,6 +476,36 @@ contract TreasuryContract is IERC1155Receiver, SnapshotERC1155 {
 
     function snapshot() public returns (uint256 snapshotId) {
         return _snapshot();
+    }
+
+    // Update balance and/or total supply snapshots before the values are modified. This is implemented
+    // in the _beforeTokenTransfer hook, which is executed for _mint, _burn, and _transfer operations.
+    function _beforeTokenTransfer(
+        address operator,
+        address from,
+        address to,
+        uint256[] memory ids,
+        uint256[] memory amounts,
+        bytes memory data
+    ) internal override {
+        //Below condition is needed as the _mint is called in the constructor
+        //and at that particular point in time the below address is not initialized thus leading to a revert
+        if (VOTING_HUB_ADDRESS != address(0)) {
+            VotingHubContract votingHubContract = VotingHubContract(
+                VOTING_HUB_ADDRESS
+            );
+
+            for (uint256 i = 0; i < ids.length; i++) {
+                votingHubContract.handleUserTokenTransfers(
+                    from,
+                    to,
+                    amounts[i],
+                    ids[i]
+                );
+            }
+        }
+
+        super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
     }
 
     function onERC1155Received(

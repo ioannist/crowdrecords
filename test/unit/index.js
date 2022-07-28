@@ -1,4 +1,4 @@
-describe("Unit Tests", function () {
+describe("Unit Tests", function() {
     require("./deployment");
     require("./ERC1155");
     require("./voting");

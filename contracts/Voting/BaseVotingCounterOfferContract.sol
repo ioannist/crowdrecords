@@ -9,7 +9,8 @@ contract BaseVotingCounterOfferContract is BaseVotingContract {
     mapping(uint256 => mapping(address => bool)) counterOffered;
 
     /**
-     * @dev This function check if the user has created the counter offer or not, if it is created it will revert the transaction
+     * @dev This function check if the user has created the counter offer or not,
+       if it is created it will revert the transaction
      */
     modifier _shouldNotHaveCreatedCounterOffer(uint256 votingBallotId) {
         require(

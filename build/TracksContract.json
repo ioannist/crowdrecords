@@ -153,7 +153,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [
@@ -172,7 +173,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [
@@ -196,7 +198,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [],
@@ -209,7 +212,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [
@@ -228,7 +232,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [
@@ -316,7 +321,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [],
@@ -329,7 +335,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [
@@ -348,7 +355,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [
@@ -382,7 +390,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [
@@ -18818,9 +18827,17 @@
     "name": "solc",
     "version": "0.8.12+commit.f00d7308.Emscripten.clang"
   },
-  "networks": {},
+  "networks": {
+    "1658578861148": {
+      "events": {},
+      "links": {},
+      "address": "0x4800B05AC2BCd2D623b2e28D2156107978407ACc",
+      "transactionHash": "0xf699991ca177713b9b1a3219763f666acd69f43536160a2de1b47da18de91aa5"
+    }
+  },
   "schemaVersion": "3.4.6",
-  "updatedAt": "2022-07-14T12:27:38.507Z",
+  "updatedAt": "2022-07-23T13:28:07.996Z",
+  "networkType": "ethereum",
   "devdoc": {
     "events": {
       "TrackCreated(uint256,string,string,string,uint256)": {
