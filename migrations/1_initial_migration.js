@@ -12,6 +12,7 @@ const BaseVotingContractMock = artifacts.require("../contracts/Mocks/BaseVotingC
 const BaseVotingCounterOfferContractMock = artifacts.require(
     "../contracts/Mocks/BaseVotingCounterOfferContractMock.sol"
 );
+const DilutionContract = artifacts.require("../contracts/voting/DilutionContract.Sol");
 const VotingHubContract = artifacts.require("../contracts/voting/VotingHubContract.Sol");
 
 module.exports = async (deployer) => {
@@ -37,6 +38,8 @@ module.exports = async (deployer) => {
     await deployer.deploy(BaseVotingCounterOfferContractMock, 20);
     let baseVotingCounterOfferContractMock = await BaseVotingCounterOfferContractMock.deployed();
 
+    await deployer.deploy(DilutionContract, 20, 1000);
+    let dilutionContract = await DilutionContract.deployed();
     await deployer.deploy(VotingHubContract);
     let votingHubContract = await VotingHubContract.deployed();
 };

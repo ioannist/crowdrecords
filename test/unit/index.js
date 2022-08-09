@@ -6,5 +6,6 @@ describe("Unit Tests", function() {
     require("./records");
     require("./orders");
     require("./agreement");
+    require("./dilution");
 });
 

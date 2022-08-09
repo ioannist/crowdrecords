@@ -20,6 +20,7 @@ contract TreasuryContract is IERC1155Receiver, SnapshotERC1155 {
     uint256 private LastTokenId = 1;
     address public RECORDS_CONTRACT_ADDRESS;
     address public CONTRIBUTION_VOTING_CONTRACT_ADDRESS;
+    address public DILUTION_CONTRACT_ADDRESS;
     address public VOTING_HUB_ADDRESS;
     address OWNER;
     string private PREFIX_GOVERNANCE = "CRDG_";
@@ -167,6 +168,17 @@ contract TreasuryContract is IERC1155Receiver, SnapshotERC1155 {
     }
 
     /**
+     * @dev Modifier to check that if the sender is the dilution contract or not.
+     */
+    modifier onlyDilutionContract() {
+        require(
+            msg.sender == DILUTION_CONTRACT_ADDRESS,
+            "You are not authorized for this action"
+        );
+        _;
+    }
+
+    /**
      * @dev This function sets the Records Contract address
      */
     function setRecordsContractAddress(address newRecordsContractAddress)
@@ -184,6 +196,13 @@ contract TreasuryContract is IERC1155Receiver, SnapshotERC1155 {
         ownerOnly
     {
         VOTING_HUB_ADDRESS = newVotingHubContract;
+    }
+
+    /**
+     * @dev This function sets the dilution Contract address
+     */
+    function setDilutionContract(address newDilutionContract) public ownerOnly {
+        DILUTION_CONTRACT_ADDRESS = newDilutionContract;
     }
 
     /**
@@ -506,6 +525,18 @@ contract TreasuryContract is IERC1155Receiver, SnapshotERC1155 {
         }
 
         super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
+    }
+
+    /**
+     * @dev this function is responsible for minting of new tokens for records
+     * @param tokenId Id this is the tokenId that is to minted
+     * @param amount the amount that is to be minted
+     */
+    function mintTokens(uint256 tokenId, uint256 amount)
+        public
+        onlyDilutionContract
+    {
+        _mint(address(this), tokenId, amount, "New tokens minted");
     }
 
     function onERC1155Received(

@@ -10,6 +10,7 @@ contract OrdersContract {
     address public RECORDS_CONTRACT_ADDRESS;
     address public VOTING_CONTRACT_ADDRESS;
     address public TREASURY_CONTRACT_ADDRESS;
+    address public WALLET_ADDRESS;
     uint8 TRANSACTION_FEE = 50; //This is 0.50%
     address OWNER;
 
@@ -127,6 +128,13 @@ contract OrdersContract {
         ownerOnly
     {
         TREASURY_CONTRACT_ADDRESS = newTreasuryContractAddress;
+    }
+
+    /**
+     * @dev This function sets the owner of the wallet address
+     */
+    function setWalletAddress(address newWalletAddress) public ownerOnly {
+        WALLET_ADDRESS = newWalletAddress;
     }
 
     //safeTransferFrom
@@ -413,14 +421,14 @@ contract OrdersContract {
         TreasuryContract treasuryContract = TreasuryContract(
             TREASURY_CONTRACT_ADDRESS
         );
-        //* Where to shift the transaction fees
-        // treasuryContract.safeTransferFrom(
-        //     msg.sender,
-        //     address(this),
-        //     treasuryContract.CRD(),
-        //     transactionFee,
-        //     "Sale transaction fee"
-        // );
+
+        treasuryContract.safeTransferFrom(
+            msg.sender,
+            WALLET_ADDRESS,
+            treasuryContract.CRD(),
+            transactionFee,
+            "Sale transaction fee"
+        );
 
         treasuryContract.safeTransferFrom(
             address(this),
