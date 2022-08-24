@@ -135,8 +135,8 @@ contract DilutionContract is BaseVotingContract {
             TREASURY_CONTRACT_ADDRESS
         );
 
-        uint256 govTokenId = treasuryContract.getCommunityTokenId(recordId);
-        uint256 commTokenId = treasuryContract.getGovernanceTokenId(recordId);
+        uint256 commTokenId = treasuryContract.getCommunityTokenId(recordId);
+        uint256 govTokenId = treasuryContract.getGovernanceTokenId(recordId);
 
         require(
             govTokenId == tokenId || commTokenId == tokenId,

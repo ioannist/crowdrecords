@@ -183,15 +183,6 @@ contract("Dilution Contract", function() {
             await helper.revertToSnapshot(snapshotId2);
         });
 
-        //// Create request with invalid tokenId, reject
-        //// Create a request without owning the token, reject
-        //// Dilution by voting, wins with votes
-        //// Dilution by voting, loses the ballot
-        //// Dilution by voting with shifting weight of votes, wins the ballot
-        //// Dilution by voting with shifting weight of votes, loses the ballot
-        //// Dilution votin        this.user1 = await helper.getEthAccog done, trying to create a new dilution request before set time, reject
-        //// Dilution voting done, creates a new request and wins
-
         it("shifting weight of votes, wins the ballot", async function() {
             const afterDilution = await web3.utils.toWei("1000000");
             const txx = await this.dilutionContract.castVote(this.dilutionId, false, {

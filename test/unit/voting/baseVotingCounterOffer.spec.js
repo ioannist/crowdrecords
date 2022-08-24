@@ -215,7 +215,7 @@ contract("BaseVotingCounterOfferContract", function() {
         await expectEvent(trx, "BallotResult", { ballotId: new BN(ballotId), result: false });
     });
 
-    describe("counter offers", function() {
+    context("counter offers", function() {
         let snapShot2, snapshotId2;
         beforeEach(async function() {
             snapShot2 = await helper.takeSnapshot();
