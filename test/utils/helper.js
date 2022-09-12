@@ -1,3 +1,6 @@
+const Web3 = require("web3");
+const web3 = new Web3("ws://localhost:8545");
+
 exports.VOTING_INTERVAL_BLOCKS = 25;
 exports.DILUTION_INTERVAL_BLOCKS = 1000;
 

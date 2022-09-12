@@ -101,8 +101,8 @@ contract DilutionContract is BaseVotingContract {
 
     uint256 public REQUEST_INTERVAL;
 
-    constructor(uint8 votingInterval, uint256 requestInterval)
-        BaseVotingContract()
+    constructor(uint8 votingInterval, uint256 requestInterval, address owner)
+        BaseVotingContract(owner)
     {
         VOTING_BLOCK_PERIOD = votingInterval;
         REQUEST_INTERVAL = requestInterval;

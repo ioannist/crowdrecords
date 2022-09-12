@@ -6,6 +6,17 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "../OrdersContract.sol";
 
 contract BaseVotingContract {
+    /// @dev this is Contribution Create event this event will be emited when a new contribution is created.
+    /// @param owner This is the owner of the voting ballot
+    /// @param yesWeight This is the weightage of yes in the ballot
+    /// @param yesCount This is the count of yes in the ballot
+    /// @param noWeight This is the weightage of no in the ballot
+    /// @param noCount This is the count of no in the ballot
+    /// @param tokenId This is the token id using which the voting is done
+    /// @param votingEndBlock This is the block number till which the voting can be done for specific ballot
+    /// @param isResultDeclared This specifies if result is declared
+    /// @param canOwnerVote This specifies if a owner can vote or not
+    /// @param isPresent This is to check if a ballot of specific id is present or not
     struct VotingBallot {
         address owner;
         uint256 yesWeight;
@@ -22,11 +33,12 @@ contract BaseVotingContract {
     uint256 VOTING_BLOCK_PERIOD = 25;
     address public TREASURY_CONTRACT_ADDRESS;
     address public TREASURY_HUB_ADDRESS;
-    address OWNER;
+    address public OWNER;
 
     uint256 votingId = 0;
     mapping(uint256 => VotingBallot) votingMap;
     //This mapping tracks the state of user, that is if they have voted already or not.
+    // Ballot id => user address => bool
     mapping(uint256 => mapping(address => bool)) alreadyVoted;
     //This mapping is useful if the user has voted, as this hold if user voted yes or no for a specific ballot,
     mapping(uint256 => mapping(address => bool)) userVotes;
@@ -35,13 +47,13 @@ contract BaseVotingContract {
     // user address => List of ballot in which user has voted
     mapping(address => uint256[]) userActiveVotedBallots;
 
-    constructor() {
-        OWNER = msg.sender;
+    constructor(address owner) {
+        OWNER = owner;
     }
 
-    /**
-     * @dev This modifier checks if a ballot is open for voting or has the time expired
-     */
+    /// @dev This modifier checks if a ballot is open for voting or has the time expired
+    /// @param votingBallotId This is the id of the ballot which we are checking
+    /// @param voter This is the address of the voter for whom we are checking voting rights
     modifier _checkIfBallotIsOpen(uint256 votingBallotId, address voter) {
         require(
             votingMap[votingBallotId].isPresent == true,
@@ -61,17 +73,14 @@ contract BaseVotingContract {
         _;
     }
 
-    /**
-     * @dev Modifier to check that the person who accesses a specific function is the owner himself.
-     */
+    /// @dev Modifier to check that the person who accesses a specific function is the owner himself.
     modifier _ownerOnly() {
         require(msg.sender == OWNER, "You are not authorized for this action");
         _;
     }
 
-    /**
-     * @dev This modifier checks if a ballot is open for voting or has the time expired
-     */
+    /// @dev This modifier checks if a ballot is open for voting or has the time expired
+    /// @param votingBallotId This is the id of the ballot which we are checking
     modifier _checkIfOwnerAllowed(uint256 votingBallotId) {
         if (votingMap[votingBallotId].canOwnerVote) {
             require(
@@ -84,10 +93,15 @@ contract BaseVotingContract {
         _;
     }
 
-    /**
-     * @dev This function is called by user to creata a new voting
-     * @param canOwnerVote this is if a user can vote in a voting which he created
-     */
+    /// @dev This function sets the owner address
+    /// @param ownerAddress This is the address of the owner
+    function setOwnerAddress(address ownerAddress) public _ownerOnly {
+        OWNER = ownerAddress;
+    }
+
+    /// @dev This function is called by user to creata a new voting
+    /// @param canOwnerVote this is if a user can vote in a voting which he created
+    /// @param tokenId This is the id of the token using which voting can be done
     function _createVoting(bool canOwnerVote, uint256 tokenId)
         internal
         returns (uint256)
@@ -111,9 +125,8 @@ contract BaseVotingContract {
         return votingId;
     }
 
-    /**
-     * @dev This function sets the treasury Contract address
-     */
+    /// @dev This function sets the treasury Contract address
+    /// @param newTreasuryContractAddress This is the new address of treasury contract
     function _setTreasuryContractAddress(address newTreasuryContractAddress)
         internal
         virtual
@@ -122,11 +135,19 @@ contract BaseVotingContract {
         TREASURY_CONTRACT_ADDRESS = newTreasuryContractAddress;
     }
 
-    /**
-     * @dev This function is called by any user to cast vote
-     * @param votingBallotId this is the id of the ballot for which user is voting
-     * @param vote this is the state of the vote, if true than it means the vote is in favour of the ballot
-     */
+    /// @dev This function sets the treasury Contract address
+    /// @param newOwnerAddress This is the address of new owner
+    function _setOwnerAddress(address newOwnerAddress)
+        internal
+        virtual
+        _ownerOnly
+    {
+        TREASURY_CONTRACT_ADDRESS = newOwnerAddress;
+    }
+
+    /// @dev This function is called by any user to cast vote
+    /// @param votingBallotId this is the id of the ballot for which user is voting
+    /// @param vote this is the state of the vote, if true than it means the vote is in favour of the ballot
     function _castVote(uint256 votingBallotId, bool vote)
         internal
         virtual
@@ -136,12 +157,10 @@ contract BaseVotingContract {
         _castVotePrivate(votingBallotId, vote, tx.origin);
     }
 
-    /**
-     * @dev This function is called when the vote is casted on later stages such as in counter offer where the vote is 
-       reviewed before hand by the user and then it is accepted by the user.
-     * @param votingBallotId this is the id of the ballot for which user is voting
-     * @param vote this is the state of the vote, if true than it means the vote is in favour of the ballot
-     */
+    /// @dev This function is called when the vote is casted on later stages such as in counter offer where the vote is
+    /// reviewed before hand by the user and then it is accepted by the user.
+    /// @param votingBallotId this is the id of the ballot for which user is voting
+    /// @param vote this is the state of the vote, if true than it means the vote is in favour of the ballot
     function _castVoteForOther(
         uint256 votingBallotId,
         bool vote,
@@ -150,12 +169,10 @@ contract BaseVotingContract {
         _castVotePrivate(votingBallotId, vote, voter);
     }
 
-    /**
-     * @dev core logic for voting
-     * @param votingBallotId this is the id of the ballot for which user is voting
-     * @param vote this is the state of the vote, if true than it means the vote is in favour of the ballot
-     * @param voter Voter's address
-     */
+    /// @dev core logic for voting
+    /// @param votingBallotId this is the id of the ballot for which user is voting
+    /// @param vote this is the state of the vote, if true than it means the vote is in favour of the ballot
+    /// @param voter Voter's address
     function _castVotePrivate(
         uint256 votingBallotId,
         bool vote,
@@ -181,13 +198,11 @@ contract BaseVotingContract {
         list.push(votingBallotId);
     }
 
-    /**
-     * @dev core logic for voting
-     * @param votingBallotId this is the id of the ballot for which user is voting
-     * @param voter Voter's address
-     * @param oldWeight Old weight of the voter
-     * @param newWeight New weight of the voter
-     */
+    /// @dev core logic for voting
+    /// @param votingBallotId this is the id of the ballot for which user is voting
+    /// @param voter Voter's address
+    /// @param oldWeight Old weight of the voter
+    /// @param newWeight New weight of the voter
     function _changeVoteWeight(
         uint256 votingBallotId,
         address voter,
@@ -208,13 +223,11 @@ contract BaseVotingContract {
         }
     }
 
-    /**
-     * @dev This function will be called when either user is transferring the tokens to other account,
-     or is receiving tokens from other tokens.
-     * @param user address of the user whose balance is being changed
-     * @param previousBalance this is the old balance of the user
-     * @param newBalance this is the new balance of the user that is after the transfer
-     */
+    /// @dev This function will be called when either user is transferring the tokens to other account,
+    /// or is receiving tokens from other tokens.
+    /// @param user address of the user whose balance is being changed
+    /// @param previousBalance this is the old balance of the user
+    /// @param newBalance this is the new balance of the user that is after the transfer
     function _handleUserTokenTransfers(
         address user,
         uint256 tokenId,
@@ -247,10 +260,8 @@ contract BaseVotingContract {
         }
     }
 
-    /**
-     * @dev This function is called by any user to cast vote
-     * @param votingBallotId this is the id of the ballot for which we need to find the winner
-     */
+    /// @dev This function is called by any user to cast vote
+    /// @param votingBallotId this is the id of the ballot for which we need to find the winner
     function _declareWinner(uint256 votingBallotId)
         internal
         returns (bool isWinner)

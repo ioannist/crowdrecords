@@ -7,30 +7,21 @@ import "../interface/IBaseVoting.sol";
 contract VotingHubContract {
     address[] public VOTING_CONTRACTS_ADDRESS;
     address public TREASURY_CONTRACT_ADDRESS;
-    address OWNER;
+    address public OWNER;
 
-    constructor() {
-        OWNER = msg.sender;
+    constructor(address owner) {
+        OWNER = owner;
     }
 
-    //TODO Hub created now need to
-    // call this from treasury
-    //// function to add the voting contract address
-    //// function to remove the voting contract address
-    //// implement the methods in the child classes that would propagate the call to super methods
-    // need to verify if the balanceOf value called inside _handleUserTokenTransfers gets new value or the old value
-
-    /**
-     * @dev This modifier checks that only owner fo the contracts can call the functions
-     */
+    /// @notice
+    /// @dev This modifier checks that only owner fo the contracts can call the functions
     modifier _ownerOnly() {
         require(msg.sender == OWNER, "Only owner can call it.");
         _;
     }
 
-    /**
-     * @dev This modifier checks that only treasury can call the functions
-     */
+    /// @notice
+    /// @dev This modifier checks that only treasury can call the functions
     modifier _onlyTreasury() {
         require(
             msg.sender == TREASURY_CONTRACT_ADDRESS,
@@ -39,14 +30,21 @@ contract VotingHubContract {
         _;
     }
 
-    /**
-     * @dev This function will be called when either user is transferring the tokens to other account,
-     or is receiving tokens from other tokens.
-     * @param sender address of the sender
-     * @param receiver address of the receiver
-     * @param amount the amount that is being transferred
-     * @param tokenId the id of the token that is being transferred
-     */
+
+    /// @notice This function is to set the owner address
+    /// @dev This function takes in the address of new owner and sets it to the contract
+    /// @param owner Takes the address of new owner as parameter
+    function setOwner(address owner)public _ownerOnly{
+        OWNER = owner;
+    }
+
+    /// @notice this 
+    /// @dev This function will be called when either user is transferring the tokens to other account,
+    /// or is receiving tokens from other tokens.
+    /// @param sender address of the sender
+    /// @param receiver address of the receiver
+    /// @param amount the amount that is being transferred
+    /// @param tokenId the id of the token that is being transferred
     function handleUserTokenTransfers(
         address sender,
         address receiver,
@@ -77,9 +75,8 @@ contract VotingHubContract {
         }
     }
 
-    /**
-     * @dev This function sets the treasury Contract address
-     */
+    /// @notice
+    /// @dev This function sets the treasury Contract address
     function setTreasuryContractAddress(address newTreasuryContractAddress)
         public
         _ownerOnly
@@ -87,20 +84,18 @@ contract VotingHubContract {
         TREASURY_CONTRACT_ADDRESS = newTreasuryContractAddress;
     }
 
-    /**
-     * @dev This function will be called when either user is transferring the tokens to other account,
-     or is receiving tokens from other tokens.
-     * @param contractAddress address of the voting contract
-     */
+    /// @notice
+    /// @dev This function will be called when either user is transferring the tokens to other account,
+    /// or is receiving tokens from other tokens.
+    /// @param contractAddress address of the voting contract
     function addVotingContract(address contractAddress) public _ownerOnly {
         VOTING_CONTRACTS_ADDRESS.push(contractAddress);
     }
 
-    /**
-     * @dev This function will be called when either user is transferring the tokens to other account,
-     or is receiving tokens from other tokens.
-     * @param index index of the contract to remove from the list
-     */
+    /// @notice
+    /// @dev This function will be called when either user is transferring the tokens to other account,
+    /// or is receiving tokens from other tokens.
+    /// @param index index of the contract to remove from the list
     function removeVotingContract(uint256 index) public _ownerOnly {
         require(index < VOTING_CONTRACTS_ADDRESS.length, "Invalid index");
         VOTING_CONTRACTS_ADDRESS[index] = VOTING_CONTRACTS_ADDRESS[

@@ -12,7 +12,7 @@ contract OrdersContract {
     address public TREASURY_CONTRACT_ADDRESS;
     address public WALLET_ADDRESS;
     uint8 TRANSACTION_FEE = 50; //This is 0.50%
-    address OWNER;
+    address public OWNER;
 
     //TODO: Convert the contract into buy order contract and remove the token transfering process to order contract from users wallet
     /**
@@ -108,8 +108,8 @@ contract OrdersContract {
     mapping(uint256 => Order) orderBook;
     uint256 orderId = 0;
 
-    constructor() {
-        OWNER = msg.sender;
+    constructor(address owner) {
+        OWNER = owner;
     }
 
     /**
@@ -118,6 +118,13 @@ contract OrdersContract {
     modifier ownerOnly() {
         require(msg.sender == OWNER, "You are not authorized for this action");
         _;
+    }
+
+    /// @notice This function is to set the owner address
+    /// @dev This function takes in the address of new owner and sets it to the contract
+    /// @param owner Takes the address of new owner as parameter
+    function setOwnerAddress(address owner) public ownerOnly {
+        OWNER = owner;
     }
 
     /**

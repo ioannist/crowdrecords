@@ -28,6 +28,7 @@
         "chai-as-promised": "^7.1.1",
         "chai-bn": "^0.3.1",
         "ganache": "^7.0.5",
-        "solhint": "^3.3.7"
+        "solhint": "^3.3.7",
+        "web3": "^1.7.5"
     }
 }

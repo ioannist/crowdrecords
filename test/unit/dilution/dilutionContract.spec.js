@@ -85,7 +85,7 @@ contract("Dilution Contract", function() {
 
         await this.dilutionContract.castVote(dilutionId, true);
 
-        await helper.advanceMultipleBlocks(50);
+        await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 2);
 
         const tx = await this.dilutionContract.declareWinner(dilutionId);
 
@@ -131,7 +131,7 @@ contract("Dilution Contract", function() {
 
         await this.dilutionContract.castVote(dilutionId, false);
 
-        await helper.advanceMultipleBlocks(50);
+        await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 2);
 
         const tx = await this.dilutionContract.declareWinner(dilutionId);
 
@@ -200,7 +200,7 @@ contract("Dilution Contract", function() {
                 "0x0"
             );
 
-            await helper.advanceMultipleBlocks(50);
+            await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 2);
 
             const tx = await this.dilutionContract.declareWinner(this.dilutionId);
 
@@ -229,7 +229,7 @@ contract("Dilution Contract", function() {
                 "0x0"
             );
 
-            await helper.advanceMultipleBlocks(50);
+            await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 2);
 
             const tx = await this.dilutionContract.declareWinner(this.dilutionId);
 
@@ -258,7 +258,7 @@ contract("Dilution Contract", function() {
                 "0x0"
             );
 
-            await helper.advanceMultipleBlocks(50);
+            await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 2);
 
             const tx = await this.dilutionContract.declareWinner(this.dilutionId);
 
@@ -299,7 +299,7 @@ contract("Dilution Contract", function() {
                 "0x0"
             );
 
-            await helper.advanceMultipleBlocks(50);
+            await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 2);
 
             const tx = await this.dilutionContract.declareWinner(this.dilutionId);
 
@@ -312,7 +312,7 @@ contract("Dilution Contract", function() {
                 result: false,
             });
 
-            await helper.advanceMultipleBlocks(1000);
+            await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 1000);
 
             const tx2 = await this.dilutionContract.createDilutionRequest(
                 RECORD_ID,

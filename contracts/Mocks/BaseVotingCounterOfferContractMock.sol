@@ -14,7 +14,7 @@ contract BaseVotingCounterOfferContractMock is BaseVotingCounterOfferContract {
      */
     event BallotResult(uint256 ballotId, bool result);
 
-    constructor(uint8 votingInterval) {
+    constructor(uint8 votingInterval,address owner) BaseVotingCounterOfferContract(owner){
         VOTING_BLOCK_PERIOD = votingInterval;
     }
 

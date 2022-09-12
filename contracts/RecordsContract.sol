@@ -6,10 +6,6 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./interface/IContribution.sol";
 
-// ERC 20 balance[adress] => 2 contracts // governance and comunity
-// ERC 721 blance[adress] => 1 contract // records
-// ERC 1155
-
 contract RecordsContract is ERC1155Supply {
     uint256 newTokenId = 0;
 
@@ -50,8 +46,8 @@ contract RecordsContract is ERC1155Supply {
         uint256 creationDate
     );
 
-    constructor() ERC1155("https://something.com/{id}") {
-        OWNER = msg.sender;
+    constructor(address owner) ERC1155("https://something.com/{id}") {
+        OWNER = owner;
     }
 
     /**
@@ -60,6 +56,16 @@ contract RecordsContract is ERC1155Supply {
     modifier ownerOnly() {
         require(msg.sender == OWNER, "You are not authorized for this action");
         _;
+    }
+
+    /**
+     * @dev This function sets the owner address
+     */
+    function setOwnerAddress(address ownerAddress)
+        public
+        ownerOnly
+    {
+        OWNER = ownerAddress;
     }
 
     /**

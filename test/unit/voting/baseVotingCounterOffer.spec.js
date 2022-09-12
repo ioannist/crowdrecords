@@ -61,7 +61,7 @@ contract("BaseVotingCounterOfferContract", function() {
 
         await this.baseVotingCounterOfferContractMock.castVote(ballotId, true, { from: user1 });
 
-        await helper.advanceMultipleBlocks(70);
+        await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 2);
 
         let trx = await this.baseVotingCounterOfferContractMock.declareWinner(ballotId);
         await expectEvent(trx, "BallotResult", { ballotId: new BN(ballotId), result: true });
@@ -87,7 +87,7 @@ contract("BaseVotingCounterOfferContract", function() {
 
         await this.baseVotingCounterOfferContractMock.castVote(ballotId, true, { from: user3 });
 
-        await helper.advanceMultipleBlocks(70);
+        await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 2);
 
         let trx = await this.baseVotingCounterOfferContractMock.declareWinner(ballotId);
         await expectEvent(trx, "BallotResult", { ballotId: new BN(ballotId), result: false });
@@ -113,7 +113,7 @@ contract("BaseVotingCounterOfferContract", function() {
 
         await this.baseVotingCounterOfferContractMock.castVote(ballotId, true, { from: user3 });
 
-        await helper.advanceMultipleBlocks(70);
+        await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 2);
 
         let trx = await this.baseVotingCounterOfferContractMock.declareWinner(ballotId);
         await expectEvent(trx, "BallotResult", { ballotId: new BN(ballotId), result: true });
@@ -139,7 +139,7 @@ contract("BaseVotingCounterOfferContract", function() {
 
         await this.baseVotingCounterOfferContractMock.castVote(ballotId, true, { from: user3 });
 
-        await helper.advanceMultipleBlocks(70);
+        await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 2);
 
         let trx = await this.baseVotingCounterOfferContractMock.declareWinner(ballotId);
         await expectEvent(trx, "BallotResult", { ballotId: new BN(ballotId), result: false });
@@ -174,7 +174,7 @@ contract("BaseVotingCounterOfferContract", function() {
         await this.baseVotingCounterOfferContractMock.castVote(ballotId, true);
         await this.baseVotingCounterOfferContractMock.castVote(ballotId, true, { from: user3 });
 
-        await helper.advanceMultipleBlocks(30);
+        await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 2);
 
         let trx = await this.baseVotingCounterOfferContractMock.declareWinner(ballotId);
         await expectEvent(trx, "BallotResult", { ballotId: new BN(ballotId), result: true });
@@ -209,7 +209,7 @@ contract("BaseVotingCounterOfferContract", function() {
         await this.baseVotingCounterOfferContractMock.castVote(ballotId, true, { from: user2 });
         await this.baseVotingCounterOfferContractMock.castVote(ballotId, true, { from: user3 });
 
-        await helper.advanceMultipleBlocks(30);
+        await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 2);
 
         let trx = await this.baseVotingCounterOfferContractMock.declareWinner(ballotId);
         await expectEvent(trx, "BallotResult", { ballotId: new BN(ballotId), result: false });
@@ -320,7 +320,7 @@ contract("BaseVotingCounterOfferContract", function() {
                 }
             );
 
-            await helper.advanceMultipleBlocks(30);
+            await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 2);
 
             let trx = await this.baseVotingCounterOfferContractMock.declareWinner(this.ballotId);
             await expectEvent(trx, "BallotResult", {
@@ -349,7 +349,7 @@ contract("BaseVotingCounterOfferContract", function() {
                 }
             );
 
-            await helper.advanceMultipleBlocks(30);
+            await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 2);
 
             let trx = await this.baseVotingCounterOfferContractMock.declareWinner(this.ballotId);
             await expectEvent(trx, "BallotResult", {
@@ -370,7 +370,7 @@ contract("BaseVotingCounterOfferContract", function() {
                 from: this.user1,
             });
 
-            await helper.advanceMultipleBlocks(30);
+            await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 2);
 
             let trx = await this.baseVotingCounterOfferContractMock.declareWinner(this.ballotId);
             await expectEvent(trx, "BallotResult", {
@@ -428,7 +428,7 @@ contract("BaseVotingCounterOfferContract", function() {
                 "0xa165"
             );
 
-            await helper.advanceMultipleBlocks(30);
+            await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 2);
 
             let trx = await this.baseVotingCounterOfferContractMock.declareWinner(this.ballotId);
             await expectEvent(trx, "BallotResult", {

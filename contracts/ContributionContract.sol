@@ -54,9 +54,9 @@ contract ContributionContract is ERC721 {
 
     mapping(uint256 => Contribution) public contributionData;
 
-    constructor() ERC721("Contributions", "CTRB") {
+    constructor(address owner) ERC721("Contributions", "CTRB") {
         // _baseURIextended = baseURI_;
-        OWNER = msg.sender;
+        OWNER = owner;
     }
 
     /**
@@ -76,10 +76,14 @@ contract ContributionContract is ERC721 {
         CONTRIBUTION_VOTING_CONTRACT_ADDRESS = newVotingContractAddress;
     }
 
-    /**
-     * @dev This function returns contribution data
-     * @param contributionId Id of the contribution whose data you want
-     */
+    /// @dev This function sets the owner address
+    /// @param ownerAddress This is the address of the owner
+    function setOwnerAddress(address ownerAddress) public ownerOnly {
+        OWNER = ownerAddress;
+    }
+
+    /// @dev This function returns contribution data
+    /// @param contributionId Id of the contribution whose data you want
     function getContributionData(uint256 contributionId)
         public
         view

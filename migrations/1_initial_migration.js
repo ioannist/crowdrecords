@@ -15,32 +15,42 @@ const BaseVotingCounterOfferContractMock = artifacts.require(
 const DilutionContract = artifacts.require("../contracts/voting/DilutionContract.Sol");
 const VotingHubContract = artifacts.require("../contracts/voting/VotingHubContract.Sol");
 
+const { getEthAccount, VOTING_INTERVAL_BLOCKS } = require("../test/utils/helper");
+
 module.exports = async (deployer) => {
-    await deployer.deploy(ContributionContract);
+    await deployer.deploy(ContributionContract, await getEthAccount(0));
     let contributionContract = await ContributionContract.deployed();
-    await deployer.deploy(RecordsContract);
+    await deployer.deploy(RecordsContract, await getEthAccount(0));
     let recordsContract = await RecordsContract.deployed();
     await deployer.deploy(TracksContract);
     let tracksContract = await TracksContract.deployed();
-    await deployer.deploy(TreasuryContract);
+    await deployer.deploy(TreasuryContract, await getEthAccount(0));
     let treasuryContract = await TreasuryContract.deployed();
-    await deployer.deploy(ContributionVotingContract, 20);
+    await deployer.deploy(
+        ContributionVotingContract,
+        VOTING_INTERVAL_BLOCKS,
+        await getEthAccount(0)
+    );
     let contributionVotingContract = await ContributionVotingContract.deployed();
 
-    await deployer.deploy(OrdersContract);
+    await deployer.deploy(OrdersContract, await getEthAccount(0));
     let ordersContract = await OrdersContract.deployed();
 
-    await deployer.deploy(AgreementContract, 20);
+    await deployer.deploy(AgreementContract, VOTING_INTERVAL_BLOCKS, await getEthAccount(0));
     let agreementContract = await AgreementContract.deployed();
 
-    await deployer.deploy(BaseVotingContractMock, 20);
+    await deployer.deploy(BaseVotingContractMock, VOTING_INTERVAL_BLOCKS, await getEthAccount(0));
     let baseVotingContractMock = await BaseVotingContractMock.deployed();
-    await deployer.deploy(BaseVotingCounterOfferContractMock, 20);
+    await deployer.deploy(
+        BaseVotingCounterOfferContractMock,
+        VOTING_INTERVAL_BLOCKS,
+        await getEthAccount(0)
+    );
     let baseVotingCounterOfferContractMock = await BaseVotingCounterOfferContractMock.deployed();
 
-    await deployer.deploy(DilutionContract, 20, 1000);
+    await deployer.deploy(DilutionContract, VOTING_INTERVAL_BLOCKS, 1000, await getEthAccount(0));
     let dilutionContract = await DilutionContract.deployed();
-    await deployer.deploy(VotingHubContract);
+    await deployer.deploy(VotingHubContract, await getEthAccount(0));
     let votingHubContract = await VotingHubContract.deployed();
 };
 

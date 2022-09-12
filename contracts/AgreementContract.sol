@@ -5,7 +5,17 @@ import "./voting/BaseVotingContract.sol";
 import "./TreasuryContract.sol";
 
 contract AgreementContract is BaseVotingContract {
-    //This is the struct that contains the publishing agreement data
+
+    /// @dev This structure will hold the data for agreements
+    /// @param requester This is the person who has requested for the agreement
+    /// @param recordId This is the record id to which the agreement belongs to 
+    /// @param ballotId This is the ballot id of the agreement
+    /// @param tokenId This is the id of token using which user can vote
+    /// @param isActive This is to check if a agreement is active or not    
+    /// @param contractLink This is the link of the contract file    
+    /// @param contractHash This is the hash of the contract file
+    /// @param creationTime This is the creation time of the contract
+    /// @param isPresent This is to check if agreement is present or not    
     struct Agreement {
         address requester;
         uint256 recordId;
@@ -18,6 +28,16 @@ contract AgreementContract is BaseVotingContract {
         bool isPresent;
     }
 
+    /// @dev This event is emmited when a agreement is created.
+    /// @param requester This is the person who has requested for the agreement
+    /// @param recordId This is the record id to which the agreement belongs to 
+    /// @param agreementId This is the id of the agreement that was created    
+    /// @param ballotId This is the ballot id of the agreement
+    /// @param tokenId This is the id of token using which user can vote
+    /// @param contractLink This is the link of the contract file    
+    /// @param contractHash This is the hash of the contract file
+    /// @param creationTime This is the creation time of the contract
+    /// @param isPresent This is to check if agreement is present or not    
     event AgreementCreated(
         address requester,
         uint256 recordId,
@@ -30,41 +50,62 @@ contract AgreementContract is BaseVotingContract {
         bool isPresent
     );
 
+    /// @dev This evet is emitted when as royalty payment is done by a user for a royalty agreement.
+    /// @param agreementId This is the id of the agreement that was created    
+    /// @param recordId This is the record id to which the agreement belongs to 
+    /// @param totalSupplyEther This is the total amount of tokens that are in circulation in ether value
+    /// during the distribution was made
+    /// @param royaltyAmountWei This is the amount of royalty that has been paid by user in wei amount
+    /// @param royaltyId This is the id of royalty that has been paid
+    /// @param tokenId This is the id of tokens that will used to determine the royalty ratio (it is holding tokenid)
+    /// @param royaltyPerTokenWei This is how many wei each user will get for each token (token of "tokenId") he holds.
+    /// @param snapshotId This is the snapshot id when the user distributed the reward
     event RoyaltyPayment(
         uint256 agreementId,
         uint256 recordId,
         uint256 totalSupplyEther,
-        uint256 dividendAmountWei,
-        uint256 dividendId,
+        uint256 royaltyAmountWei,
+        uint256 royaltyId,
         uint256 tokenId,
-        uint256 dividendPerTokenWei,
+        uint256 royaltyPerTokenWei,
         uint256 snapshotId
     );
 
+    /// @dev This event is emitted when a royalty payment is claimed
+    /// @param agreementId This is the id of the agreement that was created    
+    /// @param royaltyId This is the id of royalty that has been paid
+    /// @param recordId This is the record id to which the agreement belongs to 
+    /// @param rewardAmount This is the amount of reward that user claimed 
+    /// @param userAddress Address of user who claimed the royalty payment
     event RoyaltyPaymentClaimed(
         uint256 agreementId,
-        uint256 dividendId,
+        uint256 royaltyId,
         uint256 recordId,
         uint256 rewardAmount,
         address userAddress
     );
 
-    struct DividendData {
+    /// @dev This structure holds data of each royalty payment made by user
+    /// @param totalSupplyEther This is the total amount of tokens that are in circulation in ether value
+    /// @param royaltyAmountWei This is the amount of royalty that has been paid by user in wei amount
+    /// @param royaltyId This is the id of royalty that has been paid
+    /// @param tokenId This is the id of tokens that will used to determine the royalty ratio (it is holding tokenid)
+    /// @param royaltyPerTokenWei This is how many wei each user will get for each token (token of "tokenId") he holds.
+    /// @param snapshotId This is the snapshot id when the user distributed the reward
+    struct RoyaltyData {
         uint256 totalSupplyEther;
-        uint256 dividendAmountWei;
-        uint256 dividendId;
+        uint256 royaltyAmountWei;
+        uint256 royaltyId;
         uint256 tokenId;
-        uint256 dividendPerTokenWei;
+        uint256 royaltyPerTokenWei;
         uint256 snapshotId;
     }
 
-    /**
-        @dev This is when a user votes for a publishing agreement
-        @param voter Address of the voter
-        @param agreementId This is the id of the publishing agreement that is linked to this ballot 
-        @param ballotId Id of the ballot where voting is stored
-        @param vote State of vote : true for yes and false for No
-     */
+    /// @dev This is when a user votes for a publishing agreement
+    /// @param voter Address of the voter
+    /// @param agreementId This is the id of the publishing agreement that is linked to this ballot 
+    /// @param ballotId Id of the ballot where voting is stored
+    /// @param vote State of vote : true for yes and false for No
     event AgreementVoting(
         address voter,
         uint256 agreementId,
@@ -72,12 +113,11 @@ contract AgreementContract is BaseVotingContract {
         bool vote
     );
 
-    /**
-        @dev this event is generated when result of a ballot is declared
-        @param agreementId This is the id of the agreement that is linked to this ballot 
-        @param ballotId this is the ballot Id for which result is declared 
-        @param result this is the status of the result //either true if user won that is he received more than 66% of votes or false if user lost 
-     */
+    /// @dev this event is generated when result of a ballot is declared
+    /// @param agreementId This is the id of the agreement that is linked to this ballot 
+    /// @param ballotId this is the ballot Id for which result is declared 
+    /// @param result this is the status of the result either true if user won that is he received
+    ///  more than 66% of votes or false if user lost 
     event BallotResult(uint256 agreementId, uint256 ballotId, bool result);
 
     uint256 public agreementCurrentId = 0;
@@ -86,21 +126,21 @@ contract AgreementContract is BaseVotingContract {
     // mapping works as (recordId => [agreementId])
     mapping(uint256 => uint256[]) recordAgreementList;
 
-    uint256 dividendId = 0;
-    //agreementId => array of dividends
-    mapping(uint256 => uint256[]) dividendListMapping;
+    uint256 royaltyId = 0;
+    //agreementId => array of royalties
+    mapping(uint256 => uint256[]) royaltyListMapping;
     //Dividend id => dividend data
-    mapping(uint256 => DividendData) dividendDataMapping;
-    //dividendId => userAddress => bool
-    mapping(uint256 => mapping(address => bool)) dividendClaimMapping;
+    mapping(uint256 => RoyaltyData) royaltyDataMapping;
+    //royaltyId => userAddress => bool
+    mapping(uint256 => mapping(address => bool)) royaltyClaimMapping;
 
-    constructor(uint8 votingInterval) BaseVotingContract() {
+    constructor(uint8 votingInterval, address owner) BaseVotingContract(owner) {
         VOTING_BLOCK_PERIOD = votingInterval;
     }
 
-    /**
-     * @dev This function sets the treasury Contract address
-     */
+    
+    /// @dev This function sets the treasury Contract address
+    /// @param newTreasuryContractAddress this is the new address of treasury contract
     function setTreasuryContractAddress(address newTreasuryContractAddress)
         external
         _ownerOnly
@@ -108,19 +148,11 @@ contract AgreementContract is BaseVotingContract {
         _setTreasuryContractAddress(newTreasuryContractAddress);
     }
 
-    /**
-     * @dev This function sets the treasury Contract address
-     */
-    // function setOrderContractAddress(address newOrderContractAddress)
-    //     external
-    //     _ownerOnly
-    // {
-    //     _setOrderContractAddress(newOrderContractAddress);
-    // }
-
-    /**
-     * @dev This function will create a new agreement voting ballot
-     */
+    
+    /// @dev This function will create a new agreement voting ballot
+    /// @param recordId this is the id of record of which we need to create agreement of 
+    /// @param contractLink this is the link of the agreement contract
+    /// @param contractHash this is the hash of the agreement contract file
     function createAgreement(
         uint256 recordId,
         string memory contractLink,
@@ -169,11 +201,11 @@ contract AgreementContract is BaseVotingContract {
         return agreeId;
     }
 
-    /**
-     * @dev This function is called by any user to cast vote
-     * @param agreementId this is the id of the agreement for which user is voting
-     * @param vote this is the state of the vote, if true than it means the vote is in favour of the ballot
-     */
+    
+    /// @dev This function is called by any user to cast vote
+    /// @param agreementId this is the id of the agreement for which user is voting
+    /// @param vote this is the state of the vote, if true than it means the vote is in favour of the ballot
+    
     function castVoteForAgreement(uint256 agreementId, bool vote) public {
         super._castVote(agreementMap[agreementId].ballotId, vote);
 
@@ -185,12 +217,8 @@ contract AgreementContract is BaseVotingContract {
         });
     }
 
-    //Deciding the winner
-
-    /**
-     * @dev This function can be called from external source and also from within the contract
-     * @param agreementId this is the id of the agreement of which the winner is to be decleared
-     */
+    /// @dev This function can be called from external source and also from within the contract
+    /// @param agreementId this is the id of the agreement of which the winner is to be decleared
     function declareWinner(uint256 agreementId) external {
         bool result = _declareWinner(agreementMap[agreementId].ballotId);
 
@@ -207,19 +235,16 @@ contract AgreementContract is BaseVotingContract {
         }
     }
 
-    //-------------------------TEST----------------------------//
-
-    /**
-     * @dev This function is for testing purpose for distributing the royalty payment
-     */
+    /// @dev This function is for distributing the royalty payment
+    /// @param agreementId this is the id of the agreement of which the royalty is paid for
+    /// @param amount this is the amount of royalty is being
     function payRoyaltyAmount(
-        /* uint256 recordId, */
         uint256 agreementId,
         uint256 amount
     ) public {
         require(agreementMap[agreementId].isActive, "Invalid agreement id");
         uint256 recordId = agreementMap[agreementId].recordId;
-        dividendId += 1;
+        royaltyId += 1;
         TreasuryContract treasuryContract = TreasuryContract(
             TREASURY_CONTRACT_ADDRESS
         );
@@ -234,17 +259,17 @@ contract AgreementContract is BaseVotingContract {
             "Royalty payment transfer"
         );
 
-        DividendData memory dividend = DividendData({
+        RoyaltyData memory dividend = RoyaltyData({
             totalSupplyEther: totalSupply / 1 ether,
-            dividendAmountWei: amount,
-            dividendId: dividendId,
-            dividendPerTokenWei: amount / (totalSupply / 1 ether),
+            royaltyAmountWei: amount,
+            royaltyId: royaltyId,
+            royaltyPerTokenWei: amount / (totalSupply / 1 ether),
             tokenId: tokenId,
             snapshotId: treasuryContract.snapshot()
         });
 
         require(
-            dividend.dividendPerTokenWei > 0,
+            dividend.royaltyPerTokenWei > 0,
             "Insufficient amount, please try again with greater amount"
         );
 
@@ -252,22 +277,22 @@ contract AgreementContract is BaseVotingContract {
             agreementId: agreementId,
             recordId: recordId,
             totalSupplyEther: dividend.totalSupplyEther,
-            dividendAmountWei: dividend.dividendAmountWei,
-            dividendId: dividend.dividendId,
+            royaltyAmountWei: dividend.royaltyAmountWei,
+            royaltyId: dividend.royaltyId,
             tokenId: dividend.tokenId,
-            dividendPerTokenWei: dividend.dividendPerTokenWei,
+            royaltyPerTokenWei: dividend.royaltyPerTokenWei,
             snapshotId: dividend.snapshotId
         });
 
-        dividendListMapping[agreementId].push(dividendId);
-        dividendDataMapping[dividendId] = dividend;
+        royaltyListMapping[agreementId].push(royaltyId);
+        royaltyDataMapping[royaltyId] = dividend;
     }
 
-    /**
-     * @dev This function is for testing purpose for distributing the royalty payment
-     */
+    
+    /// @dev This function is for testing purpose for distributing the royalty payment
+    /// @param agreementId this is the agreement Id of which royalty is to be claimed
     function claimRoyaltyAmount(uint256 agreementId) public {
-        uint256[] memory dividendIdArray = dividendListMapping[agreementId];
+        uint256[] memory dividendIdArray = royaltyListMapping[agreementId];
         uint256 recordId = agreementMap[agreementId].recordId;
 
         require(dividendIdArray.length > 0, "No royalty payments created yet");
@@ -286,7 +311,7 @@ contract AgreementContract is BaseVotingContract {
         uint256 totalReward = 0;
 
         require(
-            dividendClaimMapping[dividendIdArray[newClaimIndex]][msg.sender] ==
+            royaltyClaimMapping[dividendIdArray[newClaimIndex]][msg.sender] ==
                 false,
             "Can only claim once"
         );
@@ -298,7 +323,7 @@ contract AgreementContract is BaseVotingContract {
             );
 
             emit RoyaltyPaymentClaimed({
-                dividendId: dividendIdArray[newClaimIndex],
+                royaltyId: dividendIdArray[newClaimIndex],
                 recordId: recordId,
                 agreementId: agreementId,
                 rewardAmount: rewardAmount,
@@ -306,7 +331,7 @@ contract AgreementContract is BaseVotingContract {
             });
 
             uint256 index = dividendIdArray[newClaimIndex];
-            dividendClaimMapping[index][msg.sender] = true;
+            royaltyClaimMapping[index][msg.sender] = true;
 
             totalReward = rewardAmount + totalReward;
         }
@@ -333,15 +358,15 @@ contract AgreementContract is BaseVotingContract {
         );
     }
 
-    /**
-     * @dev This function is for testing purpose for distributing the royalty payment
-     */
-    function _calculateSingleRoyaltyAmount(uint256 diviId, uint256 tokenId)
+    /// @dev This function is for testing purpose for distributing the royalty payment
+    /// @param royaltyId This is the id of royalty that user wants to claim
+    /// @param tokenId this is the id of token that determines the royalty amount
+    function _calculateSingleRoyaltyAmount(uint256 royaltyId, uint256 tokenId)
         internal
         view
         returns (uint256)
     {
-        DividendData memory dividend = dividendDataMapping[diviId];
+        RoyaltyData memory dividend = royaltyDataMapping[royaltyId];
         TreasuryContract treasuryContract = TreasuryContract(
             TREASURY_CONTRACT_ADDRESS
         );
@@ -356,12 +381,12 @@ contract AgreementContract is BaseVotingContract {
             return 0;
         }
 
-        return dividend.dividendPerTokenWei * (tokenBal / 1 ether);
+        return dividend.royaltyPerTokenWei * (tokenBal / 1 ether);
     }
 
-    /**
-     * @dev
-     */
+    /// @dev This function calculates the royalty claim index 
+    /// @param dividendIdArray This is the array of royalties for a single user
+    /// @param user this address of user whose royalty claim index needs to be identified
     function _getNewClaimIndex(uint256[] memory dividendIdArray, address user)
         internal
         view
@@ -377,7 +402,7 @@ contract AgreementContract is BaseVotingContract {
         while (low < high) {
             uint256 mid = Math.average(low, high);
             lastClaimedDividendId = dividendIdArray[mid];
-            bool claimStatus = dividendClaimMapping[lastClaimedDividendId][
+            bool claimStatus = royaltyClaimMapping[lastClaimedDividendId][
                 user
             ];
 
@@ -392,11 +417,11 @@ contract AgreementContract is BaseVotingContract {
 
         if (
             low > 0 &&
-            dividendClaimMapping[dividendIdArray[low - 1]][user] == false
+            royaltyClaimMapping[dividendIdArray[low - 1]][user] == false
         ) return low - 1;
         else if (
             low < dividendIdArray.length &&
-            dividendClaimMapping[dividendIdArray[low]][user] == true
+            royaltyClaimMapping[dividendIdArray[low]][user] == true
         ) return low + 1;
         else return low;
     }

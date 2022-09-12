@@ -57,7 +57,7 @@ contract("BaseVotingContract", function() {
 
         await this.baseVotingContractMock.castVote(ballotId, true, { from: user1 });
 
-        await helper.advanceMultipleBlocks(70);
+        await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 2);
 
         let trx = await this.baseVotingContractMock.declareWinner(ballotId);
         await expectEvent(trx, "BallotResult", { ballotId: new BN(ballotId), result: true });
@@ -81,7 +81,7 @@ contract("BaseVotingContract", function() {
 
         await this.baseVotingContractMock.castVote(ballotId, true, { from: user3 });
 
-        await helper.advanceMultipleBlocks(70);
+        await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 2);
 
         let trx = await this.baseVotingContractMock.declareWinner(ballotId);
         await expectEvent(trx, "BallotResult", { ballotId: new BN(ballotId), result: false });
@@ -105,7 +105,7 @@ contract("BaseVotingContract", function() {
 
         await this.baseVotingContractMock.castVote(ballotId, true, { from: user3 });
 
-        await helper.advanceMultipleBlocks(70);
+        await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 2);
 
         let trx = await this.baseVotingContractMock.declareWinner(ballotId);
         await expectEvent(trx, "BallotResult", { ballotId: new BN(ballotId), result: true });
@@ -129,7 +129,7 @@ contract("BaseVotingContract", function() {
 
         await this.baseVotingContractMock.castVote(ballotId, true, { from: user3 });
 
-        await helper.advanceMultipleBlocks(70);
+        await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 2);
 
         let trx = await this.baseVotingContractMock.declareWinner(ballotId);
         await expectEvent(trx, "BallotResult", { ballotId: new BN(ballotId), result: false });
@@ -162,7 +162,7 @@ contract("BaseVotingContract", function() {
         await this.baseVotingContractMock.castVote(ballotId, true);
         await this.baseVotingContractMock.castVote(ballotId, true, { from: user3 });
 
-        await helper.advanceMultipleBlocks(30);
+        await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 2);
 
         let trx = await this.baseVotingContractMock.declareWinner(ballotId);
         await expectEvent(trx, "BallotResult", { ballotId: new BN(ballotId), result: true });
@@ -195,7 +195,7 @@ contract("BaseVotingContract", function() {
         await this.baseVotingContractMock.castVote(ballotId, true, { from: user2 });
         await this.baseVotingContractMock.castVote(ballotId, true, { from: user3 });
 
-        await helper.advanceMultipleBlocks(30);
+        await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 2);
 
         let trx = await this.baseVotingContractMock.declareWinner(ballotId);
         await expectEvent(trx, "BallotResult", { ballotId: new BN(ballotId), result: false });
@@ -238,7 +238,7 @@ contract("BaseVotingContract", function() {
             "0xa165"
         );
 
-        await helper.advanceMultipleBlocks(30);
+        await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 2);
 
         let trx = await this.baseVotingContractMock.declareWinner(ballotId);
         await expectEvent(trx, "BallotResult", { ballotId: new BN(ballotId), result: false });
@@ -273,7 +273,7 @@ contract("BaseVotingContract", function() {
         await this.baseVotingContractMock.castVote(ballotId, true, { from: user2 });
         await this.baseVotingContractMock.castVote(ballotId, true, { from: user3 });
 
-        await helper.advanceMultipleBlocks(30);
+        await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 2);
 
         await this.treasuryContract.safeTransferFrom(
             user1,
@@ -333,11 +333,14 @@ contract("BaseVotingContract", function() {
             "0xa165"
         );
 
-        await helper.advanceMultipleBlocks(30);
+        await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 2);
 
         let trx = await this.baseVotingContractMock.declareWinner(ballotId);
         await expectEvent(trx, "BallotResult", { ballotId: new BN(ballotId), result: true });
     });
+
+    //Move the tokens from a to b and b to a expect the same result
+    //Move all the tokens from A to B and then all B tokens to A
 
     it("Moving tokens between 2 accounts after voting, should lose", async function() {
         const ballotId = 1;
@@ -377,7 +380,7 @@ contract("BaseVotingContract", function() {
         await this.baseVotingContractMock.castVote(ballotId, true, { from: user2 });
         await this.baseVotingContractMock.castVote(ballotId, true, { from: user3 });
 
-        await helper.advanceMultipleBlocks(30);
+        await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 2);
 
         await this.treasuryContract.safeTransferFrom(
             user1,

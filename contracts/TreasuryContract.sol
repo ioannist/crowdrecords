@@ -121,9 +121,9 @@ contract TreasuryContract is IERC1155Receiver, SnapshotERC1155 {
 
     // By default URI to crowdrecords domain
     // 18 decimal points supported
-    constructor() ERC1155("https://crowdrecords.com/{id}") {
-        _mint(msg.sender, CRD, 1000000 * 10**18, "https://crowdrecords.com");
-        OWNER = msg.sender;
+    constructor(address owner) ERC1155("https://crowdrecords.com/{id}") {
+        _mint(owner, CRD, 1000000 * 10**18, "https://crowdrecords.com");
+        OWNER = owner;
     }
 
     /**
@@ -176,6 +176,16 @@ contract TreasuryContract is IERC1155Receiver, SnapshotERC1155 {
             "You are not authorized for this action"
         );
         _;
+    }
+
+    /**
+     * @dev This function sets the Owners address
+     */
+    function setOwnerAddress(address ownerAddress)
+        public
+        ownerOnly
+    {
+        OWNER = ownerAddress;
     }
 
     /**
