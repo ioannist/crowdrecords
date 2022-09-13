@@ -9,6 +9,11 @@ contract TracksContract is ERC721 {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
 
+    /// @dev This holds data of individual tracks
+    /// @param filehash This is hash of the file
+    /// @param filelink This is the link to the file
+    /// @param category this is the category of song
+    /// @param creationDate this is hash of the preview file
     struct Tracks {
         string filehash;
         string filelink;
@@ -16,14 +21,12 @@ contract TracksContract is ERC721 {
         uint256 creationDate;
     }
 
-    /**
-     * @dev This is emited when a new track is created
-     * @param trackId This is the id of the track
-     * @param filehash This is hash of the file
-     * @param filelink This is the link to the file
-     * @param category this is the category of song
-     * @param creationDate this is hash of the preview file
-     */
+    /// @dev This is emited when a new track is created
+    /// @param trackId This is the id of the track
+    /// @param filehash This is hash of the file
+    /// @param filelink This is the link to the file
+    /// @param category this is the category of song
+    /// @param creationDate this is hash of the preview file
     event TrackCreated(
         uint256 trackId,
         string filehash,
@@ -34,17 +37,12 @@ contract TracksContract is ERC721 {
 
     mapping(uint256 => Tracks) public tracksData;
 
-    //Keep the baseURI empty if you want to have different URIs without any structure
-    constructor() ERC721("Tracks", "CRD_TRKS") {
-        // _baseURIextended = baseURI_;
-    }
+    constructor() ERC721("Tracks", "CRD_TRKS") {}
 
-    /**
-     * @dev This function will be called by the user to create a new contribution
-     * @param filehash This is hash of the file
-     * @param filelink this is preview file of the contribution
-     * @param category this is the category of song
-     */
+    /// @dev This function will be called by the user to create a new contribution
+    /// @param filehash This is hash of the file
+    /// @param filelink this is preview file of the contribution
+    /// @param category this is the category of song
     function createNewTrack(
         string memory filehash,
         string memory filelink,

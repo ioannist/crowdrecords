@@ -7,20 +7,17 @@ import "../voting/BaseVotingCounterOfferContract.sol";
 contract BaseVotingCounterOfferContractMock is BaseVotingCounterOfferContract {
     uint256 private LastTokenId = 1;
 
-    /**
-        @dev this event is genrated when result of a ballot is declared
-        @param ballotId this is the ballot Id for which result is declared 
-        @param result this is the status of the result //either true if user won that is he recived more than 66% of votes or false if user lost 
-     */
+    /// @dev this event is generated when result of a ballot is declared
+    /// @param ballotId this is the ballot Id for which result is declared 
+    /// @param result this is the status of the result //either true if user won that is he received more than 66% of votes or false if user lost 
     event BallotResult(uint256 ballotId, bool result);
 
     constructor(uint8 votingInterval,address owner) BaseVotingCounterOfferContract(owner){
         VOTING_BLOCK_PERIOD = votingInterval;
     }
 
-    /**
-     * @dev This function sets the treasury Contract address
-     */
+    /// @dev This function sets the treasury Contract address
+    /// @param newTreasuryContractAddress this is the new address of the treasury contract
     function setTreasuryContractAddress(address newTreasuryContractAddress)
         external
         _ownerOnly

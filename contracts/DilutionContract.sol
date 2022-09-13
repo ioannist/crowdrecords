@@ -6,27 +6,15 @@ import "./TreasuryContract.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
 contract DilutionContract is BaseVotingContract {
-    //Event
-    // == Create
-    // == vote
-    // == result
-    //Dilution data storage
-    //Dilution mapping, id => data
-    //Dilution request creation
-    //Dilution voting
-    //Dilution result
-
-    /**
-        @dev This will contain the data for the dilution request
-        @param requester the person who has requested for token dilution
-        @param recordId This is the id of the record that is linked to this ballot 
-        @param dilutionId This is the id of the dilution structure that is linked to this ballot 
-        @param ballotId Id of the ballot where voting is stored
-        @param tokenId token that is to be minted
-        @param amount the amount of tokens to be minted
-        @param isPresent State of vote : true for yes and false for No
-        @param isAccepted State of vote : true for yes and false for No
-     */
+    /// @dev This will contain the data for the dilution request
+    /// @param requester the person who has requested for token dilution
+    /// @param recordId This is the id of the record that is linked to this ballot
+    /// @param dilutionId This is the id of the dilution structure that is linked to this ballot
+    /// @param ballotId Id of the ballot where voting is stored
+    /// @param tokenId token that is to be minted
+    /// @param amount the amount of tokens to be minted
+    /// @param isPresent this is to check if the dilution request is present or not
+    /// @param isAccepted this denotes the status of the request that is if the request was accepted or rejected
     struct DilutionRequest {
         address requester;
         uint256 recordId;
@@ -38,15 +26,13 @@ contract DilutionContract is BaseVotingContract {
         bool isAccepted;
     }
 
-    /**
-        @dev This is when a dilution request is created.
-        @param requester the person who has requested for token dilution
-        @param recordId This is the id of the record that is linked to this ballot 
-        @param dilutionId This is the id of the dilution structure that is linked to this ballot 
-        @param ballotId Id of the ballot where voting is stored
-        @param tokenId token that is to be minted
-        @param amount the amount of tokens to be minted
-     */
+    /// @dev This is when a dilution request is created.
+    /// @param requester the person who has requested for token dilution
+    /// @param recordId This is the id of the record that is linked to this ballot
+    /// @param dilutionId This is the id of the dilution structure that is linked to this ballot
+    /// @param ballotId Id of the ballot where voting is stored
+    /// @param tokenId token that is to be minted
+    /// @param amount the amount of tokens to be minted
     event DilutionRequestCreated(
         address requester,
         uint256 recordId,
@@ -56,13 +42,11 @@ contract DilutionContract is BaseVotingContract {
         uint256 amount
     );
 
-    /**
-        @dev This is when a vote is given by user.
-        @param voter Address of the voter
-        @param dilutionId This is the id of the dilution structure that is linked to this ballot 
-        @param ballotId Id of the ballot where voting is stored
-        @param vote State of vote : true for yes and false for No
-     */
+    /// @dev This is when a vote is given by user.
+    /// @param voter Address of the voter
+    /// @param dilutionId This is the id of the dilution structure that is linked to this ballot
+    /// @param ballotId Id of the ballot where voting is stored
+    /// @param vote State of vote : true for yes and false for No
     event DilutionVoting(
         address voter,
         uint256 dilutionId,
@@ -70,13 +54,11 @@ contract DilutionContract is BaseVotingContract {
         bool vote
     );
 
-    /**
-        @dev this event is generated when result of a ballot is declared
-        @param dilutionId This is the id of dilution request
-        @param tokenId This is the id of the contribution that is linked to this ballot 
-        @param ballotId this is the ballot Id for which result is declared 
-        @param result this is the status of the result //either true if user won that is he received more than 66% of votes or false if user lost 
-     */
+    /// @dev this event is generated when result of a ballot is declared
+    /// @param dilutionId This is the id of dilution request
+    /// @param tokenId This is the id of the contribution that is linked to this ballot
+    /// @param ballotId this is the ballot Id for which result is declared
+    /// @param result this is the status of the result, either true if user won that is he received more than 66% of votes or false if user lost
     event DilutionResult(
         uint256 dilutionId,
         uint256 tokenId,
@@ -101,16 +83,17 @@ contract DilutionContract is BaseVotingContract {
 
     uint256 public REQUEST_INTERVAL;
 
-    constructor(uint8 votingInterval, uint256 requestInterval, address owner)
-        BaseVotingContract(owner)
-    {
+    constructor(
+        uint8 votingInterval,
+        uint256 requestInterval,
+        address owner
+    ) BaseVotingContract(owner) {
         VOTING_BLOCK_PERIOD = votingInterval;
         REQUEST_INTERVAL = requestInterval;
     }
 
-    /**
-     * @dev This function sets the treasury Contract address
-     */
+    /// @dev This function sets the treasury Contract address
+    /// @param newTreasuryContractAddress The mew address of treasury contract
     function setTreasuryContractAddress(address newTreasuryContractAddress)
         external
         _ownerOnly
@@ -118,9 +101,10 @@ contract DilutionContract is BaseVotingContract {
         _setTreasuryContractAddress(newTreasuryContractAddress);
     }
 
-    /**
-     * @dev This function will create a new contribution voting ballot
-     */
+    /// @dev This function will create a new contribution voting ballot
+    /// @param recordId this is the id of the record whose dilution request is to be created
+    /// @param tokenId the token that needs to be diluted
+    /// @param amount the amount to be diluted
     function createDilutionRequest(
         uint256 recordId,
         uint256 tokenId,
@@ -185,11 +169,9 @@ contract DilutionContract is BaseVotingContract {
         dilutionRequestMap[dilutionId] = dilutionRequest;
     }
 
-    /**
-     * @dev This function is called by any user to cast vote
-     * @param dilutionId this is the id of the dilution request for which user is voting
-     * @param vote this is the state of the vote, if true than it means the vote is in favour of the ballot
-     */
+    /// @dev This function is called by any user to cast vote
+    /// @param dilutionId this is the id of the dilution request for which user is voting
+    /// @param vote this is the state of the vote, if true than it means the vote is in favour of the ballot
     function castVote(uint256 dilutionId, bool vote) public {
         require(
             dilutionRequestMap[dilutionId].isPresent == true,
@@ -206,10 +188,8 @@ contract DilutionContract is BaseVotingContract {
         super._castVote(dilutionRequestMap[dilutionId].ballotId, vote);
     }
 
-    /**
-     * @dev This function can be called from external source and also from within the contract
-     * @param dilutionId this is the id of the contribution to which the winner is to be decleared
-     */
+    /// @dev This function can be called from external source and also from within the contract
+    /// @param dilutionId this is the id of the contribution to which the winner is to be decleared
     function declareWinner(uint256 dilutionId) external {
         bool result = _declareWinner(dilutionRequestMap[dilutionId].ballotId);
 

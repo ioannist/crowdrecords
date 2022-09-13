@@ -8,12 +8,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "./RecordsContract.sol";
 import "./ERC1155/SnapshotERC1155.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-
 import "./voting/VotingHubContract.sol";
-
-// ERC 20 balance[adress] => 2 contracts // governance and comunity
-// ERC 721 blance[adress] => 1 contract // records
-// ERC 1155
 
 contract TreasuryContract is IERC1155Receiver, SnapshotERC1155 {
     uint256 public constant CRD = 1;
@@ -22,12 +17,19 @@ contract TreasuryContract is IERC1155Receiver, SnapshotERC1155 {
     address public CONTRIBUTION_VOTING_CONTRACT_ADDRESS;
     address public DILUTION_CONTRACT_ADDRESS;
     address public VOTING_HUB_ADDRESS;
-    address OWNER;
+    address public OWNER;
     string private PREFIX_GOVERNANCE = "CRDG_";
     string private PREFIX_COMMUNITY = "CRD_";
     uint8 private TOKEN_TYPE_COMMUNITY = 0;
     uint8 private TOKEN_TYPE_GOVERNANCE = 1;
 
+    /// @dev This structure will store information of tokens for each records
+    /// @param recordId This is the id of record to which a token belongs
+    /// @param symbol This is the symbol of a token
+    /// @param image This is the token image
+    /// @param creationDate This is the block number of creation date
+    /// @param isPresent This is to check if a token struct exists or not
+    /// @param tokenId This is the id of the token that is created
     struct Token {
         uint256 recordId;
         string symbol;
@@ -37,6 +39,12 @@ contract TreasuryContract is IERC1155Receiver, SnapshotERC1155 {
         uint256 tokenId;
     }
 
+    /// @dev This structure will store information of the contribution
+    /// @param recordId This is the id of the record to which contribution belongs to
+    /// @param totalSupply Total supply of token
+    /// @param userBalance The amount of tokens that goes into creators wallet
+    /// @param symbol This is the symbol of the token
+    /// @param image This is the link of the image / icon of the token
     struct NewTokenData {
         uint256 recordId;
         uint256 totalSupply;
@@ -45,15 +53,13 @@ contract TreasuryContract is IERC1155Receiver, SnapshotERC1155 {
         string image;
     }
 
-    /**
-        @dev this is event which is created when a token transfer takes place
-        @param from This is the address of sender 
-        @param to This is the address of reciver 
-        @param transferDate This is the date of the transfer
-        @param tokenId This is the id of the token that is being transfered 
-        @param amount This is the amount of token transfered 
-        @param symbol This is the symbol of the token that were transfered
-     */
+    /// @dev this is event which is created when a token transfer takes place
+    /// @param from This is the address of sender
+    /// @param to This is the address of receiver
+    /// @param transferDate This is the date of the transfer
+    /// @param tokenId This is the id of the token that is being transferred
+    /// @param amount This is the amount of token transferred
+    /// @param symbol This is the symbol of the token that were transferred
     event TokenTransfer(
         address from,
         address to,
@@ -63,16 +69,14 @@ contract TreasuryContract is IERC1155Receiver, SnapshotERC1155 {
         string symbol
     );
 
-    /**
-        @dev this is event which is created when new governance token is created (NEW CREATION Not MINITING)
-        @param recordId This is the record Id to which this token belongs to 
-        @param symbol This is the symbol of the governance token
-        @param image This is the image of the token 
-        @param creationDate This is the creation date of the token 
-        @param tokenAmount This is the amount of token that are created 
-        @param tokenId This is the id of token that is newly created tokens 
-        @param tokenType This is the type of the token that is created => For governance 1 and for copyright 0  
-      */
+    /// @dev this is event which is created when new governance token is created (NEW CREATION Not MINTING)
+    /// @param recordId This is the record Id to which this token belongs to
+    /// @param symbol This is the symbol of the governance token
+    /// @param image This is the image of the token
+    /// @param creationDate This is the creation date of the token
+    /// @param tokenAmount This is the amount of token that are created
+    /// @param tokenId This is the id of token that is newly created tokens
+    /// @param tokenType This is the type of the token that is created => For governance 1 and for copyright 0
     event NewTokenCreated(
         uint256 recordId,
         string symbol,
@@ -83,13 +87,11 @@ contract TreasuryContract is IERC1155Receiver, SnapshotERC1155 {
         uint8 tokenType
     );
 
-    /**
-        @dev this is event which is created when new governance token is minted after the voting is done
-        @param recordId This is the record Id to which this token belongs to 
-        @param creationDate This is the creation date of the token 
-        @param tokenAmount This is the amount of token that are created 
-        @param tokenId This is the id of token that is newly created tokens 
-      */
+    /// @dev this is event which is created when new governance token is minted after the voting is done
+    /// @param recordId This is the record Id to which this token belongs to
+    /// @param creationDate This is the creation date of the token
+    /// @param tokenAmount This is the amount of token that are created
+    /// @param tokenId This is the id of token that is newly created tokens
     event TokenMinted(
         uint256 recordId,
         uint256 tokenId,
@@ -97,15 +99,14 @@ contract TreasuryContract is IERC1155Receiver, SnapshotERC1155 {
         uint256 tokenAmount
     );
 
-    /**
-        @dev this is event which is genrated when a contribution voting has came to an end and the contribution is accepted
-        @param to This the address of the winner or the owner of the contribution 
-        @param recordId This is the id of the record to which this contribution relates to 
-        @param contributionId This is the id of the contribution to which the record is related to 
-        @param rewardGovernance The reward amount for governance tokens 
-        @param rewardCommunity The reward amount for comunity tokens
-     */
-    event ContributionRewardTransfered(
+    /// @dev this is event which is generated when a contribution voting has came to an
+    /// end and the contribution is accepted
+    /// @param to This the address of the winner or the owner of the contribution
+    /// @param recordId This is the id of the record to which this contribution relates to
+    /// @param contributionId This is the id of the contribution to which the record is related to
+    /// @param rewardGovernance The reward amount for governance tokens
+    /// @param rewardCommunity The reward amount for community tokens
+    event ContributionRewardTransferred(
         address to,
         uint256 recordId,
         uint256 contributionId,
@@ -126,17 +127,15 @@ contract TreasuryContract is IERC1155Receiver, SnapshotERC1155 {
         OWNER = owner;
     }
 
-    /**
-     * @dev Modifier to check that the person who accesses a specific function is the owner of contract himself.
-     */
+    /// @dev Modifier to check that the person who accesses a specific function is the owner of contract himself.
     modifier ownerOnly() {
         require(msg.sender == OWNER, "You are not authorized for this action");
         _;
     }
 
-    /**
-     * @dev Modifier to check if the sender is authorized to create tokens for this record.
-     */
+    /// @dev Modifier to check if the sender is authorized to create tokens for this record.
+    /// @param newTokenData This is the NewTokenData structure that needs to be passed to create a new token,
+    /// here it is passed to check if the token can be created with respected data
     modifier canCreateToken(NewTokenData memory newTokenData) {
         require(
             newTokenData.totalSupply / 2 > newTokenData.userBalance,
@@ -156,9 +155,7 @@ contract TreasuryContract is IERC1155Receiver, SnapshotERC1155 {
         _;
     }
 
-    /**
-     * @dev Modifier to check that if the sender is the voting contract or not.
-     */
+    /// @dev Modifier to check that if the sender is the voting contract or not.
     modifier onlyContributionVotingContract() {
         require(
             msg.sender == CONTRIBUTION_VOTING_CONTRACT_ADDRESS,
@@ -167,9 +164,7 @@ contract TreasuryContract is IERC1155Receiver, SnapshotERC1155 {
         _;
     }
 
-    /**
-     * @dev Modifier to check that if the sender is the dilution contract or not.
-     */
+    /// @dev Modifier to check that if the sender is the dilution contract or not.
     modifier onlyDilutionContract() {
         require(
             msg.sender == DILUTION_CONTRACT_ADDRESS,
@@ -178,19 +173,14 @@ contract TreasuryContract is IERC1155Receiver, SnapshotERC1155 {
         _;
     }
 
-    /**
-     * @dev This function sets the Owners address
-     */
-    function setOwnerAddress(address ownerAddress)
-        public
-        ownerOnly
-    {
+    /// @dev This function sets the Owners address
+    /// @param ownerAddress This is the address of new owner of contract
+    function setOwnerAddress(address ownerAddress) public ownerOnly {
         OWNER = ownerAddress;
     }
 
-    /**
-     * @dev This function sets the Records Contract address
-     */
+    /// @dev This function sets the Records Contract address
+    /// @param newRecordsContractAddress This is the address of new Records contract
     function setRecordsContractAddress(address newRecordsContractAddress)
         public
         ownerOnly
@@ -198,9 +188,8 @@ contract TreasuryContract is IERC1155Receiver, SnapshotERC1155 {
         RECORDS_CONTRACT_ADDRESS = newRecordsContractAddress;
     }
 
-    /**
-     * @dev This function sets the Records Contract address
-     */
+    /// @dev This function sets the Records Contract address
+    /// @param newVotingHubContract This is the address of new voting hub contract
     function setVotingHubContract(address newVotingHubContract)
         public
         ownerOnly
@@ -208,31 +197,22 @@ contract TreasuryContract is IERC1155Receiver, SnapshotERC1155 {
         VOTING_HUB_ADDRESS = newVotingHubContract;
     }
 
-    /**
-     * @dev This function sets the dilution Contract address
-     */
+    /// @dev This function sets the dilution Contract address
+    /// @param newDilutionContract This is the address of new dilution contract
     function setDilutionContract(address newDilutionContract) public ownerOnly {
         DILUTION_CONTRACT_ADDRESS = newDilutionContract;
     }
 
-    /**
-     * @dev This function sets the Voting Contract address
-     */
+    /// @dev This function sets the Voting Contract address
+
     function setContributionVotingContractAddress(
         address newVotingContractAddress
     ) public ownerOnly {
         CONTRIBUTION_VOTING_CONTRACT_ADDRESS = newVotingContractAddress;
     }
 
-    /**
-     * @dev This function creats new governance tokens for specified record
-     * @param newTokenData This contains all the parameters needed to create a new governance token that are
-     * - recordId This is the recordId that for new token
-     * - totalSupply This is the total supply of governance token
-     * - userBalance This is the amount of tokens that user wants to keep to himself
-     * - symbol This is the symbol of the gvernance token
-     * - image this is image of the gov token.
-     */
+    /// @dev This function creates new governance tokens for specified record
+    /// @param newTokenData This contains all the parameters needed to create a new governance token that are
     function createNewGovernanceToken(NewTokenData memory newTokenData)
         external
         payable
@@ -269,15 +249,8 @@ contract TreasuryContract is IERC1155Receiver, SnapshotERC1155 {
         return newTokenId;
     }
 
-    /**
-     * @dev This function creats new community tokens for specified record
-     * @param newTokenData This contains all the parameters needed to create a new community token that are
-     * - recordId This is the recordId that for new token
-     * - totalSupply This is the total supply of community token
-     * - userBalance This is the amount of tokens that user wants to keep to himself
-     * - symbol This is the symbol of the community token
-     * - image this is image of the gov token.
-     */
+    /// @dev This function creats new community tokens for specified record
+    /// @param newTokenData This contains all the parameters needed to create a new community token that are
     function createNewCommunityToken(NewTokenData memory newTokenData)
         external
         payable
@@ -314,17 +287,10 @@ contract TreasuryContract is IERC1155Receiver, SnapshotERC1155 {
         return newTokenId;
     }
 
-    /**
-     * @dev This function is an internal use only function whoes role is to create a new token of specified type
-     * @param newTokenData This contains all the parameters needed to create a new community token that are
-     * - recordId This is the recordId that for new token
-     * - totalSupply This is the total supply of community token
-     * - userBalance This is the amount of tokens that user wants to keep to himself
-     * - symbol This is the symbol of the community token
-     * - image this is image of the gov token.
-     * @param newTokenId This is the Id of the token to create
-     * @param tokenType This is the type of token that is to be created such as community or governance
-     */
+    /// @dev This function is an internal use only function whoes role is to create a new token of specified type
+    /// @param newTokenData This contains all the parameters needed to create a new community token that are
+    /// @param newTokenId - This is the Id of the token to create
+    /// @param tokenType - This is the type of token that is to be created such as community or governance
     function createToken(
         NewTokenData memory newTokenData,
         uint256 newTokenId,
@@ -364,12 +330,10 @@ contract TreasuryContract is IERC1155Receiver, SnapshotERC1155 {
         return token;
     }
 
-    /**
-     * @dev This function creats new community tokens for specified record
-     * @param recordId This is the id of the record to which the token belongs to
-     * @param tokenId This is the id of the which is to be minted
-     * @param tokenAmount This is the amount that is to be minted
-     */
+    /// @dev This function creats new community tokens for specified record
+    /// @param recordId This is the id of the record to which the token belongs to
+    /// @param tokenId This is the id of the which is to be minted
+    /// @param tokenAmount This is the amount that is to be minted
     function mintTokens(
         uint256 recordId,
         uint256 tokenId,
@@ -403,14 +367,12 @@ contract TreasuryContract is IERC1155Receiver, SnapshotERC1155 {
         });
     }
 
-    /**
-     * @dev This function is called only by the voting contract once the voting ends
-     * @param to This is the recivers address
-     * @param recordId This is the recordId to which the contribution belongs to
-     * @param contributionId this is the contribution id to which the user has won
-     * @param rewardGovernance this is the amout of Governance token that needs to be transfered
-     * @param rewardCommunity this is the amout of comunity token that needs to be transfered
-     */
+    /// @dev This function is called only by the voting contract once the voting ends
+    /// @param to This is the receivers address
+    /// @param recordId This is the recordId to which the contribution belongs to
+    /// @param contributionId this is the contribution id to which the user has won
+    /// @param rewardGovernance this is the amount of Governance token that needs to be transferred
+    /// @param rewardCommunity this is the amount of community token that needs to be transferred
     function transferRewardAmount(
         address to,
         uint256 recordId,
@@ -443,7 +405,7 @@ contract TreasuryContract is IERC1155Receiver, SnapshotERC1155 {
             );
         }
 
-        emit ContributionRewardTransfered({
+        emit ContributionRewardTransferred({
             to: to,
             recordId: recordId,
             contributionId: contributionId,
@@ -452,10 +414,8 @@ contract TreasuryContract is IERC1155Receiver, SnapshotERC1155 {
         });
     }
 
-    /**
-     * @dev This function gives you the community token id of the recordId that you pass
-     * @param recordId This is the Id of the token that you want to check
-     */
+    /// @dev This function gives you the community token id of the recordId that you pass
+    /// @param recordId This is the Id of the token that you want to check
     function getCommunityTokenId(uint256 recordId)
         public
         view
@@ -469,10 +429,8 @@ contract TreasuryContract is IERC1155Receiver, SnapshotERC1155 {
         }
     }
 
-    /**
-     * @dev This function gives you the governance token id of the recordId that you pass
-     * @param recordId This is the Id of the token that you want to check
-     */
+    /// @dev This function gives you the governance token id of the recordId that you pass
+    /// @param recordId This is the Id of the token that you want to check
     function getGovernanceTokenId(uint256 recordId)
         public
         view
@@ -486,10 +444,8 @@ contract TreasuryContract is IERC1155Receiver, SnapshotERC1155 {
         }
     }
 
-    /**
-     * @dev This function returns the amount of total tokens that are in circulation
-     * @param tokenId This is the token whoes circulating supply you  want to find out
-     */
+    /// @dev This function returns the amount of total tokens that are in circulation
+    /// @param tokenId This is the token whose circulating supply you  want to find out
     function totalCirculatingSupply(uint256 tokenId)
         public
         view
@@ -537,11 +493,9 @@ contract TreasuryContract is IERC1155Receiver, SnapshotERC1155 {
         super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
     }
 
-    /**
-     * @dev this function is responsible for minting of new tokens for records
-     * @param tokenId Id this is the tokenId that is to minted
-     * @param amount the amount that is to be minted
-     */
+    /// @dev this function is responsible for minting of new tokens for records
+    /// @param tokenId Id this is the tokenId that is to minted
+    /// @param amount the amount that is to be minted
     function mintTokens(uint256 tokenId, uint256 amount)
         public
         onlyDilutionContract

@@ -14,13 +14,19 @@ contract OrdersContract {
     uint8 TRANSACTION_FEE = 50; //This is 0.50%
     address public OWNER;
 
-    //TODO: Convert the contract into buy order contract and remove the token transfering process to order contract from users wallet
-    /**
-        Buyer creates buying order and deposits amount.
-        seller sell the token and receives the CRD token, 
-        then tokens are transferred to buyer
-     */
-
+    /// @dev this is event which is created when a user creates order to sell his tokens
+    /// @param isClosed this is if a order is closed or not, that is if any amount is remaining for purchase or not,
+    /// it will also be false if order was canceled by user
+    /// @param isLockedInRatio the is denotes wether the user wants to sell the token individually or in a ratio
+    /// @param buyer this is the address of the owner or the Buy order
+    /// @param creationDate this is the creation date of the Buy order
+    /// @param communityTokenId this is the community token id that is involved in the Buy order
+    /// @param communityTokenAmount this is the community token amount for Buy order
+    /// @param communityTokenPrice this is the price of single token
+    /// @param governanceTokenId this is the community token id that is involved in the Buy order
+    /// @param governanceTokenAmount this is the community token amount for Buy order
+    /// @param governanceTokenPrice this is the price of single token
+    /// @param crdBalance this is the total balance remaining for the order
     struct Order {
         bool isClosed;
         bool isLockedInRatio;
@@ -35,20 +41,18 @@ contract OrdersContract {
         uint256 crdBalance;
     }
 
-    /**
-        @dev this is event which is created when a user creates order to sell his tokens
-        @param saleId this is the Id of the Buy order
-        @param buyer this is the address of the owner or the Buy order
-        @param isLockedInRatio the is denotes wether the user wants to sell the token individually or in a ratio
-        @param creationDate this is the creation date of the Buy order
-        @param communityTokenId this is the community token id that is involved in the Buy order
-        @param communityTokenAmount this is the community token amount for Buy order
-        @param communityTokenPrice this is the price of single token
-        @param governanceTokenId this is the community token id that is involved in the Buy order
-        @param governanceTokenAmount this is the community token amount for Buy order
-        @param governanceTokenPrice this is the price of single token
-        @param crdBalance this is the total balance remaining for the order
-     */
+    /// @dev this is event which is created when a user creates order to sell his tokens
+    /// @param saleId this is the Id of the Buy order
+    /// @param buyer this is the address of the owner or the Buy order
+    /// @param isLockedInRatio the is denotes wether the user wants to sell the token individually or in a ratio
+    /// @param creationDate this is the creation date of the Buy order
+    /// @param communityTokenId this is the community token id that is involved in the Buy order
+    /// @param communityTokenAmount this is the community token amount for Buy order
+    /// @param communityTokenPrice this is the price of single token
+    /// @param governanceTokenId this is the community token id that is involved in the Buy order
+    /// @param governanceTokenAmount this is the community token amount for Buy order
+    /// @param governanceTokenPrice this is the price of single token
+    /// @param crdBalance this is the total balance remaining for the order
     event BuyOrder(
         uint256 saleId,
         address buyer,
@@ -63,21 +67,20 @@ contract OrdersContract {
         uint256 crdBalance
     );
 
-    /**
-        @dev this is event which is created when a user purchases any sale order
-        @param saleId this is the Id of the sale order
-        @param seller this is the address of the person who sold the tokens in exchange for the crd
-        @param buyer this is the address of the owner or the sale order
-        @param creationDate this is the date when tokens were purchased
-        @param communityTokenId this is the community token id that is involved in the sale
-        @param communityTokenAmount this is the community token amount for sale
-        @param communityTokenPrice this is the price of single token
-        @param governanceTokenId this is the community token id that is involved in the sale
-        @param governanceTokenAmount this is the community token amount for sale
-        @param governanceTokenPrice this is the price of single token
-        @param amountTransferred this is the total amount paid
-        @param platformFees this is the platform fees taken by crowdrecords
-     */
+    /// @dev this is event which is created when a user purchases any sale order
+    /// @param saleId this is the Id of the sale order
+    /// @param seller this is the address of the person who sold the tokens in exchange for the crd
+    /// @param buyer this is the address of the owner or the sale order
+    /// @param creationDate this is the date when tokens were purchased
+    /// @param communityTokenId this is the community token id that is involved in the sale
+    /// @param communityTokenAmount this is the community token amount for sale
+    /// @param communityTokenPrice this is the price of single token
+    /// @param governanceTokenId this is the community token id that is involved in the sale
+    /// @param governanceTokenAmount this is the community token amount for sale
+    /// @param governanceTokenPrice this is the price of single token
+    /// @param amountTransferred this is the total amount paid
+    /// @param platformFees this is the platform fees taken by crowdrecords
+
     event SaleBought(
         uint256 saleId,
         address seller,
@@ -93,12 +96,10 @@ contract OrdersContract {
         uint256 platformFees
     );
 
-    /**
-        @dev this event is emmited when user closes his/her sale order
-        @param saleId This is the sale Id of the sale order 
-        @param creationDate This is the date when the event took place 
-        @param remainingBalance This is the amount that was remaining from the partially fulfilled orders
-     */
+    /// @dev this event is emmited when user closes his/her sale order
+    /// @param saleId This is the sale Id of the sale order
+    /// @param creationDate This is the date when the event took place
+    /// @param remainingBalance This is the amount that was remaining from the partially fulfilled orders
     event OrderClose(
         uint256 saleId,
         uint256 creationDate,
@@ -112,9 +113,7 @@ contract OrdersContract {
         OWNER = owner;
     }
 
-    /**
-     * @dev Modifier to check that the person who accesses a specific function is the owner of contract himself.
-     */
+    /// @dev Modifier to check that the person who accesses a specific function is the owner of contract himself.
     modifier ownerOnly() {
         require(msg.sender == OWNER, "You are not authorized for this action");
         _;
@@ -127,9 +126,8 @@ contract OrdersContract {
         OWNER = owner;
     }
 
-    /**
-     * @dev This function sets the treasury Contract address
-     */
+    /// @dev This function sets the treasury Contract address
+    /// @param newTreasuryContractAddress the is the new treasuryContractAddress
     function setTreasuryContractAddress(address newTreasuryContractAddress)
         public
         ownerOnly
@@ -137,18 +135,20 @@ contract OrdersContract {
         TREASURY_CONTRACT_ADDRESS = newTreasuryContractAddress;
     }
 
-    /**
-     * @dev This function sets the owner of the wallet address
-     */
+    /// @dev This function sets the wallet address this address will receive all the transaction royalties
+    /// @param newWalletAddress the is the new newWalletAddress
     function setWalletAddress(address newWalletAddress) public ownerOnly {
         WALLET_ADDRESS = newWalletAddress;
     }
 
-    //safeTransferFrom
-
-    /**
-     * @dev This function is called to create a new saleOrder
-     */
+    /// @dev This function is called to create a new saleOrder
+    /// @param isLockedInRatio the is denotes wether the user wants to sell the token individually or in a ratio
+    /// @param communityTokenId this is the community token id that is involved in the Buy order
+    /// @param communityTokenAmount this is the community token amount for Buy order
+    /// @param communityTokenPrice this is the price of single token
+    /// @param governanceTokenId this is the community token id that is involved in the Buy order
+    /// @param governanceTokenAmount this is the community token amount for Buy order
+    /// @param governanceTokenPrice this is the price of single token
     function createBuyOrder(
         bool isLockedInRatio,
         uint256 recordId,
@@ -235,9 +235,8 @@ contract OrdersContract {
         return newOrderId;
     }
 
-    /**
-     * @dev This function is called to cancel the existing sale order
-     */
+    /// @dev This function is called to cancel the existing sale order
+    /// @param saleId This is the id of the buy order to cancel
     function cancelBuyOrder(uint256 saleId) public {
         require(
             orderBook[orderId].buyer == msg.sender,
@@ -278,9 +277,10 @@ contract OrdersContract {
         uint256 otherTest
     );
 
-    /**
-     * @dev This function is called to accept the existing buy order
-     */
+    /// @dev This function is called to accept the existing buy order
+    /// @param saleId This is the id of the buy order to buy
+    /// @param governanceTokenAmount This is the governance token amount that is being offered
+    /// @param communityTokenAmount This is the community token amount that is being offered
     function acceptBuyOrder(
         uint256 saleId,
         uint256 governanceTokenAmount,
@@ -407,7 +407,8 @@ contract OrdersContract {
     }
 
     /// @notice This is only for internal use
-    /// @dev This function is responsible to transfer the tokens at the time of purchase and it is also responsible for transfering the fees.
+    /// @dev This function is responsible to transfer the tokens at the time of purchase and
+    /// it is also responsible for transferring the fees.
     /// @param tokenAmount This is the amount of token to transfer
     /// @param tokenPrice This is the token price at which the tokens are being sold at
     /// @param tokenId this is the ID of the token to transfer
@@ -417,8 +418,9 @@ contract OrdersContract {
         uint256 tokenId,
         address receiver
     ) internal returns (uint256 totalCost, uint256 totalFee) {
-        ///Change the function so that it will transfer the community and governance tokens from the sellers account to buyer account
-        //then it would transfer the CRD tokens from contract account to sellers account after deducting the transaction fees.
+        // Change the function so that it will transfer the community and governance tokens from the sellers
+        //account to buyer account then it would transfer the CRD tokens from contract account to sellers
+        //account after deducting the transaction fees.
 
         uint256 transactionAmount = (tokenAmount * tokenPrice);
         uint256 transactionFee = (transactionAmount * TRANSACTION_FEE) / 10000;
@@ -456,9 +458,6 @@ contract OrdersContract {
         return (transactionAmount, transactionFee);
     }
 
-    /**
-    Below code are for transfer of tokens from ERC1155 standard contract
-     */
     function onERC1155Received(
         address,
         address,

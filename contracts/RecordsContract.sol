@@ -14,9 +14,17 @@ contract RecordsContract is ERC1155Supply {
     // This mapping contains if seed data id is being used or not
     mapping(uint256 => bool) public seedIdUsed;
 
-    address OWNER;
+    // Address of the owner of the contracts
+    address public OWNER;
     address public CONTRIBUTION_CONTRACT_ADDRESS;
 
+    /// @dev This struct holds the data for record token
+    /// @param name Name of the record
+    /// @param image This is the image of the record
+    /// @param seedId This is the seed contribution id
+    /// @param parentId This is the id of the parent record from which record is created
+    /// @param recordCategory This is the record category
+    /// @param creationDate This is the creation date of the record
     struct RecordToken {
         string name;
         string image;
@@ -26,16 +34,14 @@ contract RecordsContract is ERC1155Supply {
         uint256 creationDate;
     }
 
-    /**
-     * @dev This event is emited when new record is created
-     * @param recordId This is the recordId
-     * @param name Name of the record
-     * @param image This is the image of the record
-     * @param seedId This is the seed contribution id
-     * @param parentId This is the id of the parent record from which record is created
-     * @param recordCategory This is the record category
-     * @param creationDate This is the creation date of the record
-     */
+    /// @dev This event is emited when new record is created
+    /// @param recordId This is the recordId
+    /// @param name Name of the record
+    /// @param image This is the image of the record
+    /// @param seedId This is the seed contribution id
+    /// @param parentId This is the id of the parent record from which record is created
+    /// @param recordCategory This is the record category
+    /// @param creationDate This is the creation date of the record
     event RecordCreated(
         uint256 recordId,
         string name,
@@ -50,27 +56,20 @@ contract RecordsContract is ERC1155Supply {
         OWNER = owner;
     }
 
-    /**
-     * @dev Modifier to check that the person who accesses a specific function is the owner of contract himself.
-     */
+    /// @dev Modifier to check that the person who accesses a specific function is the owner of contract himself.
     modifier ownerOnly() {
         require(msg.sender == OWNER, "You are not authorized for this action");
         _;
     }
 
-    /**
-     * @dev This function sets the owner address
-     */
-    function setOwnerAddress(address ownerAddress)
-        public
-        ownerOnly
-    {
+    /// @dev This function sets the owner address
+    /// @param ownerAddress Takes the address of new owner as parameter
+    function setOwnerAddress(address ownerAddress) public ownerOnly {
         OWNER = ownerAddress;
     }
 
-    /**
-     * @dev This function sets the Voting Contract address
-     */
+    /// @dev This function sets the contribution Contract address
+    /// @param contributionContractAddress Takes the address of new contribution contract as parameter
     function setContributionContractAddress(address contributionContractAddress)
         public
         ownerOnly
@@ -78,13 +77,11 @@ contract RecordsContract is ERC1155Supply {
         CONTRIBUTION_CONTRACT_ADDRESS = contributionContractAddress;
     }
 
-    /**
-     * @dev This function creates new record
-     * @param name This is the total supply of governance token
-     * @param image This is the total supply of community token
-     * @param seedId this is hash of the preview file
-     * @param recordCategory this is hash of the preview file
-     */
+    /// @dev This function creates new record
+    /// @param name This is the name of the record
+    /// @param image This is the image/logo of the record
+    /// @param recordCategory This is the category to which record belongs
+    /// @param seedId This is the seed contribution id
     function createNewRecord(
         string memory name,
         string memory image,
