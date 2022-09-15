@@ -69,7 +69,7 @@ contract ContributionContract is ERC721 {
 
     /// @dev Modifier to check that the person who accesses a specific function is the owner of contract himself.
     modifier ownerOnly() {
-        require(msg.sender == OWNER, "You are not authorized for this action");
+        require(msg.sender == OWNER, "UNAUTHORIZED: CANNOT_PERFORM_ACTION");
         _;
     }
 

@@ -112,7 +112,7 @@ contract DilutionContract is BaseVotingContract {
     ) public {
         require(
             activeDilutionRequestMap[tokenId] == 0,
-            "There is a pending dilution request"
+            "INVALID: PENDING_DILUTION_REQUEST"
         );
 
         TreasuryContract treasuryContract = TreasuryContract(
@@ -124,22 +124,23 @@ contract DilutionContract is BaseVotingContract {
 
         require(
             govTokenId == tokenId || commTokenId == tokenId,
-            "Invalid token or record"
+            "INVALID: TOKEN_OR_RECORD"
         );
 
         require(
             treasuryContract.balanceOf(msg.sender, tokenId) > 0,
-            "You cannot create dilution request"
+            "INVALID: NO_TOKENS_FOUND"
         );
 
         // We need to check if there were any previous request made,
         // and if any request are made then has sufficient time passed or not.
         // If the block number is 0 then it means that no request has been created
+        // err: You need to wait sometime for you create new dilution request
         require(
             lastDilutionResultMap[tokenId] == 0 ||
                 lastDilutionResultMap[tokenId] + REQUEST_INTERVAL <
                 block.number,
-            "You need to wait sometime for you create new dilution request"
+            "INVALID: WAIT_SOMETIME_BEFORE_NEW_DILUTION_REQUEST"
         );
 
         _dilutionIds.increment();
@@ -175,7 +176,7 @@ contract DilutionContract is BaseVotingContract {
     function castVote(uint256 dilutionId, bool vote) public {
         require(
             dilutionRequestMap[dilutionId].isPresent == true,
-            "Invalid dilution request id"
+            "INVALID: INVALID_DILUTiON_ID"
         );
 
         emit DilutionVoting({

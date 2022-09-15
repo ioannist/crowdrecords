@@ -33,13 +33,13 @@ contract("BaseVotingCounterOfferContract", function() {
         await helper.revertToSnapshot(snapshotId);
     });
 
-    it("Creating a voting ballot owner cannot vote", async function() {
+    it("Creating a voting ballot UNAUTHORIZED: OWNER_CANNOT_VOTE", async function() {
         const ballotId = 1;
         await this.baseVotingCounterOfferContractMock.createBallot(false, COMMUNITY_TOKEN_ID);
 
         await expect(
             this.baseVotingCounterOfferContractMock.castVote(ballotId, true)
-        ).to.eventually.be.rejectedWith("Owner cannot vote");
+        ).to.eventually.be.rejectedWith("UNAUTHORIZED: OWNER_CANNOT_VOTE");
     });
 
     it("Creating a voting ballot owner can vote", async function() {
@@ -261,7 +261,7 @@ contract("BaseVotingCounterOfferContract", function() {
                 this.baseVotingCounterOfferContractMock.castVote(this.ballotId, true, {
                     from: this.user1,
                 })
-            ).to.eventually.rejectedWith("You have already given a counter offer");
+            ).to.eventually.rejectedWith("INVALID: ALREADY_COUNTER_OFFERED");
         });
 
         it("Creating a voting ballot, Tries to create counter offer after vote, expect revert", async function() {
@@ -279,7 +279,7 @@ contract("BaseVotingCounterOfferContract", function() {
                 this.baseVotingCounterOfferContractMock.createCounterOffer(this.ballotId, {
                     from: this.user1,
                 })
-            ).to.eventually.rejectedWith("You have already voted");
+            ).to.eventually.rejectedWith("INVALID: ALREADY_VOTED");
         });
 
         it("Creating a voting ballot, Tries to create 2 counter offers, expect revert", async function() {
@@ -297,7 +297,7 @@ contract("BaseVotingCounterOfferContract", function() {
                 this.baseVotingCounterOfferContractMock.createCounterOffer(this.ballotId, {
                     from: this.user1,
                 })
-            ).to.eventually.rejectedWith("You have already given a counter offer");
+            ).to.eventually.rejectedWith("INVALID: ALREADY_COUNTER_OFFERED");
         });
 
         it("Creating a voting ballot, create counter offer, win", async function() {
@@ -397,7 +397,7 @@ contract("BaseVotingCounterOfferContract", function() {
                         from: this.user2,
                     }
                 )
-            ).to.eventually.rejectedWith("Counter offer doesn't exists");
+            ).to.eventually.rejectedWith("INVALID: COUNTER_OFFER_NOT_EXISTS");
         });
 
         it("Creating a voting ballot, create counter offer, transfers token, wins", async function() {

@@ -8,7 +8,7 @@ const chaiAsPromised = require("chai-as-promised");
 chai.use(chaiAsPromised);
 const expect = chai.expect;
 
-contract("Records Contract", function () {
+contract("Records Contract", function() {
     let SEED_CONTRIBUTION_ID = 1;
     let NEW_CONTRIBUTION_1_ID = 2;
     let RECORD_ID = 1;
@@ -32,17 +32,17 @@ contract("Records Contract", function () {
     });
 
     let snapShot, snapshotId;
-    beforeEach(async function () {
+    beforeEach(async function() {
         snapShot = await helper.takeSnapshot();
         snapshotId = snapShot["result"];
     });
-    afterEach(async function () {
+    afterEach(async function() {
         await helper.revertToSnapshot(snapshotId);
     });
 
     //creating new record from existing records
 
-    it("Creating seed contribution and record", async function () {
+    it("Creating seed contribution and record", async function() {
         //seed contribution id 1
         await this.contributionContract.createSeedContribution(
             [1, 2, 3],
@@ -69,7 +69,7 @@ contract("Records Contract", function () {
     //     ).to.eventually.rejectedWith("No contribution with this id is found");
     // });
 
-    it("Creating a normal contribution and try to create record with it, expect reject", async function () {
+    it("Creating a normal contribution and try to create record with it, expect reject", async function() {
         //seed contribution id 1
         await this.contributionContract.createSeedContribution(
             [1, 2, 3],
@@ -115,7 +115,7 @@ contract("Records Contract", function () {
 
         await expect(
             this.recordsContract.createNewRecord("Test", "image.png", "Cat1", 2)
-        ).to.eventually.rejectedWith("Contribution needs to be seed contribution");
+        ).to.eventually.rejectedWith("INVALID: NOT_SEED_CONTRIBUTION");
     });
 });
 

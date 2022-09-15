@@ -57,17 +57,17 @@ contract BaseVotingContract {
     modifier _checkIfBallotIsOpen(uint256 votingBallotId, address voter) {
         require(
             votingMap[votingBallotId].isPresent == true,
-            "No ballot with your id is found"
+            "INVALID: BALLOT_NOT_FOUND"
         );
 
         require(
             votingMap[votingBallotId].votingEndBlock > block.number,
-            "Voting time is over"
+            "INVALID: VOTING_TIME_OVER"
         );
 
         require(
             alreadyVoted[votingBallotId][voter] == false,
-            "You have already voted"
+            "INVALID: ALREADY_VOTED"
         );
 
         _;
@@ -75,7 +75,7 @@ contract BaseVotingContract {
 
     /// @dev Modifier to check that the person who accesses a specific function is the owner himself.
     modifier _ownerOnly() {
-        require(msg.sender == OWNER, "You are not authorized for this action");
+        require(msg.sender == OWNER, "UNAUTHORIZED: CANNOT_PERFORM_ACTION");
         _;
     }
 
@@ -85,10 +85,10 @@ contract BaseVotingContract {
         if (votingMap[votingBallotId].canOwnerVote) {
             require(
                 alreadyVoted[votingBallotId][tx.origin] == false,
-                "You have already voted"
+                "INVALID: ALREADY_VOTED"
             );
         } else if (tx.origin == votingMap[votingBallotId].owner) {
-            revert("Owner cannot vote");
+            revert("UNAUTHORIZED: OWNER_CANNOT_VOTE");
         }
         _;
     }
@@ -211,7 +211,7 @@ contract BaseVotingContract {
     ) private {
         require(
             alreadyVoted[votingBallotId][voter] == true,
-            "User has not voted yet"
+            "INVALID: INTERNAL: USER_HAS_NOT_VOTED"
         );
         bool vote = userVotes[votingBallotId][voter];
         if (vote) {
@@ -268,17 +268,17 @@ contract BaseVotingContract {
     {
         require(
             votingMap[votingBallotId].isPresent == true,
-            "No ballot with your id is found"
+            "INVALID: BALLOT_NOT_FOUND"
         );
 
         require(
             votingMap[votingBallotId].votingEndBlock < block.number,
-            "Voting time is not over yet"
+            "INVALID: VOTING_TIME_OVER"
         );
 
         require(
             votingMap[votingBallotId].isResultDeclared == false,
-            "Result already declared"
+            "INVALID: RESULT_ALREADY_DECLARED"
         );
 
         VotingBallot storage votingBallot = votingMap[votingBallotId];

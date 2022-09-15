@@ -129,7 +129,7 @@ contract TreasuryContract is IERC1155Receiver, SnapshotERC1155 {
 
     /// @dev Modifier to check that the person who accesses a specific function is the owner of contract himself.
     modifier ownerOnly() {
-        require(msg.sender == OWNER, "You are not authorized for this action");
+        require(msg.sender == OWNER, "UNAUTHORIZED: CANNOT_PERFORM_ACTION");
         _;
     }
 
@@ -139,7 +139,7 @@ contract TreasuryContract is IERC1155Receiver, SnapshotERC1155 {
     modifier canCreateToken(NewTokenData memory newTokenData) {
         require(
             newTokenData.totalSupply / 2 > newTokenData.userBalance,
-            "Treasury should have at least 50% of the total supply"
+            "INVALID: TREASURY_SHOULD_HAVE_50%_OF_SUPPLY"
         );
 
         RecordsContract recordsContract = RecordsContract(
@@ -151,7 +151,7 @@ contract TreasuryContract is IERC1155Receiver, SnapshotERC1155 {
             newTokenData.recordId
         );
 
-        require(balance > 0, "You are not the owner of the record");
+        require(balance > 0, "INVALID: ONLY_RECORD_OWNER");
         _;
     }
 
@@ -159,7 +159,7 @@ contract TreasuryContract is IERC1155Receiver, SnapshotERC1155 {
     modifier onlyContributionVotingContract() {
         require(
             msg.sender == CONTRIBUTION_VOTING_CONTRACT_ADDRESS,
-            "You are not authorized for this action"
+            "UNAUTHORIZED: CANNOT_PERFORM_ACTION"
         );
         _;
     }
@@ -168,7 +168,7 @@ contract TreasuryContract is IERC1155Receiver, SnapshotERC1155 {
     modifier onlyDilutionContract() {
         require(
             msg.sender == DILUTION_CONTRACT_ADDRESS,
-            "You are not authorized for this action"
+            "UNAUTHORIZED: CANNOT_PERFORM_ACTION"
         );
         _;
     }
@@ -228,12 +228,12 @@ contract TreasuryContract is IERC1155Receiver, SnapshotERC1155 {
 
         require(
             govTokenMapping[newTokenData.recordId].isPresent == false,
-            "Governance token for this id already present"
+            "INVALID: TOKEN_ID_ALREADY_IN_USE"
         );
 
         require(
             govTokenSym[newTokenData.symbol] == false,
-            "Governance token with this SYMBOL already present"
+            "INVALID: TOKEN_SYMBOL_ALREADY_IN_USE"
         );
 
         LastTokenId++;
@@ -266,12 +266,12 @@ contract TreasuryContract is IERC1155Receiver, SnapshotERC1155 {
 
         require(
             commTokenMapping[newTokenData.recordId].isPresent == false,
-            "Governance token for this id already present"
+            "INVALID: TOKEN_ID_ALREADY_IN_USE"
         );
 
         require(
             commTokenSym[newTokenData.symbol] == false,
-            "Governance token with this SYMBOL already present"
+            "INVALID: TOKEN_SYMBOL_ALREADY_IN_USE"
         );
 
         LastTokenId++;
@@ -342,13 +342,13 @@ contract TreasuryContract is IERC1155Receiver, SnapshotERC1155 {
         require(
             commTokenMapping[recordId].isPresent == true ||
                 govTokenMapping[recordId].isPresent == true,
-            "Invalid record "
+            "INVALID: WRONG_RECORD_ID"
         );
 
         require(
             commTokenMapping[recordId].tokenId == tokenId ||
                 govTokenMapping[recordId].tokenId == tokenId,
-            "Invalid tokens"
+            "INVALID: WRONG_TOKEN_ID"
         );
 
         // Here minting of new tokens is done. And those are sent directly into the treasury
@@ -425,7 +425,7 @@ contract TreasuryContract is IERC1155Receiver, SnapshotERC1155 {
         if (token.isPresent) {
             return token.tokenId;
         } else {
-            revert("Invalid record id");
+            revert("INVALID: WRONG_RECORD_ID");
         }
     }
 
@@ -440,7 +440,7 @@ contract TreasuryContract is IERC1155Receiver, SnapshotERC1155 {
         if (token.isPresent) {
             return token.tokenId;
         } else {
-            revert("Invalid record id");
+            revert("INVALID: WRONG_RECORD_ID");
         }
     }
 

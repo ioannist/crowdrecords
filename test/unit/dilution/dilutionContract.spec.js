@@ -39,7 +39,7 @@ contract("Dilution Contract", function() {
                 10,
                 await web3.utils.toWei("450000")
             )
-        ).to.eventually.be.rejectedWith("Invalid token or record");
+        ).to.eventually.be.rejectedWith("INVALID: TOKEN_OR_RECORD");
     });
 
     it("Create a request without owning the token, reject", async function() {
@@ -50,7 +50,7 @@ contract("Dilution Contract", function() {
                 await web3.utils.toWei("450000"),
                 { from: await helper.getEthAccount(5) }
             )
-        ).to.eventually.be.rejectedWith("You cannot create dilution request");
+        ).to.eventually.be.rejectedWith("INVALID: NO_TOKENS_FOUND");
     });
 
     it("Dilution by voting, wins with votes", async function() {
@@ -278,9 +278,7 @@ contract("Dilution Contract", function() {
                     await web3.utils.toWei("450000"),
                     { from: this.user2 }
                 )
-            ).to.eventually.be.rejectedWith(
-                "You need to wait sometime for you create new dilution request"
-            );
+            ).to.eventually.be.rejectedWith("INVALID: WAIT_SOMETIME_BEFORE_NEW_DILUTION_REQUEST");
         });
 
         it("Dilution voting done, trying to create a new dilution request after set time, creates successfully", async function() {

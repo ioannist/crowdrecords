@@ -18,21 +18,21 @@ const chaiAsPromised = require("chai-as-promised");
 chai.use(chaiAsPromised);
 const expect = chai.expect;
 
-contract("Not Ratio Locked Sales", function () {
+contract("Not Ratio Locked Sales", function() {
     before(setup);
     before(generateTokens);
 
     const CRDTokenId = 1;
     let snapShot, snapshotId;
-    beforeEach(async function () {
+    beforeEach(async function() {
         snapShot = await helper.takeSnapshot();
         snapshotId = snapShot["result"];
     });
-    afterEach(async function () {
+    afterEach(async function() {
         await helper.revertToSnapshot(snapshotId);
     });
 
-    it("User can create normal Buy request and cancel it", async function () {
+    it("User can create normal Buy request and cancel it", async function() {
         await this.treasuryContract.setApprovalForAll(this.ordersContract.address, true);
 
         let trx = await this.ordersContract.createBuyOrder(
@@ -63,7 +63,7 @@ contract("Not Ratio Locked Sales", function () {
         ).to.eventually.be.bignumber.equals(await web3.utils.toWei("1000000"));
     });
 
-    it("Sale tokens should belong to same record, expect revert", async function () {
+    it("Sale tokens should belong to same record, expect revert", async function() {
         await this.treasuryContract.setApprovalForAll(this.ordersContract.address, true);
         await expect(
             this.ordersContract.createBuyOrder(
@@ -72,26 +72,26 @@ contract("Not Ratio Locked Sales", function () {
                 COMMUNITY_TOKEN_ID,
                 await web3.utils.toWei("100"),
                 1,
-                GOVERNANCE_TOKEN_ID + 2, //Invalid Governance token id
+                GOVERNANCE_TOKEN_ID + 2, //INVALID: GOVERNANCE_TOKEN_ID
                 await web3.utils.toWei("5"),
                 2
             )
-        ).to.eventually.be.rejectedWith("Invalid governance token id");
+        ).to.eventually.be.rejectedWith("INVALID: GOVERNANCE_TOKEN_ID");
         await expect(
             this.ordersContract.createBuyOrder(
                 false,
                 RECORD_ID,
-                COMMUNITY_TOKEN_ID + 2, //Invalid Community token id
+                COMMUNITY_TOKEN_ID + 2, //INVALID: COMMUNITY_TOKEN_ID
                 await web3.utils.toWei("100"),
                 1,
                 GOVERNANCE_TOKEN_ID,
                 await web3.utils.toWei("5"),
                 2
             )
-        ).to.eventually.be.rejectedWith("Invalid community token id");
+        ).to.eventually.be.rejectedWith("INVALID: COMMUNITY_TOKEN_ID");
     });
 
-    it("Should able to purchase non locked asset and sale should close", async function () {
+    it("Should able to purchase non locked asset and sale should close", async function() {
         const user1 = await helper.getEthAccount(0);
         const user2 = await helper.getEthAccount(1);
 

@@ -102,7 +102,7 @@ contract("AgreementContract", function() {
 
         await expect(
             this.agreementContract.payRoyaltyAmount(agreementId, await web3.utils.toWei("1000"))
-        ).to.eventually.be.rejectedWith("Invalid agreement id");
+        ).to.eventually.be.rejectedWith("INVALID: AGREEMENT_ID");
     });
 
     describe("After winning the voting for agreement contract", async function() {
@@ -338,7 +338,7 @@ contract("AgreementContract", function() {
                     this.agreementContract.claimRoyaltyAmount(this.firstAgreementId, {
                         from: this.user2,
                     })
-                ).to.be.rejectedWith("You have no pending claims");
+                ).to.be.rejectedWith("NO_PENDING_CLAIMS");
             });
         });
 
@@ -350,7 +350,7 @@ contract("AgreementContract", function() {
             await this.treasuryContract.setApprovalForAll(this.agreementContract.address, true);
             await expect(
                 this.agreementContract.payRoyaltyAmount(invalidRecord, singleRewardAmount)
-            ).to.be.rejectedWith("Invalid agreement id");
+            ).to.be.rejectedWith("INVALID: AGREEMENT_ID");
         });
 
         it("Claiming without reward payment, transaction should revert", async function() {
@@ -359,7 +359,7 @@ contract("AgreementContract", function() {
                 this.agreementContract.claimRoyaltyAmount(this.firstAgreementId, {
                     from: user2,
                 })
-            ).to.be.rejectedWith("No royalty payments created yet");
+            ).to.be.rejectedWith("NO_ROYALTY_PAYMENTS");
         });
 
         it("Claiming Royalty : Single user royalty claim", async function() {
@@ -666,7 +666,7 @@ contract("AgreementContract", function() {
                     this.agreementContract.claimRoyaltyAmount(this.firstAgreementId, {
                         from: this.user3,
                     })
-                ).to.eventually.be.rejectedWith("You have no pending claims");
+                ).to.eventually.be.rejectedWith("NO_PENDING_CLAIMS");
             });
 
             it("Eligible user tries to claim twice, successful first time and then revert", async function() {
@@ -687,7 +687,7 @@ contract("AgreementContract", function() {
                     this.agreementContract.claimRoyaltyAmount(this.firstAgreementId, {
                         from: this.user2,
                     })
-                ).to.eventually.be.rejectedWith("You have no pending claims");
+                ).to.eventually.be.rejectedWith("NO_PENDING_CLAIMS");
             });
 
             it("User only eligible for the latest royalty paid", async function() {
@@ -743,9 +743,7 @@ contract("AgreementContract", function() {
             //Distributing first time
             await expect(
                 this.agreementContract.payRoyaltyAmount(RECORD_ID, singleRewardAmount)
-            ).to.eventually.rejectedWith(
-                "Insufficient amount, please try again with greater amount"
-            );
+            ).to.eventually.rejectedWith("INSUFFICIENT_AMOUNT: NEED_GREATER_AMOUNT");
         });
     });
 

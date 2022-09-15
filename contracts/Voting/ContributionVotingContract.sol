@@ -5,11 +5,10 @@ import "./BaseVotingCounterOfferContract.sol";
 import "../TreasuryContract.sol";
 
 contract ContributionVotingContract is BaseVotingCounterOfferContract {
-    
-    /// @dev This structure will hold the data for contribution rewards 
+    /// @dev This structure will hold the data for contribution rewards
     /// @param requester This is the person who has contributed and is seeking for reward
-    /// @param contributionId This is the contribution id 
-    /// @param recordId This is the record id to which the reward belongs to 
+    /// @param contributionId This is the contribution id
+    /// @param recordId This is the record id to which the reward belongs to
     /// @param ballotId This is the ballot id of the reward
     /// @param communityReward This is the community reward amount
     /// @param communityTokenId This is the id of community token
@@ -28,7 +27,7 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
         bool isPresent;
     }
 
-    /// @dev This structure will hold the data for contribution rewards 
+    /// @dev This structure will hold the data for contribution rewards
     /// @param newCommunityReward This is the community reward amount
     /// @param newGovernanceReward This is the amount of governance token requested as reward
     /// @param status This is status of the offer that is either : PENDING = 1 | ACCEPTED = 2 | REJECTED = 3
@@ -41,8 +40,8 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
     /// @notice This event is emitted when a contribution ballot is created by a user and it hold the following details
     /// @dev This event is emitted during contribution ballot creation
     /// @param requester This is the person who has contributed and is seeking for reward
-    /// @param contributionId This is the contribution id 
-    /// @param recordId This is the record id to which the reward belongs to 
+    /// @param contributionId This is the contribution id
+    /// @param recordId This is the record id to which the reward belongs to
     /// @param communityReward This is the community reward amount
     /// @param communityTokenId This is the id of community token
     /// @param governanceReward This is the amount of governance token requested as reward
@@ -59,10 +58,9 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
         uint256 ballotId
     );
 
-    
     /// @dev This is when a vote is given by user.
     /// @param voter Address of the voter
-    /// @param contributionId This is the id of the contribution that is linked to this ballot 
+    /// @param contributionId This is the id of the contribution that is linked to this ballot
     /// @param ballotId Id of the ballot where voting is stored
     /// @param vote State of vote : true for yes and false for No
     event ContributionVoting(
@@ -72,9 +70,8 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
         bool vote
     );
 
-    
     /// @dev this is event which is created when a user proposes counter offer
-    /// @param contributionId This is the id of the contribution that is linked to this ballot 
+    /// @param contributionId This is the id of the contribution that is linked to this ballot
     /// @param voterId This is the id of the voter who's vote it is
     /// @param newGovernanceReward This is the new reward amount counter offered by the voter
     /// @param newCommunityReward This is the new reward amount counter offered by the voter
@@ -85,9 +82,8 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
         uint256 newCommunityReward
     );
 
-    
     /// @dev this is event which is created when the owner of the ballot takes action on a specific counter offer
-    /// @param contributionId This is the id of the contribution that is linked to this ballot 
+    /// @param contributionId This is the id of the contribution that is linked to this ballot
     /// @param voterId This is the id of the voter who's vote it is
     /// @param newGovernanceReward This is the new reward amount counter offered by the voter
     /// @param newCommunityReward This is the new reward amount counter offered by the voter
@@ -100,12 +96,11 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
         uint256 status
     );
 
-    
     /// @dev this event is genrated when result of a ballot is declared
-    /// @param contributionId This is the id of the contribution that is linked to this ballot 
-    /// @param ballotId this is the ballot Id for which result is declared 
-    /// @param result this is the status of the result, either true if user won that is 
-    /// he received more than 66% of votes or false if user lost 
+    /// @param contributionId This is the id of the contribution that is linked to this ballot
+    /// @param ballotId this is the ballot Id for which result is declared
+    /// @param result this is the status of the result, either true if user won that is
+    /// he received more than 66% of votes or false if user lost
     event BallotResult(uint256 contributionId, uint256 ballotId, bool result);
 
     mapping(uint256 => ContributionReward) rewardMapping;
@@ -115,19 +110,20 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
     mapping(uint256 => address[]) contributionCounterOfferList;
     address public CONTRIBUTION_CONTRACT_ADDRESS;
 
-    constructor(uint8 votingInterval, address owner) BaseVotingCounterOfferContract(owner) {
+    constructor(uint8 votingInterval, address owner)
+        BaseVotingCounterOfferContract(owner)
+    {
         VOTING_BLOCK_PERIOD = votingInterval;
     }
 
     modifier _onlyContributionContract() {
         require(
             msg.sender == CONTRIBUTION_CONTRACT_ADDRESS,
-            "You are not contribution contract"
+            "UNAUTHORIZED: ONLY_CONTRIBUTION_CONTRACT"
         );
         _;
     }
 
-    
     /// @dev This function sets the treasury Contract address
     function setTreasuryContractAddress(address newTreasuryContractAddress)
         external
@@ -136,7 +132,6 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
         _setTreasuryContractAddress(newTreasuryContractAddress);
     }
 
-    
     /// @dev Sets the contribution contract address so that the voting ballot for contribution can
     /// be restricted only to a certain contract that is the contribution contract
     function setContributionContractAddress(
@@ -145,7 +140,6 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
         CONTRIBUTION_CONTRACT_ADDRESS = newContributionContractAddress;
     }
 
-    
     /// @dev This function will create a new contribution voting ballot
     function createContributionVotingBallot(
         uint256 contributionId,
@@ -155,7 +149,7 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
     ) public _onlyContributionContract {
         require(
             rewardMapping[contributionId].isPresent == false,
-            "Voting is already created"
+            "INVALID: BALLOT_ALREADY_CREATED"
         );
 
         TreasuryContract treasuryContract = TreasuryContract(
@@ -193,14 +187,13 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
         rewardMapping[contributionId] = contributionReward;
     }
 
-    
     /// @dev This function is called by any user to cast vote
     /// @param contributionId this is the id of the contribution for which user is voting
     /// @param vote this is the state of the vote, if true than it means the vote is in favour of the ballot
     function castVoteForContribution(uint256 contributionId, bool vote) public {
         require(
             rewardMapping[contributionId].isPresent == true,
-            "Invalid contribution id"
+            "INVALID: CONTRIBUTION_ID"
         );
         super._castVote(rewardMapping[contributionId].ballotId, vote);
 
@@ -212,7 +205,6 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
         });
     }
 
-    
     /// @dev This function is called by any user to cast vote
     /// @param contributionId this is the id of the contribution for which user is creating a counter offer
     /// @param newCommunityReward new community token amount as reward for the negotiation
@@ -246,7 +238,6 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
         );
     }
 
-    
     /// @dev This function is called by owner of the contribution to either accept or reject a counter offer
     /// @param contributionId this is the id of the contribution to which the counter offer belongs to
     /// @param counterOfferIds The id of counter offers in array to accept or reject multiple counter offers at once
@@ -307,7 +298,6 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
         }
     }
 
-    
     /// @dev This function can be called from external source and also from within the contract
     /// @param contributionId this is the id of the contribution to which the winner is to be declared
     function declareWinner(uint256 contributionId) external {

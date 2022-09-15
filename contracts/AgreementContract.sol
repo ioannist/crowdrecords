@@ -5,17 +5,16 @@ import "./voting/BaseVotingContract.sol";
 import "./TreasuryContract.sol";
 
 contract AgreementContract is BaseVotingContract {
-
     /// @dev This structure will hold the data for agreements
     /// @param requester This is the person who has requested for the agreement
-    /// @param recordId This is the record id to which the agreement belongs to 
+    /// @param recordId This is the record id to which the agreement belongs to
     /// @param ballotId This is the ballot id of the agreement
     /// @param tokenId This is the id of token using which user can vote
-    /// @param isActive This is to check if a agreement is active or not    
-    /// @param contractLink This is the link of the contract file    
+    /// @param isActive This is to check if a agreement is active or not
+    /// @param contractLink This is the link of the contract file
     /// @param contractHash This is the hash of the contract file
     /// @param creationTime This is the creation time of the contract
-    /// @param isPresent This is to check if agreement is present or not    
+    /// @param isPresent This is to check if agreement is present or not
     struct Agreement {
         address requester;
         uint256 recordId;
@@ -30,14 +29,14 @@ contract AgreementContract is BaseVotingContract {
 
     /// @dev This event is emmited when a agreement is created.
     /// @param requester This is the person who has requested for the agreement
-    /// @param recordId This is the record id to which the agreement belongs to 
-    /// @param agreementId This is the id of the agreement that was created    
+    /// @param recordId This is the record id to which the agreement belongs to
+    /// @param agreementId This is the id of the agreement that was created
     /// @param ballotId This is the ballot id of the agreement
     /// @param tokenId This is the id of token using which user can vote
-    /// @param contractLink This is the link of the contract file    
+    /// @param contractLink This is the link of the contract file
     /// @param contractHash This is the hash of the contract file
     /// @param creationTime This is the creation time of the contract
-    /// @param isPresent This is to check if agreement is present or not    
+    /// @param isPresent This is to check if agreement is present or not
     event AgreementCreated(
         address requester,
         uint256 recordId,
@@ -51,8 +50,8 @@ contract AgreementContract is BaseVotingContract {
     );
 
     /// @dev This evet is emitted when as royalty payment is done by a user for a royalty agreement.
-    /// @param agreementId This is the id of the agreement that was created    
-    /// @param recordId This is the record id to which the agreement belongs to 
+    /// @param agreementId This is the id of the agreement that was created
+    /// @param recordId This is the record id to which the agreement belongs to
     /// @param totalSupplyEther This is the total amount of tokens that are in circulation in ether value
     /// during the distribution was made
     /// @param royaltyAmountWei This is the amount of royalty that has been paid by user in wei amount
@@ -72,10 +71,10 @@ contract AgreementContract is BaseVotingContract {
     );
 
     /// @dev This event is emitted when a royalty payment is claimed
-    /// @param agreementId This is the id of the agreement that was created    
+    /// @param agreementId This is the id of the agreement that was created
     /// @param royaltyId This is the id of royalty that has been paid
-    /// @param recordId This is the record id to which the agreement belongs to 
-    /// @param rewardAmount This is the amount of reward that user claimed 
+    /// @param recordId This is the record id to which the agreement belongs to
+    /// @param rewardAmount This is the amount of reward that user claimed
     /// @param userAddress Address of user who claimed the royalty payment
     event RoyaltyPaymentClaimed(
         uint256 agreementId,
@@ -103,7 +102,7 @@ contract AgreementContract is BaseVotingContract {
 
     /// @dev This is when a user votes for a publishing agreement
     /// @param voter Address of the voter
-    /// @param agreementId This is the id of the publishing agreement that is linked to this ballot 
+    /// @param agreementId This is the id of the publishing agreement that is linked to this ballot
     /// @param ballotId Id of the ballot where voting is stored
     /// @param vote State of vote : true for yes and false for No
     event AgreementVoting(
@@ -114,10 +113,10 @@ contract AgreementContract is BaseVotingContract {
     );
 
     /// @dev this event is generated when result of a ballot is declared
-    /// @param agreementId This is the id of the agreement that is linked to this ballot 
-    /// @param ballotId this is the ballot Id for which result is declared 
+    /// @param agreementId This is the id of the agreement that is linked to this ballot
+    /// @param ballotId this is the ballot Id for which result is declared
     /// @param result this is the status of the result either true if user won that is he received
-    ///  more than 66% of votes or false if user lost 
+    ///  more than 66% of votes or false if user lost
     event BallotResult(uint256 agreementId, uint256 ballotId, bool result);
 
     uint256 public agreementCurrentId = 0;
@@ -138,7 +137,6 @@ contract AgreementContract is BaseVotingContract {
         VOTING_BLOCK_PERIOD = votingInterval;
     }
 
-    
     /// @dev This function sets the treasury Contract address
     /// @param newTreasuryContractAddress this is the new address of treasury contract
     function setTreasuryContractAddress(address newTreasuryContractAddress)
@@ -148,9 +146,8 @@ contract AgreementContract is BaseVotingContract {
         _setTreasuryContractAddress(newTreasuryContractAddress);
     }
 
-    
     /// @dev This function will create a new agreement voting ballot
-    /// @param recordId this is the id of record of which we need to create agreement of 
+    /// @param recordId this is the id of record of which we need to create agreement of
     /// @param contractLink this is the link of the agreement contract
     /// @param contractHash this is the hash of the agreement contract file
     function createAgreement(
@@ -201,11 +198,10 @@ contract AgreementContract is BaseVotingContract {
         return agreeId;
     }
 
-    
     /// @dev This function is called by any user to cast vote
     /// @param agreementId this is the id of the agreement for which user is voting
     /// @param vote this is the state of the vote, if true than it means the vote is in favour of the ballot
-    
+
     function castVoteForAgreement(uint256 agreementId, bool vote) public {
         super._castVote(agreementMap[agreementId].ballotId, vote);
 
@@ -238,11 +234,8 @@ contract AgreementContract is BaseVotingContract {
     /// @dev This function is for distributing the royalty payment
     /// @param agreementId this is the id of the agreement of which the royalty is paid for
     /// @param amount this is the amount of royalty is being
-    function payRoyaltyAmount(
-        uint256 agreementId,
-        uint256 amount
-    ) public {
-        require(agreementMap[agreementId].isActive, "Invalid agreement id");
+    function payRoyaltyAmount(uint256 agreementId, uint256 amount) public {
+        require(agreementMap[agreementId].isActive, "INVALID: AGREEMENT_ID");
         uint256 recordId = agreementMap[agreementId].recordId;
         royaltyId += 1;
         TreasuryContract treasuryContract = TreasuryContract(
@@ -256,7 +249,7 @@ contract AgreementContract is BaseVotingContract {
             address(this),
             treasuryContract.CRD(),
             amount,
-            "Royalty payment transfer"
+            "ROYALTY_PAYMENT_TRANSFER"
         );
 
         RoyaltyData memory dividend = RoyaltyData({
@@ -270,7 +263,7 @@ contract AgreementContract is BaseVotingContract {
 
         require(
             dividend.royaltyPerTokenWei > 0,
-            "Insufficient amount, please try again with greater amount"
+            "INSUFFICIENT_AMOUNT: NEED_GREATER_AMOUNT"
         );
 
         emit RoyaltyPayment({
@@ -288,19 +281,18 @@ contract AgreementContract is BaseVotingContract {
         royaltyDataMapping[royaltyId] = dividend;
     }
 
-    
     /// @dev This function is for testing purpose for distributing the royalty payment
     /// @param agreementId this is the agreement Id of which royalty is to be claimed
     function claimRoyaltyAmount(uint256 agreementId) public {
         uint256[] memory dividendIdArray = royaltyListMapping[agreementId];
         uint256 recordId = agreementMap[agreementId].recordId;
 
-        require(dividendIdArray.length > 0, "No royalty payments created yet");
+        require(dividendIdArray.length > 0, "NO_ROYALTY_PAYMENTS");
 
         uint256 newClaimIndex = _getNewClaimIndex(dividendIdArray, msg.sender);
         require(
             newClaimIndex >= 0 && newClaimIndex < dividendIdArray.length,
-            "You have no pending claims"
+            "NO_PENDING_CLAIMS"
         );
 
         TreasuryContract treasuryContract = TreasuryContract(
@@ -313,7 +305,7 @@ contract AgreementContract is BaseVotingContract {
         require(
             royaltyClaimMapping[dividendIdArray[newClaimIndex]][msg.sender] ==
                 false,
-            "Can only claim once"
+            "INVALID: CAN_ONLY_CLAIM_ONCE"
         );
 
         for (; newClaimIndex < dividendIdArray.length; newClaimIndex++) {
@@ -337,24 +329,24 @@ contract AgreementContract is BaseVotingContract {
         }
 
         //If the total is not bigger then 0 then it means that user doesn't have any pending claim
-        // require(totalReward > 0, "You have no pending claims");
+        // require(totalReward > 0, "NO_PENDING_CLAIMS");
 
         /**
-            //! When you uncomment the below code then it just causes the crash without a proper reason, here we expect crash to return "You have no pending claims" but instead it just throws error with
+            //! When you uncomment the below code then it just causes the crash without a proper reason, here we expect crash to return "NO_PENDING_CLAIMS" but instead it just throws error with
             -Transaction: 0x5896b98d557a472e4f0063783b9e8bcf8ce7982de710c1c3c69c727e9989066a exited with an error (status 0) after consuming all gas.
             -     Please check that the transaction:
             -     - satisfies all conditions set by Solidity `assert` statements.
             -     - has enough gas to execute the full transaction.
             -     - does not trigger an invalid opcode by other means (ex: accessing an array out of bounds).
        */
-        // require(false, "You have no pending claims");
+        // require(false, "NO_PENDING_CLAIMS");
 
         treasuryContract.safeTransferFrom(
             address(this),
             msg.sender,
             treasuryContract.CRD(),
             totalReward,
-            "Royalty payment claim"
+            "INVALID: ROYALTY_ALREADY_CLAIMED"
         );
     }
 
@@ -384,7 +376,7 @@ contract AgreementContract is BaseVotingContract {
         return dividend.royaltyPerTokenWei * (tokenBal / 1 ether);
     }
 
-    /// @dev This function calculates the royalty claim index 
+    /// @dev This function calculates the royalty claim index
     /// @param dividendIdArray This is the array of royalties for a single user
     /// @param user this address of user whose royalty claim index needs to be identified
     function _getNewClaimIndex(uint256[] memory dividendIdArray, address user)
@@ -402,9 +394,7 @@ contract AgreementContract is BaseVotingContract {
         while (low < high) {
             uint256 mid = Math.average(low, high);
             lastClaimedDividendId = dividendIdArray[mid];
-            bool claimStatus = royaltyClaimMapping[lastClaimedDividendId][
-                user
-            ];
+            bool claimStatus = royaltyClaimMapping[lastClaimedDividendId][user];
 
             //If claimStatus is false then it means that there are some elements that are yet to be claimed
             //so we will go down and search there

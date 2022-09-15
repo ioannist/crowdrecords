@@ -115,7 +115,7 @@ contract OrdersContract {
 
     /// @dev Modifier to check that the person who accesses a specific function is the owner of contract himself.
     modifier ownerOnly() {
-        require(msg.sender == OWNER, "You are not authorized for this action");
+        require(msg.sender == OWNER, "UNAUTHORIZED: CANNOT_PERFORM_ACTION");
         _;
     }
 
@@ -165,23 +165,23 @@ contract OrdersContract {
 
         require(
             treasuryContract.getCommunityTokenId(recordId) == communityTokenId,
-            "Invalid community token id"
+            "INVALID: COMMUNITY_TOKEN_ID"
         );
         require(
             treasuryContract.getGovernanceTokenId(recordId) ==
                 governanceTokenId,
-            "Invalid governance token id"
+            "INVALID: GOVERNANCE_TOKEN_ID"
         );
 
         if (isLockedInRatio) {
             require(
                 communityTokenAmount > 0,
-                "You cannot have 0 community token amount"
+                "INVALID: CANNOT_HAVE_0_COMMUNITY_AMOUNT"
             );
 
             require(
                 governanceTokenAmount > 0,
-                "You cannot have 0 governance token amount"
+                "INVALID: CANNOT_HAVE_0_GOVERNANCE_AMOUNT"
             );
         }
 
@@ -240,10 +240,10 @@ contract OrdersContract {
     function cancelBuyOrder(uint256 saleId) public {
         require(
             orderBook[orderId].buyer == msg.sender,
-            "you are unauthorized for this action"
+            "UNAUTHORIZED: ONLY_ORDER_CREATOR"
         );
 
-        require(orderBook[orderId].isClosed == false, "Is already closed");
+        require(orderBook[orderId].isClosed == false, "INVALID: ORDER_CLOSED");
 
         Order memory order = orderBook[orderId];
 
@@ -288,21 +288,21 @@ contract OrdersContract {
     ) public {
         require(
             orderBook[orderId].buyer != msg.sender,
-            "you cannot purchase your own tokens"
+            "INVALID: CANNOT_PURCHASE_SELF_ORDER"
         );
 
-        require(orderBook[orderId].isClosed == false, "Is already closed");
+        require(orderBook[orderId].isClosed == false, "INVALID: ORDER_CLOSED");
 
         Order storage order = orderBook[orderId];
 
         //This will check if the amount to purchase is less or equal than the order that is generated
         require(
             order.communityTokenAmount >= communityTokenAmount,
-            "Community token amount is insufficient"
+            "INSUFFICIENT: COMMUNITY_TOKEN_AMOUNT"
         );
         require(
             order.governanceTokenAmount >= governanceTokenAmount,
-            "Governance token amount is insufficient"
+            "INSUFFICIENT: GOVERNANCE_TOKEN_AMOUNT"
         );
 
         if (order.isLockedInRatio) {
@@ -313,28 +313,28 @@ contract OrdersContract {
                     SafeMath.div(
                         communityTokenAmount * 100,
                         governanceTokenAmount,
-                        "Invalid Ratio"
+                        "INVALID: TOKEN_RATIO"
                     ) ==
                         SafeMath.div(
                             order.communityTokenAmount * 100,
                             order.governanceTokenAmount,
-                            "Invalid Ratio"
+                            "INVALID: TOKEN_RATIO"
                         ),
-                    "Invalid Ratio"
+                    "INVALID: TOKEN_RATIO"
                 );
             } else {
                 require(
                     SafeMath.div(
                         governanceTokenAmount * 100,
                         communityTokenAmount,
-                        "Invalid Ratio"
+                        "INVALID: TOKEN_RATIO"
                     ) ==
                         SafeMath.div(
                             order.governanceTokenAmount * 100,
                             order.communityTokenAmount,
-                            "Invalid Ratio"
+                            "INVALID: TOKEN_RATIO"
                         ),
-                    "Invalid Ratio"
+                    "INVALID: TOKEN_RATIO"
                 );
             }
         }

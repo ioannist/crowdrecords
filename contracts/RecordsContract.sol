@@ -58,7 +58,7 @@ contract RecordsContract is ERC1155Supply {
 
     /// @dev Modifier to check that the person who accesses a specific function is the owner of contract himself.
     modifier ownerOnly() {
-        require(msg.sender == OWNER, "You are not authorized for this action");
+        require(msg.sender == OWNER, "UNAUTHORIZED: CANNOT_PERFORM_ACTION");
         _;
     }
 
@@ -92,7 +92,7 @@ contract RecordsContract is ERC1155Supply {
         uint256 recordId = newTokenId;
         _mint(msg.sender, recordId, 1, "");
 
-        require(seedIdUsed[seedId] == false, "Seed already used");
+        require(seedIdUsed[seedId] == false, "INVALID: SEED_ALREADY_USED");
 
         IContribution contributionContract = IContribution(
             CONTRIBUTION_CONTRACT_ADDRESS
@@ -103,12 +103,12 @@ contract RecordsContract is ERC1155Supply {
 
         require(
             contribution.isPresent == true,
-            "No contribution with this id is found"
+            "INVALID: CONTRIBUTION_NOT_FOUND"
         );
 
         require(
             contribution.seedContribution == true,
-            "Contribution needs to be seed contribution"
+            "INVALID: NOT_SEED_CONTRIBUTION"
         );
 
         RecordToken memory recordToken = RecordToken({

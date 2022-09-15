@@ -16,7 +16,7 @@ contract VotingHubContract {
     /// @notice
     /// @dev This modifier checks that only owner fo the contracts can call the functions
     modifier _ownerOnly() {
-        require(msg.sender == OWNER, "Only owner can call it.");
+        require(msg.sender == OWNER, "UNAUTHORIZED: LACKS_PERMISSION");
         _;
     }
 
@@ -25,20 +25,19 @@ contract VotingHubContract {
     modifier _onlyTreasury() {
         require(
             msg.sender == TREASURY_CONTRACT_ADDRESS,
-            "Only treasury can call it."
+            "UNAUTHORIZED: ONLY_TREASURY_CONTRACT"
         );
         _;
     }
 
-
     /// @notice This function is to set the owner address
     /// @dev This function takes in the address of new owner and sets it to the contract
     /// @param owner Takes the address of new owner as parameter
-    function setOwner(address owner)public _ownerOnly{
+    function setOwner(address owner) public _ownerOnly {
         OWNER = owner;
     }
 
-    /// @notice this 
+    /// @notice this
     /// @dev This function will be called when either user is transferring the tokens to other account,
     /// or is receiving tokens from other tokens.
     /// @param sender address of the sender
@@ -97,7 +96,10 @@ contract VotingHubContract {
     /// or is receiving tokens from other tokens.
     /// @param index index of the contract to remove from the list
     function removeVotingContract(uint256 index) public _ownerOnly {
-        require(index < VOTING_CONTRACTS_ADDRESS.length, "Invalid index");
+        require(
+            index < VOTING_CONTRACTS_ADDRESS.length,
+            "INVALID: INCORRECT_INDEX"
+        );
         VOTING_CONTRACTS_ADDRESS[index] = VOTING_CONTRACTS_ADDRESS[
             VOTING_CONTRACTS_ADDRESS.length - 1
         ];

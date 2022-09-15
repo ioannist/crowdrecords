@@ -31,13 +31,13 @@ contract("BaseVotingContract", function() {
         await helper.revertToSnapshot(snapshotId);
     });
 
-    it("Creating a voting ballot owner cannot vote", async function() {
+    it("Creating a voting ballot UNAUTHORIZED: OWNER_CANNOT_VOTE", async function() {
         const ballotId = 1;
         await this.baseVotingContractMock.createBallot(false, COMMUNITY_TOKEN_ID);
 
         await expect(
             this.baseVotingContractMock.castVote(ballotId, true)
-        ).to.eventually.be.rejectedWith("Owner cannot vote");
+        ).to.eventually.be.rejectedWith("UNAUTHORIZED: OWNER_CANNOT_VOTE");
     });
 
     it("Creating a voting ballot owner can vote", async function() {

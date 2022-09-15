@@ -8,7 +8,7 @@ const chaiAsPromised = require("chai-as-promised");
 chai.use(chaiAsPromised);
 const expect = chai.expect;
 
-contract("Contribution Contract", function () {
+contract("Contribution Contract", function() {
     let SEED_CONTRIBUTION_ID = 1;
     let NEW_CONTRIBUTION_1_ID = 2;
     let RECORD_ID = 1;
@@ -22,7 +22,7 @@ contract("Contribution Contract", function () {
     let rewardGovernanceToken;
 
     before(setup);
-    before(async function () {
+    before(async function() {
         GOVERNANCE_TOKEN_BALANCE_USER1 = await web3.utils.toWei("450000");
         COMMUNITY_TOKEN_BALANCE_USER1 = await web3.utils.toWei("450000");
 
@@ -32,15 +32,15 @@ contract("Contribution Contract", function () {
     });
 
     let snapShot, snapshotId;
-    beforeEach(async function () {
+    beforeEach(async function() {
         snapShot = await helper.takeSnapshot();
         snapshotId = snapShot["result"];
     });
-    afterEach(async function () {
+    afterEach(async function() {
         await helper.revertToSnapshot(snapshotId);
     });
 
-    it("Creating a seed contribution", async function () {
+    it("Creating a seed contribution", async function() {
         const tx = await this.contributionContract.createSeedContribution(
             [1, 2, 3],
             "preview.raw",
@@ -54,7 +54,7 @@ contract("Contribution Contract", function () {
         });
     });
 
-    it("Creating seed contribution and record", async function () {
+    it("Creating seed contribution and record", async function() {
         //seed contribution id 1
         await this.contributionContract.createSeedContribution(
             [1, 2, 3],
@@ -73,9 +73,9 @@ contract("Contribution Contract", function () {
         });
     });
 
-    context("Testing contribution voting", function () {
+    context("Testing contribution voting", function() {
         let snapShot2, snapshotId2;
-        beforeEach(async function () {
+        beforeEach(async function() {
             snapShot2 = await helper.takeSnapshot();
             snapshotId2 = snapShot2["result"];
 
@@ -119,18 +119,18 @@ contract("Contribution Contract", function () {
                 }
             );
         });
-        afterEach(async function () {
+        afterEach(async function() {
             await helper.revertToSnapshot(snapshotId2);
         });
 
-        it("Tries to vote to invalid contribution id, expect revert", async function () {
+        it("Tries to vote to INVALID: CONTRIBUTION_ID, expect revert", async function() {
             const invalidContributionId = 3;
             await expect(
                 this.contributionVotingContract.castVoteForContribution(invalidContributionId, true)
-            ).to.eventually.be.rejectedWith("Invalid contribution id");
+            ).to.eventually.be.rejectedWith("INVALID: CONTRIBUTION_ID");
         });
 
-        it("User can vote and event is emitted", async function () {
+        it("User can vote and event is emitted", async function() {
             const trx = await this.contributionVotingContract.castVoteForContribution(
                 NEW_CONTRIBUTION_1_ID,
                 true
@@ -141,17 +141,17 @@ contract("Contribution Contract", function () {
             });
         });
 
-        it("Cannot Vote More than once", async function () {
+        it("Cannot Vote More than once", async function() {
             await this.contributionVotingContract.castVoteForContribution(
                 NEW_CONTRIBUTION_1_ID,
                 true
             );
             await expect(
                 this.contributionVotingContract.castVoteForContribution(NEW_CONTRIBUTION_1_ID, true)
-            ).to.eventually.be.rejectedWith("You have already voted");
+            ).to.eventually.be.rejectedWith("INVALID: ALREADY_VOTED");
         });
 
-        it("Declaring voting winner, user wins and reward amount is transferred : One Person Vote", async function () {
+        it("Declaring voting winner, user wins and reward amount is transferred : One Person Vote", async function() {
             await this.contributionVotingContract.castVoteForContribution(
                 NEW_CONTRIBUTION_1_ID,
                 true,
@@ -181,7 +181,7 @@ contract("Contribution Contract", function () {
             ).to.eventually.be.bignumber.equals(rewardGovernanceToken);
         });
 
-        it("Declaring voting winner, user loses and reward amount is not transferred", async function () {
+        it("Declaring voting winner, user loses and reward amount is not transferred", async function() {
             await this.contributionVotingContract.castVoteForContribution(
                 NEW_CONTRIBUTION_1_ID,
                 false
@@ -202,7 +202,7 @@ contract("Contribution Contract", function () {
             ).to.eventually.be.bignumber.equals(new BN(0));
         });
 
-        it("Declaring winner, user should win and receive the reward : Multi Person Vote", async function () {
+        it("Declaring winner, user should win and receive the reward : Multi Person Vote", async function() {
             await this.contributionVotingContract.castVoteForContribution(
                 NEW_CONTRIBUTION_1_ID,
                 true

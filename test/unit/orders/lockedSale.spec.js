@@ -18,7 +18,7 @@ const chaiAsPromised = require("chai-as-promised");
 chai.use(chaiAsPromised);
 const expect = chai.expect;
 
-contract("Ratio Locked Sales", function () {
+contract("Ratio Locked Sales", function() {
     before(setup);
     before(generateTokens);
 
@@ -37,15 +37,15 @@ contract("Ratio Locked Sales", function () {
 
     const CRDTokenId = 1;
     let snapShot, snapshotId;
-    beforeEach(async function () {
+    beforeEach(async function() {
         snapShot = await helper.takeSnapshot();
         snapshotId = snapShot["result"];
     });
-    afterEach(async function () {
+    afterEach(async function() {
         await helper.revertToSnapshot(snapshotId);
     });
 
-    it("User can create lock sale request and cancel it", async function () {
+    it("User can create lock sale request and cancel it", async function() {
         await this.treasuryContract.setApprovalForAll(this.ordersContract.address, true);
 
         let trx = await this.ordersContract.createBuyOrder(
@@ -76,7 +76,7 @@ contract("Ratio Locked Sales", function () {
         ).to.eventually.be.bignumber.equals(await web3.utils.toWei("1000000"));
     });
 
-    it("Sale tokens should belong to single record only", async function () {
+    it("Sale tokens should belong to single record only", async function() {
         await this.treasuryContract.setApprovalForAll(this.ordersContract.address, true);
         await expect(
             this.ordersContract.createBuyOrder(
@@ -85,28 +85,28 @@ contract("Ratio Locked Sales", function () {
                 COMMUNITY_TOKEN_ID,
                 await web3.utils.toWei("100"),
                 1,
-                GOVERNANCE_TOKEN_ID + 2, //Invalid Governance token id
+                GOVERNANCE_TOKEN_ID + 2, //INVALID: GOVERNANCE_TOKEN_ID
                 await web3.utils.toWei("5"),
                 2
             )
-        ).to.eventually.be.rejectedWith("Invalid governance token id");
+        ).to.eventually.be.rejectedWith("INVALID: GOVERNANCE_TOKEN_ID");
         await expect(
             this.ordersContract.createBuyOrder(
                 true,
                 RECORD_ID,
-                COMMUNITY_TOKEN_ID + 2, //Invalid Community token id
+                COMMUNITY_TOKEN_ID + 2, //INVALID: COMMUNITY_TOKEN_ID
                 await web3.utils.toWei("100"),
                 1,
                 GOVERNANCE_TOKEN_ID,
                 await web3.utils.toWei("5"),
                 2
             )
-        ).to.eventually.be.rejectedWith("Invalid community token id");
+        ).to.eventually.be.rejectedWith("INVALID: COMMUNITY_TOKEN_ID");
     });
 
-    describe("With locked asset purchase order", function () {
+    describe("With locked asset purchase order", function() {
         let snapShot2, snapshotId2;
-        beforeEach(async function () {
+        beforeEach(async function() {
             snapShot2 = await helper.takeSnapshot();
             snapshotId2 = snapShot2["result"];
 
@@ -142,11 +142,11 @@ contract("Ratio Locked Sales", function () {
             );
             this.saleId = trx?.logs[0].args.saleId;
         });
-        afterEach(async function () {
+        afterEach(async function() {
             await helper.revertToSnapshot(snapshotId2);
         });
 
-        it("Should not be able to purchase locked asset if the ratio is wrong", async function () {
+        it("Should not be able to purchase locked asset if the ratio is wrong", async function() {
             // Here we are performing wrong ratio transfer it should be reject.
             await expect(
                 this.ordersContract.acceptBuyOrder(
@@ -155,7 +155,7 @@ contract("Ratio Locked Sales", function () {
                     await web3.utils.toWei("50"), //communityTokenAmount
                     { from: this.user1 }
                 )
-            ).to.eventually.be.rejectedWith("Invalid Ratio");
+            ).to.eventually.be.rejectedWith("INVALID: TOKEN_RATIO");
 
             await expect(
                 this.ordersContract.acceptBuyOrder(
@@ -164,10 +164,10 @@ contract("Ratio Locked Sales", function () {
                     await web3.utils.toWei("1"), //communityTokenAmount
                     { from: this.user1 }
                 )
-            ).to.eventually.be.rejectedWith("Invalid Ratio");
+            ).to.eventually.be.rejectedWith("INVALID: TOKEN_RATIO");
         });
 
-        it("Trying to purchase more than available", async function () {
+        it("Trying to purchase more than available", async function() {
             // Here we are performing wrong ratio transfer it should be reject.
             await expect(
                 this.ordersContract.acceptBuyOrder(
@@ -176,7 +176,7 @@ contract("Ratio Locked Sales", function () {
                     await web3.utils.toWei("5"), //communityTokenAmount
                     { from: this.user1 }
                 )
-            ).to.eventually.be.rejectedWith("Governance token amount is insufficient");
+            ).to.eventually.be.rejectedWith("INSUFFICIENT: GOVERNANCE_TOKEN_AMOUNT");
 
             await expect(
                 this.ordersContract.acceptBuyOrder(
@@ -185,10 +185,10 @@ contract("Ratio Locked Sales", function () {
                     await web3.utils.toWei("500"), //communityTokenAmount
                     { from: this.user1 }
                 )
-            ).to.eventually.be.rejectedWith("Community token amount is insufficient");
+            ).to.eventually.be.rejectedWith("INSUFFICIENT: COMMUNITY_TOKEN_AMOUNT");
         });
 
-        it("Should able to purchase locked asset and sale should close", async function () {
+        it("Should able to purchase locked asset and sale should close", async function() {
             //-----------------------------------------------------------------------------//
             // Here we are performing partial transfer
             // That is we will only purchase some amount of the order
