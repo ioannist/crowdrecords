@@ -4,8 +4,7 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract TracksContract is ERC721 {
-    //----------------------Tracks Related code---------------------//
+contract TracksContract {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
 
@@ -37,7 +36,7 @@ contract TracksContract is ERC721 {
 
     mapping(uint256 => Tracks) public tracksData;
 
-    constructor() ERC721("Tracks", "CRD_TRKS") {}
+    constructor() {}
 
     /// @dev This function will be called by the user to create a new contribution
     /// @param filehash This is hash of the file
@@ -51,7 +50,6 @@ contract TracksContract is ERC721 {
         _tokenIds.increment();
 
         uint256 newTrackId = _tokenIds.current();
-        _mint(msg.sender, newTrackId);
         Tracks memory track = Tracks({
             filehash: filehash,
             filelink: filelink,

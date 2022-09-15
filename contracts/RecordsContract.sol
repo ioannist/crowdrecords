@@ -6,13 +6,21 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./interface/IContribution.sol";
 
-contract RecordsContract is ERC1155Supply {
+contract RecordsContract {
     uint256 newTokenId = 0;
 
     // This mapping contains data of record
-    mapping(uint256 => RecordToken) public recordData;
+    mapping(uint256 => RecordStruct) public recordData;
     // This mapping contains if seed data id is being used or not
+    // Same shouldn't be used to create 2 different records, unless the other record is a different
+    // version of existing record
     mapping(uint256 => bool) public seedIdUsed;
+
+    //This is mapping that holds the listing of versions that are created from a original record
+    mapping(uint256 => uint256[]) public recordVersion;
+
+    // This mapping will hold the list of contributions that are linked to a specific record
+    mapping(uint256 => uint256[]) public recordContributions;
 
     // Address of the owner of the contracts
     address public OWNER;
@@ -23,13 +31,15 @@ contract RecordsContract is ERC1155Supply {
     /// @param image This is the image of the record
     /// @param seedId This is the seed contribution id
     /// @param parentId This is the id of the parent record from which record is created
+    /// @param owner Address of the owner
     /// @param recordCategory This is the record category
     /// @param creationDate This is the creation date of the record
-    struct RecordToken {
+    struct RecordStruct {
         string name;
         string image;
         uint256 seedId;
         uint256 parentId;
+        address owner;
         string recordCategory;
         uint256 creationDate;
     }
@@ -52,13 +62,22 @@ contract RecordsContract is ERC1155Supply {
         uint256 creationDate
     );
 
-    constructor(address owner) ERC1155("https://something.com/{id}") {
+    constructor(address owner) {
         OWNER = owner;
     }
 
     /// @dev Modifier to check that the person who accesses a specific function is the owner of contract himself.
     modifier ownerOnly() {
         require(msg.sender == OWNER, "UNAUTHORIZED: CANNOT_PERFORM_ACTION");
+        _;
+    }
+
+    /// @dev Modifier to check that the function is only being called from the contribution contract
+    modifier onlyContributionContract() {
+        require(
+            msg.sender == CONTRIBUTION_CONTRACT_ADDRESS,
+            "UNAUTHORIZED: ONLY_CONTRIBUTION_CONTRACT"
+        );
         _;
     }
 
@@ -90,7 +109,6 @@ contract RecordsContract is ERC1155Supply {
     ) public returns (uint256 recordId) {
         newTokenId++;
         uint256 recordId = newTokenId;
-        _mint(msg.sender, recordId, 1, "");
 
         require(seedIdUsed[seedId] == false, "INVALID: SEED_ALREADY_USED");
 
@@ -111,16 +129,18 @@ contract RecordsContract is ERC1155Supply {
             "INVALID: NOT_SEED_CONTRIBUTION"
         );
 
-        RecordToken memory recordToken = RecordToken({
+        RecordStruct memory recordStruct = RecordStruct({
             name: name,
             image: image,
             seedId: seedId,
             parentId: 0,
+            owner: msg.sender,
             recordCategory: recordCategory,
             creationDate: block.timestamp
         });
 
-        recordData[recordId] = recordToken;
+        recordData[recordId] = recordStruct;
+        recordContributions[recordId].push(seedId);
 
         emit RecordCreated({
             recordId: recordId,
@@ -129,9 +149,33 @@ contract RecordsContract is ERC1155Supply {
             seedId: seedId,
             parentId: 0,
             recordCategory: recordCategory,
-            creationDate: recordToken.creationDate
+            creationDate: recordStruct.creationDate
         });
 
         return (recordId);
     }
+
+    /// @dev This function pushes a contribution into the array of the record
+    /// @param recordId This is the recordId to which contribution is to be added
+    /// @param contributionId This is the contribution id to push in array
+    function pushContributionIdToContributionList(
+        uint256 recordId,
+        uint256 contributionId
+    ) external onlyContributionContract {
+        recordContributions[recordId].push(contributionId);
+    }
+
+    /// @dev This function return the address of record owner
+    /// @param recordId This is the recordId whose owner you want
+    function ownerOf(uint256 recordId) external returns (address) {
+        return recordData[recordId].owner;
+    }
+
+    // create new version,
+    // take existing records id,
+    // The seed will stay same
+    // The contributions id is selected by user,
+    // New clone contributions are created,
+    // create voting for the token distribution,
+    // wait for result - generate tokens
 }

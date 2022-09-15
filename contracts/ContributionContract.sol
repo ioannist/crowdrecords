@@ -4,8 +4,9 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./voting/ContributionVotingContract.sol";
+import "./interface/IRecords.sol";
 
-contract ContributionContract is ERC721 {
+contract ContributionContract {
     using Counters for Counters.Counter;
 
     /// @dev this is Contribution Create event this event will be emitted when a new contribution is created.
@@ -39,7 +40,7 @@ contract ContributionContract is ERC721 {
     /// @param createdAt blocknumber of when the contribution was created
     /// @param previewFile This is the preview file link
     /// @param previewFileHash This is the preview file hash
-    /// @param recordId This is the id of the record to which contribution belongs to
+    // / @param recordId This is the id of the record to which contribution belongs to
     /// @param seedContribution This flag determines if it is a seed contribution or not
     /// @param roughMix This flag determines if it is a rough mix or not, true if rough mix or else false
     /// @param status This specifies the status of contribution PENDING = 1 | ACCEPTED = 2| REJECTED = 3
@@ -50,7 +51,6 @@ contract ContributionContract is ERC721 {
         uint256 createdAt;
         string previewFile;
         string previewFileHash;
-        uint256 recordId;
         bool seedContribution;
         bool roughMix;
         uint256 status;
@@ -61,9 +61,13 @@ contract ContributionContract is ERC721 {
     Counters.Counter private _contributionIds;
     address public OWNER;
     address public CONTRIBUTION_VOTING_CONTRACT_ADDRESS;
+    address public RECORD_CONTRACT_ADDRESS;
     mapping(uint256 => Contribution) public contributionData;
+    uint256 public PENDING = 1;
+    uint256 public ACCEPTED = 2;
+    uint256 public REJECTED = 3;
 
-    constructor(address owner) ERC721("Contributions", "CTRB") {
+    constructor(address owner) {
         OWNER = owner;
     }
 
@@ -79,6 +83,15 @@ contract ContributionContract is ERC721 {
         address newVotingContractAddress
     ) public ownerOnly {
         CONTRIBUTION_VOTING_CONTRACT_ADDRESS = newVotingContractAddress;
+    }
+
+    /// @dev This function sets the Records contract address
+    /// @param newRecordsContractAddress this is the address of new Records contract
+    function setRecordsContractAddress(address newRecordsContractAddress)
+        public
+        ownerOnly
+    {
+        RECORD_CONTRACT_ADDRESS = newRecordsContractAddress;
     }
 
     /// @dev This function sets the owner address
@@ -122,7 +135,7 @@ contract ContributionContract is ERC721 {
         _contributionIds.increment();
 
         uint256 contributionId = _contributionIds.current();
-        _mint(msg.sender, contributionId);
+        // _mint(msg.sender, contributionId);
 
         ContributionVotingContract contributionVotingContract = ContributionVotingContract(
                 CONTRIBUTION_VOTING_CONTRACT_ADDRESS
@@ -139,13 +152,18 @@ contract ContributionContract is ERC721 {
             createdAt: block.timestamp,
             previewFile: previewFile,
             previewFileHash: previewFileHash,
-            recordId: recordId,
             roughMix: roughMix,
-            status: 1,
+            status: PENDING,
             description: description,
             seedContribution: false,
             isPresent: true
         });
+
+        IRecords recordsContract = IRecords(RECORD_CONTRACT_ADDRESS);
+        recordsContract.pushContributionIdToContributionList(
+            recordId,
+            contributionId
+        );
 
         contributionData[contributionId] = contribution;
 
@@ -155,7 +173,7 @@ contract ContributionContract is ERC721 {
             contribution.createdAt,
             contribution.previewFile,
             contribution.previewFileHash,
-            contribution.recordId,
+            recordId,
             contribution.seedContribution,
             contribution.roughMix,
             contribution.status,
@@ -181,16 +199,15 @@ contract ContributionContract is ERC721 {
         _contributionIds.increment();
 
         uint256 contributionId = _contributionIds.current();
-        _mint(msg.sender, contributionId);
+        // _mint(msg.sender, contributionId);
 
         Contribution memory contribution = Contribution({
             tracks: tracks,
             createdAt: block.timestamp,
             previewFile: previewFile,
             previewFileHash: previewFileHash,
-            recordId: 0,
             roughMix: false,
-            status: 2,
+            status: ACCEPTED,
             description: description,
             seedContribution: true,
             isPresent: true
@@ -204,7 +221,7 @@ contract ContributionContract is ERC721 {
             contribution.createdAt,
             contribution.previewFile,
             contribution.previewFileHash,
-            contribution.recordId,
+            0,
             contribution.seedContribution,
             contribution.roughMix,
             contribution.status,

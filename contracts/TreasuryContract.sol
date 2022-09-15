@@ -146,12 +146,9 @@ contract TreasuryContract is IERC1155Receiver, SnapshotERC1155 {
             RECORDS_CONTRACT_ADDRESS
         );
 
-        uint256 balance = recordsContract.balanceOf(
-            msg.sender,
-            newTokenData.recordId
-        );
+        address owner = recordsContract.ownerOf(newTokenData.recordId);
 
-        require(balance > 0, "INVALID: ONLY_RECORD_OWNER");
+        require(owner == msg.sender, "INVALID: ONLY_RECORD_OWNER");
         _;
     }
 

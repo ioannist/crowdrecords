@@ -49,6 +49,10 @@ contract("All Contract Deployment", function() {
             this.contributionContract.CONTRIBUTION_VOTING_CONTRACT_ADDRESS()
         ).eventually.to.be.equal(this.contributionVotingContract.address);
 
+        expect(this.contributionContract.RECORD_CONTRACT_ADDRESS()).eventually.to.be.equal(
+            this.recordsContract.address
+        );
+
         expect(this.treasuryContract.RECORDS_CONTRACT_ADDRESS()).eventually.to.be.equal(
             this.recordsContract.address
         );
