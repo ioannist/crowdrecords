@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "./BaseVotingCounterOfferContract.sol";
-import "../TreasuryContract.sol";
+import "../interface/ITreasury.sol";
 
 contract ContributionVotingContract is BaseVotingCounterOfferContract {
     /// @dev This structure will hold the data for contribution rewards
@@ -152,9 +152,7 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
             "INVALID: BALLOT_ALREADY_CREATED"
         );
 
-        TreasuryContract treasuryContract = TreasuryContract(
-            TREASURY_CONTRACT_ADDRESS
-        );
+        ITreasury treasuryContract = ITreasury(TREASURY_CONTRACT_ADDRESS);
 
         uint256 govTokenId = treasuryContract.getCommunityTokenId(recordId);
         uint256 commTokenId = treasuryContract.getGovernanceTokenId(recordId);
@@ -332,9 +330,7 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
 
         if (result) {
             //Transfer the reward amount to user
-            TreasuryContract treasuryContract = TreasuryContract(
-                TREASURY_CONTRACT_ADDRESS
-            );
+            ITreasury treasuryContract = ITreasury(TREASURY_CONTRACT_ADDRESS);
             treasuryContract.transferRewardAmount(
                 rewardMapping[contributionId].requester,
                 rewardMapping[contributionId].recordId,

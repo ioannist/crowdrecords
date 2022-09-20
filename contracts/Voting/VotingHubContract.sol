@@ -6,7 +6,7 @@ import "../interface/IBaseVoting.sol";
 
 contract VotingHubContract {
     address[] public VOTING_CONTRACTS_ADDRESS;
-    address public TREASURY_CONTRACT_ADDRESS;
+    address public TREASURY_CORE_CONTRACT_ADDRESS;
     address public OWNER;
 
     constructor(address owner) {
@@ -22,10 +22,10 @@ contract VotingHubContract {
 
     /// @notice
     /// @dev This modifier checks that only treasury can call the functions
-    modifier _onlyTreasury() {
+    modifier _onlyTreasuryCore() {
         require(
-            msg.sender == TREASURY_CONTRACT_ADDRESS,
-            "UNAUTHORIZED: ONLY_TREASURY_CONTRACT"
+            msg.sender == TREASURY_CORE_CONTRACT_ADDRESS,
+            "UNAUTHORIZED: ONLY_TREASURY_CORE_CONTRACT"
         );
         _;
     }
@@ -49,8 +49,8 @@ contract VotingHubContract {
         address receiver,
         uint256 amount,
         uint256 tokenId
-    ) public _onlyTreasury {
-        ITreasury iTreasury = ITreasury(TREASURY_CONTRACT_ADDRESS);
+    ) public _onlyTreasuryCore {
+        ITreasury iTreasury = ITreasury(TREASURY_CORE_CONTRACT_ADDRESS);
         for (uint256 i = 0; i < VOTING_CONTRACTS_ADDRESS.length; i++) {
             IBaseVoting iBaseVoting = IBaseVoting(VOTING_CONTRACTS_ADDRESS[i]);
             if (sender != address(0)) {
@@ -76,11 +76,11 @@ contract VotingHubContract {
 
     /// @notice
     /// @dev This function sets the treasury Contract address
-    function setTreasuryContractAddress(address newTreasuryContractAddress)
+    function setTreasuryCoreContractAddress(address newTreasuryContractAddress)
         public
         _ownerOnly
     {
-        TREASURY_CONTRACT_ADDRESS = newTreasuryContractAddress;
+        TREASURY_CORE_CONTRACT_ADDRESS = newTreasuryContractAddress;
     }
 
     /// @notice

@@ -1,7 +1,8 @@
 const ContributionContract = artifacts.require("../contracts/ContributionContract.sol");
 const RecordsContract = artifacts.require("../contracts/RecordsContract.sol");
 const TracksContract = artifacts.require("../contracts/TracksContract.sol");
-const TreasuryContract = artifacts.require("../contracts/TreasuryContract.sol");
+const TreasuryContract = artifacts.require("../contracts/treasury/TreasuryContract.sol");
+const TreasuryCoreContract = artifacts.require("../contracts/treasury/TreasuryCoreContract.sol");
 const ContributionVotingContract = artifacts.require(
     "../contracts/voting/ContributionVotingContract.sol"
 );
@@ -23,6 +24,7 @@ async function setup() {
     let contributionContract = await ContributionContract.deployed();
     let recordsContract = await RecordsContract.deployed();
     let treasuryContract = await TreasuryContract.deployed();
+    let treasuryCoreContract = await TreasuryCoreContract.deployed();
     let contributionVotingContract = await ContributionVotingContract.deployed(
         VOTING_INTERVAL_BLOCKS
     );
@@ -55,15 +57,20 @@ async function setup() {
     await baseVotingContractMock.setTreasuryContractAddress(treasuryContract.address);
     await baseVotingCounterOfferContractMock.setTreasuryContractAddress(treasuryContract.address);
 
-    await votingHubContract.setTreasuryContractAddress(treasuryContract.address);
+    await votingHubContract.setTreasuryCoreContractAddress(treasuryCoreContract.address);
     await votingHubContract.addVotingContract(contributionVotingContract.address);
     await votingHubContract.addVotingContract(agreementContract.address);
     await votingHubContract.addVotingContract(dilutionContract.address);
 
-    await treasuryContract.setVotingHubContract(votingHubContract.address);
     await treasuryContract.setDilutionContract(dilutionContract.address);
     await treasuryContract.setContributionVotingContractAddress(contributionVotingContract.address);
     await treasuryContract.setRecordsContractAddress(recordsContract.address);
+    await treasuryContract.setCoreTreasuryAddress(treasuryCoreContract.address);
+
+    await treasuryCoreContract.setVotingHubContract(votingHubContract.address);
+    await treasuryCoreContract.setTreasuryContract(treasuryContract.address);
+
+    await recordsContract.setTreasuryContractAddress(treasuryContract.address);
 
     await dilutionContract.setTreasuryContractAddress(treasuryContract.address);
 
@@ -71,6 +78,7 @@ async function setup() {
     this.contributionContract = contributionContract;
     this.recordsContract = recordsContract;
     this.treasuryContract = treasuryContract;
+    this.treasuryCoreContract = treasuryCoreContract;
     this.contributionVotingContract = contributionVotingContract;
     this.ordersContract = ordersContract;
     this.agreementContract = agreementContract;

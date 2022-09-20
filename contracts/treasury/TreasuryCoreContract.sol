@@ -5,18 +5,16 @@ import "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Supply.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "./RecordsContract.sol";
-import "./ERC1155/SnapshotERC1155.sol";
+import "../interface/IRecords.sol";
+import "../ERC1155/SnapshotERC1155.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-import "./voting/VotingHubContract.sol";
+import "../voting/VotingHubContract.sol";
 
-contract TreasuryContract is IERC1155Receiver, SnapshotERC1155 {
+contract TreasuryCoreContract is IERC1155Receiver, SnapshotERC1155 {
     uint256 public constant CRD = 1;
     uint256 private LastTokenId = 1;
-    address public RECORDS_CONTRACT_ADDRESS;
-    address public CONTRIBUTION_VOTING_CONTRACT_ADDRESS;
-    address public DILUTION_CONTRACT_ADDRESS;
     address public VOTING_HUB_ADDRESS;
+    address public TREASURY_CONTRACT_ADDRESS;
     address public OWNER;
     string private PREFIX_GOVERNANCE = "CRDG_";
     string private PREFIX_COMMUNITY = "CRD_";
@@ -114,16 +112,15 @@ contract TreasuryContract is IERC1155Receiver, SnapshotERC1155 {
         uint256 rewardCommunity
     );
 
-    mapping(uint256 => Token) govTokenMapping;
-    mapping(uint256 => Token) commTokenMapping;
+    mapping(uint256 => Token) public govTokenMapping;
+    mapping(uint256 => Token) public commTokenMapping;
 
-    mapping(string => bool) govTokenSym;
-    mapping(string => bool) commTokenSym;
+    mapping(string => bool) public govTokenSym;
+    mapping(string => bool) public commTokenSym;
 
     // By default URI to crowdrecords domain
     // 18 decimal points supported
     constructor(address owner) ERC1155("https://crowdrecords.com/{id}") {
-        _mint(owner, CRD, 1000000 * 10**18, "https://crowdrecords.com");
         OWNER = owner;
     }
 
@@ -133,56 +130,13 @@ contract TreasuryContract is IERC1155Receiver, SnapshotERC1155 {
         _;
     }
 
-    /// @dev Modifier to check if the sender is authorized to create tokens for this record.
-    /// @param newTokenData This is the NewTokenData structure that needs to be passed to create a new token,
-    /// here it is passed to check if the token can be created with respected data
-    modifier canCreateToken(NewTokenData memory newTokenData) {
+    /// @dev Modifier to check that the person who accesses a specific function is the owner of contract himself.
+    modifier onlyTreasuryContract() {
         require(
-            newTokenData.totalSupply / 2 > newTokenData.userBalance,
-            "INVALID: TREASURY_SHOULD_HAVE_50%_OF_SUPPLY"
-        );
-
-        RecordsContract recordsContract = RecordsContract(
-            RECORDS_CONTRACT_ADDRESS
-        );
-
-        address owner = recordsContract.ownerOf(newTokenData.recordId);
-
-        require(owner == msg.sender, "INVALID: ONLY_RECORD_OWNER");
-        _;
-    }
-
-    /// @dev Modifier to check that if the sender is the voting contract or not.
-    modifier onlyContributionVotingContract() {
-        require(
-            msg.sender == CONTRIBUTION_VOTING_CONTRACT_ADDRESS,
+            msg.sender == TREASURY_CONTRACT_ADDRESS,
             "UNAUTHORIZED: CANNOT_PERFORM_ACTION"
         );
         _;
-    }
-
-    /// @dev Modifier to check that if the sender is the dilution contract or not.
-    modifier onlyDilutionContract() {
-        require(
-            msg.sender == DILUTION_CONTRACT_ADDRESS,
-            "UNAUTHORIZED: CANNOT_PERFORM_ACTION"
-        );
-        _;
-    }
-
-    /// @dev This function sets the Owners address
-    /// @param ownerAddress This is the address of new owner of contract
-    function setOwnerAddress(address ownerAddress) public ownerOnly {
-        OWNER = ownerAddress;
-    }
-
-    /// @dev This function sets the Records Contract address
-    /// @param newRecordsContractAddress This is the address of new Records contract
-    function setRecordsContractAddress(address newRecordsContractAddress)
-        public
-        ownerOnly
-    {
-        RECORDS_CONTRACT_ADDRESS = newRecordsContractAddress;
     }
 
     /// @dev This function sets the Records Contract address
@@ -194,26 +148,17 @@ contract TreasuryContract is IERC1155Receiver, SnapshotERC1155 {
         VOTING_HUB_ADDRESS = newVotingHubContract;
     }
 
-    /// @dev This function sets the dilution Contract address
-    /// @param newDilutionContract This is the address of new dilution contract
-    function setDilutionContract(address newDilutionContract) public ownerOnly {
-        DILUTION_CONTRACT_ADDRESS = newDilutionContract;
-    }
-
-    /// @dev This function sets the Voting Contract address
-
-    function setContributionVotingContractAddress(
-        address newVotingContractAddress
-    ) public ownerOnly {
-        CONTRIBUTION_VOTING_CONTRACT_ADDRESS = newVotingContractAddress;
+    /// @dev This function sets the treasury Contract address
+    /// @param newTreasuryAddress This is the address of new voting hub contract
+    function setTreasuryContract(address newTreasuryAddress) public ownerOnly {
+        TREASURY_CONTRACT_ADDRESS = newTreasuryAddress;
     }
 
     /// @dev This function creates new governance tokens for specified record
     /// @param newTokenData This contains all the parameters needed to create a new governance token that are
     function createNewGovernanceToken(NewTokenData memory newTokenData)
         external
-        payable
-        canCreateToken(newTokenData)
+        onlyTreasuryContract
         returns (uint256)
     {
         {
@@ -250,8 +195,7 @@ contract TreasuryContract is IERC1155Receiver, SnapshotERC1155 {
     /// @param newTokenData This contains all the parameters needed to create a new community token that are
     function createNewCommunityToken(NewTokenData memory newTokenData)
         external
-        payable
-        canCreateToken(newTokenData)
+        onlyTreasuryContract
         returns (uint256)
     {
         {
@@ -293,8 +237,6 @@ contract TreasuryContract is IERC1155Receiver, SnapshotERC1155 {
         uint256 newTokenId,
         uint8 tokenType
     ) private returns (Token memory) {
-        //!Add check for the totalsupply > userBalance
-
         uint256 treasuryAmount = (newTokenData.totalSupply -
             newTokenData.userBalance);
         uint256 userAmount = newTokenData.userBalance;
@@ -302,8 +244,8 @@ contract TreasuryContract is IERC1155Receiver, SnapshotERC1155 {
         // Here minting of new tokens is done. And those are sent directly into the treasury
         _mint(address(this), newTokenId, treasuryAmount, "");
 
-        // The user requested amount of tokens is genrated and send to his account
-        _mint(msg.sender, newTokenId, userAmount, "");
+        // The user requested amount of tokens is generated and send to his account
+        _mint(tx.origin, newTokenId, userAmount, "");
 
         Token memory token = Token({
             recordId: newTokenData.recordId,
@@ -335,7 +277,7 @@ contract TreasuryContract is IERC1155Receiver, SnapshotERC1155 {
         uint256 recordId,
         uint256 tokenId,
         uint256 tokenAmount
-    ) external payable onlyContributionVotingContract {
+    ) external onlyTreasuryContract {
         require(
             commTokenMapping[recordId].isPresent == true ||
                 govTokenMapping[recordId].isPresent == true,
@@ -375,11 +317,12 @@ contract TreasuryContract is IERC1155Receiver, SnapshotERC1155 {
         uint256 recordId,
         uint256 contributionId,
         uint256 rewardGovernance,
-        uint256 rewardCommunity
-    ) external payable onlyContributionVotingContract {
+        uint256 rewardCommunity,
+        address contributionVotingContractAddress
+    ) external onlyTreasuryContract {
         _setApprovalForAll(
             address(this),
-            CONTRIBUTION_VOTING_CONTRACT_ADDRESS,
+            contributionVotingContractAddress,
             true
         );
         if (rewardGovernance > 0) {
@@ -409,55 +352,6 @@ contract TreasuryContract is IERC1155Receiver, SnapshotERC1155 {
             rewardGovernance: rewardGovernance,
             rewardCommunity: rewardCommunity
         });
-    }
-
-    /// @dev This function gives you the community token id of the recordId that you pass
-    /// @param recordId This is the Id of the token that you want to check
-    function getCommunityTokenId(uint256 recordId)
-        public
-        view
-        returns (uint256)
-    {
-        Token memory token = commTokenMapping[recordId];
-        if (token.isPresent) {
-            return token.tokenId;
-        } else {
-            revert("INVALID: WRONG_RECORD_ID");
-        }
-    }
-
-    /// @dev This function gives you the governance token id of the recordId that you pass
-    /// @param recordId This is the Id of the token that you want to check
-    function getGovernanceTokenId(uint256 recordId)
-        public
-        view
-        returns (uint256)
-    {
-        Token memory token = govTokenMapping[recordId];
-        if (token.isPresent) {
-            return token.tokenId;
-        } else {
-            revert("INVALID: WRONG_RECORD_ID");
-        }
-    }
-
-    /// @dev This function returns the amount of total tokens that are in circulation
-    /// @param tokenId This is the token whose circulating supply you  want to find out
-    function totalCirculatingSupply(uint256 tokenId)
-        public
-        view
-        returns (uint256)
-    {
-        uint256 totalCirculatingBalance = SafeMath.sub(
-            totalSupply(tokenId),
-            balanceOf(address(this), tokenId)
-        );
-
-        return totalCirculatingBalance;
-    }
-
-    function snapshot() public returns (uint256 snapshotId) {
-        return _snapshot();
     }
 
     // Update balance and/or total supply snapshots before the values are modified. This is implemented
@@ -490,12 +384,41 @@ contract TreasuryContract is IERC1155Receiver, SnapshotERC1155 {
         super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
     }
 
-    /// @dev this function is responsible for minting of new tokens for records
-    /// @param tokenId Id this is the tokenId that is to minted
-    /// @param amount the amount that is to be minted
-    function mintTokens(uint256 tokenId, uint256 amount)
-        public
-        onlyDilutionContract
+    /// @dev This function sets the symbol name as used, this function is called from records
+    // contract to reserve symbol for new version creation
+    /// @param governanceSymbol Symbol for governance token
+    /// @param communitySymbol Symbol for community token
+    function setSymbolsAsUsed(
+        string memory governanceSymbol,
+        string memory communitySymbol
+    ) external onlyTreasuryContract {
+        commTokenSym[communitySymbol] = true;
+        govTokenSym[governanceSymbol] = true;
+    }
+
+    /// @dev This function sets the symbol name as available, this function is called from records
+    // contract to reserve symbol for new version creation
+    /// @param governanceSymbol Symbol for governance token
+    /// @param communitySymbol Symbol for community token
+    function setSymbolsAsAvailable(
+        string memory governanceSymbol,
+        string memory communitySymbol
+    ) external onlyTreasuryContract {
+        commTokenSym[communitySymbol] = true;
+        govTokenSym[governanceSymbol] = true;
+    }
+
+    function snapshot()
+        external
+        onlyTreasuryContract
+        returns (uint256 snapshotId)
+    {
+        return _snapshot();
+    }
+
+    function mint(uint256 tokenId, uint256 amount)
+        external
+        onlyTreasuryContract
     {
         _mint(address(this), tokenId, amount, "New tokens minted");
     }

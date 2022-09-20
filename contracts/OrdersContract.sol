@@ -3,11 +3,9 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-import "./RecordsContract.sol";
-import "./TreasuryContract.sol";
+import "./interface/ITreasury.sol";
 
 contract OrdersContract {
-    address public RECORDS_CONTRACT_ADDRESS;
     address public VOTING_CONTRACT_ADDRESS;
     address public TREASURY_CONTRACT_ADDRESS;
     address public WALLET_ADDRESS;
@@ -159,9 +157,7 @@ contract OrdersContract {
         uint256 governanceTokenAmount,
         uint256 governanceTokenPrice
     ) public returns (uint256 saleOrderId) {
-        TreasuryContract treasuryContract = TreasuryContract(
-            TREASURY_CONTRACT_ADDRESS
-        );
+        ITreasury treasuryContract = ITreasury(TREASURY_CONTRACT_ADDRESS);
 
         require(
             treasuryContract.getCommunityTokenId(recordId) == communityTokenId,
@@ -247,9 +243,7 @@ contract OrdersContract {
 
         Order memory order = orderBook[orderId];
 
-        TreasuryContract treasuryContract = TreasuryContract(
-            TREASURY_CONTRACT_ADDRESS
-        );
+        ITreasury treasuryContract = ITreasury(TREASURY_CONTRACT_ADDRESS);
 
         //--- Need to have additional checks for balance of the sale and also to deduct the tokens from the sale struct
         //Send back the remaining amount to user
@@ -427,9 +421,7 @@ contract OrdersContract {
         //Removing the transaction fee from the transaction amount
         transactionAmount = transactionAmount - transactionFee;
 
-        TreasuryContract treasuryContract = TreasuryContract(
-            TREASURY_CONTRACT_ADDRESS
-        );
+        ITreasury treasuryContract = ITreasury(TREASURY_CONTRACT_ADDRESS);
 
         treasuryContract.safeTransferFrom(
             msg.sender,

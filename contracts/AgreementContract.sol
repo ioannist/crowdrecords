@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "./voting/BaseVotingContract.sol";
-import "./TreasuryContract.sol";
+import "./interface/ITreasury.sol";
 
 contract AgreementContract is BaseVotingContract {
     /// @dev This structure will hold the data for agreements
@@ -159,9 +159,7 @@ contract AgreementContract is BaseVotingContract {
         agreementCurrentId++;
         uint256 agreeId = agreementCurrentId;
 
-        TreasuryContract treasuryContract = TreasuryContract(
-            TREASURY_CONTRACT_ADDRESS
-        );
+        ITreasury treasuryContract = ITreasury(TREASURY_CONTRACT_ADDRESS);
 
         uint256 tokenId = treasuryContract.getGovernanceTokenId(recordId);
 
@@ -238,9 +236,7 @@ contract AgreementContract is BaseVotingContract {
         require(agreementMap[agreementId].isActive, "INVALID: AGREEMENT_ID");
         uint256 recordId = agreementMap[agreementId].recordId;
         royaltyId += 1;
-        TreasuryContract treasuryContract = TreasuryContract(
-            TREASURY_CONTRACT_ADDRESS
-        );
+        ITreasury treasuryContract = ITreasury(TREASURY_CONTRACT_ADDRESS);
         uint256 tokenId = treasuryContract.getCommunityTokenId(recordId);
         uint256 totalSupply = treasuryContract.totalCirculatingSupply(tokenId);
 
@@ -295,9 +291,7 @@ contract AgreementContract is BaseVotingContract {
             "NO_PENDING_CLAIMS"
         );
 
-        TreasuryContract treasuryContract = TreasuryContract(
-            TREASURY_CONTRACT_ADDRESS
-        );
+        ITreasury treasuryContract = ITreasury(TREASURY_CONTRACT_ADDRESS);
 
         uint256 tokenId = treasuryContract.getCommunityTokenId(recordId);
         uint256 totalReward = 0;
@@ -359,9 +353,7 @@ contract AgreementContract is BaseVotingContract {
         returns (uint256)
     {
         RoyaltyData memory dividend = royaltyDataMapping[royaltyId];
-        TreasuryContract treasuryContract = TreasuryContract(
-            TREASURY_CONTRACT_ADDRESS
-        );
+        ITreasury treasuryContract = ITreasury(TREASURY_CONTRACT_ADDRESS);
 
         uint256 tokenBal = treasuryContract.balanceOfAt(
             msg.sender,
@@ -392,7 +384,7 @@ contract AgreementContract is BaseVotingContract {
         uint256 high = dividendIdArray.length;
         uint256 lastClaimedDividendId = 0;
         while (low < high) {
-            uint256 mid = Math.average(low, high);
+            uint256 mid = (low + high) / 2;
             lastClaimedDividendId = dividendIdArray[mid];
             bool claimStatus = royaltyClaimMapping[lastClaimedDividendId][user];
 

@@ -53,12 +53,12 @@ contract("All Contract Deployment", function() {
             this.recordsContract.address
         );
 
-        expect(this.treasuryContract.RECORDS_CONTRACT_ADDRESS()).eventually.to.be.equal(
-            this.recordsContract.address
-        );
-
         expect(this.recordsContract.CONTRIBUTION_CONTRACT_ADDRESS()).eventually.to.be.equal(
             this.contributionContract.address
+        );
+
+        expect(this.recordsContract.TREASURY_CONTRACT_ADDRESS()).eventually.to.be.equal(
+            this.treasuryContract.address
         );
 
         expect(
@@ -72,9 +72,6 @@ contract("All Contract Deployment", function() {
         expect(this.ordersContract.TREASURY_CONTRACT_ADDRESS()).eventually.to.be.equal(
             this.treasuryContract.address
         );
-        expect(this.treasuryContract.CONTRIBUTION_VOTING_CONTRACT_ADDRESS()).eventually.to.be.equal(
-            this.contributionVotingContract.address
-        );
 
         expect(this.agreementContract.TREASURY_CONTRACT_ADDRESS()).eventually.to.be.equal(
             this.treasuryContract.address
@@ -84,12 +81,29 @@ contract("All Contract Deployment", function() {
             this.treasuryContract.address
         );
 
+        expect(this.dilutionContract.TREASURY_CONTRACT_ADDRESS()).eventually.to.be.equal(
+            this.treasuryContract.address
+        );
+
+        expect(this.treasuryContract.RECORDS_CONTRACT_ADDRESS()).eventually.to.be.equal(
+            this.recordsContract.address
+        );
+        expect(this.treasuryContract.CONTRIBUTION_VOTING_CONTRACT_ADDRESS()).eventually.to.be.equal(
+            this.contributionVotingContract.address
+        );
+        expect(this.treasuryContract.DILUTION_CONTRACT_ADDRESS()).eventually.to.be.equal(
+            this.dilutionContract.address
+        );
+        expect(this.treasuryContract.TREASURY_CORE_CONTRACT_ADDRESS()).eventually.to.be.equal(
+            this.treasuryCoreContract.address
+        );
+
         expect(
             this.baseVotingCounterOfferContractMock.TREASURY_CONTRACT_ADDRESS()
         ).eventually.to.be.equal(this.treasuryContract.address);
 
-        expect(this.votingHubContract.TREASURY_CONTRACT_ADDRESS()).eventually.to.be.equal(
-            this.treasuryContract.address
+        expect(this.votingHubContract.TREASURY_CORE_CONTRACT_ADDRESS()).eventually.to.be.equal(
+            this.treasuryCoreContract.address
         );
 
         expect(this.votingHubContract.VOTING_CONTRACTS_ADDRESS(0)).eventually.to.be.equal(
@@ -99,8 +113,11 @@ contract("All Contract Deployment", function() {
             this.agreementContract.address
         );
 
-        expect(this.treasuryContract.VOTING_HUB_ADDRESS()).eventually.to.be.equal(
+        expect(this.treasuryCoreContract.VOTING_HUB_ADDRESS()).eventually.to.be.equal(
             this.votingHubContract.address
+        );
+        expect(this.treasuryCoreContract.TREASURY_CONTRACT_ADDRESS()).eventually.to.be.equal(
+            this.treasuryContract.address
         );
     });
 });

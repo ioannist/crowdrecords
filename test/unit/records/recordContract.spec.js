@@ -61,13 +61,11 @@ contract("Records Contract", function() {
         });
     });
 
-    // it("Creating record with invalid seed contribution Id, expect revert", async function () {
-    //     // The following transaction should reject with error message but instead it just gets 'exited with an error (status 0) after consuming all gas.'
-    //     // this is happening when trying to get data of a contribution that is not yet created
-    //     await expect(
-    //         this.recordsContract.createNewRecord("Test", "image.png", "Cat1", 3)
-    //     ).to.eventually.rejectedWith("No contribution with this id is found");
-    // });
+    it("Creating record with invalid seed contribution Id, expect revert", async function() {
+        await expect(
+            this.recordsContract.createNewRecord("Test", "image.png", "Cat1", 3)
+        ).to.eventually.rejectedWith("INVALID: CONTRIBUTION_NOT_FOUND");
+    });
 
     it("Creating a normal contribution and try to create record with it, expect reject", async function() {
         //seed contribution id 1

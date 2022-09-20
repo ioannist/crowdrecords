@@ -1,0 +1,1134 @@
+{
+  "contractName": "IRecords",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "ownerAddress",
+          "type": "address"
+        }
+      ],
+      "name": "setOwnerAddress",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "contributionContractAddress",
+          "type": "address"
+        }
+      ],
+      "name": "setContributionContractAddress",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "image",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "recordCategory",
+          "type": "string"
+        },
+        {
+          "internalType": "uint256",
+          "name": "seedId",
+          "type": "uint256"
+        }
+      ],
+      "name": "createNewRecord",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "recordId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "contributionId",
+          "type": "uint256"
+        }
+      ],
+      "name": "pushContributionIdToContributionList",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "recordId",
+          "type": "uint256"
+        }
+      ],
+      "name": "ownerOf",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.8.12+commit.f00d7308\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"image\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"recordCategory\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"seedId\",\"type\":\"uint256\"}],\"name\":\"createNewRecord\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"recordId\",\"type\":\"uint256\"}],\"name\":\"ownerOf\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"recordId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"contributionId\",\"type\":\"uint256\"}],\"name\":\"pushContributionIdToContributionList\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"contributionContractAddress\",\"type\":\"address\"}],\"name\":\"setContributionContractAddress\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"ownerAddress\",\"type\":\"address\"}],\"name\":\"setOwnerAddress\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{\"createNewRecord(string,string,string,uint256)\":{\"details\":\"This function creates new record\",\"params\":{\"image\":\"This is the image/logo of the record\",\"name\":\"This is the name of the record\",\"recordCategory\":\"This is the category to which record belongs\",\"seedId\":\"This is the seed contribution id\"}},\"ownerOf(uint256)\":{\"details\":\"This function return the address of record owner\",\"params\":{\"recordId\":\"This is the recordId whose owner you want\"}},\"pushContributionIdToContributionList(uint256,uint256)\":{\"details\":\"This function pushes a contribution into the array of the record\",\"params\":{\"contributionId\":\"This is the contribution id to push in array\",\"recordId\":\"This is the recordId to which contribution is to be added\"}},\"setContributionContractAddress(address)\":{\"details\":\"This function sets the contribution Contract address\",\"params\":{\"contributionContractAddress\":\"Takes the address of new contribution contract as parameter\"}},\"setOwnerAddress(address)\":{\"details\":\"This function sets the owner address\",\"params\":{\"ownerAddress\":\"Takes the address of new owner as parameter\"}}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"project:/contracts/interface/IRecords.sol\":\"IRecords\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"project:/contracts/interface/IRecords.sol\":{\"keccak256\":\"0x95d836ed8be0d48d7d5ac67ff339fdd034c4537076ae5c553029c52868d6ca72\",\"urls\":[\"bzz-raw://e1ba35e64e35e60afcbded1dfd581d6e586c0aa5b66d656676e0f5fd4adb5548\",\"dweb:/ipfs/QmWwkTbRuCCg2Jkd5WZQS8nayWPLdDAm3vDrjSCad4vd7t\"]}},\"version\":1}",
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "immutableReferences": {},
+  "generatedSources": [],
+  "deployedGeneratedSources": [],
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "pragma solidity ^0.8.0;\n\ninterface IRecords {\n    /// @dev This function sets the owner address\n    /// @param ownerAddress Takes the address of new owner as parameter\n    function setOwnerAddress(address ownerAddress) external;\n\n    /// @dev This function sets the contribution Contract address\n    /// @param contributionContractAddress Takes the address of new contribution contract as parameter\n    function setContributionContractAddress(address contributionContractAddress)\n        external;\n\n    /// @dev This function creates new record\n    /// @param name This is the name of the record\n    /// @param image This is the image/logo of the record\n    /// @param recordCategory This is the category to which record belongs\n    /// @param seedId This is the seed contribution id\n    function createNewRecord(\n        string memory name,\n        string memory image,\n        string memory recordCategory,\n        uint256 seedId\n    ) external;\n\n    /// @dev This function pushes a contribution into the array of the record\n    /// @param recordId This is the recordId to which contribution is to be added\n    /// @param contributionId This is the contribution id to push in array\n    function pushContributionIdToContributionList(\n        uint256 recordId,\n        uint256 contributionId\n    ) external;\n\n    /// @dev This function return the address of record owner\n    /// @param recordId This is the recordId whose owner you want\n    function ownerOf(uint256 recordId) external returns (address);\n}\n",
+  "sourcePath": "/Users/a1/Desktop/Office/projects/CrowdRecords/Contracts/contracts/interface/IRecords.sol",
+  "ast": {
+    "absolutePath": "project:/contracts/interface/IRecords.sol",
+    "exportedSymbols": {
+      "IRecords": [
+        9471
+      ]
+    },
+    "id": 9472,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 9430,
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:23:35"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "canonicalName": "IRecords",
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "id": 9471,
+        "linearizedBaseContracts": [
+          9471
+        ],
+        "name": "IRecords",
+        "nameLocation": "35:8:35",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "documentation": {
+              "id": 9431,
+              "nodeType": "StructuredDocumentation",
+              "src": "50:117:35",
+              "text": "@dev This function sets the owner address\n @param ownerAddress Takes the address of new owner as parameter"
+            },
+            "functionSelector": "331a6bf5",
+            "id": 9436,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "setOwnerAddress",
+            "nameLocation": "181:15:35",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 9434,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 9433,
+                  "mutability": "mutable",
+                  "name": "ownerAddress",
+                  "nameLocation": "205:12:35",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9436,
+                  "src": "197:20:35",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 9432,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "197:7:35",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "196:22:35"
+            },
+            "returnParameters": {
+              "id": 9435,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "227:0:35"
+            },
+            "scope": 9471,
+            "src": "172:56:35",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 9437,
+              "nodeType": "StructuredDocumentation",
+              "src": "234:164:35",
+              "text": "@dev This function sets the contribution Contract address\n @param contributionContractAddress Takes the address of new contribution contract as parameter"
+            },
+            "functionSelector": "29c50b59",
+            "id": 9442,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "setContributionContractAddress",
+            "nameLocation": "412:30:35",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 9440,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 9439,
+                  "mutability": "mutable",
+                  "name": "contributionContractAddress",
+                  "nameLocation": "451:27:35",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9442,
+                  "src": "443:35:35",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 9438,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "443:7:35",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "442:37:35"
+            },
+            "returnParameters": {
+              "id": 9441,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "496:0:35"
+            },
+            "scope": 9471,
+            "src": "403:94:35",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 9443,
+              "nodeType": "StructuredDocumentation",
+              "src": "503:280:35",
+              "text": "@dev This function creates new record\n @param name This is the name of the record\n @param image This is the image/logo of the record\n @param recordCategory This is the category to which record belongs\n @param seedId This is the seed contribution id"
+            },
+            "functionSelector": "bb6c5fb3",
+            "id": 9454,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "createNewRecord",
+            "nameLocation": "797:15:35",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 9452,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 9445,
+                  "mutability": "mutable",
+                  "name": "name",
+                  "nameLocation": "836:4:35",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9454,
+                  "src": "822:18:35",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 9444,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "822:6:35",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 9447,
+                  "mutability": "mutable",
+                  "name": "image",
+                  "nameLocation": "864:5:35",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9454,
+                  "src": "850:19:35",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 9446,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "850:6:35",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 9449,
+                  "mutability": "mutable",
+                  "name": "recordCategory",
+                  "nameLocation": "893:14:35",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9454,
+                  "src": "879:28:35",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 9448,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "879:6:35",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 9451,
+                  "mutability": "mutable",
+                  "name": "seedId",
+                  "nameLocation": "925:6:35",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9454,
+                  "src": "917:14:35",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 9450,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "917:7:35",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "812:125:35"
+            },
+            "returnParameters": {
+              "id": 9453,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "946:0:35"
+            },
+            "scope": 9471,
+            "src": "788:159:35",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 9455,
+              "nodeType": "StructuredDocumentation",
+              "src": "953:230:35",
+              "text": "@dev This function pushes a contribution into the array of the record\n @param recordId This is the recordId to which contribution is to be added\n @param contributionId This is the contribution id to push in array"
+            },
+            "functionSelector": "c10df2cf",
+            "id": 9462,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "pushContributionIdToContributionList",
+            "nameLocation": "1197:36:35",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 9460,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 9457,
+                  "mutability": "mutable",
+                  "name": "recordId",
+                  "nameLocation": "1251:8:35",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9462,
+                  "src": "1243:16:35",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 9456,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1243:7:35",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 9459,
+                  "mutability": "mutable",
+                  "name": "contributionId",
+                  "nameLocation": "1277:14:35",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9462,
+                  "src": "1269:22:35",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 9458,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1269:7:35",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1233:64:35"
+            },
+            "returnParameters": {
+              "id": 9461,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1306:0:35"
+            },
+            "scope": 9471,
+            "src": "1188:119:35",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 9463,
+              "nodeType": "StructuredDocumentation",
+              "src": "1313:123:35",
+              "text": "@dev This function return the address of record owner\n @param recordId This is the recordId whose owner you want"
+            },
+            "functionSelector": "6352211e",
+            "id": 9470,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "ownerOf",
+            "nameLocation": "1450:7:35",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 9466,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 9465,
+                  "mutability": "mutable",
+                  "name": "recordId",
+                  "nameLocation": "1466:8:35",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9470,
+                  "src": "1458:16:35",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 9464,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1458:7:35",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1457:18:35"
+            },
+            "returnParameters": {
+              "id": 9469,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 9468,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9470,
+                  "src": "1494:7:35",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 9467,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1494:7:35",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1493:9:35"
+            },
+            "scope": 9471,
+            "src": "1441:62:35",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "scope": 9472,
+        "src": "25:1480:35",
+        "usedErrors": []
+      }
+    ],
+    "src": "0:1506:35"
+  },
+  "legacyAST": {
+    "absolutePath": "project:/contracts/interface/IRecords.sol",
+    "exportedSymbols": {
+      "IRecords": [
+        9471
+      ]
+    },
+    "id": 9472,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 9430,
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:23:35"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "canonicalName": "IRecords",
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "id": 9471,
+        "linearizedBaseContracts": [
+          9471
+        ],
+        "name": "IRecords",
+        "nameLocation": "35:8:35",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "documentation": {
+              "id": 9431,
+              "nodeType": "StructuredDocumentation",
+              "src": "50:117:35",
+              "text": "@dev This function sets the owner address\n @param ownerAddress Takes the address of new owner as parameter"
+            },
+            "functionSelector": "331a6bf5",
+            "id": 9436,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "setOwnerAddress",
+            "nameLocation": "181:15:35",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 9434,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 9433,
+                  "mutability": "mutable",
+                  "name": "ownerAddress",
+                  "nameLocation": "205:12:35",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9436,
+                  "src": "197:20:35",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 9432,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "197:7:35",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "196:22:35"
+            },
+            "returnParameters": {
+              "id": 9435,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "227:0:35"
+            },
+            "scope": 9471,
+            "src": "172:56:35",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 9437,
+              "nodeType": "StructuredDocumentation",
+              "src": "234:164:35",
+              "text": "@dev This function sets the contribution Contract address\n @param contributionContractAddress Takes the address of new contribution contract as parameter"
+            },
+            "functionSelector": "29c50b59",
+            "id": 9442,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "setContributionContractAddress",
+            "nameLocation": "412:30:35",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 9440,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 9439,
+                  "mutability": "mutable",
+                  "name": "contributionContractAddress",
+                  "nameLocation": "451:27:35",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9442,
+                  "src": "443:35:35",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 9438,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "443:7:35",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "442:37:35"
+            },
+            "returnParameters": {
+              "id": 9441,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "496:0:35"
+            },
+            "scope": 9471,
+            "src": "403:94:35",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 9443,
+              "nodeType": "StructuredDocumentation",
+              "src": "503:280:35",
+              "text": "@dev This function creates new record\n @param name This is the name of the record\n @param image This is the image/logo of the record\n @param recordCategory This is the category to which record belongs\n @param seedId This is the seed contribution id"
+            },
+            "functionSelector": "bb6c5fb3",
+            "id": 9454,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "createNewRecord",
+            "nameLocation": "797:15:35",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 9452,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 9445,
+                  "mutability": "mutable",
+                  "name": "name",
+                  "nameLocation": "836:4:35",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9454,
+                  "src": "822:18:35",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 9444,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "822:6:35",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 9447,
+                  "mutability": "mutable",
+                  "name": "image",
+                  "nameLocation": "864:5:35",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9454,
+                  "src": "850:19:35",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 9446,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "850:6:35",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 9449,
+                  "mutability": "mutable",
+                  "name": "recordCategory",
+                  "nameLocation": "893:14:35",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9454,
+                  "src": "879:28:35",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 9448,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "879:6:35",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 9451,
+                  "mutability": "mutable",
+                  "name": "seedId",
+                  "nameLocation": "925:6:35",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9454,
+                  "src": "917:14:35",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 9450,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "917:7:35",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "812:125:35"
+            },
+            "returnParameters": {
+              "id": 9453,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "946:0:35"
+            },
+            "scope": 9471,
+            "src": "788:159:35",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 9455,
+              "nodeType": "StructuredDocumentation",
+              "src": "953:230:35",
+              "text": "@dev This function pushes a contribution into the array of the record\n @param recordId This is the recordId to which contribution is to be added\n @param contributionId This is the contribution id to push in array"
+            },
+            "functionSelector": "c10df2cf",
+            "id": 9462,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "pushContributionIdToContributionList",
+            "nameLocation": "1197:36:35",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 9460,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 9457,
+                  "mutability": "mutable",
+                  "name": "recordId",
+                  "nameLocation": "1251:8:35",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9462,
+                  "src": "1243:16:35",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 9456,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1243:7:35",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 9459,
+                  "mutability": "mutable",
+                  "name": "contributionId",
+                  "nameLocation": "1277:14:35",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9462,
+                  "src": "1269:22:35",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 9458,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1269:7:35",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1233:64:35"
+            },
+            "returnParameters": {
+              "id": 9461,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1306:0:35"
+            },
+            "scope": 9471,
+            "src": "1188:119:35",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 9463,
+              "nodeType": "StructuredDocumentation",
+              "src": "1313:123:35",
+              "text": "@dev This function return the address of record owner\n @param recordId This is the recordId whose owner you want"
+            },
+            "functionSelector": "6352211e",
+            "id": 9470,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "ownerOf",
+            "nameLocation": "1450:7:35",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 9466,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 9465,
+                  "mutability": "mutable",
+                  "name": "recordId",
+                  "nameLocation": "1466:8:35",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9470,
+                  "src": "1458:16:35",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 9464,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1458:7:35",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1457:18:35"
+            },
+            "returnParameters": {
+              "id": 9469,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 9468,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9470,
+                  "src": "1494:7:35",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 9467,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1494:7:35",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1493:9:35"
+            },
+            "scope": 9471,
+            "src": "1441:62:35",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "scope": 9472,
+        "src": "25:1480:35",
+        "usedErrors": []
+      }
+    ],
+    "src": "0:1506:35"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.8.12+commit.f00d7308.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.4.6",
+  "updatedAt": "2022-09-16T13:56:48.980Z",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {
+      "createNewRecord(string,string,string,uint256)": {
+        "details": "This function creates new record",
+        "params": {
+          "image": "This is the image/logo of the record",
+          "name": "This is the name of the record",
+          "recordCategory": "This is the category to which record belongs",
+          "seedId": "This is the seed contribution id"
+        }
+      },
+      "ownerOf(uint256)": {
+        "details": "This function return the address of record owner",
+        "params": {
+          "recordId": "This is the recordId whose owner you want"
+        }
+      },
+      "pushContributionIdToContributionList(uint256,uint256)": {
+        "details": "This function pushes a contribution into the array of the record",
+        "params": {
+          "contributionId": "This is the contribution id to push in array",
+          "recordId": "This is the recordId to which contribution is to be added"
+        }
+      },
+      "setContributionContractAddress(address)": {
+        "details": "This function sets the contribution Contract address",
+        "params": {
+          "contributionContractAddress": "Takes the address of new contribution contract as parameter"
+        }
+      },
+      "setOwnerAddress(address)": {
+        "details": "This function sets the owner address",
+        "params": {
+          "ownerAddress": "Takes the address of new owner as parameter"
+        }
+      }
+    },
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  }
+}

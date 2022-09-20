@@ -1,6 +1,10 @@
 pragma solidity ^0.8.0;
 
 interface ITreasury {
+    /// @dev This function return the id of CRD token
+    /// @return tokenId it is the ID of CRD token
+    function CRD() external view returns (uint256);
+
     /// @dev This structure will store information of tokens for each records
     /// @param recordId This is the id of record to which a token belongs
     /// @param symbol This is the symbol of a token
@@ -53,6 +57,11 @@ interface ITreasury {
         external
         payable
         returns (uint256);
+
+    /// @dev this function is responsible for minting of new tokens for records
+    /// @param tokenId Id this is the tokenId that is to minted
+    /// @param amount the amount that is to be minted
+    function mintTokens(uint256 tokenId, uint256 amount) external payable;
 
     /// @dev This function creates new community tokens for specified record
     /// @param recordId This is the id of the record to which the token belongs to
@@ -107,4 +116,43 @@ interface ITreasury {
         external
         view
         returns (uint256);
+
+    /// @dev This function sets the symbol name as used, this function is called from records
+    // contract to reserve symbol for new version creation
+    /// @param governanceSymbol Symbol for governance token
+    /// @param communitySymbol Symbol for community token
+    function setSymbolsAsUsed(
+        string memory governanceSymbol,
+        string memory communitySymbol
+    ) external;
+
+    /// @dev This function sets the symbol name as available, this function is called from records
+    // contract to reserve symbol for new version creation
+    /// @param governanceSymbol Symbol for governance token
+    /// @param communitySymbol Symbol for community token
+    function setSymbolsAsAvailable(
+        string memory governanceSymbol,
+        string memory communitySymbol
+    ) external;
+
+    /// @dev Retrieves the balance of `account` at the time `snapshotId` was created.
+    function balanceOfAt(
+        address account,
+        uint256 snapshotId,
+        uint256 tokenId
+    ) external view returns (uint256);
+
+    /// @dev Transfers `amount` tokens of token type `id` from `from` to `to`.
+    /// @param to It is the token receivers address
+    /// @param from from is the sender address.
+    /// @param id `from` must have a balance of tokens of type `id` of at least `amount`.
+    /// @param amount this is the amount to transfer
+    /// @param data This is the data or note for transfer
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 id,
+        uint256 amount,
+        bytes calldata data
+    ) external;
 }

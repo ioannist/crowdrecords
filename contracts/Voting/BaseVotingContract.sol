@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "../TreasuryContract.sol";
+import "../interface/ITreasury.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "../OrdersContract.sol";
 
@@ -178,9 +178,7 @@ contract BaseVotingContract {
         bool vote,
         address voter
     ) private {
-        TreasuryContract treasuryContract = TreasuryContract(
-            TREASURY_CONTRACT_ADDRESS
-        );
+        ITreasury treasuryContract = ITreasury(TREASURY_CONTRACT_ADDRESS);
         VotingBallot memory votingBallot = votingMap[votingBallotId];
         uint256 bal = treasuryContract.balanceOf(voter, votingBallot.tokenId);
 
@@ -285,9 +283,7 @@ contract BaseVotingContract {
         uint256 totalYes = votingBallot.yesWeight;
 
         // Currently to win you would need to around 66% of votes to be yes
-        TreasuryContract treasuryContract = TreasuryContract(
-            TREASURY_CONTRACT_ADDRESS
-        );
+        ITreasury treasuryContract = ITreasury(TREASURY_CONTRACT_ADDRESS);
 
         votingMap[votingBallotId].isResultDeclared = true;
 

@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "./Voting/BaseVotingContract.sol";
-import "./TreasuryContract.sol";
+import "./interface/ITreasury.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
 contract DilutionContract is BaseVotingContract {
@@ -115,9 +115,7 @@ contract DilutionContract is BaseVotingContract {
             "INVALID: PENDING_DILUTION_REQUEST"
         );
 
-        TreasuryContract treasuryContract = TreasuryContract(
-            TREASURY_CONTRACT_ADDRESS
-        );
+        ITreasury treasuryContract = ITreasury(TREASURY_CONTRACT_ADDRESS);
 
         uint256 commTokenId = treasuryContract.getCommunityTokenId(recordId);
         uint256 govTokenId = treasuryContract.getGovernanceTokenId(recordId);
@@ -203,9 +201,7 @@ contract DilutionContract is BaseVotingContract {
 
         if (result) {
             //Transfer the reward amount to user
-            TreasuryContract treasuryContract = TreasuryContract(
-                TREASURY_CONTRACT_ADDRESS
-            );
+            ITreasury treasuryContract = ITreasury(TREASURY_CONTRACT_ADDRESS);
             treasuryContract.mintTokens(
                 dilutionRequestMap[dilutionId].tokenId,
                 dilutionRequestMap[dilutionId].amount
