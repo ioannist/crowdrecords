@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 
 import "./voting/BaseVotingContract.sol";
 import "./interface/ITreasury.sol";
+import "./interface/ITreasuryCore.sol";
 
 contract AgreementContract is BaseVotingContract {
     /// @dev This structure will hold the data for agreements
@@ -133,6 +134,9 @@ contract AgreementContract is BaseVotingContract {
     //royaltyId => userAddress => bool
     mapping(uint256 => mapping(address => bool)) royaltyClaimMapping;
 
+    //This is for the token transfer and other core functions
+    address public TREASURY_CORE_CONTRACT_ADDRESS;
+
     constructor(uint8 votingInterval, address owner) BaseVotingContract(owner) {
         VOTING_BLOCK_PERIOD = votingInterval;
     }
@@ -144,6 +148,14 @@ contract AgreementContract is BaseVotingContract {
         _ownerOnly
     {
         _setTreasuryContractAddress(newTreasuryContractAddress);
+    }
+
+    /// @dev This function sets the treasury Contract address
+    /// @param newTreasuryCoreContractAddress This is the new address of treasury core contract
+    function setTreasuryCoreContractAddress(
+        address newTreasuryCoreContractAddress
+    ) public _ownerOnly {
+        TREASURY_CORE_CONTRACT_ADDRESS = newTreasuryCoreContractAddress;
     }
 
     /// @dev This function will create a new agreement voting ballot
@@ -240,10 +252,14 @@ contract AgreementContract is BaseVotingContract {
         uint256 tokenId = treasuryContract.getCommunityTokenId(recordId);
         uint256 totalSupply = treasuryContract.totalCirculatingSupply(tokenId);
 
-        treasuryContract.safeTransferFrom(
+        ITreasuryCore treasuryCoreContract = ITreasuryCore(
+            TREASURY_CONTRACT_ADDRESS
+        );
+
+        treasuryCoreContract.safeTransferFrom(
             msg.sender,
             address(this),
-            treasuryContract.CRD(),
+            treasuryCoreContract.CRD(),
             amount,
             "ROYALTY_PAYMENT_TRANSFER"
         );
@@ -334,8 +350,11 @@ contract AgreementContract is BaseVotingContract {
             -     - does not trigger an invalid opcode by other means (ex: accessing an array out of bounds).
        */
         // require(false, "NO_PENDING_CLAIMS");
+        ITreasuryCore treasuryCoreContract = ITreasuryCore(
+            TREASURY_CORE_CONTRACT_ADDRESS
+        );
 
-        treasuryContract.safeTransferFrom(
+        treasuryCoreContract.safeTransferFrom(
             address(this),
             msg.sender,
             treasuryContract.CRD(),

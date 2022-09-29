@@ -112,7 +112,7 @@ interface ITreasury {
     /// @return snapshotId This is the id of the snapshot that was created just now
     function snapshot() external returns (uint256 snapshotId);
 
-    function balanceOf(address account, uint256 snapshotId)
+    function balanceOf(address account, uint256 tokenId)
         external
         view
         returns (uint256);
@@ -141,18 +141,4 @@ interface ITreasury {
         uint256 snapshotId,
         uint256 tokenId
     ) external view returns (uint256);
-
-    /// @dev Transfers `amount` tokens of token type `id` from `from` to `to`.
-    /// @param to It is the token receivers address
-    /// @param from from is the sender address.
-    /// @param id `from` must have a balance of tokens of type `id` of at least `amount`.
-    /// @param amount this is the amount to transfer
-    /// @param data This is the data or note for transfer
-    function safeTransferFrom(
-        address from,
-        address to,
-        uint256 id,
-        uint256 amount,
-        bytes calldata data
-    ) external;
 }

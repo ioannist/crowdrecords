@@ -34,4 +34,23 @@ interface ITreasuryCore {
         string symbol;
         string image;
     }
+
+    /// @dev Transfers `amount` tokens of token type `id` from `from` to `to`.
+    /// @param to It is the token receivers address
+    /// @param from from is the sender address.
+    /// @param id `from` must have a balance of tokens of type `id` of at least `amount`.
+    /// @param amount this is the amount to transfer
+    /// @param data This is the data or note for transfer
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 id,
+        uint256 amount,
+        bytes calldata data
+    ) external;
+
+    function balanceOf(address account, uint256 tokenId)
+        external
+        view
+        returns (uint256);
 }

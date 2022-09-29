@@ -60,7 +60,7 @@ contract("Dilution Contract", function() {
         const dilutionId = "1";
         const afterDilution = await web3.utils.toWei("1000000");
 
-        await this.treasuryContract.safeTransferFrom(
+        await this.treasuryCoreContract.safeTransferFrom(
             user1,
             user2,
             COMMUNITY_TOKEN_ID,
@@ -68,7 +68,7 @@ contract("Dilution Contract", function() {
             "0x0"
         );
 
-        await this.treasuryContract.safeTransferFrom(
+        await this.treasuryCoreContract.safeTransferFrom(
             user1,
             user3,
             COMMUNITY_TOKEN_ID,
@@ -106,7 +106,7 @@ contract("Dilution Contract", function() {
         const dilutionId = "1";
         const afterDilution = await web3.utils.toWei("550000");
 
-        await this.treasuryContract.safeTransferFrom(
+        await this.treasuryCoreContract.safeTransferFrom(
             user1,
             user2,
             COMMUNITY_TOKEN_ID,
@@ -114,7 +114,7 @@ contract("Dilution Contract", function() {
             "0x0"
         );
 
-        await this.treasuryContract.safeTransferFrom(
+        await this.treasuryCoreContract.safeTransferFrom(
             user1,
             user3,
             COMMUNITY_TOKEN_ID,
@@ -156,7 +156,7 @@ contract("Dilution Contract", function() {
             this.user3 = await helper.getEthAccount(2);
             this.dilutionId = "1";
 
-            await this.treasuryContract.safeTransferFrom(
+            await this.treasuryCoreContract.safeTransferFrom(
                 this.user1,
                 this.user2,
                 COMMUNITY_TOKEN_ID,
@@ -164,7 +164,7 @@ contract("Dilution Contract", function() {
                 "0x0"
             );
 
-            await this.treasuryContract.safeTransferFrom(
+            await this.treasuryCoreContract.safeTransferFrom(
                 this.user1,
                 this.user3,
                 COMMUNITY_TOKEN_ID,
@@ -192,7 +192,7 @@ contract("Dilution Contract", function() {
             await this.dilutionContract.castVote(this.dilutionId, true, { from: this.user2 });
             await this.dilutionContract.castVote(this.dilutionId, false, { from: this.user3 });
 
-            await this.treasuryContract.safeTransferFrom(
+            await this.treasuryCoreContract.safeTransferFrom(
                 this.user1,
                 this.user2,
                 COMMUNITY_TOKEN_ID,
@@ -221,7 +221,7 @@ contract("Dilution Contract", function() {
             await this.dilutionContract.castVote(this.dilutionId, false, { from: this.user2 });
             await this.dilutionContract.castVote(this.dilutionId, false, { from: this.user3 });
 
-            await this.treasuryContract.safeTransferFrom(
+            await this.treasuryCoreContract.safeTransferFrom(
                 this.user1,
                 this.user2,
                 COMMUNITY_TOKEN_ID,
@@ -250,7 +250,7 @@ contract("Dilution Contract", function() {
             await this.dilutionContract.castVote(this.dilutionId, true, { from: this.user2 });
             await this.dilutionContract.castVote(this.dilutionId, false, { from: this.user3 });
 
-            await this.treasuryContract.safeTransferFrom(
+            await this.treasuryCoreContract.safeTransferFrom(
                 this.user1,
                 user4,
                 COMMUNITY_TOKEN_ID,
@@ -289,7 +289,7 @@ contract("Dilution Contract", function() {
             await this.dilutionContract.castVote(this.dilutionId, true, { from: this.user2 });
             await this.dilutionContract.castVote(this.dilutionId, false, { from: this.user3 });
 
-            await this.treasuryContract.safeTransferFrom(
+            await this.treasuryCoreContract.safeTransferFrom(
                 this.user1,
                 user4,
                 COMMUNITY_TOKEN_ID,

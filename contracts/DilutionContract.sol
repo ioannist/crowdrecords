@@ -58,7 +58,8 @@ contract DilutionContract is BaseVotingContract {
     /// @param dilutionId This is the id of dilution request
     /// @param tokenId This is the id of the contribution that is linked to this ballot
     /// @param ballotId this is the ballot Id for which result is declared
-    /// @param result this is the status of the result, either true if user won that is he received more than 66% of votes or false if user lost
+    /// @param result this is the status of the result,
+    /// either true if user won that is he received more than 66% of votes or false if user lost
     event DilutionResult(
         uint256 dilutionId,
         uint256 tokenId,

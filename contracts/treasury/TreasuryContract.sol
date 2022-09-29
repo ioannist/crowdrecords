@@ -118,6 +118,15 @@ contract TreasuryContract {
         TreasuryCoreContract treasuryCoreContract = TreasuryCoreContract(
             TREASURY_CORE_CONTRACT_ADDRESS
         );
+        (, , , , bool isPresent, ) = treasuryCoreContract.govTokenMapping(
+            newTokenData.recordId
+        );
+        require(isPresent == false, "INVALID: TOKEN_ID_ALREADY_IN_USE");
+
+        bool isSymbolInUse = treasuryCoreContract.govTokenSym(
+            newTokenData.symbol
+        );
+        require(isSymbolInUse == false, "INVALID: TOKEN_SYMBOL_ALREADY_IN_USE");
         return treasuryCoreContract.createNewGovernanceToken(newTokenData);
     }
 
@@ -129,6 +138,15 @@ contract TreasuryContract {
         TreasuryCoreContract treasuryCoreContract = TreasuryCoreContract(
             TREASURY_CORE_CONTRACT_ADDRESS
         );
+        (, , , , bool isPresent, ) = treasuryCoreContract.govTokenMapping(
+            newTokenData.recordId
+        );
+        require(isPresent == false, "INVALID: TOKEN_ID_ALREADY_IN_USE");
+
+        bool isSymbolInUse = treasuryCoreContract.govTokenSym(
+            newTokenData.symbol
+        );
+        require(isSymbolInUse == false, "INVALID: TOKEN_SYMBOL_ALREADY_IN_USE");
         return treasuryCoreContract.createNewCommunityToken(newTokenData);
     }
 
@@ -225,10 +243,27 @@ contract TreasuryContract {
         );
         uint256 totalCirculatingBalance = SafeMath.sub(
             treasuryCoreContract.totalSupply(tokenId),
-            treasuryCoreContract.balanceOf(address(this), tokenId)
+            treasuryCoreContract.balanceOf(
+                TREASURY_CORE_CONTRACT_ADDRESS,
+                tokenId
+            )
         );
 
         return totalCirculatingBalance;
+    }
+
+    /// @dev This function returns the amount of total tokens that are in circulation
+    /// @param tokenId This is the token whose circulating supply you  want to find out
+    function balanceOf(address account, uint256 tokenId)
+        public
+        view
+        returns (uint256)
+    {
+        TreasuryCoreContract treasuryCoreContract = TreasuryCoreContract(
+            TREASURY_CORE_CONTRACT_ADDRESS
+        );
+
+        return treasuryCoreContract.balanceOf(account, tokenId);
     }
 
     /// @dev This function sets the symbol name as used, this function is called from records

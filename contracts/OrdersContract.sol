@@ -3,11 +3,13 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "./interface/ITreasuryCore.sol";
 import "./interface/ITreasury.sol";
 
 contract OrdersContract {
     address public VOTING_CONTRACT_ADDRESS;
     address public TREASURY_CONTRACT_ADDRESS;
+    address public TREASURY_CORE_CONTRACT_ADDRESS;
     address public WALLET_ADDRESS;
     uint8 TRANSACTION_FEE = 50; //This is 0.50%
     address public OWNER;
@@ -104,7 +106,7 @@ contract OrdersContract {
         uint256 remainingBalance
     );
 
-    mapping(uint256 => Order) orderBook;
+    mapping(uint256 => Order) public orderBook;
     uint256 orderId = 0;
 
     constructor(address owner) {
@@ -235,27 +237,29 @@ contract OrdersContract {
     /// @param saleId This is the id of the buy order to cancel
     function cancelBuyOrder(uint256 saleId) public {
         require(
-            orderBook[orderId].buyer == msg.sender,
+            orderBook[saleId].buyer == msg.sender,
             "UNAUTHORIZED: ONLY_ORDER_CREATOR"
         );
 
-        require(orderBook[orderId].isClosed == false, "INVALID: ORDER_CLOSED");
+        require(orderBook[saleId].isClosed == false, "INVALID: ORDER_CLOSED");
 
-        Order memory order = orderBook[orderId];
+        Order memory order = orderBook[saleId];
 
-        ITreasury treasuryContract = ITreasury(TREASURY_CONTRACT_ADDRESS);
+        ITreasuryCore treasuryCoreContract = ITreasuryCore(
+            TREASURY_CORE_CONTRACT_ADDRESS
+        );
 
         //--- Need to have additional checks for balance of the sale and also to deduct the tokens from the sale struct
         //Send back the remaining amount to user
-        treasuryContract.safeTransferFrom(
+        treasuryCoreContract.safeTransferFrom(
             address(this),
             order.buyer,
-            treasuryContract.CRD(),
+            treasuryCoreContract.CRD(),
             order.crdBalance,
             "Sale order canceled"
         );
 
-        orderBook[orderId].isClosed = true;
+        orderBook[saleId].isClosed = true;
 
         emit OrderClose({
             saleId: saleId,
@@ -281,13 +285,13 @@ contract OrdersContract {
         uint256 communityTokenAmount
     ) public {
         require(
-            orderBook[orderId].buyer != msg.sender,
+            orderBook[saleId].buyer != msg.sender,
             "INVALID: CANNOT_PURCHASE_SELF_ORDER"
         );
 
-        require(orderBook[orderId].isClosed == false, "INVALID: ORDER_CLOSED");
+        require(orderBook[saleId].isClosed == false, "INVALID: ORDER_CLOSED");
 
-        Order storage order = orderBook[orderId];
+        Order storage order = orderBook[saleId];
 
         //This will check if the amount to purchase is less or equal than the order that is generated
         require(
@@ -421,25 +425,27 @@ contract OrdersContract {
         //Removing the transaction fee from the transaction amount
         transactionAmount = transactionAmount - transactionFee;
 
-        ITreasury treasuryContract = ITreasury(TREASURY_CONTRACT_ADDRESS);
+        ITreasuryCore treasuryCoreContract = ITreasuryCore(
+            TREASURY_CORE_CONTRACT_ADDRESS
+        );
 
-        treasuryContract.safeTransferFrom(
+        treasuryCoreContract.safeTransferFrom(
             msg.sender,
             WALLET_ADDRESS,
-            treasuryContract.CRD(),
+            treasuryCoreContract.CRD(),
             transactionFee,
             "Sale transaction fee"
         );
 
-        treasuryContract.safeTransferFrom(
+        treasuryCoreContract.safeTransferFrom(
             address(this),
             msg.sender,
-            treasuryContract.CRD(),
+            treasuryCoreContract.CRD(),
             transactionAmount,
             "Sale token price amount transfer to seller"
         );
 
-        treasuryContract.safeTransferFrom(
+        treasuryCoreContract.safeTransferFrom(
             msg.sender,
             receiver,
             tokenId,

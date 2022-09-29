@@ -43,6 +43,7 @@ async function setup() {
     );
 
     await recordsContract.setContributionContractAddress(contributionContract.address);
+    await recordsContract.setTreasuryCoreContractAddress(treasuryCoreContract.address);
 
     await contributionContract.setRecordsContractAddress(recordsContract.address);
 
@@ -50,9 +51,11 @@ async function setup() {
     await contributionVotingContract.setContributionContractAddress(contributionContract.address);
 
     await ordersContract.setTreasuryContractAddress(treasuryContract.address);
+    await ordersContract.setTreasuryCoreContractAddress(treasuryCoreContract.address);
     await ordersContract.setWalletAddress(await getEthAccount(9));
 
     await agreementContract.setTreasuryContractAddress(treasuryContract.address);
+    await agreementContract.setTreasuryCoreContractAddress(treasuryCoreContract.address);
 
     await baseVotingContractMock.setTreasuryContractAddress(treasuryContract.address);
     await baseVotingCounterOfferContractMock.setTreasuryContractAddress(treasuryContract.address);

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "../interface/ITreasury.sol";
+import "../interface/ITreasuryCore.sol";
 import "../interface/IBaseVoting.sol";
 
 contract VotingHubContract {
@@ -50,11 +50,15 @@ contract VotingHubContract {
         uint256 amount,
         uint256 tokenId
     ) public _onlyTreasuryCore {
-        ITreasury iTreasury = ITreasury(TREASURY_CORE_CONTRACT_ADDRESS);
+        ITreasuryCore iTreasury = ITreasuryCore(TREASURY_CORE_CONTRACT_ADDRESS);
         for (uint256 i = 0; i < VOTING_CONTRACTS_ADDRESS.length; i++) {
             IBaseVoting iBaseVoting = IBaseVoting(VOTING_CONTRACTS_ADDRESS[i]);
             if (sender != address(0)) {
                 uint256 bal = iTreasury.balanceOf(sender, tokenId);
+                require(
+                    bal >= amount,
+                    "ERC1155: insufficient balance for transfer"
+                );
                 iBaseVoting._handleUserTokenTransfers(
                     sender,
                     tokenId,

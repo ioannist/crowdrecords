@@ -224,14 +224,14 @@ contract("Contribution Contract", function() {
             ).to.eventually.be.bignumber.equals(new BN(await web3.utils.toWei("1000")));
 
             //Transferring governance to other account so they can vote
-            await this.treasuryContract.safeTransferFrom(
+            await this.treasuryCoreContract.safeTransferFrom(
                 await helper.getEthAccount(0),
                 await helper.getEthAccount(2),
                 GOVERNANCE_TOKEN_ID,
                 await web3.utils.toWei("500"),
                 "0x0"
             );
-            await this.treasuryContract.safeTransferFrom(
+            await this.treasuryCoreContract.safeTransferFrom(
                 await helper.getEthAccount(0),
                 await helper.getEthAccount(3),
                 GOVERNANCE_TOKEN_ID,

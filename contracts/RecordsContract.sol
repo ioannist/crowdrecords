@@ -42,6 +42,7 @@ contract RecordsContract {
         address owner;
         string recordCategory;
         uint256 creationDate;
+        bool isPresent;
     }
 
     /// @dev This event is emited when new record is created
@@ -96,6 +97,24 @@ contract RecordsContract {
         CONTRIBUTION_CONTRACT_ADDRESS = contributionContractAddress;
     }
 
+    /// @dev This function sets the Treasury Contract address
+    /// @param treasuryContractAddress Takes the address of new treasury contract as parameter
+    function setTreasuryContractAddress(address treasuryContractAddress)
+        public
+        _ownerOnly
+    {
+        _setTreasuryContractAddress(treasuryContractAddress);
+    }
+
+    /// @dev This function sets the Treasury Contract address
+    /// @param treasuryCoreContractAddress Takes the address of new treasury core contract as parameter
+    function setTreasuryCoreContractAddress(address treasuryCoreContractAddress)
+        public
+        _ownerOnly
+    {
+        TREASURY_CORE_CONTRACT_ADDRESS = treasuryCoreContractAddress;
+    }
+
     /// @dev This function creates new record
     /// @param name This is the name of the record
     /// @param image This is the image/logo of the record
@@ -136,7 +155,8 @@ contract RecordsContract {
             parentId: 0,
             owner: msg.sender,
             recordCategory: recordCategory,
-            creationDate: block.timestamp
+            creationDate: block.timestamp,
+            isPresent: true
         });
 
         recordData[recordId] = recordStruct;

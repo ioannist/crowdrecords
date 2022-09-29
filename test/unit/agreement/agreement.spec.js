@@ -144,7 +144,7 @@ contract("AgreementContract", function() {
             let singleRewardAmount = await web3.utils.toWei("10000");
             let totalReward = await web3.utils.toWei("90000");
 
-            await this.treasuryContract.safeTransferFrom(
+            await this.treasuryCoreContract.safeTransferFrom(
                 user1,
                 user2,
                 COMMUNITY_TOKEN_ID,
@@ -152,7 +152,7 @@ contract("AgreementContract", function() {
                 "0xa165"
             );
 
-            await this.treasuryContract.setApprovalForAll(this.agreementContract.address, true);
+            await this.treasuryCoreContract.setApprovalForAll(this.agreementContract.address, true);
 
             const receipt = await this.agreementContract.payRoyaltyAmount(
                 this.firstAgreementId,
@@ -204,7 +204,7 @@ contract("AgreementContract", function() {
             let singleRewardAmount = await web3.utils.toWei("200");
             let totalReward = await web3.utils.toWei("200");
 
-            await this.treasuryContract.safeTransferFrom(
+            await this.treasuryCoreContract.safeTransferFrom(
                 user1,
                 user2,
                 COMMUNITY_TOKEN_ID,
@@ -212,7 +212,7 @@ contract("AgreementContract", function() {
                 "0xa165"
             );
 
-            await this.treasuryContract.setApprovalForAll(this.agreementContract.address, true);
+            await this.treasuryCoreContract.setApprovalForAll(this.agreementContract.address, true);
 
             await this.agreementContract.payRoyaltyAmount(
                 this.firstAgreementId,
@@ -235,7 +235,7 @@ contract("AgreementContract", function() {
                 this.user2 = await helper.getEthAccount(1);
                 this.singleRewardAmount = await web3.utils.toWei("200");
 
-                await this.treasuryContract.safeTransferFrom(
+                await this.treasuryCoreContract.safeTransferFrom(
                     this.user1,
                     this.user2,
                     COMMUNITY_TOKEN_ID,
@@ -243,7 +243,10 @@ contract("AgreementContract", function() {
                     "0xa165"
                 );
 
-                await this.treasuryContract.setApprovalForAll(this.agreementContract.address, true);
+                await this.treasuryCoreContract.setApprovalForAll(
+                    this.agreementContract.address,
+                    true
+                );
             });
             afterEach(async function() {
                 await helper.revertToSnapshot(snapshotId2);
@@ -347,7 +350,7 @@ contract("AgreementContract", function() {
             const invalidRecord = 40;
             let singleRewardAmount = new BN(200);
 
-            await this.treasuryContract.setApprovalForAll(this.agreementContract.address, true);
+            await this.treasuryCoreContract.setApprovalForAll(this.agreementContract.address, true);
             await expect(
                 this.agreementContract.payRoyaltyAmount(invalidRecord, singleRewardAmount)
             ).to.be.rejectedWith("INVALID: AGREEMENT_ID");
@@ -375,7 +378,7 @@ contract("AgreementContract", function() {
             let totalRewardForUser2 = await web3.utils.toWei("444.444444444444440000");
 
             //Transfer community token to user2 so he can make claims
-            await this.treasuryContract.safeTransferFrom(
+            await this.treasuryCoreContract.safeTransferFrom(
                 user1,
                 user2,
                 COMMUNITY_TOKEN_ID,
@@ -383,7 +386,7 @@ contract("AgreementContract", function() {
                 "0xa165"
             );
 
-            await this.treasuryContract.setApprovalForAll(this.agreementContract.address, true);
+            await this.treasuryCoreContract.setApprovalForAll(this.agreementContract.address, true);
 
             await this.agreementContract.payRoyaltyAmount(
                 this.firstAgreementId,
@@ -429,7 +432,7 @@ contract("AgreementContract", function() {
             let totalRewardForUser2 = await web3.utils.toWei("1422.2");
 
             //Transfer community token to user2 so he can make claims
-            await this.treasuryContract.safeTransferFrom(
+            await this.treasuryCoreContract.safeTransferFrom(
                 user1,
                 user2,
                 COMMUNITY_TOKEN_ID,
@@ -437,7 +440,7 @@ contract("AgreementContract", function() {
                 "0xa165"
             );
 
-            await this.treasuryContract.setApprovalForAll(this.agreementContract.address, true);
+            await this.treasuryCoreContract.setApprovalForAll(this.agreementContract.address, true);
 
             await this.agreementContract.payRoyaltyAmount(
                 this.firstAgreementId,
@@ -487,7 +490,7 @@ contract("AgreementContract", function() {
             let secondTimeRewardForUser2 = await web3.utils.toWei("888.888888888888880000");
 
             //Transfer community token to user2 so he can make claims
-            await this.treasuryContract.safeTransferFrom(
+            await this.treasuryCoreContract.safeTransferFrom(
                 user1,
                 user2,
                 COMMUNITY_TOKEN_ID,
@@ -495,7 +498,7 @@ contract("AgreementContract", function() {
                 "0xa165"
             );
 
-            await this.treasuryContract.setApprovalForAll(this.agreementContract.address, true);
+            await this.treasuryCoreContract.setApprovalForAll(this.agreementContract.address, true);
 
             //Distributing first time
             await this.agreementContract.payRoyaltyAmount(
@@ -543,7 +546,7 @@ contract("AgreementContract", function() {
             let totalRewardForUser1 = await web3.utils.toWei("79111.1111111111");
 
             //Transfer community token to user2 so he can make claims
-            await this.treasuryContract.safeTransferFrom(
+            await this.treasuryCoreContract.safeTransferFrom(
                 user1,
                 user2,
                 COMMUNITY_TOKEN_ID,
@@ -551,7 +554,7 @@ contract("AgreementContract", function() {
                 "0xa165"
             );
 
-            await this.treasuryContract.setApprovalForAll(this.agreementContract.address, true);
+            await this.treasuryCoreContract.setApprovalForAll(this.agreementContract.address, true);
 
             //Distributing first time
             await this.agreementContract.payRoyaltyAmount(
@@ -613,7 +616,7 @@ contract("AgreementContract", function() {
                 this.communityTokenOwnedByUser2 = await web3.utils.toWei("5000");
 
                 //Transfer community token to user2 so he can make claims
-                await this.treasuryContract.safeTransferFrom(
+                await this.treasuryCoreContract.safeTransferFrom(
                     this.user1,
                     this.user2,
                     COMMUNITY_TOKEN_ID,
@@ -621,7 +624,10 @@ contract("AgreementContract", function() {
                     "0xa165"
                 );
 
-                await this.treasuryContract.setApprovalForAll(this.agreementContract.address, true);
+                await this.treasuryCoreContract.setApprovalForAll(
+                    this.agreementContract.address,
+                    true
+                );
 
                 //Distributing first time
                 await this.agreementContract.payRoyaltyAmount(
@@ -636,7 +642,7 @@ contract("AgreementContract", function() {
             it("New user purchases tokens and tries to claim reward, CRD balance should remain 0", async function() {
                 const communityTokenOwnedByUser3 = await web3.utils.toWei("10000");
                 //Transfer community token to user3 so he can make claims
-                await this.treasuryContract.safeTransferFrom(
+                await this.treasuryCoreContract.safeTransferFrom(
                     this.user1,
                     this.user3,
                     COMMUNITY_TOKEN_ID,
@@ -695,7 +701,7 @@ contract("AgreementContract", function() {
                 const rewardForUser3 = await web3.utils.toWei("888.88888888888888");
 
                 //Transfer community token to user3 so he can make claims
-                await this.treasuryContract.safeTransferFrom(
+                await this.treasuryCoreContract.safeTransferFrom(
                     this.user1,
                     this.user3,
                     COMMUNITY_TOKEN_ID,
@@ -730,7 +736,7 @@ contract("AgreementContract", function() {
             const communityTokenOwnedByUser2 = await web3.utils.toWei("5000");
 
             //Transfer community token to user2 so he can make claims
-            await this.treasuryContract.safeTransferFrom(
+            await this.treasuryCoreContract.safeTransferFrom(
                 user1,
                 user2,
                 COMMUNITY_TOKEN_ID,
@@ -738,7 +744,7 @@ contract("AgreementContract", function() {
                 "0xa165"
             );
 
-            await this.treasuryContract.setApprovalForAll(this.agreementContract.address, true);
+            await this.treasuryCoreContract.setApprovalForAll(this.agreementContract.address, true);
 
             //Distributing first time
             await expect(
@@ -766,10 +772,10 @@ contract("AgreementContract", function() {
             this.communityTokenOwnedByUser4 = await web3.utils.toWei("5000");
             this.baseCRDTokens = await web3.utils.toWei("5000");
 
-            await this.treasuryContract.setApprovalForAll(this.agreementContract.address, true);
+            await this.treasuryCoreContract.setApprovalForAll(this.agreementContract.address, true);
 
             //Transfer community token to user2 so he can make claims
-            await this.treasuryContract.safeTransferFrom(
+            await this.treasuryCoreContract.safeTransferFrom(
                 this.user1,
                 this.user2,
                 COMMUNITY_TOKEN_ID,
@@ -777,7 +783,7 @@ contract("AgreementContract", function() {
                 "0xa165"
             );
 
-            await this.treasuryContract.safeTransferFrom(
+            await this.treasuryCoreContract.safeTransferFrom(
                 this.user1,
                 this.user2,
                 this.CRDToken,
@@ -786,7 +792,7 @@ contract("AgreementContract", function() {
             );
 
             //Transfer community token to user3 so he can make claims
-            await this.treasuryContract.safeTransferFrom(
+            await this.treasuryCoreContract.safeTransferFrom(
                 this.user1,
                 this.user3,
                 COMMUNITY_TOKEN_ID,
@@ -794,7 +800,7 @@ contract("AgreementContract", function() {
                 "0xa165"
             );
 
-            await this.treasuryContract.safeTransferFrom(
+            await this.treasuryCoreContract.safeTransferFrom(
                 this.user1,
                 this.user3,
                 this.CRDToken,
@@ -803,7 +809,7 @@ contract("AgreementContract", function() {
             );
 
             //Transfer community token to user4 so he can make claims
-            await this.treasuryContract.safeTransferFrom(
+            await this.treasuryCoreContract.safeTransferFrom(
                 this.user1,
                 this.user4,
                 COMMUNITY_TOKEN_ID,
@@ -811,7 +817,7 @@ contract("AgreementContract", function() {
                 "0xa165"
             );
 
-            await this.treasuryContract.safeTransferFrom(
+            await this.treasuryCoreContract.safeTransferFrom(
                 this.user1,
                 this.user4,
                 this.CRDToken,
@@ -831,18 +837,34 @@ contract("AgreementContract", function() {
                 this.treasuryContract.balanceOf(this.user4, COMMUNITY_TOKEN_ID)
             ).to.eventually.be.bignumber.equals(this.communityTokenOwnedByUser4);
 
-            await this.treasuryContract.setApprovalForAll(this.agreementContract.address, true, {
-                from: this.user1,
-            });
-            await this.treasuryContract.setApprovalForAll(this.agreementContract.address, true, {
-                from: this.user2,
-            });
-            await this.treasuryContract.setApprovalForAll(this.agreementContract.address, true, {
-                from: this.user3,
-            });
-            await this.treasuryContract.setApprovalForAll(this.agreementContract.address, true, {
-                from: this.user4,
-            });
+            await this.treasuryCoreContract.setApprovalForAll(
+                this.agreementContract.address,
+                true,
+                {
+                    from: this.user1,
+                }
+            );
+            await this.treasuryCoreContract.setApprovalForAll(
+                this.agreementContract.address,
+                true,
+                {
+                    from: this.user2,
+                }
+            );
+            await this.treasuryCoreContract.setApprovalForAll(
+                this.agreementContract.address,
+                true,
+                {
+                    from: this.user3,
+                }
+            );
+            await this.treasuryCoreContract.setApprovalForAll(
+                this.agreementContract.address,
+                true,
+                {
+                    from: this.user4,
+                }
+            );
         });
         afterEach(async function() {
             await helper.revertToSnapshot(snapshotId2);

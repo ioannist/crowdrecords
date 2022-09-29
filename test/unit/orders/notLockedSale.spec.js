@@ -33,7 +33,10 @@ contract("Not Ratio Locked Sales", function() {
     });
 
     it("User can create normal Buy request and cancel it", async function() {
-        await this.treasuryContract.setApprovalForAll(this.ordersContract.address, true);
+        const user1 = await helper.getEthAccount(0);
+        await this.treasuryCoreContract.setApprovalForAll(this.ordersContract.address, true, {
+            from: user1,
+        });
 
         let trx = await this.ordersContract.createBuyOrder(
             false,
@@ -46,12 +49,12 @@ contract("Not Ratio Locked Sales", function() {
             2
         );
         expectEvent(trx, "BuyOrder", {
-            buyer: await helper.getEthAccount(0),
+            buyer: user1,
             isLockedInRatio: false,
         });
 
-        let saleId = trx?.logs[0].args.saleId;
-        trx = await this.ordersContract.cancelBuyOrder(saleId);
+        let saleId = trx?.logs[0].args.saleId.toString();
+        trx = await this.ordersContract.cancelBuyOrder(1, { from: user1 });
 
         expectEvent(trx, "OrderClose", {
             saleId: saleId,
@@ -59,12 +62,12 @@ contract("Not Ratio Locked Sales", function() {
 
         //The CRD tokens that were transferred to ordersContract needs to be returned
         await expect(
-            this.treasuryContract.balanceOf(await helper.getEthAccount(0), CRDTokenId)
+            this.treasuryContract.balanceOf(user1, CRDTokenId)
         ).to.eventually.be.bignumber.equals(await web3.utils.toWei("1000000"));
     });
 
     it("Sale tokens should belong to same record, expect revert", async function() {
-        await this.treasuryContract.setApprovalForAll(this.ordersContract.address, true);
+        await this.treasuryCoreContract.setApprovalForAll(this.ordersContract.address, true);
         await expect(
             this.ordersContract.createBuyOrder(
                 false,
@@ -96,14 +99,14 @@ contract("Not Ratio Locked Sales", function() {
         const user2 = await helper.getEthAccount(1);
 
         //Seller Approval
-        await this.treasuryContract.setApprovalForAll(this.ordersContract.address, true);
+        await this.treasuryCoreContract.setApprovalForAll(this.ordersContract.address, true);
         //Purchaser Approval
-        await this.treasuryContract.setApprovalForAll(this.ordersContract.address, true, {
+        await this.treasuryCoreContract.setApprovalForAll(this.ordersContract.address, true, {
             from: user2,
         });
 
         //Transferring CRD token to user2
-        await this.treasuryContract.safeTransferFrom(
+        await this.treasuryCoreContract.safeTransferFrom(
             user1,
             user2,
             CRDTokenId,
@@ -143,15 +146,15 @@ contract("Not Ratio Locked Sales", function() {
         });
 
         assert(
-            (await this.treasuryContract.balanceOf(user2, COMMUNITY_TOKEN_ID)) ==
-                (await web3.utils.toWei("50")),
-            "Final balance after community token transfer doesn't match"
-        );
-
-        assert(
             (await this.treasuryContract.balanceOf(user2, GOVERNANCE_TOKEN_ID)) ==
                 (await web3.utils.toWei("1")),
             "Final balance after governance token transfer doesn't match"
+        );
+
+        assert(
+            (await this.treasuryContract.balanceOf(user2, COMMUNITY_TOKEN_ID)) ==
+                (await web3.utils.toWei("50")),
+            "Final balance after community token transfer doesn't match"
         );
 
         //-----------------------------------------------------------------------------//

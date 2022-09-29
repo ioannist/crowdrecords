@@ -73,7 +73,7 @@ contract("BaseVotingCounterOfferContract", function() {
         const user2 = await helper.getEthAccount(1);
         const user3 = await helper.getEthAccount(2);
 
-        await this.treasuryContract.safeTransferFrom(
+        await this.treasuryCoreContract.safeTransferFrom(
             user1,
             user3,
             COMMUNITY_TOKEN_ID,
@@ -99,7 +99,7 @@ contract("BaseVotingCounterOfferContract", function() {
         const user2 = await helper.getEthAccount(1);
         const user3 = await helper.getEthAccount(2);
 
-        await this.treasuryContract.safeTransferFrom(
+        await this.treasuryCoreContract.safeTransferFrom(
             user1,
             user3,
             COMMUNITY_TOKEN_ID,
@@ -125,7 +125,7 @@ contract("BaseVotingCounterOfferContract", function() {
         const user2 = await helper.getEthAccount(1);
         const user3 = await helper.getEthAccount(2);
 
-        await this.treasuryContract.safeTransferFrom(
+        await this.treasuryCoreContract.safeTransferFrom(
             user1,
             user3,
             COMMUNITY_TOKEN_ID,
@@ -151,7 +151,7 @@ contract("BaseVotingCounterOfferContract", function() {
         const user2 = await helper.getEthAccount(1);
         const user3 = await helper.getEthAccount(2);
 
-        await this.treasuryContract.safeTransferFrom(
+        await this.treasuryCoreContract.safeTransferFrom(
             user1,
             user2,
             COMMUNITY_TOKEN_ID,
@@ -159,7 +159,7 @@ contract("BaseVotingCounterOfferContract", function() {
             "0xa165"
         );
 
-        await this.treasuryContract.safeTransferFrom(
+        await this.treasuryCoreContract.safeTransferFrom(
             user1,
             user3,
             COMMUNITY_TOKEN_ID,
@@ -186,7 +186,7 @@ contract("BaseVotingCounterOfferContract", function() {
         const user2 = await helper.getEthAccount(1);
         const user3 = await helper.getEthAccount(2);
 
-        await this.treasuryContract.safeTransferFrom(
+        await this.treasuryCoreContract.safeTransferFrom(
             user1,
             user2,
             COMMUNITY_TOKEN_ID,
@@ -194,7 +194,7 @@ contract("BaseVotingCounterOfferContract", function() {
             "0xa165"
         );
 
-        await this.treasuryContract.safeTransferFrom(
+        await this.treasuryCoreContract.safeTransferFrom(
             user1,
             user3,
             COMMUNITY_TOKEN_ID,
@@ -226,7 +226,7 @@ contract("BaseVotingCounterOfferContract", function() {
             this.user2 = await helper.getEthAccount(1);
             this.user3 = await helper.getEthAccount(2);
 
-            await this.treasuryContract.safeTransferFrom(
+            await this.treasuryCoreContract.safeTransferFrom(
                 this.user1,
                 this.user2,
                 COMMUNITY_TOKEN_ID,
@@ -234,7 +234,7 @@ contract("BaseVotingCounterOfferContract", function() {
                 "0xa165"
             );
 
-            await this.treasuryContract.safeTransferFrom(
+            await this.treasuryCoreContract.safeTransferFrom(
                 this.user1,
                 this.user3,
                 COMMUNITY_TOKEN_ID,
@@ -420,7 +420,7 @@ contract("BaseVotingCounterOfferContract", function() {
                 }
             );
 
-            await this.treasuryContract.safeTransferFrom(
+            await this.treasuryCoreContract.safeTransferFrom(
                 this.user1,
                 this.user2,
                 COMMUNITY_TOKEN_ID,

@@ -122,6 +122,7 @@ contract TreasuryCoreContract is IERC1155Receiver, SnapshotERC1155 {
     // 18 decimal points supported
     constructor(address owner) ERC1155("https://crowdrecords.com/{id}") {
         OWNER = owner;
+        _mint(owner, CRD, 1000000 * 10**18, "https://crowdrecords.com");
     }
 
     /// @dev Modifier to check that the person who accesses a specific function is the owner of contract himself.
@@ -168,16 +169,6 @@ contract TreasuryCoreContract is IERC1155Receiver, SnapshotERC1155 {
             );
         }
 
-        require(
-            govTokenMapping[newTokenData.recordId].isPresent == false,
-            "INVALID: TOKEN_ID_ALREADY_IN_USE"
-        );
-
-        require(
-            govTokenSym[newTokenData.symbol] == false,
-            "INVALID: TOKEN_SYMBOL_ALREADY_IN_USE"
-        );
-
         LastTokenId++;
         uint256 newTokenId = LastTokenId;
 
@@ -204,16 +195,6 @@ contract TreasuryCoreContract is IERC1155Receiver, SnapshotERC1155 {
                 abi.encodePacked(preString, newTokenData.symbol)
             );
         }
-
-        require(
-            commTokenMapping[newTokenData.recordId].isPresent == false,
-            "INVALID: TOKEN_ID_ALREADY_IN_USE"
-        );
-
-        require(
-            commTokenSym[newTokenData.symbol] == false,
-            "INVALID: TOKEN_SYMBOL_ALREADY_IN_USE"
-        );
 
         LastTokenId++;
         uint256 newTokenId = LastTokenId;

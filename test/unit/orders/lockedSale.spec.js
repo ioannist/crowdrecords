@@ -46,7 +46,7 @@ contract("Ratio Locked Sales", function() {
     });
 
     it("User can create lock sale request and cancel it", async function() {
-        await this.treasuryContract.setApprovalForAll(this.ordersContract.address, true);
+        await this.treasuryCoreContract.setApprovalForAll(this.ordersContract.address, true);
 
         let trx = await this.ordersContract.createBuyOrder(
             true,
@@ -77,7 +77,7 @@ contract("Ratio Locked Sales", function() {
     });
 
     it("Sale tokens should belong to single record only", async function() {
-        await this.treasuryContract.setApprovalForAll(this.ordersContract.address, true);
+        await this.treasuryCoreContract.setApprovalForAll(this.ordersContract.address, true);
         await expect(
             this.ordersContract.createBuyOrder(
                 true,
@@ -114,14 +114,14 @@ contract("Ratio Locked Sales", function() {
             this.user2 = await helper.getEthAccount(1);
 
             //Seller Approval
-            await this.treasuryContract.setApprovalForAll(this.ordersContract.address, true);
+            await this.treasuryCoreContract.setApprovalForAll(this.ordersContract.address, true);
             //Purchaser Approval
-            await this.treasuryContract.setApprovalForAll(this.ordersContract.address, true, {
+            await this.treasuryCoreContract.setApprovalForAll(this.ordersContract.address, true, {
                 from: this.user2,
             });
 
             //Transferring CRD token to user2
-            await this.treasuryContract.safeTransferFrom(
+            await this.treasuryCoreContract.safeTransferFrom(
                 this.user1,
                 this.user2,
                 CRDTokenId,
