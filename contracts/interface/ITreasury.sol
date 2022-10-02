@@ -44,8 +44,16 @@ interface ITreasury {
         address newVotingContractAddress
     ) external;
 
+    /// @dev This function creates new governance tokens for specified record. Only call from records contract
+    function createNewGovernanceToken(
+        uint256 recordId,
+        uint256 totalSupply,
+        uint256 userBalance,
+        string memory symbol,
+        string memory image
+    ) external payable returns (uint256);
+
     /// @dev This function creats new governance tokens for specified record
-    /// @param newTokenData This contains all the parameters needed to create a new governance token that are
     function createNewGovernanceToken(NewTokenData memory newTokenData)
         external
         payable
@@ -134,11 +142,4 @@ interface ITreasury {
         string memory governanceSymbol,
         string memory communitySymbol
     ) external;
-
-    /// @dev Retrieves the balance of `account` at the time `snapshotId` was created.
-    function balanceOfAt(
-        address account,
-        uint256 snapshotId,
-        uint256 tokenId
-    ) external view returns (uint256);
 }

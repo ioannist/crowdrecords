@@ -53,4 +53,11 @@ interface ITreasuryCore {
         external
         view
         returns (uint256);
+
+    /// @dev Retrieves the balance of `account` at the time `snapshotId` was created.
+    function balanceOfAt(
+        address account,
+        uint256 snapshotId,
+        uint256 tokenId
+    ) external view returns (uint256);
 }

@@ -3,6 +3,7 @@ const web3 = new Web3("ws://localhost:8545");
 
 exports.VOTING_INTERVAL_BLOCKS = 25;
 exports.DILUTION_INTERVAL_BLOCKS = 1000;
+exports.SALE_TRANSACTION_FEE_PERCENT = 0.5;
 
 exports.advanceTime = (time) => {
     return new Promise((resolve, reject) => {

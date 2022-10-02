@@ -22,10 +22,10 @@ contract OrdersContract {
     /// @param creationDate this is the creation date of the Buy order
     /// @param communityTokenId this is the community token id that is involved in the Buy order
     /// @param communityTokenAmount this is the community token amount for Buy order
-    /// @param communityTokenPrice this is the price of single token
+    /// @param communityTokenCRD this is the total CRD amount for the community token purchase
     /// @param governanceTokenId this is the community token id that is involved in the Buy order
     /// @param governanceTokenAmount this is the community token amount for Buy order
-    /// @param governanceTokenPrice this is the price of single token
+    /// @param governanceTokenCRD this is the total CRD amount for the governance token purchase
     /// @param crdBalance this is the total balance remaining for the order
     struct Order {
         bool isClosed;
@@ -34,11 +34,30 @@ contract OrdersContract {
         uint256 creationDate;
         uint256 communityTokenId;
         uint256 communityTokenAmount;
-        uint256 communityTokenPrice;
+        uint256 communityTokenCRD;
         uint256 governanceTokenId;
         uint256 governanceTokenAmount;
-        uint256 governanceTokenPrice;
+        uint256 governanceTokenCRD;
         uint256 crdBalance;
+    }
+
+    /// @dev Struct that holds the data for the params of the BuyOrder
+    /// @param isLockedInRatio the is denotes wether the user wants to sell the token individually or in a ratio
+    /// @param communityTokenId this is the community token id that is involved in the Buy order
+    /// @param communityTokenAmount this is the community token amount for Buy order
+    /// @param communityTokenCRD this is the CRD balance for community token purchase
+    /// @param governanceTokenId this is the community token id that is involved in the Buy order
+    /// @param governanceTokenAmount this is the community token amount for Buy order
+    /// @param governanceTokenCRD this is the CRD balance for governance token purchase
+    struct BuyOrderParams {
+        bool isLockedInRatio;
+        uint256 recordId;
+        uint256 communityTokenId;
+        uint256 communityTokenAmount;
+        uint256 communityTokenCRD;
+        uint256 governanceTokenId;
+        uint256 governanceTokenAmount;
+        uint256 governanceTokenCRD;
     }
 
     /// @dev this is event which is created when a user creates order to sell his tokens
@@ -48,10 +67,10 @@ contract OrdersContract {
     /// @param creationDate this is the creation date of the Buy order
     /// @param communityTokenId this is the community token id that is involved in the Buy order
     /// @param communityTokenAmount this is the community token amount for Buy order
-    /// @param communityTokenPrice this is the price of single token
+    /// @param communityTokenCRD Total CRD tokens available for the purchase of community token
     /// @param governanceTokenId this is the community token id that is involved in the Buy order
     /// @param governanceTokenAmount this is the community token amount for Buy order
-    /// @param governanceTokenPrice this is the price of single token
+    /// @param governanceTokenCRD Total CRD tokens available for the purchase of governance token
     /// @param crdBalance this is the total balance remaining for the order
     event BuyOrder(
         uint256 saleId,
@@ -60,10 +79,10 @@ contract OrdersContract {
         uint256 creationDate,
         uint256 communityTokenId,
         uint256 communityTokenAmount,
-        uint256 communityTokenPrice,
+        uint256 communityTokenCRD,
         uint256 governanceTokenId,
         uint256 governanceTokenAmount,
-        uint256 governanceTokenPrice,
+        uint256 governanceTokenCRD,
         uint256 crdBalance
     );
 
@@ -74,10 +93,10 @@ contract OrdersContract {
     /// @param creationDate this is the date when tokens were purchased
     /// @param communityTokenId this is the community token id that is involved in the sale
     /// @param communityTokenAmount this is the community token amount for sale
-    /// @param communityTokenPrice this is the price of single token
+    /// @param communityTokenCRD Total CRD tokens available for the purchase of community token
     /// @param governanceTokenId this is the community token id that is involved in the sale
     /// @param governanceTokenAmount this is the community token amount for sale
-    /// @param governanceTokenPrice this is the price of single token
+    /// @param governanceTokenCRD Total CRD tokens available for the purchase of governance token
     /// @param amountTransferred this is the total amount paid
     /// @param platformFees this is the platform fees taken by crowdrecords
 
@@ -88,10 +107,10 @@ contract OrdersContract {
         uint256 creationDate,
         uint256 communityTokenId,
         uint256 communityTokenAmount,
-        uint256 communityTokenPrice,
+        uint256 communityTokenCRD,
         uint256 governanceTokenId,
         uint256 governanceTokenAmount,
-        uint256 governanceTokenPrice,
+        uint256 governanceTokenCRD,
         uint256 amountTransferred,
         uint256 platformFees
     );
@@ -119,6 +138,53 @@ contract OrdersContract {
         _;
     }
 
+    /// @dev Modifier checks if order params are valid or not
+    /// @param params params for the buy order
+    modifier buyOrderCheck(BuyOrderParams memory params) {
+        ITreasury treasuryContract = ITreasury(TREASURY_CONTRACT_ADDRESS);
+
+        require(
+            treasuryContract.getCommunityTokenId(params.recordId) ==
+                params.communityTokenId,
+            "INVALID: COMMUNITY_TOKEN_ID"
+        );
+        require(
+            treasuryContract.getGovernanceTokenId(params.recordId) ==
+                params.governanceTokenId,
+            "INVALID: GOVERNANCE_TOKEN_ID"
+        );
+
+        if (params.isLockedInRatio) {
+            require(
+                params.communityTokenAmount > 0,
+                "INVALID: CANNOT_HAVE_0_COMMUNITY_AMOUNT"
+            );
+
+            require(
+                params.governanceTokenAmount > 0,
+                "INVALID: CANNOT_HAVE_0_GOVERNANCE_AMOUNT"
+            );
+        }
+        _;
+    }
+
+    /// @dev This function calculates the ratio of the 2 values with fixed precision
+    /// @param numerator the numerator value
+    /// @param denominator the denominator value
+    /// @param precision precision count
+    /// @return quotient The ratio of numerator to denominator
+    function ratio(
+        uint256 numerator,
+        uint256 denominator,
+        uint256 precision
+    ) public pure returns (uint256 quotient) {
+        // caution, check safe-to-multiply here
+        uint256 _numerator = numerator * 10**(precision + 1);
+        // with rounding of last digit
+        uint256 _quotient = ((_numerator / denominator) + 5) / 10;
+        return (_quotient);
+    }
+
     /// @notice This function is to set the owner address
     /// @dev This function takes in the address of new owner and sets it to the contract
     /// @param owner Takes the address of new owner as parameter
@@ -135,6 +201,14 @@ contract OrdersContract {
         TREASURY_CONTRACT_ADDRESS = newTreasuryContractAddress;
     }
 
+    /// @dev This function sets the treasury core Contract address
+    /// @param newTreasuryCoreContractAddress the is the new Treasury Core Contract Address
+    function setTreasuryCoreContractAddress(
+        address newTreasuryCoreContractAddress
+    ) public ownerOnly {
+        TREASURY_CORE_CONTRACT_ADDRESS = newTreasuryCoreContractAddress;
+    }
+
     /// @dev This function sets the wallet address this address will receive all the transaction royalties
     /// @param newWalletAddress the is the new newWalletAddress
     function setWalletAddress(address newWalletAddress) public ownerOnly {
@@ -142,61 +216,49 @@ contract OrdersContract {
     }
 
     /// @dev This function is called to create a new saleOrder
-    /// @param isLockedInRatio the is denotes wether the user wants to sell the token individually or in a ratio
-    /// @param communityTokenId this is the community token id that is involved in the Buy order
-    /// @param communityTokenAmount this is the community token amount for Buy order
-    /// @param communityTokenPrice this is the price of single token
-    /// @param governanceTokenId this is the community token id that is involved in the Buy order
-    /// @param governanceTokenAmount this is the community token amount for Buy order
-    /// @param governanceTokenPrice this is the price of single token
-    function createBuyOrder(
-        bool isLockedInRatio,
-        uint256 recordId,
-        uint256 communityTokenId,
-        uint256 communityTokenAmount,
-        uint256 communityTokenPrice,
-        uint256 governanceTokenId,
-        uint256 governanceTokenAmount,
-        uint256 governanceTokenPrice
-    ) public returns (uint256 saleOrderId) {
-        ITreasury treasuryContract = ITreasury(TREASURY_CONTRACT_ADDRESS);
-
-        require(
-            treasuryContract.getCommunityTokenId(recordId) == communityTokenId,
-            "INVALID: COMMUNITY_TOKEN_ID"
-        );
-        require(
-            treasuryContract.getGovernanceTokenId(recordId) ==
-                governanceTokenId,
-            "INVALID: GOVERNANCE_TOKEN_ID"
+    /// @param params this is the params for the buy order creation
+    function createBuyOrder(BuyOrderParams memory params)
+        public
+        buyOrderCheck(params)
+        returns (uint256 saleOrderId)
+    {
+        ITreasuryCore treasuryCoreContract = ITreasuryCore(
+            TREASURY_CORE_CONTRACT_ADDRESS
         );
 
-        if (isLockedInRatio) {
-            require(
-                communityTokenAmount > 0,
-                "INVALID: CANNOT_HAVE_0_COMMUNITY_AMOUNT"
-            );
-
-            require(
-                governanceTokenAmount > 0,
-                "INVALID: CANNOT_HAVE_0_GOVERNANCE_AMOUNT"
-            );
-        }
-
-        //Calculate the total CRD required for the deal and then transfer them
-        uint256[2] memory tokenTotal;
-        tokenTotal[0] = governanceTokenAmount * governanceTokenPrice;
-        tokenTotal[1] = communityTokenAmount * communityTokenPrice;
-
-        //Transferring the CRD token into contract to lock it
-        treasuryContract.safeTransferFrom(
+        // Transferring the CRD token into contract to lock it
+        treasuryCoreContract.safeTransferFrom(
             tx.origin,
             address(this),
-            treasuryContract.CRD(),
-            tokenTotal[1] + tokenTotal[0],
+            treasuryCoreContract.CRD(),
+            params.governanceTokenCRD + params.communityTokenCRD,
             "Sale order"
         );
 
+        uint256 orderId = createOrder(
+            params.isLockedInRatio,
+            params.communityTokenId,
+            params.communityTokenAmount,
+            params.communityTokenCRD,
+            params.governanceTokenId,
+            params.governanceTokenAmount,
+            params.governanceTokenCRD,
+            params.governanceTokenCRD + params.communityTokenCRD
+        );
+
+        return orderId;
+    }
+
+    function createOrder(
+        bool isLockedInRatio,
+        uint256 communityTokenId,
+        uint256 communityTokenAmount,
+        uint256 communityTokenCRD,
+        uint256 governanceTokenId,
+        uint256 governanceTokenAmount,
+        uint256 governanceTokenCRD,
+        uint256 totalCRD
+    ) internal returns (uint256 orderId) {
         uint256 newOrderId = orderId;
         orderId++;
 
@@ -207,11 +269,11 @@ contract OrdersContract {
             creationDate: block.timestamp,
             communityTokenId: communityTokenId,
             communityTokenAmount: communityTokenAmount,
-            communityTokenPrice: communityTokenPrice,
+            communityTokenCRD: communityTokenCRD,
             governanceTokenId: governanceTokenId,
             governanceTokenAmount: governanceTokenAmount,
-            governanceTokenPrice: governanceTokenPrice,
-            crdBalance: tokenTotal[0] + tokenTotal[1]
+            governanceTokenCRD: governanceTokenCRD,
+            crdBalance: totalCRD
         });
 
         orderBook[orderId] = order;
@@ -223,14 +285,14 @@ contract OrdersContract {
             creationDate: order.creationDate,
             communityTokenId: communityTokenId,
             communityTokenAmount: communityTokenAmount,
-            communityTokenPrice: communityTokenPrice,
+            communityTokenCRD: communityTokenCRD,
             governanceTokenId: governanceTokenId,
             governanceTokenAmount: governanceTokenAmount,
-            governanceTokenPrice: governanceTokenPrice,
-            crdBalance: tokenTotal[0] + tokenTotal[1]
+            governanceTokenCRD: governanceTokenCRD,
+            crdBalance: totalCRD
         });
 
-        return newOrderId;
+        return orderId;
     }
 
     /// @dev This function is called to cancel the existing sale order
@@ -268,21 +330,14 @@ contract OrdersContract {
         });
     }
 
-    event DEBUG(
-        uint256 amount,
-        uint256 fees,
-        uint256 totalCRD,
-        uint256 otherTest
-    );
-
     /// @dev This function is called to accept the existing buy order
     /// @param saleId This is the id of the buy order to buy
-    /// @param governanceTokenAmount This is the governance token amount that is being offered
     /// @param communityTokenAmount This is the community token amount that is being offered
+    /// @param governanceTokenAmount This is the governance token amount that is being offered
     function acceptBuyOrder(
         uint256 saleId,
-        uint256 governanceTokenAmount,
-        uint256 communityTokenAmount
+        uint256 communityTokenAmount,
+        uint256 governanceTokenAmount
     ) public {
         require(
             orderBook[saleId].buyer != msg.sender,
@@ -308,49 +363,45 @@ contract OrdersContract {
             //As if we don't do that then something like 3/2 and 5/4 will be considers same and they will result in a false positive
             if (order.communityTokenAmount > order.governanceTokenAmount) {
                 require(
-                    SafeMath.div(
-                        communityTokenAmount * 100,
-                        governanceTokenAmount,
-                        "INVALID: TOKEN_RATIO"
-                    ) ==
-                        SafeMath.div(
-                            order.communityTokenAmount * 100,
+                    ratio(communityTokenAmount, governanceTokenAmount, 6) ==
+                        ratio(
+                            order.communityTokenAmount,
                             order.governanceTokenAmount,
-                            "INVALID: TOKEN_RATIO"
+                            6
                         ),
                     "INVALID: TOKEN_RATIO"
                 );
             } else {
                 require(
-                    SafeMath.div(
-                        governanceTokenAmount * 100,
-                        communityTokenAmount,
-                        "INVALID: TOKEN_RATIO"
-                    ) ==
-                        SafeMath.div(
-                            order.governanceTokenAmount * 100,
+                    ratio(governanceTokenAmount, communityTokenAmount, 6) ==
+                        ratio(
+                            order.governanceTokenAmount,
                             order.communityTokenAmount,
-                            "INVALID: TOKEN_RATIO"
+                            6
                         ),
                     "INVALID: TOKEN_RATIO"
                 );
             }
         }
 
-        uint256 amount = 0;
-        uint256 fees = 0;
+        uint256[4] memory costArr;
         if (order.communityTokenAmount > 0) {
             (
                 uint256 cost,
                 uint256 platformFees
             ) = _transferTokensAndTransactionCharge(
                     communityTokenAmount,
-                    order.communityTokenPrice,
+                    (order.communityTokenCRD * 1e6) /
+                        order.communityTokenAmount,
                     order.communityTokenId,
                     order.buyer
                 );
-            amount = amount + cost;
-            fees = fees + platformFees;
+            order.communityTokenCRD =
+                order.communityTokenCRD -
+                (cost + platformFees);
+
+            costArr[0] = cost;
+            costArr[1] = platformFees;
         }
 
         if (order.governanceTokenAmount > 0) {
@@ -359,12 +410,16 @@ contract OrdersContract {
                 uint256 platformFees
             ) = _transferTokensAndTransactionCharge(
                     governanceTokenAmount,
-                    order.governanceTokenPrice,
+                    (order.governanceTokenCRD * 1e6) /
+                        order.governanceTokenAmount,
                     order.governanceTokenId,
                     order.buyer
                 );
-            amount = amount + cost;
-            fees = fees + platformFees;
+            order.governanceTokenCRD =
+                order.governanceTokenCRD -
+                (cost + platformFees);
+            costArr[2] = cost;
+            costArr[3] = platformFees;
         }
 
         emit SaleBought({
@@ -374,12 +429,15 @@ contract OrdersContract {
             creationDate: block.timestamp,
             communityTokenId: order.communityTokenId,
             communityTokenAmount: communityTokenAmount,
-            communityTokenPrice: order.communityTokenPrice,
+            communityTokenCRD: costArr[0] + costArr[1],
             governanceTokenId: order.governanceTokenId,
             governanceTokenAmount: governanceTokenAmount,
-            governanceTokenPrice: order.governanceTokenPrice,
-            amountTransferred: amount + fees,
-            platformFees: fees
+            governanceTokenCRD: costArr[2] + costArr[3],
+            amountTransferred: costArr[0] +
+                costArr[1] +
+                costArr[2] +
+                costArr[3],
+            platformFees: costArr[1] + costArr[3]
         });
 
         order.communityTokenAmount =
@@ -390,7 +448,9 @@ contract OrdersContract {
             order.governanceTokenAmount -
             governanceTokenAmount;
 
-        order.crdBalance = order.crdBalance - amount - fees;
+        order.crdBalance =
+            order.crdBalance -
+            (costArr[0] + costArr[1] + costArr[2] + costArr[3]);
 
         if (
             order.communityTokenAmount == 0 && order.governanceTokenAmount == 0
@@ -416,11 +476,11 @@ contract OrdersContract {
         uint256 tokenId,
         address receiver
     ) internal returns (uint256 totalCost, uint256 totalFee) {
-        // Change the function so that it will transfer the community and governance tokens from the sellers
-        //account to buyer account then it would transfer the CRD tokens from contract account to sellers
+        // Change the function so that it will transfer the governance and governance tokens from the sellers
+        // account to buyer account then it would transfer the CRD governance from contract account to sellers
         //account after deducting the transaction fees.
 
-        uint256 transactionAmount = (tokenAmount * tokenPrice);
+        uint256 transactionAmount = (tokenAmount * tokenPrice) / 1e6;
         uint256 transactionFee = (transactionAmount * TRANSACTION_FEE) / 10000;
         //Removing the transaction fee from the transaction amount
         transactionAmount = transactionAmount - transactionFee;
@@ -430,7 +490,7 @@ contract OrdersContract {
         );
 
         treasuryCoreContract.safeTransferFrom(
-            msg.sender,
+            address(this),
             WALLET_ADDRESS,
             treasuryCoreContract.CRD(),
             transactionFee,
