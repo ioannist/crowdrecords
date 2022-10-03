@@ -188,8 +188,7 @@ contract TreasuryContract {
             recordId,
             contributionId,
             rewardGovernance,
-            rewardCommunity,
-            CONTRIBUTION_VOTING_CONTRACT_ADDRESS
+            rewardCommunity
         );
     }
 

@@ -298,14 +298,9 @@ contract TreasuryCoreContract is IERC1155Receiver, SnapshotERC1155 {
         uint256 recordId,
         uint256 contributionId,
         uint256 rewardGovernance,
-        uint256 rewardCommunity,
-        address contributionVotingContractAddress
+        uint256 rewardCommunity
     ) external onlyTreasuryContract {
-        _setApprovalForAll(
-            address(this),
-            contributionVotingContractAddress,
-            true
-        );
+        _setApprovalForAll(address(this), msg.sender, true);
         if (rewardGovernance > 0) {
             safeTransferFrom(
                 address(this),

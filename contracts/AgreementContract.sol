@@ -252,30 +252,31 @@ contract AgreementContract is BaseVotingContract {
         uint256 tokenId = treasuryContract.getCommunityTokenId(recordId);
         uint256 totalSupply = treasuryContract.totalCirculatingSupply(tokenId);
 
-        ITreasuryCore treasuryCoreContract = ITreasuryCore(
-            TREASURY_CONTRACT_ADDRESS
-        );
-
-        treasuryCoreContract.safeTransferFrom(
-            msg.sender,
-            address(this),
-            treasuryCoreContract.CRD(),
-            amount,
-            "ROYALTY_PAYMENT_TRANSFER"
+        uint256 totalSupplyEther = totalSupply / 1 ether;
+        uint256 royaltyPerTokenWei = amount / totalSupplyEther;
+        require(
+            royaltyPerTokenWei > 0,
+            "INSUFFICIENT_AMOUNT: NEED_GREATER_AMOUNT"
         );
 
         RoyaltyData memory dividend = RoyaltyData({
             totalSupplyEther: totalSupply / 1 ether,
             royaltyAmountWei: amount,
             royaltyId: royaltyId,
-            royaltyPerTokenWei: amount / (totalSupply / 1 ether),
+            royaltyPerTokenWei: royaltyPerTokenWei,
             tokenId: tokenId,
             snapshotId: treasuryContract.snapshot()
         });
 
-        require(
-            dividend.royaltyPerTokenWei > 0,
-            "INSUFFICIENT_AMOUNT: NEED_GREATER_AMOUNT"
+        ITreasuryCore treasuryCoreContract = ITreasuryCore(
+            TREASURY_CORE_CONTRACT_ADDRESS
+        );
+        treasuryCoreContract.safeTransferFrom(
+            msg.sender,
+            address(this),
+            treasuryCoreContract.CRD(),
+            amount,
+            "ROYALTY_PAYMENT_TRANSFER"
         );
 
         emit RoyaltyPayment({
@@ -372,9 +373,11 @@ contract AgreementContract is BaseVotingContract {
         returns (uint256)
     {
         RoyaltyData memory dividend = royaltyDataMapping[royaltyId];
-        ITreasury treasuryContract = ITreasury(TREASURY_CONTRACT_ADDRESS);
+        ITreasuryCore treasuryCoreContract = ITreasuryCore(
+            TREASURY_CORE_CONTRACT_ADDRESS
+        );
 
-        uint256 tokenBal = treasuryContract.balanceOfAt(
+        uint256 tokenBal = treasuryCoreContract.balanceOfAt(
             msg.sender,
             dividend.snapshotId,
             tokenId
@@ -384,7 +387,7 @@ contract AgreementContract is BaseVotingContract {
             return 0;
         }
 
-        return dividend.royaltyPerTokenWei * (tokenBal / 1 ether);
+        return (dividend.royaltyPerTokenWei * tokenBal) / 1 ether;
     }
 
     /// @dev This function calculates the royalty claim index

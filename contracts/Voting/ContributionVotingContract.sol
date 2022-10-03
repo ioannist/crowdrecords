@@ -305,21 +305,21 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
 
         //! we should remove the below for loop as we don't need loop through all the offers
         //! as we are only calculating the votes that are accepted and rest are considered as false
-        for (uint256 i = 0; i < counterOfferList.length; i++) {
-            if (
-                contributionCounterOfferMap[contributionId][counterOfferList[i]]
-                    .status == 1
-            ) {
-                super._counterOfferAction(
-                    rewardMapping[contributionId].ballotId,
-                    counterOfferList[i],
-                    false
-                );
-                //The counter offer ids are the addresses of the user who proposed the offer
-                contributionCounterOfferMap[contributionId][counterOfferList[i]]
-                    .status = 3;
-            }
-        }
+        // for (uint256 i = 0; i < counterOfferList.length; i++) {
+        //     if (
+        //         contributionCounterOfferMap[contributionId][counterOfferList[i]]
+        //             .status == 1
+        //     ) {
+        //         super._counterOfferAction(
+        //             rewardMapping[contributionId].ballotId,
+        //             counterOfferList[i],
+        //             false
+        //         );
+        //         //The counter offer ids are the addresses of the user who proposed the offer
+        //         contributionCounterOfferMap[contributionId][counterOfferList[i]]
+        //             .status = 3;
+        //     }
+        // }
         bool result = _declareWinner(rewardMapping[contributionId].ballotId);
 
         emit BallotResult(

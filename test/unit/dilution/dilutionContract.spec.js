@@ -89,8 +89,8 @@ contract("Dilution Contract", function() {
 
         const tx = await this.dilutionContract.declareWinner(dilutionId);
 
-        expect(
-            this.treasuryContract.balanceOf(this.treasuryContract.address, COMMUNITY_TOKEN_ID)
+        await expect(
+            this.treasuryContract.balanceOf(this.treasuryCoreContract.address, COMMUNITY_TOKEN_ID)
         ).to.eventually.be.bignumber.equals(afterDilution);
 
         expectEvent(tx, "DilutionResult", {
@@ -135,8 +135,8 @@ contract("Dilution Contract", function() {
 
         const tx = await this.dilutionContract.declareWinner(dilutionId);
 
-        expect(
-            this.treasuryContract.balanceOf(this.treasuryContract.address, COMMUNITY_TOKEN_ID)
+        await expect(
+            this.treasuryContract.balanceOf(this.treasuryCoreContract.address, COMMUNITY_TOKEN_ID)
         ).to.eventually.be.bignumber.equals(afterDilution);
 
         expectEvent(tx, "DilutionResult", {
@@ -145,7 +145,7 @@ contract("Dilution Contract", function() {
         });
     });
 
-    context("Dilution by voting", function() {
+    describe("Dilution by voting", function() {
         let snapShot2, snapshotId2;
         beforeEach(async function() {
             snapShot2 = await helper.takeSnapshot();
@@ -210,7 +210,10 @@ contract("Dilution Contract", function() {
             });
 
             await expect(
-                this.treasuryContract.balanceOf(this.treasuryContract.address, COMMUNITY_TOKEN_ID)
+                this.treasuryContract.balanceOf(
+                    this.treasuryCoreContract.address,
+                    COMMUNITY_TOKEN_ID
+                )
             ).to.eventually.be.bignumber.equals(afterDilution);
         });
 
@@ -233,8 +236,11 @@ contract("Dilution Contract", function() {
 
             const tx = await this.dilutionContract.declareWinner(this.dilutionId);
 
-            expect(
-                this.treasuryContract.balanceOf(this.treasuryContract.address, COMMUNITY_TOKEN_ID)
+            await expect(
+                this.treasuryContract.balanceOf(
+                    this.treasuryCoreContract.address,
+                    COMMUNITY_TOKEN_ID
+                )
             ).to.eventually.be.bignumber.equals(afterDilution);
 
             expectEvent(tx, "DilutionResult", {
@@ -263,7 +269,10 @@ contract("Dilution Contract", function() {
             const tx = await this.dilutionContract.declareWinner(this.dilutionId);
 
             await expect(
-                this.treasuryContract.balanceOf(this.treasuryContract.address, COMMUNITY_TOKEN_ID)
+                this.treasuryContract.balanceOf(
+                    this.treasuryCoreContract.address,
+                    COMMUNITY_TOKEN_ID
+                )
             ).to.eventually.be.bignumber.equals(afterDilution);
 
             expectEvent(tx, "DilutionResult", {
@@ -302,7 +311,10 @@ contract("Dilution Contract", function() {
             const tx = await this.dilutionContract.declareWinner(this.dilutionId);
 
             await expect(
-                this.treasuryContract.balanceOf(this.treasuryContract.address, COMMUNITY_TOKEN_ID)
+                this.treasuryContract.balanceOf(
+                    this.treasuryCoreContract.address,
+                    COMMUNITY_TOKEN_ID
+                )
             ).to.eventually.be.bignumber.equals(afterDilution);
 
             expectEvent(tx, "DilutionResult", {
