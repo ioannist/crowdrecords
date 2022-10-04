@@ -294,7 +294,7 @@ contract AgreementContract is BaseVotingContract {
         royaltyDataMapping[royaltyId] = dividend;
     }
 
-    /// @dev This function is for testing purpose for distributing the royalty payment
+    /// @dev This function is for distributing the royalty payment
     /// @param agreementId this is the agreement Id of which royalty is to be claimed
     function claimRoyaltyAmount(uint256 agreementId) public {
         uint256[] memory dividendIdArray = royaltyListMapping[agreementId];

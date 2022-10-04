@@ -1,6 +1,39 @@
 pragma solidity ^0.8.0;
 
 interface IRecords {
+    /// @dev This struct holds the data for record token
+    /// @param name Name of the record
+    /// @param image This is the image of the record
+    /// @param seedId This is the seed contribution id
+    /// @param parentId This is the id of the parent record from which record is created
+    /// @param owner Address of the owner
+    /// @param recordCategory This is the record category
+    /// @param creationDate This is the creation date of the record
+    struct RecordStruct {
+        string name;
+        string image;
+        uint256 seedId;
+        uint256 parentId;
+        address owner;
+        string recordCategory;
+        uint256 creationDate;
+        bool isPresent;
+    }
+
+    /// @dev This is the token data for new version of record
+    /// @param totalSupply This is the total amount of tokens that will be created
+    /// @param oldContributorShare This is the amount of token that will be distributed among the previous record owners
+    /// @param userBalance Amount of tokens that user will keep to himself
+    /// @param symbol Symbol for the token
+    /// @param image Image for the token
+    struct NewVersionTokenStruct {
+        uint256 totalSupply;
+        uint256 oldContributorShare;
+        uint256 userBalance;
+        string symbol;
+        string image;
+    }
+
     /// @dev This function sets the owner address
     /// @param ownerAddress Takes the address of new owner as parameter
     function setOwnerAddress(address ownerAddress) external;
@@ -33,4 +66,20 @@ interface IRecords {
     /// @dev This function return the address of record owner
     /// @param recordId This is the recordId whose owner you want
     function ownerOf(uint256 recordId) external returns (address);
+
+    /// @dev This function return the id of CRD token
+    function newVersionRequestMap(uint256 index)
+        external
+        view
+        returns (
+            RecordStruct memory recordData,
+            NewVersionTokenStruct memory governanceToken,
+            NewVersionTokenStruct memory communityToken,
+            address requester,
+            uint256 oldVersionId,
+            uint256 tokenId,
+            uint256 ballotId,
+            bool isPresent,
+            bool isAccepted
+        );
 }

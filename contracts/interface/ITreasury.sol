@@ -45,26 +45,42 @@ interface ITreasury {
     ) external;
 
     /// @dev This function creates new governance tokens for specified record. Only call from records contract
-    function createNewGovernanceToken(
+    function createNewGovernanceTokenNewRecordVersion(
         uint256 recordId,
         uint256 totalSupply,
         uint256 userBalance,
         string memory symbol,
-        string memory image
+        string memory image,
+        uint256 tokensForOldContributors,
+        address userAddress
+    ) external payable returns (uint256);
+
+    /// @dev This function creates new governance tokens for specified record. Only call from records contract
+    function createNewCommunityTokenNewRecordVersion(
+        uint256 recordId,
+        uint256 totalSupply,
+        uint256 userBalance,
+        string memory symbol,
+        string memory image,
+        uint256 tokensForOldContributors,
+        address userAddress
     ) external payable returns (uint256);
 
     /// @dev This function creats new governance tokens for specified record
-    function createNewGovernanceToken(NewTokenData memory newTokenData)
-        external
-        payable
-        returns (uint256);
+    /// @param newTokenData This contains all the parameters needed to create a new governance token that are
+    /// @param userAddress - This is the address of the user who is the creator of the token
+    function createNewGovernanceToken(
+        NewTokenData memory newTokenData,
+        address userAddress
+    ) external payable returns (uint256);
 
     /// @dev This function creats new community tokens for specified record
     /// @param newTokenData This contains all the parameters needed to create a new community token that are
-    function createNewCommunityToken(NewTokenData memory newTokenData)
-        external
-        payable
-        returns (uint256);
+    /// @param userAddress - This is the address of the user who is the creator of the token
+    function createNewCommunityToken(
+        NewTokenData memory newTokenData,
+        address userAddress
+    ) external payable returns (uint256);
 
     /// @dev this function is responsible for minting of new tokens for records
     /// @param tokenId Id this is the tokenId that is to minted

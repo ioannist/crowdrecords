@@ -157,11 +157,11 @@ contract TreasuryCoreContract is IERC1155Receiver, SnapshotERC1155 {
 
     /// @dev This function creates new governance tokens for specified record
     /// @param newTokenData This contains all the parameters needed to create a new governance token that are
-    function createNewGovernanceToken(NewTokenData memory newTokenData)
-        external
-        onlyTreasuryContract
-        returns (uint256)
-    {
+    /// @param userAddress - This is the address of the user who is the creator of the token
+    function createNewGovernanceToken(
+        NewTokenData memory newTokenData,
+        address userAddress
+    ) external onlyTreasuryContract returns (uint256) {
         {
             bytes memory preString = abi.encodePacked(PREFIX_GOVERNANCE);
             newTokenData.symbol = string(
@@ -176,7 +176,8 @@ contract TreasuryCoreContract is IERC1155Receiver, SnapshotERC1155 {
         govTokenMapping[newTokenData.recordId] = createToken(
             newTokenData,
             newTokenId,
-            TOKEN_TYPE_GOVERNANCE
+            TOKEN_TYPE_GOVERNANCE,
+            userAddress
         );
 
         return newTokenId;
@@ -184,11 +185,11 @@ contract TreasuryCoreContract is IERC1155Receiver, SnapshotERC1155 {
 
     /// @dev This function creats new community tokens for specified record
     /// @param newTokenData This contains all the parameters needed to create a new community token that are
-    function createNewCommunityToken(NewTokenData memory newTokenData)
-        external
-        onlyTreasuryContract
-        returns (uint256)
-    {
+    /// @param userAddress - This is the address of the user who is the creator of the token
+    function createNewCommunityToken(
+        NewTokenData memory newTokenData,
+        address userAddress
+    ) external onlyTreasuryContract returns (uint256) {
         {
             bytes memory preString = abi.encodePacked(PREFIX_COMMUNITY);
             newTokenData.symbol = string(
@@ -203,7 +204,8 @@ contract TreasuryCoreContract is IERC1155Receiver, SnapshotERC1155 {
         commTokenMapping[newTokenData.recordId] = createToken(
             newTokenData,
             newTokenId,
-            TOKEN_TYPE_COMMUNITY
+            TOKEN_TYPE_COMMUNITY,
+            userAddress
         );
 
         return newTokenId;
@@ -213,10 +215,12 @@ contract TreasuryCoreContract is IERC1155Receiver, SnapshotERC1155 {
     /// @param newTokenData This contains all the parameters needed to create a new community token that are
     /// @param newTokenId - This is the Id of the token to create
     /// @param tokenType - This is the type of token that is to be created such as community or governance
+    /// @param userAddress - This is the address of the user who is the creator of the token
     function createToken(
         NewTokenData memory newTokenData,
         uint256 newTokenId,
-        uint8 tokenType
+        uint8 tokenType,
+        address userAddress
     ) private returns (Token memory) {
         uint256 treasuryAmount = (newTokenData.totalSupply -
             newTokenData.userBalance);
@@ -226,7 +230,7 @@ contract TreasuryCoreContract is IERC1155Receiver, SnapshotERC1155 {
         _mint(address(this), newTokenId, treasuryAmount, "");
 
         // The user requested amount of tokens is generated and send to his account
-        _mint(tx.origin, newTokenId, userAmount, "");
+        _mint(userAddress, newTokenId, userAmount, "");
 
         Token memory token = Token({
             recordId: newTokenData.recordId,
@@ -382,6 +386,25 @@ contract TreasuryCoreContract is IERC1155Receiver, SnapshotERC1155 {
     ) external onlyTreasuryContract {
         commTokenSym[communitySymbol] = true;
         govTokenSym[governanceSymbol] = true;
+    }
+
+    /// @dev this function is responsible for minting of new tokens for records
+    /// @param tokenId Id this is the tokenId that is to minted
+    /// @param amount the amount that is to be minted
+    /// @param receiver Id this is the tokenId that is to minted
+    function transferRewardTokens(
+        uint256 tokenId,
+        uint256 amount,
+        address receiver
+    ) public onlyTreasuryContract {
+        _setApprovalForAll(address(this), msg.sender, true);
+        safeTransferFrom(
+            address(this),
+            receiver,
+            tokenId,
+            amount,
+            "RECORD_TOKEN_TRANSFER"
+        );
     }
 
     function snapshot()

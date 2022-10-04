@@ -70,8 +70,16 @@ contract TreasuryContract {
         IRecords recordsContract = IRecords(RECORDS_CONTRACT_ADDRESS);
 
         address owner = recordsContract.ownerOf(newTokenData.recordId);
-
         require(owner == msg.sender, "INVALID: ONLY_RECORD_OWNER");
+
+        (, , , , , , , bool isPresent, bool isAccepted) = recordsContract
+            .newVersionRequestMap(newTokenData.recordId);
+
+        require(
+            isPresent == false,
+            "INVALID: CANNOT_CREATE_NEW_VERSION_TOKENS"
+        );
+
         _;
     }
 
@@ -127,10 +135,14 @@ contract TreasuryContract {
             newTokenData.symbol
         );
         require(isSymbolInUse == false, "INVALID: TOKEN_SYMBOL_ALREADY_IN_USE");
-        return treasuryCoreContract.createNewGovernanceToken(newTokenData);
+        return
+            treasuryCoreContract.createNewGovernanceToken(
+                newTokenData,
+                tx.origin
+            );
     }
 
-    /// @dev This function creats new community tokens for specified record
+    /// @dev This function creats new community tokens for specified record, this function should only be called by the owner of the record
     /// @param newTokenData This contains all the parameters needed to create a new community token that are
     function createNewCommunityToken(
         TreasuryCoreContract.NewTokenData memory newTokenData
@@ -147,7 +159,93 @@ contract TreasuryContract {
             newTokenData.symbol
         );
         require(isSymbolInUse == false, "INVALID: TOKEN_SYMBOL_ALREADY_IN_USE");
-        return treasuryCoreContract.createNewCommunityToken(newTokenData);
+        return
+            treasuryCoreContract.createNewCommunityToken(
+                newTokenData,
+                tx.origin
+            );
+    }
+
+    /// @dev This function should be only called from the records contract, this function creates
+    // governance tokens when the result for a new version request is declared
+    /// @param recordId Record id of which the tokens need to be created
+    /// @param totalSupply This is the total supply of the token
+    /// @param userBalance The amount of tokens that owner of the new version will receive
+    /// @param symbol This is the short abbreviation of the token
+    /// @param image This is the logo of the token
+    /// @param tokensForOldContributors This is the amount of tokens that old record owners will get
+    /// @param userAddress This is the address of the owner who is minting the token
+    function createNewGovernanceTokenNewRecordVersion(
+        uint256 recordId,
+        uint256 totalSupply,
+        uint256 userBalance,
+        string memory symbol,
+        string memory image,
+        uint256 tokensForOldContributors,
+        address userAddress
+    ) external payable onlyRecordsContract returns (uint256) {
+        TreasuryCoreContract treasuryCoreContract = TreasuryCoreContract(
+            TREASURY_CORE_CONTRACT_ADDRESS
+        );
+        TreasuryCoreContract.NewTokenData
+            memory newTokenData = TreasuryCoreContract.NewTokenData(
+                recordId,
+                totalSupply,
+                userBalance,
+                symbol,
+                image
+            );
+        uint256 tokenId = treasuryCoreContract.createNewGovernanceToken(
+            newTokenData,
+            userAddress
+        );
+        treasuryCoreContract.transferRewardTokens(
+            tokenId,
+            tokensForOldContributors,
+            RECORDS_CONTRACT_ADDRESS
+        );
+        return tokenId;
+    }
+
+    /// @dev This function should be only called from the records contract, this function creates
+    // governance tokens when the result for a new version request is declared
+    /// @param recordId Record id of which the tokens need to be created
+    /// @param totalSupply This is the total supply of the token
+    /// @param userBalance The amount of tokens that owner of the new version will receive
+    /// @param symbol This is the short abbreviation of the token
+    /// @param image This is the logo of the token
+    /// @param tokensForOldContributors This is the amount of tokens that old record owners will get
+    /// @param userAddress This is the address of the owner who is minting the token
+    function createNewCommunityTokenNewRecordVersion(
+        uint256 recordId,
+        uint256 totalSupply,
+        uint256 userBalance,
+        string memory symbol,
+        string memory image,
+        uint256 tokensForOldContributors,
+        address userAddress
+    ) external payable onlyRecordsContract returns (uint256) {
+        TreasuryCoreContract treasuryCoreContract = TreasuryCoreContract(
+            TREASURY_CORE_CONTRACT_ADDRESS
+        );
+        TreasuryCoreContract.NewTokenData
+            memory newTokenData = TreasuryCoreContract.NewTokenData(
+                recordId,
+                totalSupply,
+                userBalance,
+                symbol,
+                image
+            );
+        uint256 tokenId = treasuryCoreContract.createNewCommunityToken(
+            newTokenData,
+            userAddress
+        );
+        treasuryCoreContract.transferRewardTokens(
+            tokenId,
+            tokensForOldContributors,
+            RECORDS_CONTRACT_ADDRESS
+        );
+        return tokenId;
     }
 
     /// @dev This function creats new community tokens for specified record
