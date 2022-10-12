@@ -45,90 +45,94 @@ contract("All Contract Deployment", function() {
     });
 
     it("All address set", async function() {
-        expect(
+        await expect(
             this.contributionContract.CONTRIBUTION_VOTING_CONTRACT_ADDRESS()
         ).eventually.to.be.equal(this.contributionVotingContract.address);
 
-        expect(this.contributionContract.RECORD_CONTRACT_ADDRESS()).eventually.to.be.equal(
+        await expect(this.contributionContract.RECORD_CONTRACT_ADDRESS()).eventually.to.be.equal(
             this.recordsContract.address
         );
 
-        expect(this.recordsContract.CONTRIBUTION_CONTRACT_ADDRESS()).eventually.to.be.equal(
+        await expect(this.recordsContract.CONTRIBUTION_CONTRACT_ADDRESS()).eventually.to.be.equal(
             this.contributionContract.address
         );
-        expect(this.recordsContract.TREASURY_CONTRACT_ADDRESS()).eventually.to.be.equal(
-            this.treasuryContract.address
-        );
-        expect(this.recordsContract.TREASURY_CORE_CONTRACT_ADDRESS()).eventually.to.be.equal(
-            this.treasuryCoreContract.address
+        await expect(this.recordsContract.RECORDS_VOTING_CONTRACT_ADDRESS()).eventually.to.be.equal(
+            this.recordsVotingContract.address
         );
 
-        expect(
+        await expect(this.recordsVotingContract.TREASURY_CONTRACT_ADDRESS()).eventually.to.be.equal(
+            this.treasuryContract.address
+        );
+        await expect(this.recordsVotingContract.RECORDS_CONTRACT_ADDRESS()).eventually.to.be.equal(
+            this.recordsContract.address
+        );
+
+        await expect(
             this.contributionVotingContract.CONTRIBUTION_CONTRACT_ADDRESS()
         ).eventually.to.be.equal(this.contributionContract.address);
 
-        expect(this.contributionVotingContract.TREASURY_CONTRACT_ADDRESS()).eventually.to.be.equal(
-            this.treasuryContract.address
-        );
+        await expect(
+            this.contributionVotingContract.TREASURY_CONTRACT_ADDRESS()
+        ).eventually.to.be.equal(this.treasuryContract.address);
 
-        expect(this.ordersContract.TREASURY_CONTRACT_ADDRESS()).eventually.to.be.equal(
+        await expect(this.ordersContract.TREASURY_CONTRACT_ADDRESS()).eventually.to.be.equal(
             this.treasuryContract.address
         );
-        expect(this.ordersContract.TREASURY_CORE_CONTRACT_ADDRESS()).eventually.to.be.equal(
+        await expect(this.ordersContract.TREASURY_CORE_CONTRACT_ADDRESS()).eventually.to.be.equal(
             this.treasuryCoreContract.address
         );
 
-        expect(this.agreementContract.TREASURY_CONTRACT_ADDRESS()).eventually.to.be.equal(
+        await expect(this.agreementContract.TREASURY_CONTRACT_ADDRESS()).eventually.to.be.equal(
             this.treasuryContract.address
         );
-        expect(this.agreementContract.TREASURY_CORE_CONTRACT_ADDRESS()).eventually.to.be.equal(
-            this.treasuryCoreContract.address
-        );
+        await expect(
+            this.agreementContract.TREASURY_CORE_CONTRACT_ADDRESS()
+        ).eventually.to.be.equal(this.treasuryCoreContract.address);
 
-        expect(this.baseVotingContractMock.TREASURY_CONTRACT_ADDRESS()).eventually.to.be.equal(
+        await expect(
+            this.baseVotingContractMock.TREASURY_CONTRACT_ADDRESS()
+        ).eventually.to.be.equal(this.treasuryContract.address);
+
+        await expect(this.dilutionContract.TREASURY_CONTRACT_ADDRESS()).eventually.to.be.equal(
             this.treasuryContract.address
         );
 
-        expect(this.dilutionContract.TREASURY_CONTRACT_ADDRESS()).eventually.to.be.equal(
-            this.treasuryContract.address
-        );
-
-        expect(this.treasuryContract.RECORDS_CONTRACT_ADDRESS()).eventually.to.be.equal(
+        await expect(this.treasuryContract.RECORDS_CONTRACT_ADDRESS()).eventually.to.be.equal(
             this.recordsContract.address
         );
-        expect(this.treasuryContract.CONTRIBUTION_VOTING_CONTRACT_ADDRESS()).eventually.to.be.equal(
-            this.contributionVotingContract.address
-        );
-        expect(this.treasuryContract.DILUTION_CONTRACT_ADDRESS()).eventually.to.be.equal(
+        await expect(
+            this.treasuryContract.CONTRIBUTION_VOTING_CONTRACT_ADDRESS()
+        ).eventually.to.be.equal(this.contributionVotingContract.address);
+        await expect(this.treasuryContract.DILUTION_CONTRACT_ADDRESS()).eventually.to.be.equal(
             this.dilutionContract.address
         );
-        expect(this.treasuryContract.TREASURY_CORE_CONTRACT_ADDRESS()).eventually.to.be.equal(
+        await expect(this.treasuryContract.TREASURY_CORE_CONTRACT_ADDRESS()).eventually.to.be.equal(
             this.treasuryCoreContract.address
         );
 
-        expect(
+        await expect(
             this.baseVotingCounterOfferContractMock.TREASURY_CONTRACT_ADDRESS()
         ).eventually.to.be.equal(this.treasuryContract.address);
 
-        expect(this.votingHubContract.TREASURY_CORE_CONTRACT_ADDRESS()).eventually.to.be.equal(
-            this.treasuryCoreContract.address
-        );
+        await expect(
+            this.votingHubContract.TREASURY_CORE_CONTRACT_ADDRESS()
+        ).eventually.to.be.equal(this.treasuryCoreContract.address);
 
-        expect(this.votingHubContract.VOTING_CONTRACTS_ADDRESS(0)).eventually.to.be.equal(
+        await expect(this.votingHubContract.VOTING_CONTRACTS_ADDRESS(0)).eventually.to.be.equal(
             this.contributionVotingContract.address
         );
-        expect(this.votingHubContract.VOTING_CONTRACTS_ADDRESS(1)).eventually.to.be.equal(
+        await expect(this.votingHubContract.VOTING_CONTRACTS_ADDRESS(1)).eventually.to.be.equal(
             this.agreementContract.address
         );
 
-        expect(this.recordsContract.TREASURY_CONTRACT_ADDRESS()).eventually.to.be.equal(
-            this.treasuryContract.address
-        );
+        // await expect(this.recordsContract.TREASURY_CONTRACT_ADDRESS()).eventually.to.be.equal(
+        //     this.treasuryContract.address
+        // );
 
-        expect(this.treasuryCoreContract.VOTING_HUB_ADDRESS()).eventually.to.be.equal(
+        await expect(this.treasuryCoreContract.VOTING_HUB_ADDRESS()).eventually.to.be.equal(
             this.votingHubContract.address
         );
-        expect(this.treasuryCoreContract.TREASURY_CONTRACT_ADDRESS()).eventually.to.be.equal(
+        await expect(this.treasuryCoreContract.TREASURY_CONTRACT_ADDRESS()).eventually.to.be.equal(
             this.treasuryContract.address
         );
     });

@@ -1,5 +1,6 @@
 const ContributionContract = artifacts.require("../contracts/ContributionContract.sol");
 const RecordsContract = artifacts.require("../contracts/RecordsContract.sol");
+const RecordsVotingContract = artifacts.require("../contracts/RecordsVotingContract.sol");
 const TracksContract = artifacts.require("../contracts/TracksContract.sol");
 const TreasuryContract = artifacts.require("../contracts/treasury/TreasuryContract.sol");
 const TreasuryCoreContract = artifacts.require("../contracts/treasury/TreasuryCoreContract.sol");
@@ -23,6 +24,7 @@ async function setup() {
     let tracksContract = await TracksContract.deployed();
     let contributionContract = await ContributionContract.deployed();
     let recordsContract = await RecordsContract.deployed();
+    let recordsVotingContract = await RecordsVotingContract.deployed();
     let treasuryContract = await TreasuryContract.deployed();
     let treasuryCoreContract = await TreasuryCoreContract.deployed();
     let contributionVotingContract = await ContributionVotingContract.deployed(
@@ -43,7 +45,12 @@ async function setup() {
     );
 
     await recordsContract.setContributionContractAddress(contributionContract.address);
-    await recordsContract.setTreasuryCoreContractAddress(treasuryCoreContract.address);
+    await recordsContract.setRecordsVotingContractAddress(recordsVotingContract.address);
+    // await recordsContract.setTreasuryContractAddress(treasuryContract.address);
+
+    await recordsVotingContract.setTreasuryContractAddress(treasuryContract.address);
+    await recordsVotingContract.setTreasuryCoreContractAddress(treasuryCoreContract.address);
+    await recordsVotingContract.setRecordsContractAddress(recordsContract.address);
 
     await contributionContract.setRecordsContractAddress(recordsContract.address);
 
@@ -64,22 +71,23 @@ async function setup() {
     await votingHubContract.addVotingContract(contributionVotingContract.address);
     await votingHubContract.addVotingContract(agreementContract.address);
     await votingHubContract.addVotingContract(dilutionContract.address);
+    await votingHubContract.addVotingContract(recordsVotingContract.address);
 
     await treasuryContract.setDilutionContract(dilutionContract.address);
     await treasuryContract.setContributionVotingContractAddress(contributionVotingContract.address);
     await treasuryContract.setRecordsContractAddress(recordsContract.address);
+    await treasuryContract.setRecordsVotingContractAddress(recordsVotingContract.address);
     await treasuryContract.setCoreTreasuryAddress(treasuryCoreContract.address);
 
     await treasuryCoreContract.setVotingHubContract(votingHubContract.address);
     await treasuryCoreContract.setTreasuryContract(treasuryContract.address);
-
-    await recordsContract.setTreasuryContractAddress(treasuryContract.address);
 
     await dilutionContract.setTreasuryContractAddress(treasuryContract.address);
 
     this.tracksContract = tracksContract;
     this.contributionContract = contributionContract;
     this.recordsContract = recordsContract;
+    this.recordsVotingContract = recordsVotingContract;
     this.treasuryContract = treasuryContract;
     this.treasuryCoreContract = treasuryCoreContract;
     this.contributionVotingContract = contributionVotingContract;

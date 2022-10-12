@@ -15,6 +15,7 @@ contract TreasuryContract {
     uint256 public constant CRD = 1;
     address public OWNER;
     address public RECORDS_CONTRACT_ADDRESS;
+    address public RECORDS_VOTING_CONTRACT_ADDRESS;
     address public CONTRIBUTION_VOTING_CONTRACT_ADDRESS;
     address public DILUTION_CONTRACT_ADDRESS;
     address public TREASURY_CORE_CONTRACT_ADDRESS;
@@ -30,9 +31,9 @@ contract TreasuryContract {
     }
 
     /// @dev Modifier to check that the calls are made by records contract only
-    modifier onlyRecordsContract() {
+    modifier onlyRecordsVotingContract() {
         require(
-            msg.sender == RECORDS_CONTRACT_ADDRESS,
+            msg.sender == RECORDS_VOTING_CONTRACT_ADDRESS,
             "UNAUTHORIZED: ONLY_RECORDS_CONTRACT"
         );
         _;
@@ -72,14 +73,6 @@ contract TreasuryContract {
         address owner = recordsContract.ownerOf(newTokenData.recordId);
         require(owner == msg.sender, "INVALID: ONLY_RECORD_OWNER");
 
-        (, , , , , , , bool isPresent, bool isAccepted) = recordsContract
-            .newVersionRequestMap(newTokenData.recordId);
-
-        require(
-            isPresent == false,
-            "INVALID: CANNOT_CREATE_NEW_VERSION_TOKENS"
-        );
-
         _;
     }
 
@@ -102,6 +95,14 @@ contract TreasuryContract {
         ownerOnly
     {
         RECORDS_CONTRACT_ADDRESS = newRecordsContractAddress;
+    }
+
+    /// @dev This function sets the Records Contract address
+    /// @param newRecordsVotingContractAddress This is the address of new Records contract
+    function setRecordsVotingContractAddress(
+        address newRecordsVotingContractAddress
+    ) public ownerOnly {
+        RECORDS_VOTING_CONTRACT_ADDRESS = newRecordsVotingContractAddress;
     }
 
     /// @dev This function sets the dilution Contract address
@@ -183,7 +184,7 @@ contract TreasuryContract {
         string memory image,
         uint256 tokensForOldContributors,
         address userAddress
-    ) external payable onlyRecordsContract returns (uint256) {
+    ) external payable onlyRecordsVotingContract returns (uint256) {
         TreasuryCoreContract treasuryCoreContract = TreasuryCoreContract(
             TREASURY_CORE_CONTRACT_ADDRESS
         );
@@ -202,7 +203,7 @@ contract TreasuryContract {
         treasuryCoreContract.transferRewardTokens(
             tokenId,
             tokensForOldContributors,
-            RECORDS_CONTRACT_ADDRESS
+            RECORDS_VOTING_CONTRACT_ADDRESS
         );
         return tokenId;
     }
@@ -224,7 +225,7 @@ contract TreasuryContract {
         string memory image,
         uint256 tokensForOldContributors,
         address userAddress
-    ) external payable onlyRecordsContract returns (uint256) {
+    ) external payable onlyRecordsVotingContract returns (uint256) {
         TreasuryCoreContract treasuryCoreContract = TreasuryCoreContract(
             TREASURY_CORE_CONTRACT_ADDRESS
         );
@@ -243,7 +244,7 @@ contract TreasuryContract {
         treasuryCoreContract.transferRewardTokens(
             tokenId,
             tokensForOldContributors,
-            RECORDS_CONTRACT_ADDRESS
+            RECORDS_VOTING_CONTRACT_ADDRESS
         );
         return tokenId;
     }
@@ -370,7 +371,7 @@ contract TreasuryContract {
     function setSymbolsAsUsed(
         string memory governanceSymbol,
         string memory communitySymbol
-    ) external onlyRecordsContract {
+    ) external onlyRecordsVotingContract {
         TreasuryCoreContract treasuryCoreContract = TreasuryCoreContract(
             TREASURY_CORE_CONTRACT_ADDRESS
         );
@@ -396,7 +397,7 @@ contract TreasuryContract {
     function setSymbolsAsAvailable(
         string memory governanceSymbol,
         string memory communitySymbol
-    ) external onlyRecordsContract {
+    ) external onlyRecordsVotingContract {
         TreasuryCoreContract treasuryCoreContract = TreasuryCoreContract(
             TREASURY_CORE_CONTRACT_ADDRESS
         );
