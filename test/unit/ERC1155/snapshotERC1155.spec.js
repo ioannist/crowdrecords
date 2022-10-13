@@ -10,7 +10,7 @@ const chaiAsPromised = require("chai-as-promised");
 chai.use(chaiAsPromised);
 const expect = chai.expect;
 
-contract("SnapshotERC1155", function () {
+contract("SnapshotERC1155", function() {
     let initialHolder;
     let recipient;
     let other;
@@ -23,7 +23,7 @@ contract("SnapshotERC1155", function () {
     const uri = "DummyURI";
 
     let snapShot, snapshotId;
-    beforeEach(async function () {
+    beforeEach(async function() {
         snapShot = await helper.takeSnapshot();
         snapshotId = snapShot["result"];
 
@@ -33,17 +33,17 @@ contract("SnapshotERC1155", function () {
 
         this.token = await ERC20SnapshotMock.new(uri, initialHolder, initialSupply);
     });
-    afterEach(async function () {
+    afterEach(async function() {
         await helper.revertToSnapshot(snapshotId);
     });
 
-    describe("snapshot", function () {
-        it("emits a snapshot event", async function () {
+    describe("snapshot", function() {
+        it("emits a snapshot event", async function() {
             const receipt = await this.token.snapshot();
             expectEvent(receipt, "Snapshot");
         });
 
-        it("creates increasing snapshots ids, starting from 1", async function () {
+        it("creates increasing snapshots ids, starting from 1", async function() {
             for (const id of ["1", "2", "3", "4", "5"]) {
                 const receipt = await this.token.snapshot();
                 expectEvent(receipt, "Snapshot", { id });
@@ -51,45 +51,45 @@ contract("SnapshotERC1155", function () {
         });
     });
 
-    describe("totalSupplyAt", function () {
-        it("reverts with a snapshot id of 0", async function () {
+    describe("totalSupplyAt", function() {
+        it("reverts with a snapshot id of 0", async function() {
             await expectRevert(
                 this.token.totalSupplyAt(0, initialTokenId),
                 "ERC20Snapshot: id is 0"
             );
         });
 
-        it("reverts with a not-yet-created snapshot id", async function () {
+        it("reverts with a not-yet-created snapshot id", async function() {
             await expectRevert(
                 this.token.totalSupplyAt(1, initialTokenId),
                 "ERC20Snapshot: nonexistent id"
             );
         });
 
-        context("with initial snapshot", function () {
-            beforeEach(async function () {
+        context("with initial snapshot", function() {
+            beforeEach(async function() {
                 this.initialSnapshotId = new BN("1");
 
                 const receipt = await this.token.snapshot();
                 expectEvent(receipt, "Snapshot", { id: this.initialSnapshotId });
             });
 
-            context("with no supply changes after the snapshot", function () {
-                it("returns the current total supply", async function () {
+            context("with no supply changes after the snapshot", function() {
+                it("returns the current total supply", async function() {
                     expect(
                         await this.token.totalSupplyAt(this.initialSnapshotId, initialTokenId)
                     ).to.be.bignumber.equal(initialSupply);
                 });
             });
 
-            context("with supply changes after the snapshot", function () {
-                beforeEach(async function () {
+            context("with supply changes after the snapshot", function() {
+                beforeEach(async function() {
                     await this.token.mint(other, initialTokenId, new BN("50"));
                     await this.token.createNewToken(other, new BN("50"));
                     await this.token.burn(initialHolder, initialTokenId, new BN("20"));
                 });
 
-                it("returns the total supply before the changes", async function () {
+                it("returns the total supply before the changes", async function() {
                     expect(
                         await this.token.totalSupplyAt(this.initialSnapshotId, initialTokenId)
                     ).to.be.bignumber.equal(initialSupply);
@@ -98,15 +98,15 @@ contract("SnapshotERC1155", function () {
                     ).to.be.bignumber.equal(initialSupplySecondToken);
                 });
 
-                context("with a second snapshot after supply changes", function () {
-                    beforeEach(async function () {
+                context("with a second snapshot after supply changes", function() {
+                    beforeEach(async function() {
                         this.secondSnapshotId = new BN("2");
 
                         const receipt = await this.token.snapshot();
                         expectEvent(receipt, "Snapshot", { id: this.secondSnapshotId });
                     });
 
-                    it("snapshots return the supply before and after the changes", async function () {
+                    it("snapshots return the supply before and after the changes", async function() {
                         expect(
                             await this.token.totalSupplyAt(this.initialSnapshotId, initialTokenId)
                         ).to.be.bignumber.equal(initialSupply);
@@ -117,8 +117,8 @@ contract("SnapshotERC1155", function () {
                     });
                 });
 
-                context("with multiple snapshots after supply changes", function () {
-                    beforeEach(async function () {
+                context("with multiple snapshots after supply changes", function() {
+                    beforeEach(async function() {
                         this.secondSnapshotIds = ["2", "3", "4"];
 
                         for (const id of this.secondSnapshotIds) {
@@ -127,7 +127,7 @@ contract("SnapshotERC1155", function () {
                         }
                     });
 
-                    it("all posterior snapshots return the supply after the changes", async function () {
+                    it("all posterior snapshots return the supply after the changes", async function() {
                         expect(
                             await this.token.totalSupplyAt(this.initialSnapshotId, initialTokenId)
                         ).to.be.bignumber.equal(initialSupply);
@@ -145,31 +145,31 @@ contract("SnapshotERC1155", function () {
         });
     });
 
-    describe("balanceOfAt", function () {
-        it("reverts with a snapshot id of 0", async function () {
+    describe("balanceOfAt", function() {
+        it("reverts with a snapshot id of 0", async function() {
             await expectRevert(
                 this.token.balanceOfAt(other, 0, initialTokenId),
                 "ERC20Snapshot: id is 0"
             );
         });
 
-        it("reverts with a not-yet-created snapshot id", async function () {
+        it("reverts with a not-yet-created snapshot id", async function() {
             await expectRevert(
                 this.token.balanceOfAt(other, 1, initialTokenId),
                 "ERC20Snapshot: nonexistent id"
             );
         });
 
-        context("with initial snapshot", function () {
-            beforeEach(async function () {
+        context("with initial snapshot", function() {
+            beforeEach(async function() {
                 this.initialSnapshotId = new BN("1");
 
                 const receipt = await this.token.snapshot();
                 expectEvent(receipt, "Snapshot", { id: this.initialSnapshotId });
             });
 
-            context("with no balance changes after the snapshot", function () {
-                it("returns the current balance for all accounts", async function () {
+            context("with no balance changes after the snapshot", function() {
+                it("returns the current balance for all accounts", async function() {
                     expect(
                         await this.token.balanceOfAt(
                             initialHolder,
@@ -190,8 +190,8 @@ contract("SnapshotERC1155", function () {
                 });
             });
 
-            context("with balance changes after the snapshot", function () {
-                beforeEach(async function () {
+            context("with balance changes after the snapshot", function() {
+                beforeEach(async function() {
                     await this.token.safeTransferFrom(
                         initialHolder,
                         recipient,
@@ -208,7 +208,7 @@ contract("SnapshotERC1155", function () {
                     await this.token.burn(initialHolder, initialTokenId, new BN("20"));
                 });
 
-                it("returns the balances before the changes", async function () {
+                it("returns the balances before the changes", async function() {
                     expect(
                         await this.token.balanceOfAt(
                             initialHolder,
@@ -228,15 +228,15 @@ contract("SnapshotERC1155", function () {
                     ).to.be.bignumber.equal("0");
                 });
 
-                context("with a second snapshot after supply changes", function () {
-                    beforeEach(async function () {
+                context("with a second snapshot after supply changes", function() {
+                    beforeEach(async function() {
                         this.secondSnapshotId = new BN("2");
 
                         const receipt = await this.token.snapshot();
                         expectEvent(receipt, "Snapshot", { id: this.secondSnapshotId });
                     });
 
-                    it("snapshots return the balances before and after the changes", async function () {
+                    it("snapshots return the balances before and after the changes", async function() {
                         expect(
                             await this.token.balanceOfAt(
                                 initialHolder,
@@ -302,8 +302,8 @@ contract("SnapshotERC1155", function () {
                     });
                 });
 
-                context("with multiple snapshots after supply changes", function () {
-                    beforeEach(async function () {
+                context("with multiple snapshots after supply changes", function() {
+                    beforeEach(async function() {
                         this.secondSnapshotIds = ["2", "3", "4"];
 
                         for (const id of this.secondSnapshotIds) {
@@ -312,7 +312,7 @@ contract("SnapshotERC1155", function () {
                         }
                     });
 
-                    it("all posterior snapshots return the supply after the changes", async function () {
+                    it("all posterior snapshots return the supply after the changes", async function() {
                         expect(
                             await this.token.balanceOfAt(
                                 initialHolder,

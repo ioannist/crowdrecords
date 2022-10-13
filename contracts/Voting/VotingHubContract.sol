@@ -88,16 +88,14 @@ contract VotingHubContract {
     }
 
     /// @notice
-    /// @dev This function will be called when either user is transferring the tokens to other account,
-    /// or is receiving tokens from other tokens.
+    /// @dev This function is to add a voting contract, the added contract will be notified when a token transfer occurs
     /// @param contractAddress address of the voting contract
     function addVotingContract(address contractAddress) public _ownerOnly {
         VOTING_CONTRACTS_ADDRESS.push(contractAddress);
     }
 
     /// @notice
-    /// @dev This function will be called when either user is transferring the tokens to other account,
-    /// or is receiving tokens from other tokens.
+    /// @dev This function removes address from voting contract array
     /// @param index index of the contract to remove from the list
     function removeVotingContract(uint256 index) public _ownerOnly {
         require(

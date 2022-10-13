@@ -22,6 +22,9 @@ contract("BaseVotingCounterOfferContract", function() {
         await this.votingHubContract.addVotingContract(
             this.baseVotingCounterOfferContractMock.address
         );
+        await this.treasuryContract.addSnapshotCaller(
+            this.baseVotingCounterOfferContractMock.address
+        );
     });
 
     let snapShot, snapshotId;

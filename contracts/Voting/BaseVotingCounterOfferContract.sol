@@ -31,6 +31,17 @@ abstract contract BaseVotingCounterOfferContract is BaseVotingContract {
         _;
     }
 
+    /// @dev This function sets the treasury Contract address
+    /// @param newTreasuryContractAddress This is the new address of treasury contract
+    function initialize(address newTreasuryContractAddress)
+        public
+        virtual
+        override
+        onlyInitializing
+    {
+        BaseVotingContract.initialize(newTreasuryContractAddress);
+    }
+
     /// @dev This function is called by any user to cast vote
     /// @param votingBallotId this is the id of the ballot for which user is voting
     /// @param vote this is the state of the vote, if true than it means the vote is in favour of the ballot

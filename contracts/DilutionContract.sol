@@ -93,13 +93,15 @@ contract DilutionContract is BaseVotingContract {
         REQUEST_INTERVAL = requestInterval;
     }
 
-    /// @dev This function sets the treasury Contract address
-    /// @param newTreasuryContractAddress The mew address of treasury contract
-    function setTreasuryContractAddress(address newTreasuryContractAddress)
-        external
+    /// @dev This is to set the address of the contracts
+    /// @param newTreasuryContractAddress This is the address of new treasury contract
+    function initialize(address newTreasuryContractAddress)
+        public
+        override
+        initializer
         _ownerOnly
     {
-        _setTreasuryContractAddress(newTreasuryContractAddress);
+        BaseVotingContract.initialize(newTreasuryContractAddress);
     }
 
     /// @dev This function will create a new contribution voting ballot

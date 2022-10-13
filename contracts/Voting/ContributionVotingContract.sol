@@ -124,12 +124,15 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
         _;
     }
 
-    /// @dev This function sets the treasury Contract address
-    function setTreasuryContractAddress(address newTreasuryContractAddress)
-        external
-        _ownerOnly
-    {
-        _setTreasuryContractAddress(newTreasuryContractAddress);
+    /// @dev This is to set the address of the contracts
+    /// @param newTreasuryContractAddress This is the address of new treasury contract
+    /// @param newContributionContractAddress This is the address of new voting hub contract
+    function initialize(
+        address newTreasuryContractAddress,
+        address newContributionContractAddress
+    ) public initializer _ownerOnly {
+        BaseVotingCounterOfferContract.initialize(newTreasuryContractAddress);
+        CONTRIBUTION_CONTRACT_ADDRESS = newContributionContractAddress;
     }
 
     /// @dev Sets the contribution contract address so that the voting ballot for contribution can

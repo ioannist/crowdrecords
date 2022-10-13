@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "../interface/ITreasury.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "../interface/ITreasury.sol";
 import "../OrdersContract.sol";
 
-contract BaseVotingContract {
+contract BaseVotingContract is Initializable {
     /// @dev this is Contribution Create event this event will be emited when a new contribution is created.
     /// @param owner This is the owner of the voting ballot
     /// @param yesWeight This is the weightage of yes in the ballot
@@ -127,10 +128,10 @@ contract BaseVotingContract {
 
     /// @dev This function sets the treasury Contract address
     /// @param newTreasuryContractAddress This is the new address of treasury contract
-    function _setTreasuryContractAddress(address newTreasuryContractAddress)
-        internal
+    function initialize(address newTreasuryContractAddress)
+        public
         virtual
-        _ownerOnly
+        onlyInitializing
     {
         TREASURY_CONTRACT_ADDRESS = newTreasuryContractAddress;
     }

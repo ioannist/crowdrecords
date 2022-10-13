@@ -141,20 +141,14 @@ contract AgreementContract is BaseVotingContract {
         VOTING_BLOCK_PERIOD = votingInterval;
     }
 
-    /// @dev This function sets the treasury Contract address
-    /// @param newTreasuryContractAddress this is the new address of treasury contract
-    function setTreasuryContractAddress(address newTreasuryContractAddress)
-        external
-        _ownerOnly
-    {
-        _setTreasuryContractAddress(newTreasuryContractAddress);
-    }
-
-    /// @dev This function sets the treasury Contract address
+    /// @dev This is to set the address of the contracts
+    /// @param newTreasuryContractAddress This is the address of new treasury contract
     /// @param newTreasuryCoreContractAddress This is the new address of treasury core contract
-    function setTreasuryCoreContractAddress(
+    function initialize(
+        address newTreasuryContractAddress,
         address newTreasuryCoreContractAddress
-    ) public _ownerOnly {
+    ) public initializer _ownerOnly {
+        BaseVotingContract.initialize(newTreasuryContractAddress);
         TREASURY_CORE_CONTRACT_ADDRESS = newTreasuryCoreContractAddress;
     }
 

@@ -40,32 +40,31 @@ async function setup() {
         DILUTION_INTERVAL_BLOCKS
     );
 
-    await contributionContract.setContributionVotingContractAddress(
-        contributionVotingContract.address
+    await recordsContract.initialize(contributionContract.address, recordsVotingContract.address);
+
+    await recordsVotingContract.initialize(
+        recordsContract.address,
+        treasuryContract.address,
+        treasuryCoreContract.address
     );
 
-    await recordsContract.setContributionContractAddress(contributionContract.address);
-    await recordsContract.setRecordsVotingContractAddress(recordsVotingContract.address);
-    // await recordsContract.setTreasuryContractAddress(treasuryContract.address);
+    await contributionContract.initialize(
+        contributionVotingContract.address,
+        recordsContract.address
+    );
 
-    await recordsVotingContract.setTreasuryContractAddress(treasuryContract.address);
-    await recordsVotingContract.setTreasuryCoreContractAddress(treasuryCoreContract.address);
-    await recordsVotingContract.setRecordsContractAddress(recordsContract.address);
+    await contributionVotingContract.initialize(
+        treasuryContract.address,
+        contributionContract.address
+    );
 
-    await contributionContract.setRecordsContractAddress(recordsContract.address);
-
-    await contributionVotingContract.setTreasuryContractAddress(treasuryContract.address);
-    await contributionVotingContract.setContributionContractAddress(contributionContract.address);
-
-    await ordersContract.setTreasuryContractAddress(treasuryContract.address);
-    await ordersContract.setTreasuryCoreContractAddress(treasuryCoreContract.address);
+    await ordersContract.initialize(treasuryContract.address, treasuryCoreContract.address);
     await ordersContract.setWalletAddress(await getEthAccount(9));
 
-    await agreementContract.setTreasuryContractAddress(treasuryContract.address);
-    await agreementContract.setTreasuryCoreContractAddress(treasuryCoreContract.address);
+    await agreementContract.initialize(treasuryContract.address, treasuryCoreContract.address);
 
-    await baseVotingContractMock.setTreasuryContractAddress(treasuryContract.address);
-    await baseVotingCounterOfferContractMock.setTreasuryContractAddress(treasuryContract.address);
+    await baseVotingContractMock.initialize(treasuryContract.address);
+    await baseVotingCounterOfferContractMock.initialize(treasuryContract.address);
 
     await votingHubContract.setTreasuryCoreContractAddress(treasuryCoreContract.address);
     await votingHubContract.addVotingContract(contributionVotingContract.address);
@@ -73,16 +72,19 @@ async function setup() {
     await votingHubContract.addVotingContract(dilutionContract.address);
     await votingHubContract.addVotingContract(recordsVotingContract.address);
 
-    await treasuryContract.setDilutionContract(dilutionContract.address);
-    await treasuryContract.setContributionVotingContractAddress(contributionVotingContract.address);
-    await treasuryContract.setRecordsContractAddress(recordsContract.address);
-    await treasuryContract.setRecordsVotingContractAddress(recordsVotingContract.address);
-    await treasuryContract.setCoreTreasuryAddress(treasuryCoreContract.address);
+    await treasuryContract.initialize(
+        treasuryCoreContract.address,
+        recordsContract.address,
+        recordsVotingContract.address,
+        dilutionContract.address,
+        contributionVotingContract.address
+    );
+    await treasuryContract.addSnapshotCaller(agreementContract.address);
+    await treasuryContract.addSnapshotCaller(recordsVotingContract.address);
 
-    await treasuryCoreContract.setVotingHubContract(votingHubContract.address);
-    await treasuryCoreContract.setTreasuryContract(treasuryContract.address);
+    await treasuryCoreContract.initialize(votingHubContract.address, treasuryContract.address);
 
-    await dilutionContract.setTreasuryContractAddress(treasuryContract.address);
+    await dilutionContract.initialize(treasuryContract.address);
 
     this.tracksContract = tracksContract;
     this.contributionContract = contributionContract;

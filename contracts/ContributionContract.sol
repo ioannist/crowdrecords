@@ -3,10 +3,11 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "./voting/ContributionVotingContract.sol";
 import "./interface/IRecords.sol";
 
-contract ContributionContract {
+contract ContributionContract is Initializable {
     using Counters for Counters.Counter;
 
     /// @dev this is Contribution Create event this event will be emitted when a new contribution is created.
@@ -77,20 +78,14 @@ contract ContributionContract {
         _;
     }
 
-    /// @dev This function sets the Voting Contract address
+    /// @dev This is to set the address of the contracts
     /// @param newVotingContractAddress this is the address of new voting contract
-    function setContributionVotingContractAddress(
-        address newVotingContractAddress
-    ) public ownerOnly {
-        CONTRIBUTION_VOTING_CONTRACT_ADDRESS = newVotingContractAddress;
-    }
-
-    /// @dev This function sets the Records contract address
     /// @param newRecordsContractAddress this is the address of new Records contract
-    function setRecordsContractAddress(address newRecordsContractAddress)
-        public
-        ownerOnly
-    {
+    function initialize(
+        address newVotingContractAddress,
+        address newRecordsContractAddress
+    ) public initializer ownerOnly {
+        CONTRIBUTION_VOTING_CONTRACT_ADDRESS = newVotingContractAddress;
         RECORD_CONTRACT_ADDRESS = newRecordsContractAddress;
     }
 

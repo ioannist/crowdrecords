@@ -5,12 +5,17 @@ import "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Supply.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "../interface/IRecords.sol";
 import "../ERC1155/SnapshotERC1155.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "../voting/VotingHubContract.sol";
 
-contract TreasuryCoreContract is IERC1155Receiver, SnapshotERC1155 {
+contract TreasuryCoreContract is
+    IERC1155Receiver,
+    SnapshotERC1155,
+    Initializable
+{
     uint256 public constant CRD = 1;
     uint256 private LastTokenId = 1;
     address public VOTING_HUB_ADDRESS;
@@ -140,18 +145,14 @@ contract TreasuryCoreContract is IERC1155Receiver, SnapshotERC1155 {
         _;
     }
 
-    /// @dev This function sets the Records Contract address
+    /// @dev This is to set the address of the contracts
     /// @param newVotingHubContract This is the address of new voting hub contract
-    function setVotingHubContract(address newVotingHubContract)
-        public
-        ownerOnly
-    {
-        VOTING_HUB_ADDRESS = newVotingHubContract;
-    }
-
-    /// @dev This function sets the treasury Contract address
     /// @param newTreasuryAddress This is the address of new voting hub contract
-    function setTreasuryContract(address newTreasuryAddress) public ownerOnly {
+    function initialize(
+        address newVotingHubContract,
+        address newTreasuryAddress
+    ) public initializer ownerOnly {
+        VOTING_HUB_ADDRESS = newVotingHubContract;
         TREASURY_CONTRACT_ADDRESS = newTreasuryAddress;
     }
 

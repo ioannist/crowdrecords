@@ -4,9 +4,10 @@ import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Supply.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "./interface/IContribution.sol";
 
-contract RecordsContract {
+contract RecordsContract is Initializable {
     uint256 newTokenId = 0;
     uint256 newVersionRequestId = 0;
 
@@ -112,21 +113,14 @@ contract RecordsContract {
         _;
     }
 
-    /// @dev This function sets the contribution Contract address
+    /// @dev This is to set the address of the contracts
     /// @param contributionContractAddress Takes the address of new contribution contract as parameter
-    function setContributionContractAddress(address contributionContractAddress)
-        public
-        onlyOwner
-    {
-        CONTRIBUTION_CONTRACT_ADDRESS = contributionContractAddress;
-    }
-
-    /// @dev This function sets the contribution Contract address
     /// @param recordsVotingContract Takes the address of new voting contract as parameter
-    function setRecordsVotingContractAddress(address recordsVotingContract)
-        public
-        onlyOwner
-    {
+    function initialize(
+        address contributionContractAddress,
+        address recordsVotingContract
+    ) public initializer onlyOwner {
+        CONTRIBUTION_CONTRACT_ADDRESS = contributionContractAddress;
         RECORDS_VOTING_CONTRACT_ADDRESS = recordsVotingContract;
     }
 

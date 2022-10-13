@@ -158,30 +158,17 @@ contract RecordsVotingContract is BaseVotingContract, IERC1155Receiver {
 
     constructor(address owner) BaseVotingContract(owner) {}
 
-    /// @dev This function sets the Records Contract address
+    /// @dev This is to set the address of the contracts
     /// @param recordsContractAddress New records contract address
-    function setRecordsContractAddress(address recordsContractAddress)
-        public
-        _ownerOnly
-    {
-        RECORDS_CONTRACT_ADDRESS = recordsContractAddress;
-    }
-
-    /// @dev This function sets the Treasury Contract address
     /// @param treasuryContractAddress Takes the address of new treasury contract as parameter
-    function setTreasuryContractAddress(address treasuryContractAddress)
-        public
-        _ownerOnly
-    {
-        _setTreasuryContractAddress(treasuryContractAddress);
-    }
-
-    /// @dev This function sets the Treasury Contract address
     /// @param treasuryCoreContractAddress Takes the address of new treasury core contract as parameter
-    function setTreasuryCoreContractAddress(address treasuryCoreContractAddress)
-        public
-        _ownerOnly
-    {
+    function initialize(
+        address recordsContractAddress,
+        address treasuryContractAddress,
+        address treasuryCoreContractAddress
+    ) public initializer _ownerOnly {
+        BaseVotingContract.initialize(treasuryContractAddress);
+        RECORDS_CONTRACT_ADDRESS = recordsContractAddress;
         TREASURY_CORE_CONTRACT_ADDRESS = treasuryCoreContractAddress;
     }
 

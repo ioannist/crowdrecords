@@ -3,10 +3,11 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "./interface/ITreasuryCore.sol";
 import "./interface/ITreasury.sol";
 
-contract OrdersContract {
+contract OrdersContract is Initializable {
     address public VOTING_CONTRACT_ADDRESS;
     address public TREASURY_CONTRACT_ADDRESS;
     address public TREASURY_CORE_CONTRACT_ADDRESS;
@@ -192,20 +193,14 @@ contract OrdersContract {
         OWNER = owner;
     }
 
-    /// @dev This function sets the treasury Contract address
-    /// @param newTreasuryContractAddress the is the new treasuryContractAddress
-    function setTreasuryContractAddress(address newTreasuryContractAddress)
-        public
-        ownerOnly
-    {
-        TREASURY_CONTRACT_ADDRESS = newTreasuryContractAddress;
-    }
-
-    /// @dev This function sets the treasury core Contract address
-    /// @param newTreasuryCoreContractAddress the is the new Treasury Core Contract Address
-    function setTreasuryCoreContractAddress(
+    /// @dev This is to set the address of the contracts
+    /// @param newTreasuryContractAddress This is the address of new treasury contract
+    /// @param newTreasuryCoreContractAddress This is the new address of treasury core contract
+    function initialize(
+        address newTreasuryContractAddress,
         address newTreasuryCoreContractAddress
-    ) public ownerOnly {
+    ) public initializer ownerOnly {
+        TREASURY_CONTRACT_ADDRESS = newTreasuryContractAddress;
         TREASURY_CORE_CONTRACT_ADDRESS = newTreasuryCoreContractAddress;
     }
 

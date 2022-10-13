@@ -20,6 +20,7 @@ contract("BaseVotingContract", function() {
     before(createContribution);
     before(async function() {
         await this.votingHubContract.addVotingContract(this.baseVotingContractMock.address);
+        await this.treasuryContract.addSnapshotCaller(this.baseVotingContractMock.address);
     });
 
     let snapShot, snapshotId;
@@ -29,6 +30,12 @@ contract("BaseVotingContract", function() {
     });
     afterEach(async function() {
         await helper.revertToSnapshot(snapshotId);
+    });
+
+    it("Calling snapshot function of treasury UNAUTHORIZED: ONLY_SNAPSHOT_CALLERS", async function() {
+        await expect(this.treasuryContract.snapshot()).to.eventually.be.rejectedWith(
+            "UNAUTHORIZED: ONLY_SNAPSHOT_CALLERS"
+        );
     });
 
     it("Creating a voting ballot UNAUTHORIZED: OWNER_CANNOT_VOTE", async function() {

@@ -60,9 +60,9 @@ abstract contract SnapshotERC1155 is ERC1155Supply {
         return currentId;
     }
 
-    function snap() public returns (uint256) {
-        return _snapshot();
-    }
+    // function snap() public returns (uint256) {
+    //     return _snapshot();
+    // }
 
     /**
      * @dev Get the current snapshotId

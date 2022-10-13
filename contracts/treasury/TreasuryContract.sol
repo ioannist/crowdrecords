@@ -5,13 +5,14 @@ import "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Supply.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "../interface/IRecords.sol";
-import "../ERC1155/SnapshotERC1155.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "../ERC1155/SnapshotERC1155.sol";
+import "../interface/IRecords.sol";
 import "../voting/VotingHubContract.sol";
 import "./TreasuryCoreContract.sol";
 
-contract TreasuryContract {
+contract TreasuryContract is Initializable {
     uint256 public constant CRD = 1;
     address public OWNER;
     address public RECORDS_CONTRACT_ADDRESS;
@@ -19,6 +20,8 @@ contract TreasuryContract {
     address public CONTRIBUTION_VOTING_CONTRACT_ADDRESS;
     address public DILUTION_CONTRACT_ADDRESS;
     address public TREASURY_CORE_CONTRACT_ADDRESS;
+
+    address[] public SNAPSHOT_CALLER;
 
     constructor(address owner) {
         OWNER = owner;
@@ -76,46 +79,54 @@ contract TreasuryContract {
         _;
     }
 
+    /// @dev Modifier to check that if the sender is the dilution contract or not.
+    modifier onlySnapshotCaller() {
+        for (uint256 i; i < SNAPSHOT_CALLER.length; i++) {
+            if (msg.sender == SNAPSHOT_CALLER[i]) {
+                _;
+            }
+        }
+        revert("UNAUTHORIZED: ONLY_SNAPSHOT_CALLERS");
+    }
+
+    /// @dev This function is called to give a address privilege to call snapshot function
+    /// @param contractAddress address of the voting contract
+    function addSnapshotCaller(address contractAddress) public ownerOnly {
+        SNAPSHOT_CALLER.push(contractAddress);
+    }
+
+    /// @notice
+    /// @dev This function invokes the snapshot calling privilages
+    /// @param index index of the contract to remove from the list
+    function removeSnapshotCaller(uint256 index) public ownerOnly {
+        require(index < SNAPSHOT_CALLER.length, "INVALID: INCORRECT_INDEX");
+        SNAPSHOT_CALLER[index] = SNAPSHOT_CALLER[SNAPSHOT_CALLER.length - 1];
+        SNAPSHOT_CALLER.pop();
+    }
+
     /// @dev This function sets the Owners address
     /// @param ownerAddress This is the address of new owner of contract
     function setOwnerAddress(address ownerAddress) public ownerOnly {
         OWNER = ownerAddress;
     }
 
-    /// @dev This function sets the core treasury contract address
-    /// @param ownerAddress This is the address of new core treasury contract
-    function setCoreTreasuryAddress(address ownerAddress) public ownerOnly {
-        TREASURY_CORE_CONTRACT_ADDRESS = ownerAddress;
-    }
-
-    /// @dev This function sets the Records Contract address
-    /// @param newRecordsContractAddress This is the address of new Records contract
-    function setRecordsContractAddress(address newRecordsContractAddress)
-        public
-        ownerOnly
-    {
-        RECORDS_CONTRACT_ADDRESS = newRecordsContractAddress;
-    }
-
-    /// @dev This function sets the Records Contract address
-    /// @param newRecordsVotingContractAddress This is the address of new Records contract
-    function setRecordsVotingContractAddress(
-        address newRecordsVotingContractAddress
-    ) public ownerOnly {
-        RECORDS_VOTING_CONTRACT_ADDRESS = newRecordsVotingContractAddress;
-    }
-
-    /// @dev This function sets the dilution Contract address
+    /// @dev This is to set the address of the contracts
+    /// @param newTreasuryCoreContractAddress address of treasury core contract
+    /// @param newRecordsContractAddress address of records contract
+    /// @param newRecordsVotingContractAddress address of record voting contract
     /// @param newDilutionContract This is the address of new dilution contract
-    function setDilutionContract(address newDilutionContract) public ownerOnly {
-        DILUTION_CONTRACT_ADDRESS = newDilutionContract;
-    }
-
-    /// @dev This function sets the Voting Contract address
     /// @param newVotingContractAddress This is the address of new voting contract
-    function setContributionVotingContractAddress(
+    function initialize(
+        address newTreasuryCoreContractAddress,
+        address newRecordsContractAddress,
+        address newRecordsVotingContractAddress,
+        address newDilutionContract,
         address newVotingContractAddress
-    ) public ownerOnly {
+    ) public initializer ownerOnly {
+        TREASURY_CORE_CONTRACT_ADDRESS = newTreasuryCoreContractAddress;
+        RECORDS_CONTRACT_ADDRESS = newRecordsContractAddress;
+        RECORDS_VOTING_CONTRACT_ADDRESS = newRecordsVotingContractAddress;
+        DILUTION_CONTRACT_ADDRESS = newDilutionContract;
         CONTRIBUTION_VOTING_CONTRACT_ADDRESS = newVotingContractAddress;
     }
 
@@ -407,7 +418,7 @@ contract TreasuryContract {
         );
     }
 
-    function snapshot() public returns (uint256 snapshotId) {
+    function snapshot() public onlySnapshotCaller returns (uint256 snapshotId) {
         TreasuryCoreContract treasuryCoreContract = TreasuryCoreContract(
             TREASURY_CORE_CONTRACT_ADDRESS
         );
