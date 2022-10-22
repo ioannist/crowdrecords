@@ -10,6 +10,7 @@ interface IContribution {
     /// @param roughMix This flag determines if it is a rough mix or not, true if rough mix or else false
     /// @param status This specifies the status of contribution PENDING = 1 | ACCEPTED = 2| REJECTED = 3
     /// @param description This is the description that is entered by user
+    /// @param owner This is the owner of the contribution
     /// @param isPresent This is to check if a contribution exists or not
     struct Contribution {
         uint256[] tracks;
@@ -20,6 +21,7 @@ interface IContribution {
         bool roughMix;
         uint256 status;
         string description;
+        address owner;
         bool isPresent;
     }
 

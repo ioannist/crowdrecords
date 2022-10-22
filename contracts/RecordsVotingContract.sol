@@ -111,11 +111,13 @@ contract RecordsVotingContract is BaseVotingContract, IERC1155Receiver {
     /// @param tokenId This is the id of the token that is linked to this ballot
     /// @param ballotId this is the ballot Id for which result is declared
     /// @param result this is the status of the result
+    /// @param minTurnOut this status indicates if minimum amount of user showed up for voting
     event NewVersionRequestResult(
         uint256 versionReqId,
         uint256 tokenId,
         uint256 ballotId,
-        bool result
+        bool result,
+        bool minTurnOut
     );
 
     //------------------------------
@@ -273,9 +275,6 @@ contract RecordsVotingContract is BaseVotingContract, IERC1155Receiver {
     /// @param versionReqId this is the id of the new version request for which user is voting
     /// @param vote this is the state of the vote, if true than it means the vote is in favour of the ballot
     function castVote(uint256 versionReqId, bool vote) public {
-        // RecordsContract recordsContract = RecordsContract(
-        //     RECORDS_CONTRACT_ADDRESS
-        // );
         require(
             newVersionRequestMap[versionReqId].isPresent == true,
             "INVALID: INVALID_VERSION_REQ_ID"
@@ -297,17 +296,17 @@ contract RecordsVotingContract is BaseVotingContract, IERC1155Receiver {
         RecordsContract recordsContract = RecordsContract(
             RECORDS_CONTRACT_ADDRESS
         );
-        // RecordsContract.NewVersionRequest memory req = recordsContract
-        //     .newVersionRequestMap(versionReqId);
+
         NewVersionRequest memory req = newVersionRequestMap[versionReqId];
 
-        bool result = _declareWinner(req.ballotId);
+        (bool result, bool minTurnOut) = _declareWinner(req.ballotId);
 
         emit NewVersionRequestResult({
             versionReqId: versionReqId,
             tokenId: req.tokenId,
             ballotId: req.ballotId,
-            result: result
+            result: result,
+            minTurnOut: minTurnOut
         });
 
         if (result) {

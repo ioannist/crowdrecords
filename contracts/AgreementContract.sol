@@ -117,8 +117,14 @@ contract AgreementContract is BaseVotingContract {
     /// @param agreementId This is the id of the agreement that is linked to this ballot
     /// @param ballotId this is the ballot Id for which result is declared
     /// @param result this is the status of the result either true if user won that is he received
+    /// @param minTurnOut this status indicates if minimum amount of user showed up for voting
     ///  more than 66% of votes or false if user lost
-    event BallotResult(uint256 agreementId, uint256 ballotId, bool result);
+    event BallotResult(
+        uint256 agreementId,
+        uint256 ballotId,
+        bool result,
+        bool minTurnOut
+    );
 
     uint256 public agreementCurrentId = 0;
     mapping(uint256 => Agreement) agreementMap;
@@ -220,12 +226,15 @@ contract AgreementContract is BaseVotingContract {
     /// @dev This function can be called from external source and also from within the contract
     /// @param agreementId this is the id of the agreement of which the winner is to be decleared
     function declareWinner(uint256 agreementId) external {
-        bool result = _declareWinner(agreementMap[agreementId].ballotId);
+        (bool result, bool minTurnOut) = _declareWinner(
+            agreementMap[agreementId].ballotId
+        );
 
         emit BallotResult(
             agreementId,
             agreementMap[agreementId].ballotId,
-            result
+            result,
+            minTurnOut
         );
 
         if (result) {

@@ -81,12 +81,17 @@ contract TreasuryContract is Initializable {
 
     /// @dev Modifier to check that if the sender is the dilution contract or not.
     modifier onlySnapshotCaller() {
+        bool validCall = false;
         for (uint256 i; i < SNAPSHOT_CALLER.length; i++) {
             if (msg.sender == SNAPSHOT_CALLER[i]) {
-                _;
+                validCall = true;
             }
         }
-        revert("UNAUTHORIZED: ONLY_SNAPSHOT_CALLERS");
+        if (validCall) {
+            _;
+        } else {
+            revert("UNAUTHORIZED: ONLY_SNAPSHOT_CALLERS");
+        }
     }
 
     /// @dev This function is called to give a address privilege to call snapshot function

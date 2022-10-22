@@ -32,12 +32,13 @@ contract BaseVotingContract is Initializable {
     }
 
     uint256 VOTING_BLOCK_PERIOD = 25;
+    uint256 public MIN_TURNOUT_PERCENT = 500;
     address public TREASURY_CONTRACT_ADDRESS;
     address public TREASURY_HUB_ADDRESS;
     address public OWNER;
 
     uint256 votingId = 0;
-    mapping(uint256 => VotingBallot) votingMap;
+    mapping(uint256 => VotingBallot) public votingMap;
     //This mapping tracks the state of user, that is if they have voted already or not.
     // Ballot id => user address => bool
     mapping(uint256 => mapping(address => bool)) alreadyVoted;
@@ -134,16 +135,6 @@ contract BaseVotingContract is Initializable {
         onlyInitializing
     {
         TREASURY_CONTRACT_ADDRESS = newTreasuryContractAddress;
-    }
-
-    /// @dev This function sets the treasury Contract address
-    /// @param newOwnerAddress This is the address of new owner
-    function _setOwnerAddress(address newOwnerAddress)
-        internal
-        virtual
-        _ownerOnly
-    {
-        TREASURY_CONTRACT_ADDRESS = newOwnerAddress;
     }
 
     /// @dev This function is called by any user to cast vote
@@ -263,7 +254,7 @@ contract BaseVotingContract is Initializable {
     /// @param votingBallotId this is the id of the ballot for which we need to find the winner
     function _declareWinner(uint256 votingBallotId)
         internal
-        returns (bool isWinner)
+        returns (bool isWinner, bool minTurnOut)
     {
         require(
             votingMap[votingBallotId].isPresent == true,
@@ -282,27 +273,34 @@ contract BaseVotingContract is Initializable {
 
         VotingBallot storage votingBallot = votingMap[votingBallotId];
         uint256 totalYes = votingBallot.yesWeight;
+        uint256 totalNo = votingBallot.noWeight;
 
         // Currently to win you would need to around 66% of votes to be yes
         ITreasury treasuryContract = ITreasury(TREASURY_CONTRACT_ADDRESS);
 
         votingMap[votingBallotId].isResultDeclared = true;
 
-        if (totalYes > 0) {
-            uint256 totalCirculatingSupply = treasuryContract
-                .totalCirculatingSupply(votingBallot.tokenId);
+        uint256 totalCirculatingSupply = treasuryContract
+            .totalCirculatingSupply(votingBallot.tokenId);
 
-            //calculating the 2/3rd value of totalCirculatingSupply to identify how much we will need to win
-            uint256 winAmount = (totalCirculatingSupply * 66) / 100;
+        uint256 minimumTurnOutAmount = ((totalCirculatingSupply *
+            MIN_TURNOUT_PERCENT) / 100) / 100;
+        if (totalNo + totalYes > minimumTurnOutAmount) {
+            if (totalYes > 0) {
+                //calculating the 2/3rd value of the votes that were casted to identify how much we will need to win
+                uint256 winAmount = ((totalYes + totalNo) * 66) / 100;
 
-            //This will check for 2 / 3 ratio for yes votes
-            if (totalYes > winAmount) {
-                return true;
+                //This will check for 2 / 3 ratio for yes votes
+                if (totalYes > winAmount) {
+                    return (true, true);
+                } else {
+                    return (false, true);
+                }
             } else {
-                return false;
+                return (false, true);
             }
         } else {
-            return false;
+            return (false, false);
         }
     }
 }

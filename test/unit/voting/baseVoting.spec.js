@@ -94,7 +94,7 @@ contract("BaseVotingContract", function() {
         await expectEvent(trx, "BallotResult", { ballotId: new BN(ballotId), result: false });
     });
 
-    it("Creating a voting ballot, ballot win with 67%", async function() {
+    it("Creating a voting ballot, voting is done more than minTurnOut, ballot win with 67%", async function() {
         const ballotId = 1;
         const user1 = await helper.getEthAccount(0);
         const user2 = await helper.getEthAccount(1);
@@ -118,7 +118,7 @@ contract("BaseVotingContract", function() {
         await expectEvent(trx, "BallotResult", { ballotId: new BN(ballotId), result: true });
     });
 
-    it("Creating a voting ballot, ballot lose with 65%", async function() {
+    it("Creating a voting ballot, voting is done more than minTurnOut, ballot lose with 65%", async function() {
         const ballotId = 1;
         const user1 = await helper.getEthAccount(0);
         const user2 = await helper.getEthAccount(1);
@@ -134,6 +134,8 @@ contract("BaseVotingContract", function() {
 
         await this.baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID, { from: user2 });
 
+        await this.baseVotingContractMock.castVote(ballotId, false, { from: user1 });
+        await this.baseVotingContractMock.castVote(ballotId, false, { from: user2 });
         await this.baseVotingContractMock.castVote(ballotId, true, { from: user3 });
 
         await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 2);
@@ -236,6 +238,7 @@ contract("BaseVotingContract", function() {
         await this.baseVotingContractMock.castVote(ballotId, true, { from: user1 });
         await this.baseVotingContractMock.castVote(ballotId, true, { from: user2 });
         await this.baseVotingContractMock.castVote(ballotId, true, { from: user3 });
+        await this.baseVotingContractMock.castVote(ballotId, false, { from: user4 });
 
         await this.treasuryCoreContract.safeTransferFrom(
             user1,
@@ -399,6 +402,36 @@ contract("BaseVotingContract", function() {
 
         let trx = await this.baseVotingContractMock.declareWinner(ballotId);
         await expectEvent(trx, "BallotResult", { ballotId: new BN(ballotId), result: false });
+    });
+
+    it("Creating a voting ballot, less then minTurnOut vote", async function() {
+        const ballotId = 1;
+        const user1 = await helper.getEthAccount(0);
+        const user2 = await helper.getEthAccount(1);
+        const user3 = await helper.getEthAccount(2);
+
+        await this.treasuryCoreContract.safeTransferFrom(
+            user1,
+            user3,
+            COMMUNITY_TOKEN_ID,
+            await web3.utils.toWei("1500"),
+            "0xa165"
+        );
+
+        await this.baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID, {
+            from: user2,
+        });
+
+        await this.baseVotingContractMock.castVote(ballotId, true, { from: user3 });
+
+        await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 2);
+
+        let trx = await this.baseVotingContractMock.declareWinner(ballotId);
+        await expectEvent(trx, "BallotResult", {
+            ballotId: new BN(ballotId),
+            result: false,
+            minTurnOut: false,
+        });
     });
 });
 

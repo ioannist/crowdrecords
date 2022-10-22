@@ -100,8 +100,14 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
     /// @param contributionId This is the id of the contribution that is linked to this ballot
     /// @param ballotId this is the ballot Id for which result is declared
     /// @param result this is the status of the result, either true if user won that is
+    /// @param minTurnOut this status indicates if minimum amount of user showed up for voting
     /// he received more than 66% of votes or false if user lost
-    event BallotResult(uint256 contributionId, uint256 ballotId, bool result);
+    event BallotResult(
+        uint256 contributionId,
+        uint256 ballotId,
+        bool result,
+        bool minTurnOut
+    );
 
     mapping(uint256 => ContributionReward) rewardMapping;
     //Bellow mapping is ContributionId => User's address => Counter Offer data
@@ -323,12 +329,15 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
         //             .status = 3;
         //     }
         // }
-        bool result = _declareWinner(rewardMapping[contributionId].ballotId);
+        (bool result, bool minTurnOut) = _declareWinner(
+            rewardMapping[contributionId].ballotId
+        );
 
         emit BallotResult(
             contributionId,
             rewardMapping[contributionId].ballotId,
-            result
+            result,
+            minTurnOut
         );
 
         if (result) {

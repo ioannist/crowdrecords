@@ -10,7 +10,8 @@ contract BaseVotingCounterOfferContractMock is BaseVotingCounterOfferContract {
     /// @dev this event is generated when result of a ballot is declared
     /// @param ballotId this is the ballot Id for which result is declared
     /// @param result this is the status of the result //either true if user won that is he received more than 66% of votes or false if user lost
-    event BallotResult(uint256 ballotId, bool result);
+    /// @param minTurnOut this status indicates if minimum amount of user showed up for voting
+    event BallotResult(uint256 ballotId, bool result, bool minTurnOut);
 
     constructor(uint8 votingInterval, address owner)
         BaseVotingCounterOfferContract(owner)
@@ -50,7 +51,7 @@ contract BaseVotingCounterOfferContractMock is BaseVotingCounterOfferContract {
     }
 
     function declareWinner(uint256 ballotId) public {
-        bool result = _declareWinner(ballotId);
-        emit BallotResult(ballotId, result);
+        (bool result, bool minTurnOut) = _declareWinner(ballotId);
+        emit BallotResult(ballotId, result, minTurnOut);
     }
 }

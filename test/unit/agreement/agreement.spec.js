@@ -78,7 +78,7 @@ contract("AgreementContract", function() {
         });
     });
 
-    it("Trying to pay royalty to a rejected agreement", async function() {
+    it("Trying to pay royalty to a rejected agreement, expect revert", async function() {
         const user1 = await helper.getEthAccount(0);
         const user2 = await helper.getEthAccount(1);
         const CRDToken = await this.treasuryContract.CRD();
