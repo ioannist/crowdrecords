@@ -281,6 +281,302 @@ contract("BaseVotingCounterOfferContract", function() {
             await helper.revertToSnapshot(snapshotId2);
         });
 
+        it("Creating a counter offer check if created", async function() {
+            await this.baseVotingCounterOfferContractMock.createBallot(true, COMMUNITY_TOKEN_ID, {
+                from: this.user2,
+            });
+            let trx = await this.baseVotingCounterOfferContractMock.createCounterOffer(
+                this.ballotId,
+                {
+                    from: this.user1,
+                }
+            );
+            await expectEvent(trx, "CounterOfferCreated", {
+                ballotId: new BN(this.ballotId),
+            });
+        });
+
+        it("Creating a counter offer check if created, accepted check event", async function() {
+            await this.baseVotingCounterOfferContractMock.createBallot(true, COMMUNITY_TOKEN_ID, {
+                from: this.user2,
+            });
+
+            await this.baseVotingCounterOfferContractMock.createCounterOffer(this.ballotId, {
+                from: this.user1,
+            });
+            let trx = await this.baseVotingCounterOfferContractMock.counterOfferAction(
+                this.ballotId,
+                this.user1,
+                true,
+                {
+                    from: this.user2,
+                }
+            );
+            await expectEvent(trx, "CounterOfferResult", {
+                ballotId: new BN(this.ballotId),
+                result: true,
+            });
+        });
+
+        it("Creating a counter offer check if created, rejected check event", async function() {
+            await this.baseVotingCounterOfferContractMock.createBallot(true, COMMUNITY_TOKEN_ID, {
+                from: this.user2,
+            });
+
+            await this.baseVotingCounterOfferContractMock.createCounterOffer(this.ballotId, {
+                from: this.user1,
+            });
+            let trx = await this.baseVotingCounterOfferContractMock.counterOfferAction(
+                this.ballotId,
+                this.user1,
+                false,
+                {
+                    from: this.user2,
+                }
+            );
+            await expectEvent(trx, "CounterOfferResult", {
+                ballotId: new BN(this.ballotId),
+                result: false,
+            });
+        });
+
+        it("Creating a counter offer check if created, rejected check event", async function() {
+            await this.baseVotingCounterOfferContractMock.createBallot(true, COMMUNITY_TOKEN_ID, {
+                from: this.user2,
+            });
+
+            await this.baseVotingCounterOfferContractMock.createCounterOffer(this.ballotId, {
+                from: this.user1,
+            });
+            let trx = await this.baseVotingCounterOfferContractMock.counterOfferAction(
+                this.ballotId,
+                this.user1,
+                true,
+                {
+                    from: this.user2,
+                }
+            );
+            await expectEvent(trx, "CounterOfferResult", {
+                ballotId: new BN(this.ballotId),
+                result: true,
+            });
+            await expect(
+                this.baseVotingCounterOfferContractMock.counterOfferAction(
+                    this.ballotId,
+                    this.user1,
+                    false,
+                    {
+                        from: this.user2,
+                    }
+                )
+            ).to.eventually.be.rejectedWith("INVALID: ALREADY_VOTED");
+        });
+
+        it("Creating a counter offer check if created, rejected check event", async function() {
+            await this.baseVotingCounterOfferContractMock.createBallot(true, COMMUNITY_TOKEN_ID, {
+                from: this.user2,
+            });
+
+            await this.baseVotingCounterOfferContractMock.createCounterOffer(this.ballotId, {
+                from: this.user1,
+            });
+            let trx = await this.baseVotingCounterOfferContractMock.counterOfferAction(
+                this.ballotId,
+                this.user1,
+                false,
+                {
+                    from: this.user2,
+                }
+            );
+            await expectEvent(trx, "CounterOfferResult", {
+                ballotId: new BN(this.ballotId),
+                result: false,
+            });
+            await expect(
+                this.baseVotingCounterOfferContractMock.counterOfferAction(
+                    this.ballotId,
+                    this.user1,
+                    true,
+                    {
+                        from: this.user2,
+                    }
+                )
+            ).to.eventually.be.rejectedWith("INVALID: ALREADY_VOTED");
+        });
+
+        it("Creating a counter offer check if created, rejected check event", async function() {
+            await this.baseVotingCounterOfferContractMock.createBallot(true, COMMUNITY_TOKEN_ID, {
+                from: this.user2,
+            });
+
+            await this.baseVotingCounterOfferContractMock.createCounterOffer(this.ballotId, {
+                from: this.user1,
+            });
+            let trx = await this.baseVotingCounterOfferContractMock.counterOfferAction(
+                this.ballotId,
+                this.user1,
+                false,
+                {
+                    from: this.user2,
+                }
+            );
+            await expectEvent(trx, "CounterOfferResult", {
+                ballotId: new BN(this.ballotId),
+                result: false,
+            });
+            await expect(
+                this.baseVotingCounterOfferContractMock.counterOfferAction(
+                    this.ballotId,
+                    this.user1,
+                    false,
+                    {
+                        from: this.user2,
+                    }
+                )
+            ).to.eventually.be.rejectedWith("INVALID: ALREADY_VOTED");
+        });
+
+        it("Creating a counter offer check if created, rejected check event", async function() {
+            await this.baseVotingCounterOfferContractMock.createBallot(true, COMMUNITY_TOKEN_ID, {
+                from: this.user2,
+            });
+
+            await this.baseVotingCounterOfferContractMock.createCounterOffer(this.ballotId, {
+                from: this.user1,
+            });
+            let trx = await this.baseVotingCounterOfferContractMock.counterOfferAction(
+                this.ballotId,
+                this.user1,
+                true,
+                {
+                    from: this.user2,
+                }
+            );
+            await expectEvent(trx, "CounterOfferResult", {
+                ballotId: new BN(this.ballotId),
+                result: true,
+            });
+            await expect(
+                this.baseVotingCounterOfferContractMock.counterOfferAction(
+                    this.ballotId,
+                    this.user1,
+                    true,
+                    {
+                        from: this.user2,
+                    }
+                )
+            ).to.eventually.be.rejectedWith("INVALID: ALREADY_VOTED");
+        });
+
+        it("Creating a counter offer, only owner of ballot can accept counter offer", async function() {
+            await this.baseVotingCounterOfferContractMock.createBallot(true, COMMUNITY_TOKEN_ID, {
+                from: this.user2,
+            });
+
+            await this.baseVotingCounterOfferContractMock.createCounterOffer(this.ballotId, {
+                from: this.user1,
+            });
+
+            await expect(
+                this.baseVotingCounterOfferContractMock.counterOfferAction(
+                    this.ballotId,
+                    this.user1,
+                    true,
+                    {
+                        from: this.user3,
+                    }
+                )
+            ).to.eventually.be.rejectedWith("INVALID: ONLY_BALLOT_OWNER");
+
+            let trx = await this.baseVotingCounterOfferContractMock.counterOfferAction(
+                this.ballotId,
+                this.user1,
+                true,
+                {
+                    from: this.user2,
+                }
+            );
+            await expectEvent(trx, "CounterOfferResult", {
+                ballotId: new BN(this.ballotId),
+                result: true,
+            });
+        });
+
+        it("Creating a counter offer, only owner of ballot can reject counter offer", async function() {
+            await this.baseVotingCounterOfferContractMock.createBallot(true, COMMUNITY_TOKEN_ID, {
+                from: this.user2,
+            });
+
+            await this.baseVotingCounterOfferContractMock.createCounterOffer(this.ballotId, {
+                from: this.user1,
+            });
+
+            await expect(
+                this.baseVotingCounterOfferContractMock.counterOfferAction(
+                    this.ballotId,
+                    this.user1,
+                    false,
+                    {
+                        from: this.user3,
+                    }
+                )
+            ).to.eventually.be.rejectedWith("INVALID: ONLY_BALLOT_OWNER");
+            let trx = await this.baseVotingCounterOfferContractMock.counterOfferAction(
+                this.ballotId,
+                this.user1,
+                false,
+                {
+                    from: this.user2,
+                }
+            );
+            await expectEvent(trx, "CounterOfferResult", {
+                ballotId: new BN(this.ballotId),
+                result: false,
+            });
+        });
+
+        it("Creating a counter offer, owner of counter offer cannot accept counter offer", async function() {
+            await this.baseVotingCounterOfferContractMock.createBallot(true, COMMUNITY_TOKEN_ID, {
+                from: this.user2,
+            });
+
+            await this.baseVotingCounterOfferContractMock.createCounterOffer(this.ballotId, {
+                from: this.user1,
+            });
+
+            await expect(
+                this.baseVotingCounterOfferContractMock.counterOfferAction(
+                    this.ballotId,
+                    this.user1,
+                    true,
+                    {
+                        from: this.user1,
+                    }
+                )
+            ).to.eventually.be.rejectedWith("INVALID: ONLY_BALLOT_OWNER");
+        });
+
+        it("Creating a counter offer, owner of counter offer cannot reject counter offer", async function() {
+            await this.baseVotingCounterOfferContractMock.createBallot(true, COMMUNITY_TOKEN_ID, {
+                from: this.user2,
+            });
+
+            await this.baseVotingCounterOfferContractMock.createCounterOffer(this.ballotId, {
+                from: this.user1,
+            });
+
+            await expect(
+                this.baseVotingCounterOfferContractMock.counterOfferAction(
+                    this.ballotId,
+                    this.user1,
+                    false,
+                    {
+                        from: this.user1,
+                    }
+                )
+            ).to.eventually.be.rejectedWith("INVALID: ONLY_BALLOT_OWNER");
+        });
+
         it("Creating a voting ballot, Tries to vote after counter offer, expect revert", async function() {
             await this.baseVotingCounterOfferContractMock.createBallot(true, COMMUNITY_TOKEN_ID, {
                 from: this.user2,

@@ -263,7 +263,7 @@ contract BaseVotingContract is Initializable {
 
         require(
             votingMap[votingBallotId].votingEndBlock < block.number,
-            "INVALID: VOTING_TIME_OVER"
+            "INVALID: VOTING_TIME_NOT_OVER"
         );
 
         require(

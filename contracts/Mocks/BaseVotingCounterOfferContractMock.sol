@@ -13,6 +13,17 @@ contract BaseVotingCounterOfferContractMock is BaseVotingCounterOfferContract {
     /// @param minTurnOut this status indicates if minimum amount of user showed up for voting
     event BallotResult(uint256 ballotId, bool result, bool minTurnOut);
 
+    /// @dev this event is generated when a counter offer is created
+    /// @param ballotId this is the ballot Id for which result is declared
+    /// @param creator this is the address of the creator of counter offer
+    event CounterOfferCreated(uint256 ballotId, address creator);
+
+    /// @dev this event is generated when a counter offer is either accepted or rejected
+    /// @param ballotId this is the ballot Id for which result is declared
+    /// @param creator this is the address of the creator of counter offer
+    /// @param result this is the result of the counter offer that is true for accepted and false for rejected
+    event CounterOfferResult(uint256 ballotId, address creator, bool result);
+
     constructor(uint8 votingInterval, address owner)
         BaseVotingCounterOfferContract(owner)
     {
@@ -40,6 +51,7 @@ contract BaseVotingCounterOfferContractMock is BaseVotingCounterOfferContract {
 
     function createCounterOffer(uint256 ballotId) public {
         _createCounterOffer(ballotId);
+        emit CounterOfferCreated(ballotId, msg.sender);
     }
 
     function counterOfferAction(
@@ -48,6 +60,7 @@ contract BaseVotingCounterOfferContractMock is BaseVotingCounterOfferContract {
         bool vote
     ) public {
         _counterOfferAction(votingBallotId, user, vote);
+        emit CounterOfferResult(votingBallotId, user, vote);
     }
 
     function declareWinner(uint256 ballotId) public {

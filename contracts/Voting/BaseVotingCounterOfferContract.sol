@@ -31,6 +31,15 @@ abstract contract BaseVotingCounterOfferContract is BaseVotingContract {
         _;
     }
 
+    /// @dev reverts transaction if the user has not created a counter offer
+    modifier _onlyBallotOwner(uint256 votingBallotId) {
+        require(
+            votingMap[votingBallotId].owner == msg.sender,
+            "INVALID: ONLY_BALLOT_OWNER"
+        );
+        _;
+    }
+
     /// @dev This function sets the treasury Contract address
     /// @param newTreasuryContractAddress This is the new address of treasury contract
     function initialize(address newTreasuryContractAddress)
@@ -72,7 +81,11 @@ abstract contract BaseVotingCounterOfferContract is BaseVotingContract {
         uint256 votingBallotId,
         address user,
         bool vote
-    ) internal _shouldHaveCreatedCounterOffer(votingBallotId, user) {
+    )
+        internal
+        _shouldHaveCreatedCounterOffer(votingBallotId, user)
+        _onlyBallotOwner(votingBallotId)
+    {
         super._castVoteForOther(votingBallotId, vote, user);
     }
 }
