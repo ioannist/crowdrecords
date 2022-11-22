@@ -203,14 +203,16 @@ contract RecordsVotingContract is BaseVotingContract, IERC1155Receiver {
         );
 
         {
-            (, , , , , , , bool isPresent) = recordsContract.recordData(
-                params.oldRecordId
+            recordsContract.validateNewRecordVersionParams(
+                params.oldRecordId,
+                params.governanceToken.totalSupply,
+                params.governanceToken.userBalance,
+                params.communityToken.totalSupply,
+                params.communityToken.userBalance
             );
-
-            require(isPresent == true, "INVALID: RECORD_NOT_FOUND");
         }
+
         newVersionRequestId++;
-        uint256 versionReqId = newVersionRequestId;
 
         ITreasury treasury = ITreasury(TREASURY_CONTRACT_ADDRESS);
         uint256 votingTokenId = treasury.getCommunityTokenId(
@@ -232,7 +234,6 @@ contract RecordsVotingContract is BaseVotingContract, IERC1155Receiver {
                 msg.sender,
                 ballotId
             );
-
         NewVersionRequest memory newVersionRequest = NewVersionRequest({
             recordData: recordStruct,
             governanceToken: params.governanceToken,
@@ -248,7 +249,7 @@ contract RecordsVotingContract is BaseVotingContract, IERC1155Receiver {
 
         {
             emit VersionRequest({
-                requestId: versionReqId,
+                requestId: newVersionRequestId,
                 recordData: recordStruct,
                 governanceToken: params.governanceToken,
                 communityToken: params.communityToken,
@@ -261,14 +262,14 @@ contract RecordsVotingContract is BaseVotingContract, IERC1155Receiver {
 
             emit NewVersionVotingBallotCreated(
                 msg.sender,
-                versionReqId,
+                newVersionRequestId,
                 ballotId
             );
         }
 
-        newVersionRequestMap[versionReqId] = newVersionRequest;
+        newVersionRequestMap[newVersionRequestId] = newVersionRequest;
 
-        return versionReqId;
+        return newVersionRequestId;
     }
 
     /// @dev This function is called by any user to cast vote
@@ -459,10 +460,10 @@ contract RecordsVotingContract is BaseVotingContract, IERC1155Receiver {
                 snapshotId: treasuryContract.snapshot()
             });
 
-        require(
+        /* require(
             newVersionToken.rewardPerTokenWei > 0,
             "INSUFFICIENT_AMOUNT: TOKEN_SHARE_PER_USER_IS_LOW"
-        );
+        ); */
 
         emit NewVersionTokenDistribution({
             versionRequestId: versionReqId,

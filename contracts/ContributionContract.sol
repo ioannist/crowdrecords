@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "./voting/ContributionVotingContract.sol";
 import "./interface/IRecords.sol";
+import "./interface/ITracks.sol";
 
 contract ContributionContract is Initializable {
     using Counters for Counters.Counter;
@@ -65,6 +66,7 @@ contract ContributionContract is Initializable {
     address public OWNER;
     address public CONTRIBUTION_VOTING_CONTRACT_ADDRESS;
     address public RECORD_CONTRACT_ADDRESS;
+    address public TRACKS_CONTRACT_ADDRESS;
     mapping(uint256 => Contribution) public contributionData;
     uint256 public PENDING = 1;
     uint256 public ACCEPTED = 2;
@@ -83,12 +85,15 @@ contract ContributionContract is Initializable {
     /// @dev This is to set the address of the contracts
     /// @param newVotingContractAddress this is the address of new voting contract
     /// @param newRecordsContractAddress this is the address of new Records contract
+    /// @param newTracksContractAddress this is the address of new tracks contract
     function initialize(
         address newVotingContractAddress,
-        address newRecordsContractAddress
+        address newRecordsContractAddress,
+        address newTracksContractAddress
     ) public initializer ownerOnly {
         CONTRIBUTION_VOTING_CONTRACT_ADDRESS = newVotingContractAddress;
         RECORD_CONTRACT_ADDRESS = newRecordsContractAddress;
+        TRACKS_CONTRACT_ADDRESS = newTracksContractAddress;
     }
 
     /// @dev This function sets the owner address
@@ -130,6 +135,12 @@ contract ContributionContract is Initializable {
         uint256 governanceReward
     ) public returns (uint256) {
         _contributionIds.increment();
+        {
+            ITracks trackInterface = ITracks(TRACKS_CONTRACT_ADDRESS);
+            bool ownerStatus = trackInterface.checkOwner(tracks, msg.sender);
+
+            require(ownerStatus, "INVALID: NOT_A_TRACK_OWNER");
+        }
 
         uint256 contributionId = _contributionIds.current();
         // _mint(msg.sender, contributionId);
@@ -194,6 +205,13 @@ contract ContributionContract is Initializable {
         string memory previewFileHash,
         string memory description
     ) public returns (uint256) {
+        {
+            ITracks trackInterface = ITracks(TRACKS_CONTRACT_ADDRESS);
+            bool ownerStatus = trackInterface.checkOwner(tracks, msg.sender);
+
+            require(ownerStatus, "INVALID: NOT_A_TRACK_OWNER");
+        }
+
         _contributionIds.increment();
 
         uint256 contributionId = _contributionIds.current();

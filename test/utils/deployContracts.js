@@ -50,7 +50,8 @@ async function setup() {
 
     await contributionContract.initialize(
         contributionVotingContract.address,
-        recordsContract.address
+        recordsContract.address,
+        tracksContract.address
     );
 
     await contributionVotingContract.initialize(

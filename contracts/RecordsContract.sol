@@ -157,6 +157,11 @@ contract RecordsContract is Initializable {
             "INVALID: NOT_SEED_CONTRIBUTION"
         );
 
+        require(
+            contribution.owner == msg.sender,
+            "INVALID: ONLY_CONTRIBUTION_OWNER"
+        );
+
         RecordStruct memory recordStruct = RecordStruct({
             name: name,
             image: image,
@@ -180,6 +185,8 @@ contract RecordsContract is Initializable {
             recordCategory: recordCategory,
             creationDate: recordStruct.creationDate
         });
+
+        seedIdUsed[seedId] = true;
 
         return (recordId);
     }
@@ -259,5 +266,28 @@ contract RecordsContract is Initializable {
             creationDate: newRecordData.creationDate
         });
         return recordId;
+    }
+
+    /// dev This function is to be called only form voting contract, and it creates new record
+    /// param newRecordData This is the record data
+    /// param contributionIds Array of the contribution id
+    function validateNewRecordVersionParams(
+        uint256 oldVersionId,
+        uint256 govTokenTotalSupply,
+        uint256 govTokenOwnerBalanace,
+        uint256 commTokenTotalSupply,
+        uint256 commTokenOwnerBalanace
+    ) external returns (bool) {
+        require(
+            recordData[oldVersionId].isPresent,
+            "INVALID: RECORD_NOT_FOUND"
+        );
+
+        require(
+            govTokenTotalSupply >= govTokenOwnerBalanace &&
+                commTokenTotalSupply >= commTokenOwnerBalanace,
+            "INVALID: USER_BALANCE_MORE_THAN_SUPPLY"
+        );
+        return true;
     }
 }

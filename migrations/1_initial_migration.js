@@ -5,6 +5,9 @@ const TracksContract = artifacts.require("../contracts/TracksContract.sol");
 // const TreasuryContract = artifacts.require("../contracts/TreasuryContract.sol");
 const TreasuryContract = artifacts.require("../contracts/treasury/TreasuryContract.sol");
 const TreasuryCoreContract = artifacts.require("../contracts/treasury/TreasuryCoreContract.sol");
+const TreasuryCoreMockContract = artifacts.require(
+    "../contracts/Mocks/TreasuryCoreContractMock.sol"
+);
 const ContributionVotingContract = artifacts.require(
     "../contracts/voting/ContributionVotingContract.sol"
 );
@@ -55,6 +58,9 @@ module.exports = async (deployer) => {
         await getEthAccount(0)
     );
     let baseVotingCounterOfferContractMock = await BaseVotingCounterOfferContractMock.deployed();
+
+    await deployer.deploy(TreasuryCoreMockContract, await getEthAccount(0));
+    let treasuryCoreMockContract = await TreasuryCoreMockContract.deployed();
 
     await deployer.deploy(DilutionContract, VOTING_INTERVAL_BLOCKS, 1000, await getEthAccount(0));
     let dilutionContract = await DilutionContract.deployed();

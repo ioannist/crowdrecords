@@ -1,4 +1,5 @@
 const setup = require("../../utils/deployContracts");
+const getMockContractsForRecordTesting = require("./deployMockContracts");
 const helper = require("../../utils/helper");
 const chai = require("chai");
 const BN = require("bn.js");
@@ -40,14 +41,6 @@ contract("Records Contract", function() {
     afterEach(async function() {
         await helper.revertToSnapshot(snapshotId);
     });
-
-    //// creating new record request from existing records
-    //// creating new record request from existing records check ballot created
-    //// creating new record request from existing records check ballot created get voting done, perform multiple votes
-    //// creating new record request from existing records check ballot created get voting done. perform multiple votes and lose
-    //// creating new record request from existing records check ballot created get voting done. perform multiple votes and win
-    //// creating new record request from existing records check ballot created get voting done. perform multiple votes and win, make reward claim check if correct amount received
-    //// creating new record request from existing records check ballot created get voting done. Multiple ballots and multiple claim
 
     it("Creating seed contribution and record", async function() {
         //seed contribution id 1
@@ -121,6 +114,155 @@ contract("Records Contract", function() {
         await expect(
             this.recordsContract.createNewRecord("Test", "image.png", "Cat1", 2)
         ).to.eventually.rejectedWith("INVALID: NOT_SEED_CONTRIBUTION");
+    });
+
+    it("User create seed contribution, creates new record, tries to create one more record with same see but rejected", async function() {
+        //seed contribution id 1
+        await this.contributionContract.createSeedContribution(
+            [1, 2, 3],
+            "preview.raw",
+            "preview.hash",
+            "This is the description for the record 1"
+        );
+        const tx = await this.recordsContract.createNewRecord(
+            "Test",
+            "image.png",
+            "Cat1",
+            SEED_CONTRIBUTION_ID
+        );
+        expectEvent(tx, "RecordCreated", {
+            seedId: "1",
+        });
+
+        await expect(
+            this.recordsContract.createNewRecord("Test", "image.png", "Cat1", SEED_CONTRIBUTION_ID)
+        ).to.eventually.be.rejectedWith("INVALID: SEED_ALREADY_USED");
+    });
+    it("User create seed contribution, creates new record, tries to create one more record with same see but rejected", async function() {
+        //seed contribution id 1
+        await this.contributionContract.createSeedContribution(
+            [1, 2, 3],
+            "preview.raw",
+            "preview.hash",
+            "This is the description for the record 1"
+        );
+        const tx = await this.recordsContract.createNewRecord(
+            "Test",
+            "image.png",
+            "Cat1",
+            SEED_CONTRIBUTION_ID
+        );
+        expectEvent(tx, "RecordCreated", {
+            seedId: "1",
+        });
+
+        await expect(
+            this.recordsContract.createNewRecord("Test", "image.png", "Cat1", SEED_CONTRIBUTION_ID)
+        ).to.eventually.be.rejectedWith("INVALID: SEED_ALREADY_USED");
+    });
+    it("User create seed contribution, different user tries to create rejected. (only the same user should be able to create new record, incase of new version anyone can create it", async function() {
+        let user2 = await helper.getEthAccount(1);
+        //seed contribution id 1
+        await this.contributionContract.createSeedContribution(
+            [1, 2, 3],
+            "preview.raw",
+            "preview.hash",
+            "This is the description for the record 1"
+        );
+
+        await expect(
+            this.recordsContract.createNewRecord(
+                "Test",
+                "image.png",
+                "Cat1",
+                SEED_CONTRIBUTION_ID,
+                { from: user2 }
+            )
+        ).to.eventually.be.rejectedWith("INVALID: ONLY_CONTRIBUTION_OWNER");
+    });
+    it("Mashing up the orders of the creation of record, expect rejection", async function() {
+        // Try to create a record without seed contribution, will receive rejection
+        await expect(
+            this.recordsContract.createNewRecord("Test", "image.png", "Cat1", SEED_CONTRIBUTION_ID)
+        ).to.eventually.be.rejectedWith("INVALID: CONTRIBUTION_NOT_FOUND");
+
+        // seed contribution id 1
+        // Now we have created a seed contribution
+        await this.contributionContract.createSeedContribution(
+            [1, 2, 3],
+            "preview.raw",
+            "preview.hash",
+            "This is the description for the record 1"
+        );
+
+        // Trying to create the community and governance token for the record, before record is created
+        await expect(
+            this.treasuryContract.createNewCommunityToken([
+                RECORD_ID,
+                await web3.utils.toWei("1000000"),
+                COMMUNITY_TOKEN_BALANCE_USER1,
+                "Test",
+                "image.png",
+            ])
+        ).to.eventually.be.rejectedWith("INVALID: ONLY_RECORD_OWNER");
+        await expect(
+            this.treasuryContract.createNewGovernanceToken([
+                RECORD_ID,
+                await web3.utils.toWei("1000000"),
+                GOVERNANCE_TOKEN_BALANCE_USER1,
+                "Test",
+                "image.png",
+            ])
+        ).to.eventually.be.rejectedWith("INVALID: ONLY_RECORD_OWNER");
+
+        // Continuing normal flow, create record from already created seed and then create tokens.
+        await this.recordsContract.createNewRecord(
+            "Test",
+            "image.png",
+            "Cat1",
+            SEED_CONTRIBUTION_ID
+        );
+        await this.treasuryContract.createNewCommunityToken([
+            RECORD_ID,
+            await web3.utils.toWei("1000000"),
+            COMMUNITY_TOKEN_BALANCE_USER1,
+            "Test",
+            "image.png",
+        ]);
+        await this.treasuryContract.createNewGovernanceToken([
+            RECORD_ID,
+            await web3.utils.toWei("1000000"),
+            GOVERNANCE_TOKEN_BALANCE_USER1,
+            "Test",
+            "image.png",
+        ]);
+
+        //this contribution will have id of 2
+        await this.contributionContract.createNewContribution(
+            [4, 5],
+            "preview.raw",
+            "preview.hash",
+            RECORD_ID,
+            false,
+            "Test description",
+            rewardCommunityToken,
+            rewardGovernanceToken,
+            {
+                from: contributionOwner,
+            }
+        );
+    });
+
+    it("Person who creates contribution needs to own the tracks are being used.", async function() {
+        await expect(
+            this.contributionContract.createSeedContribution(
+                [1, 2, 3],
+                "preview.raw",
+                "preview.hash",
+                "This is the description for the record 1",
+                { from: await helper.getEthAccount(2) }
+            )
+        ).to.eventually.be.rejectedWith("INVALID: NOT_A_TRACK_OWNER");
     });
 
     context("New Record Version", function() {
@@ -565,7 +707,7 @@ contract("Records Contract", function() {
                 )
             ).to.eventually.be.bignumber.equal(new BN(this.oldRecordVersionOwnerRewardGovernance));
 
-            //The user who calls declare winner is getting the tokens that are meant for the new version owner
+            //The owner of the new version request gets his tokens.
             await expect(
                 this.treasuryCoreContract.balanceOf(this.user1, newGovernanceTokenId)
             ).to.eventually.be.bignumber.equal(new BN(web3.utils.toWei("450000")));
@@ -674,7 +816,7 @@ contract("Records Contract", function() {
                 )
             ).to.eventually.be.bignumber.equal(new BN(this.oldRecordVersionOwnerRewardGovernance));
 
-            //The user who calls declare winner is getting the tokens that are meant for the new version owner
+            //The owner of the new version request gets his tokens.
             await expect(
                 this.treasuryCoreContract.balanceOf(this.user1, newGovernanceTokenId)
             ).to.eventually.be.bignumber.equal(new BN(web3.utils.toWei("450000")));
@@ -714,8 +856,8 @@ contract("Records Contract", function() {
             ).to.eventually.be.bignumber.equal(
                 new BN(web3.utils.toWei("16749.999999999999832500"))
             );
-            // exact we should recive is 44220 ether
-            // but due to precision we recive 44219.999999999999799000 ether
+            // exact we should receive is 44220 ether
+            // but due to precision we receive 44219.999999999999799000 ether
             await expect(
                 this.treasuryCoreContract.balanceOf(this.user2, newCommunityTokenId)
             ).to.eventually.be.bignumber.equal(
@@ -926,7 +1068,7 @@ contract("Records Contract", function() {
                 )
             ).to.eventually.be.bignumber.equal(new BN(oldVersionCommRewardSecondReq));
 
-            //The user who calls declare winner is getting the tokens that are meant for the new version owner
+            //The owner of the new version request gets his tokens.
             await expect(
                 this.treasuryCoreContract.balanceOf(this.user1, newGovernanceTokenIdFirstReq)
             ).to.eventually.be.bignumber.equal(new BN(GOVERNANCE_TOKEN_BALANCE_USER1));
@@ -979,6 +1121,962 @@ contract("Records Contract", function() {
             await expect(
                 this.treasuryCoreContract.balanceOf(this.user4, newGovernanceTokenIdSecondReq)
             ).to.eventually.be.bignumber.equal(new BN(web3.utils.toWei("0.07944444444444")));
+        });
+
+        it("Voting check, some votes are performed before expiry of ballot and some of them are performed after expiry, expecting rejection for after expiry", async function() {
+            await this.treasuryCoreContract.safeTransferFrom(
+                this.user1,
+                this.user2,
+                COMMUNITY_TOKEN_ID,
+                await web3.utils.toWei("301500"),
+                "0xa165"
+            );
+            await this.treasuryCoreContract.safeTransferFrom(
+                this.user1,
+                this.user3,
+                COMMUNITY_TOKEN_ID,
+                await web3.utils.toWei("5000"),
+                "0xa165"
+            );
+            await this.treasuryCoreContract.safeTransferFrom(
+                this.user1,
+                this.user4,
+                COMMUNITY_TOKEN_ID,
+                await web3.utils.toWei("5000"),
+                "0xa165"
+            );
+
+            const tx2 = await this.recordsVotingContract.createNewRecordVersion([
+                "Test",
+                "image.png",
+                "Cat1",
+                RECORD_ID,
+                [1],
+                [
+                    await web3.utils.toWei("1000000"),
+                    this.oldRecordVersionOwnerRewardGovernance,
+                    GOVERNANCE_TOKEN_BALANCE_USER1,
+                    "Test",
+                    "image.png",
+                ],
+                [
+                    await web3.utils.toWei("1000000"),
+                    this.oldRecordVersionOwnerRewardCommunity,
+                    COMMUNITY_TOKEN_BALANCE_USER1,
+                    "Test",
+                    "image.png",
+                ],
+            ]);
+
+            expectEvent(tx2, "VersionRequest", {
+                requestId: "1",
+                ballotId: "1",
+            });
+
+            expectEvent(tx2, "NewVersionVotingBallotCreated", {
+                versionRequestId: "1",
+                ballotId: "1",
+            });
+
+            let trx3 = await this.recordsVotingContract.castVote(1, false, { from: this.user2 });
+
+            expectEvent(trx3, "NewVersionVoting", {
+                versionRequestId: "1",
+                ballotId: "1",
+                vote: false,
+            });
+
+            trx3 = await this.recordsVotingContract.castVote(1, false, { from: this.user3 });
+
+            expectEvent(trx3, "NewVersionVoting", {
+                versionRequestId: "1",
+                ballotId: "1",
+                vote: false,
+            });
+
+            await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 2);
+
+            let trx4 = await this.recordsVotingContract.declareWinner(1);
+
+            expectEvent(trx4, "NewVersionRequestResult", {
+                versionReqId: "1",
+                tokenId: "2",
+                ballotId: "1",
+                result: false,
+            });
+
+            await expect(
+                this.recordsVotingContract.castVote(1, false, { from: this.user4 })
+            ).to.eventually.be.rejectedWith("INVALID: VOTING_TIME_OVER");
+        });
+
+        it("check for case where user provides with more reward then total minting amount / treasury amount, expect revert", async function() {
+            await this.treasuryCoreContract.safeTransferFrom(
+                this.user1,
+                this.user2,
+                COMMUNITY_TOKEN_ID,
+                await web3.utils.toWei("301500"),
+                "0xa165"
+            );
+            await this.treasuryCoreContract.safeTransferFrom(
+                this.user1,
+                this.user3,
+                COMMUNITY_TOKEN_ID,
+                await web3.utils.toWei("5000"),
+                "0xa165"
+            );
+            await this.treasuryCoreContract.safeTransferFrom(
+                this.user1,
+                this.user4,
+                COMMUNITY_TOKEN_ID,
+                await web3.utils.toWei("5000"),
+                "0xa165"
+            );
+
+            // Here the tokens for user is more than the total mint amount
+            await expect(
+                this.recordsVotingContract.createNewRecordVersion([
+                    "Test",
+                    "image.png",
+                    "Cat1",
+                    RECORD_ID,
+                    [1],
+                    [
+                        await web3.utils.toWei("1000000"),
+                        this.oldRecordVersionOwnerRewardGovernance,
+                        await web3.utils.toWei("10000000"),
+                        "Test",
+                        "image.png",
+                    ],
+                    [
+                        await web3.utils.toWei("1000000"),
+                        this.oldRecordVersionOwnerRewardCommunity,
+                        await web3.utils.toWei("10000000"),
+                        "Test",
+                        "image.png",
+                    ],
+                ])
+            ).to.eventually.be.rejectedWith("INVALID: USER_BALANCE_MORE_THAN_SUPPLY");
+        });
+
+        it("Test the voting with record reward limit, check what happens when user gives reward amount less then 1 ether", async function() {
+            let newGovernanceTokenId = "4";
+            let newCommunityTokenId = "5";
+
+            let oldVersionOwnerRewardGovernance = await web3.utils.toWei("0.51");
+            let oldVersionOwnerRewardCommunity = await web3.utils.toWei("0.21");
+
+            await this.treasuryCoreContract.safeTransferFrom(
+                this.user1,
+                this.user2,
+                COMMUNITY_TOKEN_ID,
+                await web3.utils.toWei("301500"),
+                "0xa165"
+            );
+            await this.treasuryCoreContract.safeTransferFrom(
+                this.user1,
+                this.user3,
+                COMMUNITY_TOKEN_ID,
+                await web3.utils.toWei("5000"),
+                "0xa165"
+            );
+            await this.treasuryCoreContract.safeTransferFrom(
+                this.user1,
+                this.user4,
+                COMMUNITY_TOKEN_ID,
+                await web3.utils.toWei("5000"),
+                "0xa165"
+            );
+
+            const tx2 = await this.recordsVotingContract.createNewRecordVersion([
+                "Test",
+                "image.png",
+                "Cat1",
+                RECORD_ID,
+                [1],
+                [
+                    await web3.utils.toWei("1000000"),
+                    oldVersionOwnerRewardGovernance,
+                    GOVERNANCE_TOKEN_BALANCE_USER1,
+                    "Test",
+                    "image.png",
+                ],
+                [
+                    await web3.utils.toWei("1000000"),
+                    oldVersionOwnerRewardCommunity,
+                    COMMUNITY_TOKEN_BALANCE_USER1,
+                    "Test",
+                    "image.png",
+                ],
+            ]);
+
+            expectEvent(tx2, "VersionRequest", {
+                requestId: "1",
+                ballotId: "1",
+            });
+
+            expectEvent(tx2, "NewVersionVotingBallotCreated", {
+                versionRequestId: "1",
+                ballotId: "1",
+            });
+
+            let trx3 = await this.recordsVotingContract.castVote(1, true, { from: this.user2 });
+
+            expectEvent(trx3, "NewVersionVoting", {
+                versionRequestId: "1",
+                ballotId: "1",
+                vote: true,
+            });
+
+            trx3 = await this.recordsVotingContract.castVote(1, true, { from: this.user3 });
+
+            expectEvent(trx3, "NewVersionVoting", {
+                versionRequestId: "1",
+                ballotId: "1",
+                vote: true,
+            });
+
+            await this.recordsVotingContract.castVote(1, false, { from: this.user4 });
+
+            await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 2);
+
+            let trx4 = await this.recordsVotingContract.declareWinner(1, { from: this.user2 });
+
+            await expect(
+                this.treasuryCoreContract.balanceOf(
+                    this.recordsVotingContract.address,
+                    newGovernanceTokenId
+                )
+            ).to.eventually.be.bignumber.equal(new BN(oldVersionOwnerRewardGovernance));
+
+            //The owner of the new version request gets his tokens.
+            await expect(
+                this.treasuryCoreContract.balanceOf(this.user1, newGovernanceTokenId)
+            ).to.eventually.be.bignumber.equal(new BN(web3.utils.toWei("450000")));
+            await expect(
+                this.treasuryCoreContract.balanceOf(this.user1, newCommunityTokenId)
+            ).to.eventually.be.bignumber.equal(new BN(web3.utils.toWei("450000")));
+
+            expectEvent(trx4, "NewVersionTokenDistribution", {
+                rewardTokenId: "4",
+            });
+
+            expectEvent(trx4, "NewVersionRequestResult", {
+                versionReqId: "1",
+                tokenId: "2",
+                ballotId: "1",
+                result: true,
+            });
+
+            /* expectEvent(trx4, "RecordCreated", {
+                recordId: "3",
+                seedId: "1",
+            }); */
+
+            // Make claims for the new tokens.
+            await this.recordsVotingContract.claimNewRecordTokens(1, { from: this.user2 });
+            await this.recordsVotingContract.claimNewRecordTokens(1, { from: this.user3 });
+            await this.recordsVotingContract.claimNewRecordTokens(1, { from: this.user4 });
+
+            /* expectEvent(trx4, "NewTokenClaimed", {
+                versionRequestId: "1",
+            });
+            expectEvent(trx4, "NewTokenClaimed", {
+                versionRequestId: "1",
+            }); */
+
+            // exact transfer amount 0.3416999998995 ether
+            // expect 0.341699999999899500 ether
+            await expect(
+                this.treasuryCoreContract.balanceOf(this.user2, newGovernanceTokenId)
+            ).to.eventually.be.bignumber.equal(new BN(web3.utils.toWei("0.341699999999899500")));
+
+            // exact we should receive is 0.1407 ether
+            // but due to precision we receive 0.140699999999799000 ether
+            await expect(
+                this.treasuryCoreContract.balanceOf(this.user2, newCommunityTokenId)
+            ).to.eventually.be.bignumber.equal(new BN(web3.utils.toWei("0.140699999999799000")));
+
+            // exact transfer amount 0.005666666665 ether
+            // expect 0.005666666666665000 ether
+            await expect(
+                this.treasuryCoreContract.balanceOf(this.user3, newGovernanceTokenId)
+            ).to.eventually.be.bignumber.equal(new BN(web3.utils.toWei("0.005666666666665000")));
+            // exact transfer amount 0.002333333335 ether
+            // expect 0.002333333333330000 ether
+            await expect(
+                this.treasuryCoreContract.balanceOf(this.user3, newCommunityTokenId)
+            ).to.eventually.be.bignumber.equal(new BN(web3.utils.toWei("0.002333333333330000")));
+
+            // exact transfer amount 0.005666666665 ether
+            // expect 0.005666666666665000 ether
+            await expect(
+                this.treasuryCoreContract.balanceOf(this.user4, newGovernanceTokenId)
+            ).to.eventually.be.bignumber.equal(new BN(web3.utils.toWei("0.005666666666665000")));
+            // exact transfer amount 0.002333333335 ether
+            // expect 0.002333333333330000 ether
+            await expect(
+                this.treasuryCoreContract.balanceOf(this.user4, newCommunityTokenId)
+            ).to.eventually.be.bignumber.equal(new BN(web3.utils.toWei("0.002333333333330000")));
+        });
+
+        it("Allowing 0 to be possible option as a reward for existing records owner on new record version creation", async function() {
+            let newGovernanceTokenId = "4";
+            let newCommunityTokenId = "5";
+
+            let oldVersionOwnerRewardGovernance = await web3.utils.toWei("0");
+            let oldVersionOwnerRewardCommunity = await web3.utils.toWei("0");
+
+            await this.treasuryCoreContract.safeTransferFrom(
+                this.user1,
+                this.user2,
+                COMMUNITY_TOKEN_ID,
+                await web3.utils.toWei("301500"),
+                "0xa165"
+            );
+            await this.treasuryCoreContract.safeTransferFrom(
+                this.user1,
+                this.user3,
+                COMMUNITY_TOKEN_ID,
+                await web3.utils.toWei("5000"),
+                "0xa165"
+            );
+            await this.treasuryCoreContract.safeTransferFrom(
+                this.user1,
+                this.user4,
+                COMMUNITY_TOKEN_ID,
+                await web3.utils.toWei("5000"),
+                "0xa165"
+            );
+
+            const tx2 = await this.recordsVotingContract.createNewRecordVersion([
+                "Test",
+                "image.png",
+                "Cat1",
+                RECORD_ID,
+                [1],
+                [
+                    await web3.utils.toWei("1000000"),
+                    oldVersionOwnerRewardGovernance,
+                    GOVERNANCE_TOKEN_BALANCE_USER1,
+                    "Test",
+                    "image.png",
+                ],
+                [
+                    await web3.utils.toWei("1000000"),
+                    oldVersionOwnerRewardCommunity,
+                    COMMUNITY_TOKEN_BALANCE_USER1,
+                    "Test",
+                    "image.png",
+                ],
+            ]);
+
+            expectEvent(tx2, "VersionRequest", {
+                requestId: "1",
+                ballotId: "1",
+            });
+
+            expectEvent(tx2, "NewVersionVotingBallotCreated", {
+                versionRequestId: "1",
+                ballotId: "1",
+            });
+
+            let trx3 = await this.recordsVotingContract.castVote(1, true, { from: this.user2 });
+
+            expectEvent(trx3, "NewVersionVoting", {
+                versionRequestId: "1",
+                ballotId: "1",
+                vote: true,
+            });
+
+            trx3 = await this.recordsVotingContract.castVote(1, true, { from: this.user3 });
+
+            expectEvent(trx3, "NewVersionVoting", {
+                versionRequestId: "1",
+                ballotId: "1",
+                vote: true,
+            });
+
+            await this.recordsVotingContract.castVote(1, false, { from: this.user4 });
+
+            await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 2);
+
+            let trx4 = await this.recordsVotingContract.declareWinner(1, { from: this.user2 });
+
+            await expect(
+                this.treasuryCoreContract.balanceOf(
+                    this.recordsVotingContract.address,
+                    newGovernanceTokenId
+                )
+            ).to.eventually.be.bignumber.equal(new BN(oldVersionOwnerRewardGovernance));
+
+            //The owner of the new version request gets his tokens.
+            await expect(
+                this.treasuryCoreContract.balanceOf(this.user1, newGovernanceTokenId)
+            ).to.eventually.be.bignumber.equal(new BN(web3.utils.toWei("450000")));
+            await expect(
+                this.treasuryCoreContract.balanceOf(this.user1, newCommunityTokenId)
+            ).to.eventually.be.bignumber.equal(new BN(web3.utils.toWei("450000")));
+
+            expectEvent(trx4, "NewVersionTokenDistribution", {
+                rewardTokenId: "4",
+            });
+
+            expectEvent(trx4, "NewVersionRequestResult", {
+                versionReqId: "1",
+                tokenId: "2",
+                ballotId: "1",
+                result: true,
+            });
+
+            /* expectEvent(trx4, "RecordCreated", {
+                recordId: "3",
+                seedId: "1",
+            }); */
+
+            // Make claims for the new tokens.
+            await this.recordsVotingContract.claimNewRecordTokens(1, { from: this.user2 });
+            await this.recordsVotingContract.claimNewRecordTokens(1, { from: this.user3 });
+            await this.recordsVotingContract.claimNewRecordTokens(1, { from: this.user4 });
+
+            /* expectEvent(trx4, "NewTokenClaimed", {
+                versionRequestId: "1",
+            });
+            expectEvent(trx4, "NewTokenClaimed", {
+                versionRequestId: "1",
+            }); */
+
+            // exact transfer amount 0 ether
+            // expect 0 ether
+            await expect(
+                this.treasuryCoreContract.balanceOf(this.user2, newGovernanceTokenId)
+            ).to.eventually.be.bignumber.equal(new BN(web3.utils.toWei("0")));
+
+            // exact we should receive is 0 ether
+            // but due to precision we receive 0 ether
+            await expect(
+                this.treasuryCoreContract.balanceOf(this.user2, newCommunityTokenId)
+            ).to.eventually.be.bignumber.equal(new BN(web3.utils.toWei("0")));
+
+            // exact transfer amount 0 ether
+            // expect 0 ether
+            await expect(
+                this.treasuryCoreContract.balanceOf(this.user3, newGovernanceTokenId)
+            ).to.eventually.be.bignumber.equal(new BN(web3.utils.toWei("0")));
+            // exact transfer amount 0 ether
+            // expect 0 ether
+            await expect(
+                this.treasuryCoreContract.balanceOf(this.user3, newCommunityTokenId)
+            ).to.eventually.be.bignumber.equal(new BN(web3.utils.toWei("0")));
+
+            // exact transfer amount 0 ether
+            // expect 0 ether
+            await expect(
+                this.treasuryCoreContract.balanceOf(this.user4, newGovernanceTokenId)
+            ).to.eventually.be.bignumber.equal(new BN(web3.utils.toWei("0")));
+            // exact transfer amount 0 ether
+            // expect 0 ether
+            await expect(
+                this.treasuryCoreContract.balanceOf(this.user4, newCommunityTokenId)
+            ).to.eventually.be.bignumber.equal(new BN(web3.utils.toWei("0")));
+        });
+
+        it("Allowing user to own all the tokens in record creation and new version creation", async function() {
+            let newGovernanceTokenId = "4";
+            let newCommunityTokenId = "5";
+
+            let oldVersionOwnerRewardGovernance = await web3.utils.toWei("0");
+            let oldVersionOwnerRewardCommunity = await web3.utils.toWei("0");
+
+            await this.treasuryCoreContract.safeTransferFrom(
+                this.user1,
+                this.user2,
+                COMMUNITY_TOKEN_ID,
+                await web3.utils.toWei("301500"),
+                "0xa165"
+            );
+            await this.treasuryCoreContract.safeTransferFrom(
+                this.user1,
+                this.user3,
+                COMMUNITY_TOKEN_ID,
+                await web3.utils.toWei("5000"),
+                "0xa165"
+            );
+            await this.treasuryCoreContract.safeTransferFrom(
+                this.user1,
+                this.user4,
+                COMMUNITY_TOKEN_ID,
+                await web3.utils.toWei("5000"),
+                "0xa165"
+            );
+
+            const tx2 = await this.recordsVotingContract.createNewRecordVersion([
+                "Test",
+                "image.png",
+                "Cat1",
+                RECORD_ID,
+                [1],
+                [
+                    await web3.utils.toWei("1000000"),
+                    oldVersionOwnerRewardGovernance,
+                    await web3.utils.toWei("1000000"),
+                    "Test",
+                    "image.png",
+                ],
+                [
+                    await web3.utils.toWei("1000000"),
+                    oldVersionOwnerRewardCommunity,
+                    await web3.utils.toWei("1000000"),
+                    "Test",
+                    "image.png",
+                ],
+            ]);
+
+            expectEvent(tx2, "VersionRequest", {
+                requestId: "1",
+                ballotId: "1",
+            });
+
+            expectEvent(tx2, "NewVersionVotingBallotCreated", {
+                versionRequestId: "1",
+                ballotId: "1",
+            });
+
+            let trx3 = await this.recordsVotingContract.castVote(1, true, { from: this.user2 });
+
+            expectEvent(trx3, "NewVersionVoting", {
+                versionRequestId: "1",
+                ballotId: "1",
+                vote: true,
+            });
+
+            trx3 = await this.recordsVotingContract.castVote(1, true, { from: this.user3 });
+
+            expectEvent(trx3, "NewVersionVoting", {
+                versionRequestId: "1",
+                ballotId: "1",
+                vote: true,
+            });
+
+            await this.recordsVotingContract.castVote(1, false, { from: this.user4 });
+
+            await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 2);
+
+            let trx4 = await this.recordsVotingContract.declareWinner(1, { from: this.user2 });
+
+            await expect(
+                this.treasuryCoreContract.balanceOf(
+                    this.recordsVotingContract.address,
+                    newGovernanceTokenId
+                )
+            ).to.eventually.be.bignumber.equal(new BN(oldVersionOwnerRewardGovernance));
+
+            //The owner of the new version request should get all the tokens.
+            await expect(
+                this.treasuryCoreContract.balanceOf(this.user1, newGovernanceTokenId)
+            ).to.eventually.be.bignumber.equal(new BN(web3.utils.toWei("1000000")));
+            await expect(
+                this.treasuryCoreContract.balanceOf(this.user1, newCommunityTokenId)
+            ).to.eventually.be.bignumber.equal(new BN(web3.utils.toWei("1000000")));
+
+            // Treasury should be empty
+            await expect(
+                this.treasuryCoreContract.balanceOf(
+                    this.treasuryCoreContract.address,
+                    newGovernanceTokenId
+                )
+            ).to.eventually.be.bignumber.equal(new BN("0"));
+            await expect(
+                this.treasuryCoreContract.balanceOf(
+                    this.treasuryCoreContract.address,
+                    newCommunityTokenId
+                )
+            ).to.eventually.be.bignumber.equal(new BN("0"));
+
+            expectEvent(trx4, "NewVersionTokenDistribution", {
+                rewardTokenId: "4",
+            });
+
+            expectEvent(trx4, "NewVersionRequestResult", {
+                versionReqId: "1",
+                tokenId: "2",
+                ballotId: "1",
+                result: true,
+            });
+
+            /* expectEvent(trx4, "RecordCreated", {
+                recordId: "3",
+                seedId: "1",
+            }); */
+
+            // Make claims for the new tokens.
+            await this.recordsVotingContract.claimNewRecordTokens(1, { from: this.user2 });
+            await this.recordsVotingContract.claimNewRecordTokens(1, { from: this.user3 });
+            await this.recordsVotingContract.claimNewRecordTokens(1, { from: this.user4 });
+
+            /* expectEvent(trx4, "NewTokenClaimed", {
+                versionRequestId: "1",
+            });
+            expectEvent(trx4, "NewTokenClaimed", {
+                versionRequestId: "1",
+            }); */
+
+            // exact transfer amount 0 ether
+            // expect 0 ether
+            await expect(
+                this.treasuryCoreContract.balanceOf(this.user2, newGovernanceTokenId)
+            ).to.eventually.be.bignumber.equal(new BN(web3.utils.toWei("0")));
+
+            // exact we should receive is 0 ether
+            // but due to precision we receive 0 ether
+            await expect(
+                this.treasuryCoreContract.balanceOf(this.user2, newCommunityTokenId)
+            ).to.eventually.be.bignumber.equal(new BN(web3.utils.toWei("0")));
+
+            // exact transfer amount 0 ether
+            // expect 0 ether
+            await expect(
+                this.treasuryCoreContract.balanceOf(this.user3, newGovernanceTokenId)
+            ).to.eventually.be.bignumber.equal(new BN(web3.utils.toWei("0")));
+            // exact transfer amount 0 ether
+            // expect 0 ether
+            await expect(
+                this.treasuryCoreContract.balanceOf(this.user3, newCommunityTokenId)
+            ).to.eventually.be.bignumber.equal(new BN(web3.utils.toWei("0")));
+
+            // exact transfer amount 0 ether
+            // expect 0 ether
+            await expect(
+                this.treasuryCoreContract.balanceOf(this.user4, newGovernanceTokenId)
+            ).to.eventually.be.bignumber.equal(new BN(web3.utils.toWei("0")));
+            // exact transfer amount 0 ether
+            // expect 0 ether
+            await expect(
+                this.treasuryCoreContract.balanceOf(this.user4, newCommunityTokenId)
+            ).to.eventually.be.bignumber.equal(new BN(web3.utils.toWei("0")));
+        });
+    });
+
+    context("New Record Version, dilution cases", function() {
+        let snapShot2, snapshotId2;
+        beforeEach(async function() {
+            snapShot2 = await helper.takeSnapshot();
+            snapshotId2 = snapShot2["result"];
+
+            const {
+                treasuryCoreContractMock,
+                treasuryContractMock,
+                recordsVotingContractMock,
+                recordsContractMock,
+                contributionContractMock,
+            } = await getMockContractsForRecordTesting();
+
+            this.treasuryCoreContractMock = treasuryCoreContractMock;
+            this.treasuryContractMock = treasuryContractMock;
+            this.recordsVotingContractMock = recordsVotingContractMock;
+            this.recordsContractMock = recordsContractMock;
+            this.contributionContractMock = contributionContractMock;
+
+            user1 = await helper.getEthAccount(0);
+            user2 = await helper.getEthAccount(1);
+            user3 = await helper.getEthAccount(2);
+            user4 = await helper.getEthAccount(3);
+
+            //seed contribution id 1
+            await this.contributionContractMock.createSeedContribution(
+                [1, 2, 3],
+                "preview.raw",
+                "preview.hash",
+                "This is the description for the record 1"
+            );
+            const tx = await this.recordsContractMock.createNewRecord(
+                "Test",
+                "image.png",
+                "Cat1",
+                SEED_CONTRIBUTION_ID
+            );
+            await this.treasuryContractMock.createNewCommunityToken([
+                RECORD_ID,
+                await web3.utils.toWei("1000000"),
+                COMMUNITY_TOKEN_BALANCE_USER1,
+                "Test",
+                "image.png",
+            ]);
+            await this.treasuryContractMock.createNewGovernanceToken([
+                RECORD_ID,
+                await web3.utils.toWei("1000000"),
+                GOVERNANCE_TOKEN_BALANCE_USER1,
+                "Test",
+                "image.png",
+            ]);
+
+            //this contribution will have id of 2
+            await this.contributionContractMock.createNewContribution(
+                [4, 5],
+                "preview.raw",
+                "preview.hash",
+                RECORD_ID,
+                false,
+                "Test description",
+                rewardCommunityToken,
+                rewardGovernanceToken,
+                {
+                    from: contributionOwner,
+                }
+            );
+        });
+        afterEach(async function() {
+            await helper.revertToSnapshot(snapshotId2);
+        });
+
+        it("New record version requested, voting done, user won, dilution takes place and tokens are transferred to user before winner declared, causing ballot to lose", async function() {
+            let newGovernanceTokenId = "4";
+            let newCommunityTokenId = "5";
+
+            let oldVersionOwnerRewardGovernance = await web3.utils.toWei("1000");
+            let oldVersionOwnerRewardCommunity = await web3.utils.toWei("1500");
+
+            await this.treasuryCoreContractMock.safeTransferFrom(
+                user1,
+                user2,
+                COMMUNITY_TOKEN_ID,
+                await web3.utils.toWei("301500"),
+                "0xa165"
+            );
+
+            const tx2 = await this.recordsVotingContractMock.createNewRecordVersion([
+                "Test",
+                "image.png",
+                "Cat1",
+                RECORD_ID,
+                [1],
+                [
+                    await web3.utils.toWei("1000000"),
+                    oldVersionOwnerRewardGovernance,
+                    GOVERNANCE_TOKEN_BALANCE_USER1,
+                    "Test",
+                    "image.png",
+                ],
+                [
+                    await web3.utils.toWei("1000000"),
+                    oldVersionOwnerRewardCommunity,
+                    COMMUNITY_TOKEN_BALANCE_USER1,
+                    "Test",
+                    "image.png",
+                ],
+            ]);
+
+            let trx3 = await this.recordsVotingContractMock.castVote(1, true, { from: user2 });
+
+            expectEvent(trx3, "NewVersionVoting", {
+                versionRequestId: "1",
+                ballotId: "1",
+                vote: true,
+            });
+
+            // Making token transfer after the ballot is declared
+            await this.treasuryCoreContractMock.safeTransferFrom(
+                user1,
+                user3,
+                COMMUNITY_TOKEN_ID,
+                await web3.utils.toWei("5000"),
+                "0xa165"
+            );
+
+            // Mimicking an token mint / dilution event, and the tokens are also transferred to another user to vote.
+            await this.treasuryCoreContractMock.mintTokensForMe(
+                COMMUNITY_TOKEN_ID,
+                await web3.utils.toWei("1000000"),
+                {
+                    from: user3,
+                }
+            );
+
+            trx3 = await this.recordsVotingContractMock.castVote(1, false, { from: user3 });
+
+            expectEvent(trx3, "NewVersionVoting", {
+                versionRequestId: "1",
+                ballotId: "1",
+                vote: false,
+            });
+
+            await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 2);
+
+            let trx4 = await this.recordsVotingContractMock.declareWinner(1, { from: user2 });
+
+            expectEvent(trx4, "NewVersionRequestResult", {
+                versionReqId: "1",
+                tokenId: "2",
+                ballotId: "1",
+                result: false,
+            });
+        });
+
+        it("New record version requested, voting done, user won, dilution takes place and tokens are transferred to user before winner declared, user who owned token during winner declaration gets reward", async function() {
+            let newGovernanceTokenId = "4";
+            let newCommunityTokenId = "5";
+
+            let oldVersionOwnerRewardGovernance = await web3.utils.toWei("1000");
+            let oldVersionOwnerRewardCommunity = await web3.utils.toWei("1500");
+
+            await this.treasuryCoreContractMock.safeTransferFrom(
+                user1,
+                user2,
+                COMMUNITY_TOKEN_ID,
+                await web3.utils.toWei("301500"),
+                "0xa165"
+            );
+
+            const tx2 = await this.recordsVotingContractMock.createNewRecordVersion([
+                "Test",
+                "image.png",
+                "Cat1",
+                RECORD_ID,
+                [1],
+                [
+                    await web3.utils.toWei("1000000"),
+                    oldVersionOwnerRewardGovernance,
+                    GOVERNANCE_TOKEN_BALANCE_USER1,
+                    "Test",
+                    "image.png",
+                ],
+                [
+                    await web3.utils.toWei("1000000"),
+                    oldVersionOwnerRewardCommunity,
+                    COMMUNITY_TOKEN_BALANCE_USER1,
+                    "Test",
+                    "image.png",
+                ],
+            ]);
+
+            let trx3 = await this.recordsVotingContractMock.castVote(1, true, { from: user2 });
+
+            expectEvent(trx3, "NewVersionVoting", {
+                versionRequestId: "1",
+                ballotId: "1",
+                vote: true,
+            });
+
+            // Making token transfer after the ballot is declared
+            await this.treasuryCoreContractMock.safeTransferFrom(
+                user1,
+                user3,
+                COMMUNITY_TOKEN_ID,
+                await web3.utils.toWei("5000"),
+                "0xa165"
+            );
+
+            // Mimicking an token mint / dilution event, and the tokens are also transferred to another user so that it is considered in the total circulating supply
+            await this.treasuryCoreContractMock.mintTokensForMe(
+                COMMUNITY_TOKEN_ID,
+                await web3.utils.toWei("1000"),
+                {
+                    from: user3,
+                }
+            );
+
+            await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 2);
+
+            let trx4 = await this.recordsVotingContractMock.declareWinner(1, { from: user2 });
+
+            // Make claims for the new tokens.
+            await this.recordsVotingContractMock.claimNewRecordTokens(1, { from: user2 });
+
+            // Below user makes claim for reward, he is eligible for reward as the tokens were acquired before the declaration of the winner
+            await this.recordsVotingContractMock.claimNewRecordTokens(1, { from: user3 });
+
+            // expected 13.303769401330377
+            // received 13.303769401330374000
+            await expect(
+                this.treasuryCoreContractMock.balanceOf(user3, newGovernanceTokenId)
+            ).to.eventually.be.bignumber.equal(new BN(web3.utils.toWei("13.303769401330374000")));
+            // expected 19.955654101995565
+            // received 19.955654101995564000
+            await expect(
+                this.treasuryCoreContractMock.balanceOf(user3, newCommunityTokenId)
+            ).to.eventually.be.bignumber.equal(new BN(web3.utils.toWei("19.955654101995564000")));
+        });
+
+        it("New record version requested, voting done, user won, dilution takes place and tokens are transferred to user after winner declared, user who owned token during winner declaration gets reward", async function() {
+            let newGovernanceTokenId = "4";
+            let newCommunityTokenId = "5";
+
+            let oldVersionOwnerRewardGovernance = await web3.utils.toWei("1000");
+            let oldVersionOwnerRewardCommunity = await web3.utils.toWei("1500");
+
+            await this.treasuryCoreContractMock.safeTransferFrom(
+                user1,
+                user2,
+                COMMUNITY_TOKEN_ID,
+                await web3.utils.toWei("301500"),
+                "0xa165"
+            );
+
+            const tx2 = await this.recordsVotingContractMock.createNewRecordVersion([
+                "Test",
+                "image.png",
+                "Cat1",
+                RECORD_ID,
+                [1],
+                [
+                    await web3.utils.toWei("1000000"),
+                    oldVersionOwnerRewardGovernance,
+                    GOVERNANCE_TOKEN_BALANCE_USER1,
+                    "Test",
+                    "image.png",
+                ],
+                [
+                    await web3.utils.toWei("1000000"),
+                    oldVersionOwnerRewardCommunity,
+                    COMMUNITY_TOKEN_BALANCE_USER1,
+                    "Test",
+                    "image.png",
+                ],
+            ]);
+
+            let trx3 = await this.recordsVotingContractMock.castVote(1, true, { from: user2 });
+
+            expectEvent(trx3, "NewVersionVoting", {
+                versionRequestId: "1",
+                ballotId: "1",
+                vote: true,
+            });
+
+            await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 2);
+
+            let trx4 = await this.recordsVotingContractMock.declareWinner(1, { from: user2 });
+
+            // Making token transfer after the ballot is declared
+            await this.treasuryCoreContractMock.safeTransferFrom(
+                user1,
+                user3,
+                COMMUNITY_TOKEN_ID,
+                await web3.utils.toWei("5000"),
+                "0xa165"
+            );
+
+            // Mimicking an token mint / dilution event, and the tokens are also transferred to another user so that it is considered in the total circulating supply
+            await this.treasuryCoreContractMock.mintTokensForMe(
+                COMMUNITY_TOKEN_ID,
+                await web3.utils.toWei("1000"),
+                {
+                    from: user3,
+                }
+            );
+
+            // Make claims for the new tokens.
+            await this.recordsVotingContractMock.claimNewRecordTokens(1, { from: user2 });
+
+            // Below user makes claim but gets 0 tokens in reward
+            await this.recordsVotingContractMock.claimNewRecordTokens(1, { from: user3 });
+
+            // Checking user3's balance for new tokens, it is expected to be zero as user acquired tokens after the winner was declared
+            await expect(
+                this.treasuryCoreContractMock.balanceOf(user3, newGovernanceTokenId)
+            ).to.eventually.be.bignumber.equal(new BN(web3.utils.toWei("0")));
+            await expect(
+                this.treasuryCoreContractMock.balanceOf(user3, newCommunityTokenId)
+            ).to.eventually.be.bignumber.equal(new BN(web3.utils.toWei("0")));
         });
     });
 });
