@@ -67,8 +67,8 @@ contract TreasuryContract is Initializable {
         TreasuryCoreContract.NewTokenData memory newTokenData
     ) {
         require(
-            newTokenData.totalSupply / 2 > newTokenData.userBalance,
-            "INVALID: TREASURY_SHOULD_HAVE_50%_OF_SUPPLY"
+            newTokenData.totalSupply >= newTokenData.userBalance,
+            "INVALID: USER_BALANCE_MORE_THAN_SUPPLY"
         );
 
         IRecords recordsContract = IRecords(RECORDS_CONTRACT_ADDRESS);
@@ -146,7 +146,7 @@ contract TreasuryContract is Initializable {
         (, , , , bool isPresent, ) = treasuryCoreContract.govTokenMapping(
             newTokenData.recordId
         );
-        require(isPresent == false, "INVALID: TOKEN_ID_ALREADY_IN_USE");
+        require(isPresent == false, "INVALID: TOKEN_ALREADY_CREATED");
 
         bool isSymbolInUse = treasuryCoreContract.govTokenSym(
             newTokenData.symbol
@@ -167,12 +167,12 @@ contract TreasuryContract is Initializable {
         TreasuryCoreContract treasuryCoreContract = TreasuryCoreContract(
             TREASURY_CORE_CONTRACT_ADDRESS
         );
-        (, , , , bool isPresent, ) = treasuryCoreContract.govTokenMapping(
+        (, , , , bool isPresent, ) = treasuryCoreContract.commTokenMapping(
             newTokenData.recordId
         );
-        require(isPresent == false, "INVALID: TOKEN_ID_ALREADY_IN_USE");
+        require(isPresent == false, "INVALID: TOKEN_ALREADY_CREATED");
 
-        bool isSymbolInUse = treasuryCoreContract.govTokenSym(
+        bool isSymbolInUse = treasuryCoreContract.commTokenSym(
             newTokenData.symbol
         );
         require(isSymbolInUse == false, "INVALID: TOKEN_SYMBOL_ALREADY_IN_USE");
