@@ -9,6 +9,17 @@ chai.use(chaiAsPromised);
 const expect = chai.expect;
 
 contract("Contribution Contract", function() {
+    async function createTrack(tracksContract, owner) {
+        const tx = await tracksContract.createNewTrack("fileHash", "fileLink", "Category", {
+            from: owner,
+        });
+        await expectEvent(tx, "TrackCreated", {
+            filehash: "fileHash",
+            filelink: "fileLink",
+            category: "Category",
+        });
+    }
+
     let SEED_CONTRIBUTION_ID = 1;
     let NEW_CONTRIBUTION_1_ID = 2;
     let RECORD_ID = 1;
@@ -55,6 +66,11 @@ contract("Contribution Contract", function() {
     });
 
     it("Creating seed contribution and record", async function() {
+        const user1 = await helper.getEthAccount(0);
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
+
         //seed contribution id 1
         await this.contributionContract.createSeedContribution(
             [1, 2, 3],
@@ -78,6 +94,11 @@ contract("Contribution Contract", function() {
         beforeEach(async function() {
             snapShot2 = await helper.takeSnapshot();
             snapshotId2 = snapShot2["result"];
+
+            const user1 = await helper.getEthAccount(0);
+            await createTrack(this.tracksContract, user1);
+            await createTrack(this.tracksContract, user1);
+            await createTrack(this.tracksContract, user1);
 
             await this.contributionContract.createSeedContribution(
                 [1, 2, 3],
@@ -105,6 +126,9 @@ contract("Contribution Contract", function() {
                 "Test",
                 "image.png",
             ]);
+
+            await createTrack(this.tracksContract, contributionOwner);
+            await createTrack(this.tracksContract, contributionOwner);
             await this.contributionContract.createNewContribution(
                 [4, 5],
                 "preview.raw",
@@ -239,6 +263,8 @@ contract("Contribution Contract", function() {
                 "0x0"
             );
 
+            await createTrack(this.tracksContract, contributionOwner);
+            await createTrack(this.tracksContract, contributionOwner);
             //Here user[1] has won and owns 1000 * 10**18 tokens of governance
             //user[0] creates a new contribution and other user votes
             let newContributionId = 3;

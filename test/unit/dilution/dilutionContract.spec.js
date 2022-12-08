@@ -217,6 +217,40 @@ contract("Dilution Contract", function() {
             ).to.eventually.be.bignumber.equals(afterDilution);
         });
 
+        it("shifting weight of votes before other votes are made, wins the ballot", async function() {
+            const afterDilution = await web3.utils.toWei("1000000");
+            const txx = await this.dilutionContract.castVote(this.dilutionId, false, {
+                from: this.user1,
+            });
+            expectEvent(txx, "DilutionVoting");
+
+            await this.dilutionContract.castVote(this.dilutionId, false, { from: this.user3 });
+            await this.treasuryCoreContract.safeTransferFrom(
+                this.user1,
+                this.user2,
+                COMMUNITY_TOKEN_ID,
+                await web3.utils.toWei("420000"),
+                "0x0"
+            );
+            await this.dilutionContract.castVote(this.dilutionId, true, { from: this.user2 });
+
+            await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 2);
+
+            const tx = await this.dilutionContract.declareWinner(this.dilutionId);
+
+            expectEvent(tx, "DilutionResult", {
+                dilutionId: this.dilutionId,
+                result: true,
+            });
+
+            await expect(
+                this.treasuryContract.balanceOf(
+                    this.treasuryCoreContract.address,
+                    COMMUNITY_TOKEN_ID
+                )
+            ).to.eventually.be.bignumber.equals(afterDilution);
+        });
+
         it("shifting weight of votes, lose the ballot", async function() {
             const afterDilution = await web3.utils.toWei("550000");
             const user4 = await helper.getEthAccount(3);
@@ -249,7 +283,40 @@ contract("Dilution Contract", function() {
             });
         });
 
-        it("Dilution voting done, trying to create a new dilution request before set time, reject", async function() {
+        it("shifting weight of votes before other votes are made, lose the ballot", async function() {
+            const afterDilution = await web3.utils.toWei("550000");
+            const user4 = await helper.getEthAccount(3);
+            await this.dilutionContract.castVote(this.dilutionId, true, { from: this.user1 });
+
+            await this.treasuryCoreContract.safeTransferFrom(
+                this.user1,
+                this.user2,
+                COMMUNITY_TOKEN_ID,
+                await web3.utils.toWei("300000"),
+                "0x0"
+            );
+
+            await this.dilutionContract.castVote(this.dilutionId, false, { from: this.user2 });
+            await this.dilutionContract.castVote(this.dilutionId, false, { from: this.user3 });
+
+            await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 2);
+
+            const tx = await this.dilutionContract.declareWinner(this.dilutionId);
+
+            await expect(
+                this.treasuryContract.balanceOf(
+                    this.treasuryCoreContract.address,
+                    COMMUNITY_TOKEN_ID
+                )
+            ).to.eventually.be.bignumber.equals(afterDilution);
+
+            expectEvent(tx, "DilutionResult", {
+                dilutionId: this.dilutionId,
+                result: false,
+            });
+        });
+
+        it("Dilution voting done, ballot lost, trying to create a new dilution request before set time, reject", async function() {
             const afterDilution = await web3.utils.toWei("550000");
             const user4 = await helper.getEthAccount(3);
             await this.dilutionContract.castVote(this.dilutionId, false, { from: this.user1 });
@@ -290,7 +357,40 @@ contract("Dilution Contract", function() {
             ).to.eventually.be.rejectedWith("INVALID: WAIT_SOMETIME_BEFORE_NEW_DILUTION_REQUEST");
         });
 
-        it("Dilution voting done, trying to create a new dilution request after set time, creates successfully", async function() {
+        it("Dilution voting done, ballot won, trying to create a new dilution request before set time, reject", async function() {
+            const afterDilution = await web3.utils.toWei("1000000");
+            const user4 = await helper.getEthAccount(3);
+            await this.dilutionContract.castVote(this.dilutionId, true, { from: this.user1 });
+            await this.dilutionContract.castVote(this.dilutionId, true, { from: this.user2 });
+            await this.dilutionContract.castVote(this.dilutionId, false, { from: this.user3 });
+
+            await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 2);
+
+            const tx = await this.dilutionContract.declareWinner(this.dilutionId);
+
+            await expect(
+                this.treasuryContract.balanceOf(
+                    this.treasuryCoreContract.address,
+                    COMMUNITY_TOKEN_ID
+                )
+            ).to.eventually.be.bignumber.equals(afterDilution);
+
+            expectEvent(tx, "DilutionResult", {
+                dilutionId: this.dilutionId,
+                result: true,
+            });
+
+            await expect(
+                this.dilutionContract.createDilutionRequest(
+                    RECORD_ID,
+                    COMMUNITY_TOKEN_ID,
+                    await web3.utils.toWei("450000"),
+                    { from: this.user2 }
+                )
+            ).to.eventually.be.rejectedWith("INVALID: WAIT_SOMETIME_BEFORE_NEW_DILUTION_REQUEST");
+        });
+
+        it("Dilution voting done, ballot lost, trying to create a new dilution request after set time, creates successfully", async function() {
             const afterDilution = await web3.utils.toWei("550000");
             const newDilutionId = "2";
             const user4 = await helper.getEthAccount(3);
@@ -320,6 +420,42 @@ contract("Dilution Contract", function() {
             expectEvent(tx, "DilutionResult", {
                 dilutionId: this.dilutionId,
                 result: false,
+            });
+
+            await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 1000);
+
+            const tx2 = await this.dilutionContract.createDilutionRequest(
+                RECORD_ID,
+                COMMUNITY_TOKEN_ID,
+                await web3.utils.toWei("450000"),
+                { from: this.user2 }
+            );
+
+            expectEvent(tx2, "DilutionRequestCreated", { dilutionId: newDilutionId });
+        });
+
+        it("Dilution voting done, ballot won, trying to create a new dilution request after set time, creates successfully", async function() {
+            const afterDilution = await web3.utils.toWei("1000000");
+            const newDilutionId = "2";
+            const user4 = await helper.getEthAccount(3);
+            await this.dilutionContract.castVote(this.dilutionId, true, { from: this.user1 });
+            await this.dilutionContract.castVote(this.dilutionId, true, { from: this.user2 });
+            await this.dilutionContract.castVote(this.dilutionId, false, { from: this.user3 });
+
+            await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 2);
+
+            const tx = await this.dilutionContract.declareWinner(this.dilutionId);
+
+            await expect(
+                this.treasuryContract.balanceOf(
+                    this.treasuryCoreContract.address,
+                    COMMUNITY_TOKEN_ID
+                )
+            ).to.eventually.be.bignumber.equals(afterDilution);
+
+            expectEvent(tx, "DilutionResult", {
+                dilutionId: this.dilutionId,
+                result: true,
             });
 
             await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 1000);

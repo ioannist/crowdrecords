@@ -22,6 +22,17 @@ const expect = chai.expect;
  * For all the test cases the input amount precision is only of 6 decimal digits, anything beyond 6 digits will not be either considered or would throw error in test cases
  */
 contract("Treasury Contract", function() {
+    async function createTrack(tracksContract, owner) {
+        const tx = await tracksContract.createNewTrack("fileHash", "fileLink", "Category", {
+            from: owner,
+        });
+        await expectEvent(tx, "TrackCreated", {
+            filehash: "fileHash",
+            filelink: "fileLink",
+            category: "Category",
+        });
+    }
+
     before(setup);
     before(generateTokens);
 
@@ -63,12 +74,18 @@ contract("Treasury Contract", function() {
     it("Create a record, other user tries to create community token.", async function() {
         const nonOwner = await helper.getEthAccount(3);
 
+        const user1 = await helper.getEthAccount(0);
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
+
         // Create new contribution token, it's id will be 2
         await this.contributionContract.createSeedContribution(
             [1, 2, 3],
             "preview.raw",
             "preview.hash",
-            "This is the description for the record"
+            "This is the description for the record",
+            { from: user1 }
         );
 
         // Create new record with new contribution
@@ -92,12 +109,18 @@ contract("Treasury Contract", function() {
     it("Create a record, other user tries to create governance token.", async function() {
         const nonOwner = await helper.getEthAccount(3);
 
+        const user1 = await helper.getEthAccount(0);
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
+
         // Create new contribution token, it's id will be 2
         await this.contributionContract.createSeedContribution(
             [1, 2, 3],
             "preview.raw",
             "preview.hash",
-            "This is the description for the record"
+            "This is the description for the record",
+            { from: user1 }
         );
 
         // Create new record with new contribution
@@ -119,12 +142,18 @@ contract("Treasury Contract", function() {
     });
 
     it("Create a record, create community token twice, reject.", async function() {
+        const user1 = await helper.getEthAccount(0);
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
+
         // Create new contribution token, it's id will be 2
         await this.contributionContract.createSeedContribution(
             [1, 2, 3],
             "preview.raw",
             "preview.hash",
-            "This is the description for the record"
+            "This is the description for the record",
+            { from: user1 }
         );
 
         // Create new record with new contribution
@@ -149,12 +178,18 @@ contract("Treasury Contract", function() {
     });
 
     it("Create a record, create governance token twice, reject.", async function() {
+        const user1 = await helper.getEthAccount(0);
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
+
         // Create new contribution token, it's id will be 2
         await this.contributionContract.createSeedContribution(
             [1, 2, 3],
             "preview.raw",
             "preview.hash",
-            "This is the description for the record"
+            "This is the description for the record",
+            { from: user1 }
         );
 
         // Create new record with new contribution

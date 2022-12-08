@@ -9,6 +9,10 @@ let GOVERNANCE_TOKEN_BALANCE_USER1 = new BN("450000000000000000000000");
 let COMMUNITY_TOKEN_BALANCE_USER1 = new BN("450000000000000000000000");
 
 async function generateTokens() {
+    await this.tracksContract.createNewTrack("fileHash1", "fileLink1", "Category1");
+    await this.tracksContract.createNewTrack("fileHash2", "fileLink2", "Category2");
+    await this.tracksContract.createNewTrack("fileHash3", "fileLink3", "Category3");
+
     await this.contributionContract.createSeedContribution(
         [1, 2, 3],
         "preview.raw",

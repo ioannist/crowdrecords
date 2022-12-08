@@ -11,6 +11,17 @@ chai.use(chaiAsPromised);
 const expect = chai.expect;
 
 contract("Records Contract", function() {
+    async function createTrack(tracksContract, owner) {
+        const tx = await tracksContract.createNewTrack("fileHash", "fileLink", "Category", {
+            from: owner,
+        });
+        await expectEvent(tx, "TrackCreated", {
+            filehash: "fileHash",
+            filelink: "fileLink",
+            category: "Category",
+        });
+    }
+
     let SEED_CONTRIBUTION_ID = 1;
     let NEW_CONTRIBUTION_1_ID = 2;
     let RECORD_ID = 1;
@@ -43,12 +54,17 @@ contract("Records Contract", function() {
     });
 
     it("Creating seed contribution and record", async function() {
+        const user1 = await helper.getEthAccount(0);
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
         //seed contribution id 1
         await this.contributionContract.createSeedContribution(
             [1, 2, 3],
             "preview.raw",
             "preview.hash",
-            "This is the description for the record 1"
+            "This is the description for the record 1",
+            { from: user1 }
         );
         const tx = await this.recordsContract.createNewRecord(
             "Test",
@@ -68,12 +84,18 @@ contract("Records Contract", function() {
     });
 
     it("Creating a normal contribution and try to create record with it, expect reject", async function() {
+        const user1 = await helper.getEthAccount(0);
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
+
         //seed contribution id 1
         await this.contributionContract.createSeedContribution(
             [1, 2, 3],
             "preview.raw",
             "preview.hash",
-            "This is the description for the record 1"
+            "This is the description for the record 1",
+            { from: user1 }
         );
         await this.recordsContract.createNewRecord(
             "Test",
@@ -96,6 +118,9 @@ contract("Records Contract", function() {
             "image.png",
         ]);
 
+        await createTrack(this.tracksContract, contributionOwner);
+        await createTrack(this.tracksContract, contributionOwner);
+
         //this contribution will have id of 2
         await this.contributionContract.createNewContribution(
             [4, 5],
@@ -117,12 +142,18 @@ contract("Records Contract", function() {
     });
 
     it("User create seed contribution, creates new record, tries to create one more record with same see but rejected", async function() {
+        const user1 = await helper.getEthAccount(0);
+
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
         //seed contribution id 1
         await this.contributionContract.createSeedContribution(
             [1, 2, 3],
             "preview.raw",
             "preview.hash",
-            "This is the description for the record 1"
+            "This is the description for the record 1",
+            { from: user1 }
         );
         const tx = await this.recordsContract.createNewRecord(
             "Test",
@@ -139,12 +170,18 @@ contract("Records Contract", function() {
         ).to.eventually.be.rejectedWith("INVALID: SEED_ALREADY_USED");
     });
     it("User create seed contribution, creates new record, tries to create one more record with same see but rejected", async function() {
+        const user1 = await helper.getEthAccount(0);
+
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
         //seed contribution id 1
         await this.contributionContract.createSeedContribution(
             [1, 2, 3],
             "preview.raw",
             "preview.hash",
-            "This is the description for the record 1"
+            "This is the description for the record 1",
+            { from: user1 }
         );
         const tx = await this.recordsContract.createNewRecord(
             "Test",
@@ -162,12 +199,18 @@ contract("Records Contract", function() {
     });
     it("User create seed contribution, different user tries to create rejected. (only the same user should be able to create new record, incase of new version anyone can create it", async function() {
         let user2 = await helper.getEthAccount(1);
+        const user1 = await helper.getEthAccount(0);
+
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
         //seed contribution id 1
         await this.contributionContract.createSeedContribution(
             [1, 2, 3],
             "preview.raw",
             "preview.hash",
-            "This is the description for the record 1"
+            "This is the description for the record 1",
+            { from: user1 }
         );
 
         await expect(
@@ -186,13 +229,20 @@ contract("Records Contract", function() {
             this.recordsContract.createNewRecord("Test", "image.png", "Cat1", SEED_CONTRIBUTION_ID)
         ).to.eventually.be.rejectedWith("INVALID: CONTRIBUTION_NOT_FOUND");
 
+        const user1 = await helper.getEthAccount(0);
+
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
+
         // seed contribution id 1
         // Now we have created a seed contribution
         await this.contributionContract.createSeedContribution(
             [1, 2, 3],
             "preview.raw",
             "preview.hash",
-            "This is the description for the record 1"
+            "This is the description for the record 1",
+            { from: user1 }
         );
 
         // Trying to create the community and governance token for the record, before record is created
@@ -237,6 +287,9 @@ contract("Records Contract", function() {
             "image.png",
         ]);
 
+        await createTrack(this.tracksContract, contributionOwner);
+        await createTrack(this.tracksContract, contributionOwner);
+
         //this contribution will have id of 2
         await this.contributionContract.createNewContribution(
             [4, 5],
@@ -254,6 +307,11 @@ contract("Records Contract", function() {
     });
 
     it("Person who creates contribution needs to own the tracks are being used.", async function() {
+        const user1 = await helper.getEthAccount(0);
+
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
         await expect(
             this.contributionContract.createSeedContribution(
                 [1, 2, 3],
@@ -279,12 +337,16 @@ contract("Records Contract", function() {
             this.user3 = await helper.getEthAccount(2);
             this.user4 = await helper.getEthAccount(3);
 
+            await createTrack(this.tracksContract, this.user1);
+            await createTrack(this.tracksContract, this.user1);
+            await createTrack(this.tracksContract, this.user1);
             //seed contribution id 1
             await this.contributionContract.createSeedContribution(
                 [1, 2, 3],
                 "preview.raw",
                 "preview.hash",
-                "This is the description for the record 1"
+                "This is the description for the record 1",
+                { from: this.user1 }
             );
             const tx = await this.recordsContract.createNewRecord(
                 "Test",
@@ -306,6 +368,9 @@ contract("Records Contract", function() {
                 "Test",
                 "image.png",
             ]);
+
+            await createTrack(this.tracksContract, contributionOwner);
+            await createTrack(this.tracksContract, contributionOwner);
 
             //this contribution will have id of 2
             await this.contributionContract.createNewContribution(
@@ -1769,6 +1834,7 @@ contract("Records Contract", function() {
                 recordsVotingContractMock,
                 recordsContractMock,
                 contributionContractMock,
+                tracksContractMock,
             } = await getMockContractsForRecordTesting();
 
             this.treasuryCoreContractMock = treasuryCoreContractMock;
@@ -1776,11 +1842,16 @@ contract("Records Contract", function() {
             this.recordsVotingContractMock = recordsVotingContractMock;
             this.recordsContractMock = recordsContractMock;
             this.contributionContractMock = contributionContractMock;
+            this.tracksContractMock = tracksContractMock;
 
             user1 = await helper.getEthAccount(0);
             user2 = await helper.getEthAccount(1);
             user3 = await helper.getEthAccount(2);
             user4 = await helper.getEthAccount(3);
+
+            await createTrack(this.tracksContractMock, user1);
+            await createTrack(this.tracksContractMock, user1);
+            await createTrack(this.tracksContractMock, user1);
 
             //seed contribution id 1
             await this.contributionContractMock.createSeedContribution(
@@ -1810,6 +1881,9 @@ contract("Records Contract", function() {
                 "image.png",
             ]);
 
+            await createTrack(this.tracksContractMock, contributionOwner);
+            await createTrack(this.tracksContractMock, contributionOwner);
+
             //this contribution will have id of 2
             await this.contributionContractMock.createNewContribution(
                 [4, 5],
@@ -1825,6 +1899,7 @@ contract("Records Contract", function() {
                 }
             );
         });
+
         afterEach(async function() {
             await helper.revertToSnapshot(snapshotId2);
         });

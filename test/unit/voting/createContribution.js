@@ -12,6 +12,11 @@ async function createContribution() {
     this.contributionOwner = await helper.getEthAccount(9);
     this.rewardCommunityToken = await web3.utils.toWei("1000");
     this.rewardGovernanceToken = await web3.utils.toWei("1000");
+
+    await this.tracksContract.createNewTrack("fileHash1", "fileLink1", "Category1");
+    await this.tracksContract.createNewTrack("fileHash2", "fileLink2", "Category2");
+    await this.tracksContract.createNewTrack("fileHash3", "fileLink3", "Category3");
+
     await this.contributionContract.createSeedContribution(
         [1, 2, 3],
         "preview.raw",
@@ -33,6 +38,14 @@ async function createContribution() {
         "Test",
         "image.png",
     ]);
+
+    await this.tracksContract.createNewTrack("fileHash1", "fileLink1", "Category1", {
+        from: this.contributionOwner,
+    });
+    await this.tracksContract.createNewTrack("fileHash2", "fileLink2", "Category2", {
+        from: this.contributionOwner,
+    });
+
     await this.contributionContract.createNewContribution(
         [4, 5],
         "preview.raw",
