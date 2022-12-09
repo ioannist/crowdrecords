@@ -28,9 +28,8 @@ events checks for all the functions that are called from a function within other
 -   After winning the voting for agreement contract, Distribution of small amount which results to near 0 wei per token, expect revert
 -   After winning the voting for agreement contract, Distribution with multiple users, 3 distributors, 3 agreements, 1 record, 3 claimee
 -   After winning the voting for agreement contract, Distribution with multiple users, 3 distributor accounts, 1 agreements, 1 record, 3 claimee
-
--   Haywire
--   -   Create agreement, move forward 10 blocks, create another agreement (different user), vote for both agreement, one has low turnOut and other one wins, declare winner for both, try to distribute royalty for low minTurnOut agreement, get rejected, create new voting from same user, pay for the other agreement royalty, claim royalty and then vote for 3rd agreement,after time over declare winner.
+-   2 royalty payments, user has token during first one and not during second one, makes claim to get reward only gets the first royalty
+-   giving out the 1000 royalties and logging the gas cost foe conditions : all claim together, 50% claims together 25% claims together and single claim every time. PENDING
 
 ### Contribution contract
 
@@ -42,10 +41,6 @@ events checks for all the functions that are called from a function within other
 -   Testing contribution voting, Declaring voting winner, user wins and reward amount is transferred : One Person Vote
 -   Testing contribution voting, Declaring voting winner, user loses and reward amount is not transferred
 -   Testing contribution voting, Declaring winner, user should win and receive the reward : Multi Person Vote
-
--   Haywire
--   -   Create 3 contribution from 3 accounts different after interval of 10 blocks each, declare the winner for the last one first, check balance. New contribution created, now vote 1 for yes and 1 for no (66% winning), now declare winners for the first 2 (This will change the balance to less then 66% in winning side), then declare winner should lose.
--   -   Create 2 contribution from 2 accounts different after interval of 10 blocks each, for contribution 1 create counter offer for it and also vote yes
 
 declare the winner for the last one first, check balance. New contribution created, now vote 1 for yes and 1 for no (66% winning), now declare winners for the first 2 (This will change the balance to less then 66% in winning side), then declare winner should lose.
 
@@ -64,9 +59,6 @@ declare the winner for the last one first, check balance. New contribution creat
 -   Dilution by voting, shifting weight of votes, lose the ballot
 -   Dilution by voting, Dilution voting done, trying to create a new dilution request before set time, reject
 -   Dilution by voting, Dilution voting done, trying to create a new dilution request after set time, creates successfully
-
--   Haywire
--   -   Create 3 contribution from 3 accounts different after interval of 10 blocks each, declare the winner for the last one first, check balance. New contribution created, now vote 1 for yes and 1 for no (66% winning), now declare winners for the first 2 (This will change the balance to less then 66% in winning side), then declare winner should lose.
 
 ### Sale Contract
 
@@ -94,6 +86,13 @@ declare the winner for the last one first, check balance. New contribution creat
 -   Should able to purchase non locked asset the CRD amount is less than 1
 -   Buy order is fulfilled and the transaction fees are transferred to wallet
 -   Buy order is fulfilled and the transaction fees are transferred to wallet. Order amount is greater than 1
+-   User can create normal Buy request, cancels it, other user tries to buy order expect revert.
+-   Trying to sell more then the requested amount, expect revert
+-   create buy order with 1,000,000 CRD total order value.
+-   Try to fulfill order with insufficient Community token balance, expect revert
+-   Try to fulfill order with insufficient governance token balance, expect revert
+-   testing for ration that is 1 : 1 Mil for invalid token ratio, expect revert buy 1 : 1
+-   testing for ration that is 1 : 1 Mil for invalid token ratio, buy 0.5 : 500k
 
 ### Records Contract
 

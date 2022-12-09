@@ -66,6 +66,150 @@ contract("Not Ratio Locked Sales", function() {
         ).to.eventually.be.bignumber.equals(await web3.utils.toWei("1000000"));
     });
 
+    it("User can create normal Buy request, cancels it, other user tries to buy order expect revert.", async function() {
+        const user1 = await helper.getEthAccount(0);
+        const user2 = await helper.getEthAccount(1);
+        await this.treasuryCoreContract.setApprovalForAll(this.ordersContract.address, true, {
+            from: user1,
+        });
+
+        let trx = await this.ordersContract.createBuyOrder([
+            false,
+            RECORD_ID,
+            COMMUNITY_TOKEN_ID,
+            await web3.utils.toWei("100"),
+            await web3.utils.toWei((100 * 1).toString()),
+            GOVERNANCE_TOKEN_ID,
+            await web3.utils.toWei("5"),
+            await web3.utils.toWei((5 * 2).toString()),
+        ]);
+        expectEvent(trx, "BuyOrder", {
+            buyer: user1,
+            isLockedInRatio: false,
+        });
+
+        let saleId = trx?.logs[0].args.saleId.toString();
+        trx = await this.ordersContract.cancelBuyOrder(1, { from: user1 });
+
+        expectEvent(trx, "OrderClose", {
+            saleId: saleId,
+        });
+
+        //The CRD tokens that were transferred to ordersContract needs to be returned
+        await expect(
+            this.treasuryContract.balanceOf(user1, CRDTokenId)
+        ).to.eventually.be.bignumber.equals(await web3.utils.toWei("1000000"));
+
+        await expect(
+            this.ordersContract.acceptBuyOrder(
+                saleId, //SaleId
+                await web3.utils.toWei("50"), //communityTokenAmount
+                await web3.utils.toWei("1"), //governanceTokenAmount
+                { from: user2 }
+            )
+        ).to.eventually.be.rejectedWith("INVALID: ORDER_CLOSED");
+    });
+
+    it("Trying to sell more then the requested amount, expect revert", async function() {
+        const user1 = await helper.getEthAccount(0);
+        const user2 = await helper.getEthAccount(1);
+        await this.treasuryCoreContract.setApprovalForAll(this.ordersContract.address, true, {
+            from: user1,
+        });
+
+        let trx = await this.ordersContract.createBuyOrder([
+            false,
+            RECORD_ID,
+            COMMUNITY_TOKEN_ID,
+            await web3.utils.toWei("100"),
+            await web3.utils.toWei((100 * 1).toString()),
+            GOVERNANCE_TOKEN_ID,
+            await web3.utils.toWei("5"),
+            await web3.utils.toWei((5 * 2).toString()),
+        ]);
+        expectEvent(trx, "BuyOrder", {
+            buyer: user1,
+            isLockedInRatio: false,
+        });
+
+        let saleId = trx?.logs[0].args.saleId.toString();
+
+        await expect(
+            this.ordersContract.acceptBuyOrder(
+                saleId, //SaleId
+                await web3.utils.toWei("500"), //communityTokenAmount
+                await web3.utils.toWei("1"), //governanceTokenAmount
+                { from: user2 }
+            )
+        ).to.eventually.be.rejectedWith("INSUFFICIENT: COMMUNITY_TOKEN_AMOUNT");
+
+        await expect(
+            this.ordersContract.acceptBuyOrder(
+                saleId, //SaleId
+                await web3.utils.toWei("50"), //communityTokenAmount
+                await web3.utils.toWei("10"), //governanceTokenAmount
+                { from: user2 }
+            )
+        ).to.eventually.be.rejectedWith("INSUFFICIENT: GOVERNANCE_TOKEN_AMOUNT");
+    });
+
+    it("Create buy order with 999,000 CRD total order value.", async function() {
+        const user1 = await helper.getEthAccount(0);
+        const user2 = await helper.getEthAccount(1);
+        await this.treasuryCoreContract.setApprovalForAll(this.ordersContract.address, true, {
+            from: user1,
+        });
+        await this.treasuryCoreContract.setApprovalForAll(this.ordersContract.address, true, {
+            from: user2,
+        });
+
+        await this.treasuryCoreContract.safeTransferFrom(
+            user1,
+            user2,
+            CRDTokenId,
+            await web3.utils.toWei("1000000"),
+            "0x0"
+        );
+
+        let trx = await this.ordersContract.createBuyOrder(
+            [
+                false,
+                RECORD_ID,
+                COMMUNITY_TOKEN_ID,
+                await web3.utils.toWei("990"),
+                await web3.utils.toWei((990 * 1000).toString()),
+                GOVERNANCE_TOKEN_ID,
+                await web3.utils.toWei("9"),
+                await web3.utils.toWei((9 * 1000).toString()),
+            ],
+            { from: user2 }
+        );
+        expectEvent(trx, "BuyOrder", {
+            buyer: user2,
+            isLockedInRatio: false,
+        });
+
+        let saleId = trx?.logs[0].args.saleId.toString();
+
+        await this.ordersContract.acceptBuyOrder(
+            saleId, //SaleId
+            await web3.utils.toWei("990"), //communityTokenAmount
+            await web3.utils.toWei("9"), //governanceTokenAmount
+            { from: user1 }
+        );
+
+        // Checking wether the user1 received the correct amount that is after
+        // deduction of the fess.
+        await expect(
+            this.treasuryContract.balanceOf(user1, CRDTokenId)
+        ).to.eventually.be.bignumber.equals(await web3.utils.toWei("994005"));
+
+        // Checking the wallet for the transaction cut balance
+        await expect(
+            this.treasuryContract.balanceOf(await this.ordersContract.WALLET_ADDRESS(), CRDTokenId)
+        ).to.eventually.be.bignumber.equals(await web3.utils.toWei("4995"));
+    });
+
     it("Sale tokens should belong to same record, expect revert", async function() {
         await this.treasuryCoreContract.setApprovalForAll(this.ordersContract.address, true);
         await expect(

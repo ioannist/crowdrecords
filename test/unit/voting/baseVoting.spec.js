@@ -1,6 +1,7 @@
 const setup = require("../../utils/deployContracts");
 const {
     createContribution,
+    createContributionWithMockTreasury,
     SEED_CONTRIBUTION_ID,
     NEW_CONTRIBUTION_1_ID,
     RECORD_ID,
@@ -893,28 +894,10 @@ contract("BaseVotingContract", function() {
     });
 
     it("Create vote, multiple vote, tokens are diluted and transfer it to non-voter, now the minTurnOut is not meet due to high token dilution", async function() {
-        // Here we will change the treasury contract with treasuryCoreMock.
-        const TreasuryCoreContractMock = artifacts.require(
-            "../contracts/TreasuryCoreContractMock.sol"
-        );
-        let treasuryCoreContractMock = await TreasuryCoreContractMock.deployed(
-            await helper.getEthAccount(0)
-        );
-        await treasuryCoreContractMock.initialize(
-            this.votingHubContract.address,
-            this.treasuryContract.address
-        );
-        const BaseVotingContractMock = artifacts.require(
-            "../contracts/Mocks/BaseVotingContractMock.sol"
-        );
-        let baseVotingContractMock = await BaseVotingContractMock.deployed();
-
-        // Here for this single test case we are changing the treasury address to mock contract address
-        await this.votingHubContract.setTreasuryCoreContractAddress(
-            treasuryCoreContractMock.address
-        );
-
-        this.votingHubContract.addVotingContract(baseVotingContractMock.address);
+        const {
+            treasuryCoreContractMock,
+            baseVotingContractMock,
+        } = await createContributionWithMockTreasury();
 
         const user1 = await helper.getEthAccount(0);
         const user2 = await helper.getEthAccount(1);

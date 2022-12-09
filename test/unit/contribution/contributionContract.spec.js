@@ -52,6 +52,10 @@ contract("Contribution Contract", function() {
     });
 
     it("Creating a seed contribution", async function() {
+        const user1 = await helper.getEthAccount(0);
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
         const tx = await this.contributionContract.createSeedContribution(
             [1, 2, 3],
             "preview.raw",

@@ -1,6 +1,7 @@
 const setup = require("../../utils/deployContracts");
 const {
     createContribution,
+    createContributionWithMockTreasury,
     SEED_CONTRIBUTION_ID,
     NEW_CONTRIBUTION_1_ID,
     RECORD_ID,
@@ -340,39 +341,7 @@ contract("BaseVotingCounterOfferContract", function() {
             });
         });
 
-        it("Creating a counter offer check if created, rejected check event", async function() {
-            await this.baseVotingCounterOfferContractMock.createBallot(true, COMMUNITY_TOKEN_ID, {
-                from: this.user2,
-            });
-
-            await this.baseVotingCounterOfferContractMock.createCounterOffer(this.ballotId, {
-                from: this.user1,
-            });
-            let trx = await this.baseVotingCounterOfferContractMock.counterOfferAction(
-                this.ballotId,
-                this.user1,
-                true,
-                {
-                    from: this.user2,
-                }
-            );
-            await expectEvent(trx, "CounterOfferResult", {
-                ballotId: new BN(this.ballotId),
-                result: true,
-            });
-            await expect(
-                this.baseVotingCounterOfferContractMock.counterOfferAction(
-                    this.ballotId,
-                    this.user1,
-                    false,
-                    {
-                        from: this.user2,
-                    }
-                )
-            ).to.eventually.be.rejectedWith("INVALID: ALREADY_VOTED");
-        });
-
-        it("Creating a counter offer check if created, rejected check event", async function() {
+        it("Creating a counter offer check if created, rejected check event try to accept it", async function() {
             await this.baseVotingCounterOfferContractMock.createBallot(true, COMMUNITY_TOKEN_ID, {
                 from: this.user2,
             });
@@ -404,7 +373,7 @@ contract("BaseVotingCounterOfferContract", function() {
             ).to.eventually.be.rejectedWith("INVALID: ALREADY_VOTED");
         });
 
-        it("Creating a counter offer check if created, rejected check event", async function() {
+        it("Creating a counter offer check if created, rejected check event try to reject it", async function() {
             await this.baseVotingCounterOfferContractMock.createBallot(true, COMMUNITY_TOKEN_ID, {
                 from: this.user2,
             });
@@ -436,7 +405,39 @@ contract("BaseVotingCounterOfferContract", function() {
             ).to.eventually.be.rejectedWith("INVALID: ALREADY_VOTED");
         });
 
-        it("Creating a counter offer check if created, rejected check event", async function() {
+        it("Creating a counter offer check if created, accepted check event try to accept it", async function() {
+            await this.baseVotingCounterOfferContractMock.createBallot(true, COMMUNITY_TOKEN_ID, {
+                from: this.user2,
+            });
+
+            await this.baseVotingCounterOfferContractMock.createCounterOffer(this.ballotId, {
+                from: this.user1,
+            });
+            let trx = await this.baseVotingCounterOfferContractMock.counterOfferAction(
+                this.ballotId,
+                this.user1,
+                true,
+                {
+                    from: this.user2,
+                }
+            );
+            await expectEvent(trx, "CounterOfferResult", {
+                ballotId: new BN(this.ballotId),
+                result: true,
+            });
+            await expect(
+                this.baseVotingCounterOfferContractMock.counterOfferAction(
+                    this.ballotId,
+                    this.user1,
+                    false,
+                    {
+                        from: this.user2,
+                    }
+                )
+            ).to.eventually.be.rejectedWith("INVALID: ALREADY_VOTED");
+        });
+
+        it("Creating a counter offer check if created, accepted check event try to accept it", async function() {
             await this.baseVotingCounterOfferContractMock.createBallot(true, COMMUNITY_TOKEN_ID, {
                 from: this.user2,
             });
@@ -766,6 +767,154 @@ contract("BaseVotingCounterOfferContract", function() {
                 ballotId: new BN(this.ballotId),
                 result: true,
             });
+        });
+    });
+
+    it("Creating a voting ballot, create counter offer, reject counter offer, dilution, wins", async function() {
+        const {
+            treasuryCoreContractMock,
+            baseVotingCounterOfferContractMock,
+        } = await createContributionWithMockTreasury();
+
+        //Removing all the other voting contracts temporarily
+        await this.votingHubContract.removeVotingContract(0);
+        await this.votingHubContract.removeVotingContract(0);
+        await this.votingHubContract.removeVotingContract(0);
+        await this.votingHubContract.removeVotingContract(0);
+
+        await this.votingHubContract.addVotingContract(baseVotingCounterOfferContractMock.address);
+
+        const user1 = await helper.getEthAccount(0);
+        const user2 = await helper.getEthAccount(1);
+        const user3 = await helper.getEthAccount(2);
+        const user4 = await helper.getEthAccount(3);
+        const user5 = await helper.getEthAccount(4);
+
+        const ballotId = 1;
+        const tokenId = 2;
+
+        // Minting tokens and transferring into different accounts
+        await treasuryCoreContractMock.mintTokensForMe(tokenId, await web3.utils.toWei("10000"), {
+            from: user1,
+        });
+        await treasuryCoreContractMock.mintTokensForMe(tokenId, await web3.utils.toWei("49000"), {
+            from: user2,
+        });
+        await treasuryCoreContractMock.mintTokensForMe(tokenId, await web3.utils.toWei("1000"), {
+            from: user3,
+        });
+        await treasuryCoreContractMock.mintTokensForMe(tokenId, await web3.utils.toWei("25000"), {
+            from: user4,
+        });
+        await treasuryCoreContractMock.mintTokensForMe(tokenId, await web3.utils.toWei("25000"), {
+            from: user5,
+        });
+
+        // Create a voting ballot
+        await baseVotingCounterOfferContractMock.createBallot(true, tokenId, {
+            from: user2,
+        });
+
+        // Here we are voting from 2 accounts and the minTurnOut is matched
+        await baseVotingCounterOfferContractMock.castVote(ballotId, true, { from: user2 });
+        // User 3 votes for ballot but still the winRatio is not matched
+        await baseVotingCounterOfferContractMock.castVote(ballotId, true, { from: user3 });
+
+        // Creating a counterOffer
+        await baseVotingCounterOfferContractMock.createCounterOffer(ballotId, {
+            from: user4,
+        });
+
+        // rejecting a counterOffer
+        await baseVotingCounterOfferContractMock.counterOfferAction(ballotId, user4, false, {
+            from: user2,
+        });
+
+        // Here we mint new tokens and then transfer it to user3 who has voted yes, So the vote should now win
+        await treasuryCoreContractMock.mintTokensForMe(tokenId, await web3.utils.toWei("550000"), {
+            from: user3,
+        });
+
+        await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 2);
+
+        let trx = await baseVotingCounterOfferContractMock.declareWinner(ballotId);
+        await expectEvent(trx, "BallotResult", {
+            ballotId: new BN(ballotId),
+            result: true,
+        });
+    });
+
+    it("Creating a voting ballot, create counter offer, accept counter offer, dilution, lose", async function() {
+        const {
+            treasuryCoreContractMock,
+            baseVotingCounterOfferContractMock,
+        } = await createContributionWithMockTreasury();
+
+        //Removing all the other voting contracts temporarily
+        await this.votingHubContract.removeVotingContract(0);
+        await this.votingHubContract.removeVotingContract(0);
+        await this.votingHubContract.removeVotingContract(0);
+        await this.votingHubContract.removeVotingContract(0);
+
+        await this.votingHubContract.addVotingContract(baseVotingCounterOfferContractMock.address);
+
+        const user1 = await helper.getEthAccount(0);
+        const user2 = await helper.getEthAccount(1);
+        const user3 = await helper.getEthAccount(2);
+        const user4 = await helper.getEthAccount(3);
+        const user5 = await helper.getEthAccount(4);
+
+        const ballotId = 1;
+        const tokenId = 2;
+
+        // Minting tokens and transferring into different accounts
+        await treasuryCoreContractMock.mintTokensForMe(tokenId, await web3.utils.toWei("10000"), {
+            from: user1,
+        });
+        await treasuryCoreContractMock.mintTokensForMe(tokenId, await web3.utils.toWei("49000"), {
+            from: user2,
+        });
+        await treasuryCoreContractMock.mintTokensForMe(tokenId, await web3.utils.toWei("1000"), {
+            from: user3,
+        });
+        await treasuryCoreContractMock.mintTokensForMe(tokenId, await web3.utils.toWei("25000"), {
+            from: user4,
+        });
+        await treasuryCoreContractMock.mintTokensForMe(tokenId, await web3.utils.toWei("25000"), {
+            from: user5,
+        });
+
+        // Create a voting ballot
+        await baseVotingCounterOfferContractMock.createBallot(true, tokenId, {
+            from: user2,
+        });
+
+        // Here we are voting from 2 accounts and the minTurnOut is matched
+        await baseVotingCounterOfferContractMock.castVote(ballotId, true, { from: user2 });
+        // User 3 votes for ballot but still the winRatio is not matched
+        await baseVotingCounterOfferContractMock.castVote(ballotId, false, { from: user3 });
+
+        // Creating a counterOffer
+        await baseVotingCounterOfferContractMock.createCounterOffer(ballotId, {
+            from: user4,
+        });
+
+        // accepting a counterOffer
+        await baseVotingCounterOfferContractMock.counterOfferAction(ballotId, user4, true, {
+            from: user2,
+        });
+
+        // Here we mint new tokens and then transfer it to user3 who has voted no, So the vote should now lose
+        await treasuryCoreContractMock.mintTokensForMe(tokenId, await web3.utils.toWei("550000"), {
+            from: user3,
+        });
+
+        await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 2);
+
+        let trx = await baseVotingCounterOfferContractMock.declareWinner(ballotId);
+        await expectEvent(trx, "BallotResult", {
+            ballotId: new BN(ballotId),
+            result: false,
         });
     });
 });

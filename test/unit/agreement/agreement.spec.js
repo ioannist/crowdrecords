@@ -16,6 +16,7 @@ const chai = require("chai");
 const BN = require("bn.js");
 const chaiBN = require("chai-bn")(BN);
 const chaiAsPromised = require("chai-as-promised");
+const { web3 } = require("@openzeppelin/test-helpers/src/setup");
 chai.use(chaiAsPromised);
 const expect = chai.expect;
 
@@ -533,6 +534,60 @@ contract("AgreementContract", function() {
             ).eventually.to.be.bignumber.equal(secondTimeRewardForUser2);
         });
 
+        it("2 royalty payments, user has token during first one and not during second one, makes claim to get reward only gets the first royalty", async function() {
+            const user1 = await helper.getEthAccount(0);
+            const user2 = await helper.getEthAccount(1);
+            const CRDToken = await this.treasuryContract.CRD();
+            let singleRewardAmount = await web3.utils.toWei("40000");
+            let communityTokenOwnedByUser2 = await web3.utils.toWei("5000");
+
+            // royaltyReward = rewardAmount / totalSupply * tokensOwned
+            let rewardForUser2 = await web3.utils.toWei("444.444444444444440000");
+
+            //Transfer community token to user2 so he can make claims
+            await this.treasuryCoreContract.safeTransferFrom(
+                user1,
+                user2,
+                COMMUNITY_TOKEN_ID,
+                communityTokenOwnedByUser2,
+                "0xa165"
+            );
+
+            await this.treasuryCoreContract.setApprovalForAll(this.agreementContract.address, true);
+
+            //Distributing first time
+            await this.agreementContract.payRoyaltyAmount(
+                this.firstAgreementId,
+                singleRewardAmount
+            );
+
+            //Returning the tokens that were owner by the user2 so that he can only claim the first payment and not the second one
+            await this.treasuryCoreContract.safeTransferFrom(
+                user2,
+                user1,
+                COMMUNITY_TOKEN_ID,
+                communityTokenOwnedByUser2,
+                "0xa165",
+                { from: user2 }
+            );
+
+            //Distributing for second time
+            await this.agreementContract.payRoyaltyAmount(
+                this.firstAgreementId,
+                singleRewardAmount
+            );
+
+            //Claiming for user2 for first time
+            await this.agreementContract.claimRoyaltyAmount(this.firstAgreementId, {
+                from: user2,
+            });
+
+            //Checking if the CRD tokens reached to user2 for first time claim
+            await expect(
+                this.treasuryContract.balanceOf(user2, CRDToken)
+            ).eventually.to.be.bignumber.equal(rewardForUser2);
+        });
+
         it("Claiming Royalty : Distributing then claim then distribute then claim for Multiple user", async function() {
             const user1 = await helper.getEthAccount(0);
             const user2 = await helper.getEthAccount(1);
@@ -765,11 +820,13 @@ contract("AgreementContract", function() {
             this.user2 = await helper.getEthAccount(1);
             this.user3 = await helper.getEthAccount(2);
             this.user4 = await helper.getEthAccount(4);
+            this.user5 = await helper.getEthAccount(5);
             this.CRDToken = await this.treasuryContract.CRD();
             this.singleRewardAmount = await web3.utils.toWei("5000");
             this.communityTokenOwnedByUser2 = await web3.utils.toWei("5000");
             this.communityTokenOwnedByUser3 = await web3.utils.toWei("5000");
             this.communityTokenOwnedByUser4 = await web3.utils.toWei("5000");
+            this.communityTokenOwnedByUser5 = await web3.utils.toWei("5000");
             this.baseCRDTokens = await web3.utils.toWei("5000");
 
             await this.treasuryCoreContract.setApprovalForAll(this.agreementContract.address, true);
@@ -825,6 +882,15 @@ contract("AgreementContract", function() {
                 "0xa165"
             );
 
+            //Transfer community token to user5 so he can make claims
+            await this.treasuryCoreContract.safeTransferFrom(
+                this.user1,
+                this.user5,
+                COMMUNITY_TOKEN_ID,
+                this.communityTokenOwnedByUser5,
+                "0xa165"
+            );
+
             await expect(
                 this.treasuryContract.balanceOf(this.user2, COMMUNITY_TOKEN_ID)
             ).to.eventually.be.bignumber.equals(this.communityTokenOwnedByUser2);
@@ -836,6 +902,10 @@ contract("AgreementContract", function() {
             await expect(
                 this.treasuryContract.balanceOf(this.user4, COMMUNITY_TOKEN_ID)
             ).to.eventually.be.bignumber.equals(this.communityTokenOwnedByUser4);
+
+            await expect(
+                this.treasuryContract.balanceOf(this.user5, COMMUNITY_TOKEN_ID)
+            ).to.eventually.be.bignumber.equals(this.communityTokenOwnedByUser5);
 
             await this.treasuryCoreContract.setApprovalForAll(
                 this.agreementContract.address,
@@ -984,6 +1054,164 @@ contract("AgreementContract", function() {
             await expect(
                 this.treasuryContract.balanceOf(this.user3, this.CRDToken)
             ).eventually.to.be.bignumber.equal(rewardForUser3.add(new BN(this.baseCRDTokens)));
+        });
+
+        async function calculateGasCost(trx) {
+            // Obtain gas used from the receipt
+            const gasUsed = trx.receipt.gasUsed;
+
+            // Obtain gasPrice from the transaction
+            const tx = await web3.eth.getTransaction(trx.tx);
+            const gasPrice = tx.gasPrice;
+
+            return await web3.utils.fromWei((gasPrice * gasUsed).toString(), "gwei");
+        }
+
+        it("Giving out the 1000 royalties and logging the gas cost foe conditions : all claim together, 50% claims together 25% claims together and single claim every time.", async function() {
+            const agreementOne = 1;
+            const rewardForUser2 = new BN(await web3.utils.toWei("55.555555555555555"));
+            const rewardForUser3 = new BN(await web3.utils.toWei("111.11111111111111"));
+            const rewardAmount = new BN(await web3.utils.toWei("100"));
+            await this.agreementContract.createAgreement(RECORD_ID, "Some link", "some hash", {
+                from: this.user1,
+            });
+
+            await this.agreementContract.castVoteForAgreement(agreementOne, true);
+
+            await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 2);
+
+            await this.agreementContract.declareWinner(agreementOne);
+
+            let gasCostWithOnePendingPaymentZeroClaimedPayments;
+            let gasCostWithOnePendingPaymentOneClaimedPayments;
+            let gasCostWithOnePendingPaymentTwoClaimedPayments;
+
+            let gasCostWithThreePendingPaymentZeroClaimedPayments;
+            let gasCostWithTwoPendingPaymentAndThreeClaimedPayments;
+            let gasCostWithThreePendingPaymentAndFiveClaimedPayments;
+            let gasCostWithTwoPendingPaymentAndEightClaimedPayments;
+
+            let gasCostWithFivePendingPaymentZeroClaimedPayments;
+            let gasCostWithFivePendingPaymentFiveClaimedPayments;
+
+            let gasCostWithTenPendingPaymentZeroClaimedPayments;
+
+            for (let i = 0; i < 10; i++) {
+                //Multiple user distributes royalty and single claims
+                await this.agreementContract.payRoyaltyAmount(agreementOne, rewardAmount, {
+                    from: this.user1,
+                });
+
+                // User2 makes claims for each payment made for agreement instantly
+                let trx = await this.agreementContract.claimRoyaltyAmount(agreementOne, {
+                    from: this.user2,
+                });
+                if (i === 0) {
+                    gasCostWithOnePendingPaymentZeroClaimedPayments = await calculateGasCost(trx);
+                }
+                if (i === 1) {
+                    gasCostWithOnePendingPaymentOneClaimedPayments = await calculateGasCost(trx);
+                }
+                if (i === 2) {
+                    gasCostWithOnePendingPaymentTwoClaimedPayments = await calculateGasCost(trx);
+                }
+
+                if (i === 2 || i === 4 || i === 7 || i === 9) {
+                    // User3 makes claims on agreements only 4 times throughout the cycle
+                    trx = await this.agreementContract.claimRoyaltyAmount(agreementOne, {
+                        from: this.user3,
+                    });
+
+                    if (i === 2) {
+                        gasCostWithThreePendingPaymentZeroClaimedPayments = await calculateGasCost(
+                            trx
+                        );
+                    }
+                    if (i === 4) {
+                        gasCostWithTwoPendingPaymentAndThreeClaimedPayments = await calculateGasCost(
+                            trx
+                        );
+                    }
+                    if (i === 7) {
+                        gasCostWithThreePendingPaymentAndFiveClaimedPayments = await calculateGasCost(
+                            trx
+                        );
+                    }
+                    if (i === 9) {
+                        gasCostWithTwoPendingPaymentAndEightClaimedPayments = await calculateGasCost(
+                            trx
+                        );
+                    }
+                }
+
+                if (i === 4 || i === 9) {
+                    // User4 makes claims on agreements only twice throughout the cycle
+                    trx = await this.agreementContract.claimRoyaltyAmount(agreementOne, {
+                        from: this.user4,
+                    });
+
+                    if (i === 4) {
+                        gasCostWithFivePendingPaymentZeroClaimedPayments = await calculateGasCost(
+                            trx
+                        );
+                    }
+                    if (i === 9) {
+                        gasCostWithFivePendingPaymentFiveClaimedPayments = await calculateGasCost(
+                            trx
+                        );
+                    }
+                }
+
+                if (i === 9) {
+                    // User5 makes claims on agreements only once throughout the cycle
+                    trx = await this.agreementContract.claimRoyaltyAmount(agreementOne, {
+                        from: this.user5,
+                    });
+
+                    gasCostWithTenPendingPaymentZeroClaimedPayments = await calculateGasCost(trx);
+                }
+            }
+
+            console.log(
+                "gasCostWithOnePendingPaymentZeroClaimedPayments = ",
+                gasCostWithOnePendingPaymentZeroClaimedPayments
+            );
+            console.log(
+                "gasCostWithOnePendingPaymentOneClaimedPayments = ",
+                gasCostWithOnePendingPaymentOneClaimedPayments
+            );
+            console.log(
+                "gasCostWithOnePendingPaymentTwoClaimedPayments = ",
+                gasCostWithOnePendingPaymentTwoClaimedPayments
+            );
+            console.log(
+                "gasCostWithThreePendingPaymentZeroClaimedPayments = ",
+                gasCostWithThreePendingPaymentZeroClaimedPayments
+            );
+            console.log(
+                "gasCostWithTwoPendingPaymentAndThreeClaimedPayments = ",
+                gasCostWithTwoPendingPaymentAndThreeClaimedPayments
+            );
+            console.log(
+                "gasCostWithThreePendingPaymentAndFiveClaimedPayments = ",
+                gasCostWithThreePendingPaymentAndFiveClaimedPayments
+            );
+            console.log(
+                "gasCostWithTwoPendingPaymentAndEightClaimedPayments = ",
+                gasCostWithTwoPendingPaymentAndEightClaimedPayments
+            );
+            console.log(
+                "gasCostWithFivePendingPaymentZeroClaimedPayments = ",
+                gasCostWithFivePendingPaymentZeroClaimedPayments
+            );
+            console.log(
+                "gasCostWithFivePendingPaymentFiveClaimedPayments = ",
+                gasCostWithFivePendingPaymentFiveClaimedPayments
+            );
+            console.log(
+                "gasCostWithTenPendingPaymentZeroClaimedPayments = ",
+                gasCostWithTenPendingPaymentZeroClaimedPayments
+            );
         });
     });
 });

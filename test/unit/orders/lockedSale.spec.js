@@ -203,8 +203,35 @@ contract("Ratio Locked Sales", function() {
             ).to.eventually.be.rejectedWith("INVALID: CANNOT_PURCHASE_SELF_ORDER");
         });
 
-        it("Try to fulfill order with insufficient token balance, expect revert", async function() {
-            // Here we are performing wrong ratio transfer it should be reject.
+        it("Try to fulfill order with insufficient Community token balance, expect revert", async function() {
+            await this.treasuryCoreContract.safeTransferFrom(
+                this.user1,
+                this.user4,
+                COMMUNITY_TOKEN_ID,
+                await web3.utils.toWei("10000"),
+                "0x0"
+            );
+
+            // Here we have sufficient community tokens but we lack governance tokens, expect revert
+            await expect(
+                this.ordersContract.acceptBuyOrder(
+                    this.saleId, //SaleId
+                    await web3.utils.toWei("50"), //communityTokenAmount
+                    await web3.utils.toWei("2.5"), //governanceTokenAmount
+                    { from: this.user4 }
+                )
+            ).to.eventually.be.rejectedWith("ERC1155: insufficient balance for transfer");
+        });
+        it("Try to fulfill order with insufficient governance token balance, expect revert", async function() {
+            await this.treasuryCoreContract.safeTransferFrom(
+                this.user1,
+                this.user4,
+                GOVERNANCE_TOKEN_ID,
+                await web3.utils.toWei("10000"),
+                "0x0"
+            );
+
+            // Here we have sufficient governance tokens but we lack community tokens, expect revert
             await expect(
                 this.ordersContract.acceptBuyOrder(
                     this.saleId, //SaleId
@@ -234,6 +261,75 @@ contract("Ratio Locked Sales", function() {
                     { from: this.user1 }
                 )
             ).to.eventually.be.rejectedWith("INVALID: TOKEN_RATIO");
+        });
+
+        it("Should not be able to purchase locked asset if the ratio is wrong, expect revert", async function() {
+            let trx = await this.ordersContract.createBuyOrder(
+                [
+                    true,
+                    RECORD_ID,
+                    COMMUNITY_TOKEN_ID,
+                    await web3.utils.toWei("100000"),
+                    await web3.utils.toWei((100000 * 1).toString()),
+                    GOVERNANCE_TOKEN_ID,
+                    await web3.utils.toWei("0.1"),
+                    await web3.utils.toWei((0.1 * 2).toString()),
+                ],
+                { from: this.user1 }
+            );
+
+            let saleId = trx?.logs[0].args.saleId;
+            // Here we are performing wrong ratio transfer it should be reject.
+            await expect(
+                this.ordersContract.acceptBuyOrder(
+                    saleId, //SaleId
+                    await web3.utils.toWei("1"), //communityTokenAmount
+                    await web3.utils.toWei("0.1"), //governanceTokenAmount
+                    { from: this.user3 }
+                )
+            ).to.eventually.be.rejectedWith("INVALID: TOKEN_RATIO");
+
+            await expect(
+                this.ordersContract.acceptBuyOrder(
+                    saleId, //SaleId
+                    await web3.utils.toWei("100"), //communityTokenAmount
+                    await web3.utils.toWei("0.001"), //governanceTokenAmount
+                    { from: this.user3 }
+                )
+            ).to.eventually.be.rejectedWith("INVALID: TOKEN_RATIO");
+        });
+
+        it("Should not be able to purchase locked asset if the ratio is wrong, expect revert", async function() {
+            let trx = await this.ordersContract.createBuyOrder(
+                [
+                    true,
+                    RECORD_ID,
+                    COMMUNITY_TOKEN_ID,
+                    await web3.utils.toWei("100000"),
+                    await web3.utils.toWei((100000 * 0.001).toString()),
+                    GOVERNANCE_TOKEN_ID,
+                    await web3.utils.toWei("0.1"),
+                    await web3.utils.toWei((0.1 * 2).toString()),
+                ],
+                { from: this.user2 }
+            );
+
+            let saleId = trx?.logs[0].args.saleId;
+            // Here we are performing wrong ratio transfer it should be reject.
+            await this.ordersContract.acceptBuyOrder(
+                saleId, //SaleId
+                await web3.utils.toWei("5000"), //communityTokenAmount
+                await web3.utils.toWei("0.005"), //governanceTokenAmount
+                { from: this.user3 }
+            );
+
+            await expect(
+                this.treasuryContract.balanceOf(this.user2, COMMUNITY_TOKEN_ID)
+            ).to.eventually.be.bignumber.equals(await web3.utils.toWei("5000"));
+
+            await expect(
+                this.treasuryContract.balanceOf(this.user2, GOVERNANCE_TOKEN_ID)
+            ).to.eventually.be.bignumber.equals(await web3.utils.toWei("0.005"));
         });
 
         it("Trying to purchase more than available, get's rejected", async function() {
