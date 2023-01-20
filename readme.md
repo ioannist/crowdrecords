@@ -1,12 +1,12 @@
 # Smart Contract repo of the Crowd Records project
 
-Crowd Records is a decentralized platform for music creation that allows musicians to collaborate, share skills, and monetize their work.
+CrowdRecords is a platform that helps musicians collaborate, create music together, and monetize their work.
 
-Our platform allows for the creation of music in a decentralized way by tokenizing musical ideas and contributions, turning each song into a blockchain asset that can be monetized by its creators. With Crowd Records, musicians can build on each other's ideas, remove barriers of risk, time, money and knowledge, and handle copyright and rights management in a legal and efficient way.
+The platform tokenizes song ideas and musical contributions and allows musicians to use each other's ideas trustlessly. It also removes legal and financial barriers of making music by handling copyright proof, rights management, and royalty payments.
 
-The platform also handles royalty payments and allows for legal auditing and enforcement. Finally, it offers a crowdfunding model where fans and industry professionals can purchase equity in the song in the form of song tokens. Investments can be used to pay contributors or finance future additions.
+Finally, CrowdRecords allows fans and industry professionals to invest in a song by buying tokens, which can be used to pay the creators or to develop the song.
 
-Overall, Crowd Records aims to make it easier for musicians to collaborate and share their skills while also providing a new way to fund and monetize music.
+Overall, Crowd Records makes it simpler for musicians to work together and make money from their music.
 
 
 ### [Pitch Deck](https://crowdrecords.com/downloads/CRD_PD.pptx)
