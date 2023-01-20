@@ -14,3 +14,5 @@ The official website of Crowd Records
 
 ### [Tests](tsts.md)
 Summary of tests and progress
+
+### [Contracts](contracts/)
