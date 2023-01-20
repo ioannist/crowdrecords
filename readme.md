@@ -24,11 +24,19 @@ Summary of tests and progress
 ### [Contracts](contracts/)
 All CRD contracts
 
-Features:
+## Features:
+
 • Trustless Rights Management
+
 • Customizable Control: Musicians can release or keep as much control as they want.
+
 • Automatic Blockchain-based Copyright Protection
+
 • Royalties Processing: Music royalties can be paid to song wallets which then split the funds among token holders.
-• Crowd Funding: Musicians can raise funds by selling song tokens, and use the funds to pay for contributions. Song tokens are tradeable and transferable outside Crowd Records.
+
+• Crowd Funding: Musicians can raise funds by selling song tokens, and use the funds to pay for contributions. Song tokens are tradeable and transferable outside Crowd 
+Records.
+
 • Song Version Control
+
 • Anonymous (optional)
