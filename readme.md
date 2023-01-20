@@ -8,6 +8,7 @@ Finally, CrowdRecords allows fans and industry professionals to invest in a song
 
 Overall, Crowd Records makes it simpler for musicians to work together and make money from their music.
 
+## Useful Links:
 
 ### [Pitch Deck](https://crowdrecords.com/downloads/CRD_PD.pptx)
 Powerpoint presentation for Crowd Records
