@@ -16,3 +16,4 @@ The official website of Crowd Records
 Summary of tests and progress
 
 ### [Contracts](contracts/)
+All CRD contracts
