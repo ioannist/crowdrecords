@@ -19,7 +19,7 @@ A mock app to get a sense of the user experience.
 ### [Landing Page](https://crowdrecords.com)
 The official website of Crowd Records
 
-### [Tests](tsts.md)
+### [Tests](tests.md)
 Summary of tests and progress
 
 ### [Contracts](contracts/)
