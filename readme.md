@@ -7,7 +7,7 @@ Crowd Records is a decentralized platform for music creation that allows musicia
 Powerpoint presentation for Crowd Records
 
 ### [UI Template](https://crowdrecords.netlify.app/)
-A mock app to egt a sense of what the user experience.
+A mock app to get a sense of the user experience.
 
 ### [Landing Page](https://crowdrecords.com)
 The official website of Crowd Records
