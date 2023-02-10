@@ -4,6 +4,7 @@ const RecordsVotingContract = artifacts.require("../../contracts/RecordsVotingCo
 const TracksContract = artifacts.require("../../contracts/TracksContract.sol");
 const TreasuryCoreContractMock = artifacts.require("../../contracts/TreasuryCoreContractMock.sol");
 const TreasuryContract = artifacts.require("../../contracts/treasury/TreasuryContract.sol");
+const CrdTokenContract = artifacts.require("../../contracts/treasury/CrdTokenContract.sol");
 const ContributionVotingContract = artifacts.require(
     "../../contracts/voting/ContributionVotingContract.sol"
 );
@@ -33,6 +34,7 @@ async function getMockContractsForRecordTesting() {
     let recordsVotingContract = await RecordsVotingContract.new(await getEthAccount(0));
     let treasuryCoreContractMock = await TreasuryCoreContractMock.new(await getEthAccount(0));
     let treasuryContract = await TreasuryContract.new(await getEthAccount(0));
+    let crdTokenContract = await CrdTokenContract.new(await getEthAccount(0));
     let contributionVotingContract = await ContributionVotingContract.new(
         VOTING_INTERVAL_BLOCKS,
         await getEthAccount(0)
@@ -79,7 +81,11 @@ async function getMockContractsForRecordTesting() {
     await ordersContract.initialize(treasuryContract.address, treasuryCoreContractMock.address);
     await ordersContract.setWalletAddress(await getEthAccount(9));
 
-    await agreementContract.initialize(treasuryContract.address, treasuryCoreContractMock.address);
+    await agreementContract.initialize(
+        treasuryContract.address,
+        treasuryCoreContractMock.address,
+        crdTokenContract.address
+    );
 
     await baseVotingContractMock.initialize(treasuryContract.address);
     await baseVotingCounterOfferContractMock.initialize(treasuryContract.address);
@@ -100,7 +106,17 @@ async function getMockContractsForRecordTesting() {
     await treasuryContract.addSnapshotCaller(agreementContract.address);
     await treasuryContract.addSnapshotCaller(recordsVotingContract.address);
 
-    await treasuryCoreContractMock.initialize(votingHubContract.address, treasuryContract.address);
+    await crdTokenContract.initialize(
+        treasuryContract.address,
+        treasuryCoreContractMock.address,
+        agreementContract.address
+    );
+
+    await treasuryCoreContractMock.initialize(
+        votingHubContract.address,
+        treasuryContract.address,
+        crdTokenContract.address
+    );
 
     await dilutionContract.initialize(treasuryContract.address);
 
@@ -111,6 +127,7 @@ async function getMockContractsForRecordTesting() {
         recordsVotingContractMock: recordsVotingContract,
         treasuryContractMock: treasuryContract,
         treasuryCoreContractMock: treasuryCoreContractMock,
+        crdTokenContractMock: crdTokenContract,
         contributionVotingContractMock: contributionVotingContract,
         ordersContractMock: ordersContract,
         agreementContractMock: agreementContract,

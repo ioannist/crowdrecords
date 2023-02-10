@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 import "./voting/BaseVotingContract.sol";
 import "./interface/ITreasury.sol";
 import "./interface/ITreasuryCore.sol";
+import "./interface/IERC20.sol";
 
 contract AgreementContract is BaseVotingContract {
     /// @dev This structure will hold the data for agreements
@@ -143,6 +144,8 @@ contract AgreementContract is BaseVotingContract {
     //This is for the token transfer and other core functions
     address public TREASURY_CORE_CONTRACT_ADDRESS;
 
+    IERC20 private crdTokenContract;
+
     constructor(uint8 votingInterval, address owner) BaseVotingContract(owner) {
         VOTING_BLOCK_PERIOD = votingInterval;
     }
@@ -150,12 +153,19 @@ contract AgreementContract is BaseVotingContract {
     /// @dev This is to set the address of the contracts
     /// @param newTreasuryContractAddress This is the address of new treasury contract
     /// @param newTreasuryCoreContractAddress This is the new address of treasury core contract
+    /// @param newCrdTokenContractAddress This is the new address of crd token contract
     function initialize(
         address newTreasuryContractAddress,
-        address newTreasuryCoreContractAddress
+        address newTreasuryCoreContractAddress,
+        address newCrdTokenContractAddress
     ) public initializer _ownerOnly {
         BaseVotingContract.initialize(newTreasuryContractAddress);
         TREASURY_CORE_CONTRACT_ADDRESS = newTreasuryCoreContractAddress;
+        crdTokenContract = IERC20(newCrdTokenContractAddress);
+        crdTokenContract.approve(
+            TREASURY_CORE_CONTRACT_ADDRESS,
+            0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+        );
     }
 
     /// @dev This function will create a new agreement voting ballot

@@ -80,6 +80,7 @@ contract RecordsContract is Initializable {
         string name,
         string image,
         uint256 seedId,
+        address owner,
         uint256 parentId,
         string recordCategory,
         uint256 creationDate
@@ -181,6 +182,7 @@ contract RecordsContract is Initializable {
             name: name,
             image: image,
             seedId: seedId,
+            owner: msg.sender,
             parentId: 0,
             recordCategory: recordCategory,
             creationDate: recordStruct.creationDate
@@ -261,6 +263,7 @@ contract RecordsContract is Initializable {
             name: newRecordData.name,
             image: newRecordData.image,
             seedId: newRecordData.seedId,
+            owner: msg.sender,
             parentId: newRecordData.parentId,
             recordCategory: newRecordData.recordCategory,
             creationDate: newRecordData.creationDate

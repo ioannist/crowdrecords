@@ -1,12 +1,14 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
+import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Supply.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "../interface/IRecords.sol";
+import "../interface/IERC20.sol";
 import "../ERC1155/SnapshotERC1155.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "../voting/VotingHubContract.sol";
@@ -25,6 +27,7 @@ contract TreasuryCoreContract is
     string private PREFIX_COMMUNITY = "CRD_";
     uint8 private TOKEN_TYPE_COMMUNITY = 0;
     uint8 private TOKEN_TYPE_GOVERNANCE = 1;
+    IERC20 private crdTokenContract;
 
     /// @dev This structure will store information of tokens for each records
     /// @param recordId This is the id of record to which a token belongs
@@ -127,7 +130,6 @@ contract TreasuryCoreContract is
     // 18 decimal points supported
     constructor(address owner) ERC1155("https://crowdrecords.com/{id}") {
         OWNER = owner;
-        _mint(owner, CRD, 1000000 * 10**18, "https://crowdrecords.com");
     }
 
     /// @dev Modifier to check that the person who accesses a specific function is the owner of contract himself.
@@ -148,12 +150,15 @@ contract TreasuryCoreContract is
     /// @dev This is to set the address of the contracts
     /// @param newVotingHubContract This is the address of new voting hub contract
     /// @param newTreasuryAddress This is the address of new voting hub contract
+    /// @param crdTokenAddress This is the address of CRD token contract
     function initialize(
         address newVotingHubContract,
-        address newTreasuryAddress
+        address newTreasuryAddress,
+        address crdTokenAddress
     ) public initializer ownerOnly {
         VOTING_HUB_ADDRESS = newVotingHubContract;
         TREASURY_CONTRACT_ADDRESS = newTreasuryAddress;
+        crdTokenContract = IERC20(crdTokenAddress);
     }
 
     /// @dev This function creates new governance tokens for specified record
@@ -351,7 +356,6 @@ contract TreasuryCoreContract is
             VotingHubContract votingHubContract = VotingHubContract(
                 VOTING_HUB_ADDRESS
             );
-
             for (uint256 i = 0; i < ids.length; i++) {
                 votingHubContract.handleUserTokenTransfers(
                     from,
@@ -406,6 +410,45 @@ contract TreasuryCoreContract is
             amount,
             "RECORD_TOKEN_TRANSFER"
         );
+    }
+
+    /// @dev The safeTransferFrom method has been overriden so that whenever we
+    /// need to transfer the CRD token from one address to another that can be done
+    /// within the same function
+    /// @param from this is the address of the user from whose account the token is to be deducted
+    /// @param to this is the account of user where the token will be deposited
+    /// @param id this is the id of the token that is to be transferred
+    /// @param amount the amount of token to be transferred
+    /// @param data extra information for the transaction
+    function _safeTransferFrom(
+        address from,
+        address to,
+        uint256 id,
+        uint256 amount,
+        bytes memory data
+    ) internal virtual override {
+        if (id == CRD) {
+            crdTokenContract.safeTransferFrom(from, to, amount);
+        } else {
+            super._safeTransferFrom(from, to, id, amount, data);
+        }
+    }
+
+    /// @dev this function is responsible to return the balance of a token
+    /// Here it has been overridden so that any request for CRD token will be
+    /// redirected to the ERC20 contract of CRD token
+    /// @param account this is the address of the user whose balance you want to check
+    /// @param id this is the id of the token that is to be transferred
+    /// @return balance This is the balance of the user
+    function balanceOf(address account, uint256 id)
+        public
+        view
+        virtual
+        override
+        returns (uint256)
+    {
+        if (id == CRD) return crdTokenContract.balanceOf(account);
+        else return super.balanceOf(account, id);
     }
 
     function snapshot()

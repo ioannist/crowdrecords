@@ -5,6 +5,7 @@ const TracksContract = artifacts.require("../contracts/TracksContract.sol");
 // const TreasuryContract = artifacts.require("../contracts/TreasuryContract.sol");
 const TreasuryContract = artifacts.require("../contracts/treasury/TreasuryContract.sol");
 const TreasuryCoreContract = artifacts.require("../contracts/treasury/TreasuryCoreContract.sol");
+const CrdTokenContract = artifacts.require("../contracts/treasury/CrdTokenContract.Sol");
 const TreasuryCoreMockContract = artifacts.require(
     "../contracts/Mocks/TreasuryCoreContractMock.sol"
 );
@@ -32,6 +33,8 @@ module.exports = async (deployer) => {
     let recordsVotingContract = await RecordsVotingContract.deployed();
     await deployer.deploy(TracksContract);
     let tracksContract = await TracksContract.deployed();
+    await deployer.deploy(CrdTokenContract, await getEthAccount(0));
+    let crdTokenContract = await CrdTokenContract.deployed();
     await deployer.deploy(TreasuryContract, await getEthAccount(0));
     let treasuryContract = await TreasuryContract.deployed();
     await deployer.deploy(TreasuryCoreContract, await getEthAccount(0));

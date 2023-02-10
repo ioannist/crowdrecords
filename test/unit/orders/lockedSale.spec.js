@@ -113,7 +113,7 @@ contract("Ratio Locked Sales", function() {
                 ],
                 { from: user4 }
             )
-        ).to.eventually.be.rejectedWith("ERC1155: insufficient balance for transfer");
+        ).to.eventually.be.rejectedWith("ERC20: transfer amount exceeds balance");
     });
 
     describe("With locked asset purchase order", function() {
@@ -222,6 +222,7 @@ contract("Ratio Locked Sales", function() {
                 )
             ).to.eventually.be.rejectedWith("ERC1155: insufficient balance for transfer");
         });
+
         it("Try to fulfill order with insufficient governance token balance, expect revert", async function() {
             await this.treasuryCoreContract.safeTransferFrom(
                 this.user1,
