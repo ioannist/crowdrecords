@@ -82,6 +82,7 @@ contract("Treasury Contract", function() {
         // Create new contribution token, it's id will be 2
         await this.contributionContract.createSeedContribution(
             [1, 2, 3],
+            "contribution title",
             "preview.raw",
             "preview.hash",
             "This is the description for the record",
@@ -117,6 +118,7 @@ contract("Treasury Contract", function() {
         // Create new contribution token, it's id will be 2
         await this.contributionContract.createSeedContribution(
             [1, 2, 3],
+            "contribution title",
             "preview.raw",
             "preview.hash",
             "This is the description for the record",
@@ -150,6 +152,7 @@ contract("Treasury Contract", function() {
         // Create new contribution token, it's id will be 2
         await this.contributionContract.createSeedContribution(
             [1, 2, 3],
+            "contribution title",
             "preview.raw",
             "preview.hash",
             "This is the description for the record",
@@ -186,6 +189,7 @@ contract("Treasury Contract", function() {
         // Create new contribution token, it's id will be 2
         await this.contributionContract.createSeedContribution(
             [1, 2, 3],
+            "contribution title",
             "preview.raw",
             "preview.hash",
             "This is the description for the record",

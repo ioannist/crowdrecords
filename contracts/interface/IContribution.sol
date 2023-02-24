@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 interface IContribution {
     /// @dev This structure will store information of the contribution
     /// @param tracks Array of id of tracks
+    /// @param title title of the contribution
     /// @param createdAt blocknumber of when the contribution was created
     /// @param previewFile This is the preview file link
     /// @param previewFileHash This is the preview file hash
@@ -14,6 +15,7 @@ interface IContribution {
     /// @param isPresent This is to check if a contribution exists or not
     struct Contribution {
         uint256[] tracks;
+        string title;
         uint256 createdAt;
         string previewFile;
         string previewFileHash;
@@ -33,6 +35,7 @@ interface IContribution {
 
     /// @dev This function will be called by the user to create a new contribution
     /// @param tracks Id of tracks that are part of this contribution
+    /// @param title title of the contribution
     /// @param previewFile this is preview file of the contribution
     /// @param previewFileHash this is hash of the preview file
     /// @param recordId this is the id of the record to which contribution belongs to.
@@ -45,15 +48,14 @@ interface IContribution {
     function createNewContribution(
         // string memory uri,
         uint256[] memory tracks,
+        string memory title,
         string memory previewFile,
         string memory previewFileHash,
         uint256 recordId,
         bool roughMix,
         string memory description,
         uint256 communityReward,
-        uint256 communityTokenId,
-        uint256 governanceReward,
-        uint256 governanceTokenId
+        uint256 governanceReward
     ) external returns (uint256);
 
     /// @dev This function will be called by the user to create a new seed contribution as there will be not

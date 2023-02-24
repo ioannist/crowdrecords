@@ -47,6 +47,7 @@ async function createContribution() {
 
     await this.contributionContract.createSeedContribution(
         [1, 2, 3],
+        "contribution title",
         "preview.raw",
         "preview.hash",
         "This is the description for the record"
@@ -76,6 +77,7 @@ async function createContribution() {
 
     await this.contributionContract.createNewContribution(
         [4, 5],
+        "contribution title",
         "preview.raw",
         "preview.hash",
         RECORD_ID,

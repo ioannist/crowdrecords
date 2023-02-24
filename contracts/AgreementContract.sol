@@ -9,6 +9,7 @@ import "./interface/IERC20.sol";
 contract AgreementContract is BaseVotingContract {
     /// @dev This structure will hold the data for agreements
     /// @param requester This is the person who has requested for the agreement
+    /// @param title This is the agreement title
     /// @param recordId This is the record id to which the agreement belongs to
     /// @param ballotId This is the ballot id of the agreement
     /// @param tokenId This is the id of token using which user can vote
@@ -19,6 +20,7 @@ contract AgreementContract is BaseVotingContract {
     /// @param isPresent This is to check if agreement is present or not
     struct Agreement {
         address requester;
+        string title;
         uint256 recordId;
         uint256 ballotId;
         uint256 tokenId;
@@ -31,6 +33,7 @@ contract AgreementContract is BaseVotingContract {
 
     /// @dev This event is emmited when a agreement is created.
     /// @param requester This is the person who has requested for the agreement
+    /// @param title This is the agreement title
     /// @param recordId This is the record id to which the agreement belongs to
     /// @param agreementId This is the id of the agreement that was created
     /// @param ballotId This is the ballot id of the agreement
@@ -41,6 +44,7 @@ contract AgreementContract is BaseVotingContract {
     /// @param isPresent This is to check if agreement is present or not
     event AgreementCreated(
         address requester,
+        string title,
         uint256 recordId,
         uint256 agreementId,
         uint256 ballotId,
@@ -170,10 +174,12 @@ contract AgreementContract is BaseVotingContract {
 
     /// @dev This function will create a new agreement voting ballot
     /// @param recordId this is the id of record of which we need to create agreement of
+    /// @param title This is the agreement title
     /// @param contractLink this is the link of the agreement contract
     /// @param contractHash this is the hash of the agreement contract file
     function createAgreement(
         uint256 recordId,
+        string memory title,
         string memory contractLink,
         string memory contractHash
     ) public returns (uint256) {
@@ -189,6 +195,7 @@ contract AgreementContract is BaseVotingContract {
 
         Agreement memory agreement = Agreement({
             requester: tx.origin,
+            title: title,
             recordId: recordId,
             ballotId: ballotId,
             tokenId: tokenId,
@@ -201,6 +208,7 @@ contract AgreementContract is BaseVotingContract {
 
         emit AgreementCreated({
             requester: tx.origin,
+            title: title,
             recordId: recordId,
             ballotId: ballotId,
             agreementId: agreeId,

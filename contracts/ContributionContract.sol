@@ -15,6 +15,7 @@ contract ContributionContract is Initializable {
     /// @param contributionId it is the unique identifier for the contribution
     /// @param tracks are id of the tracks that are part of this contribution, you will have to manually fetch the
     /// tracks data from trackId once you do the indexing.
+    /// @param title title of the contribution
     /// @param createdAt createdAt is indicates the time of creation of the contribution
     /// @param previewFile this is the file that contains the mix of the contribution also known as preview file
     /// @param previewFileHash this is the hash of the preview file to make sure the previewFile is not tampered with
@@ -27,6 +28,7 @@ contract ContributionContract is Initializable {
     event ContributionCreated(
         uint256 contributionId,
         uint256[] tracks,
+        string title,
         uint256 createdAt,
         string previewFile,
         string previewFileHash,
@@ -39,6 +41,7 @@ contract ContributionContract is Initializable {
 
     /// @dev This structure will store information of the contribution
     /// @param tracks Array of id of tracks
+    /// @param title title of the contribution
     /// @param createdAt blocknumber of when the contribution was created
     /// @param previewFile This is the preview file link
     /// @param previewFileHash This is the preview file hash
@@ -51,6 +54,7 @@ contract ContributionContract is Initializable {
     /// @param isPresent This is to check if a contribution exists or not
     struct Contribution {
         uint256[] tracks;
+        string title;
         uint256 createdAt;
         string previewFile;
         string previewFileHash;
@@ -114,6 +118,7 @@ contract ContributionContract is Initializable {
 
     /// @dev This function will be called by the user to create a new contribution
     /// @param tracks Id of tracks that are part of this contribution
+    /// @param title title of the contribution
     /// @param previewFile this is preview file of the contribution
     /// @param previewFileHash this is hash of the preview file
     /// @param recordId this is the id of the record to which contribution belongs to.
@@ -126,6 +131,7 @@ contract ContributionContract is Initializable {
     function createNewContribution(
         // string memory uri,
         uint256[] memory tracks,
+        string memory title,
         string memory previewFile,
         string memory previewFileHash,
         uint256 recordId,
@@ -157,6 +163,7 @@ contract ContributionContract is Initializable {
 
         Contribution memory contribution = Contribution({
             tracks: tracks,
+            title: title,
             createdAt: block.timestamp,
             previewFile: previewFile,
             previewFileHash: previewFileHash,
@@ -176,18 +183,7 @@ contract ContributionContract is Initializable {
 
         contributionData[contributionId] = contribution;
 
-        emit ContributionCreated(
-            contributionId,
-            contribution.tracks,
-            contribution.createdAt,
-            contribution.previewFile,
-            contribution.previewFileHash,
-            recordId,
-            contribution.seedContribution,
-            contribution.roughMix,
-            contribution.status,
-            contribution.description
-        );
+        emitContributionCreated(contributionId, contribution, recordId);
 
         return contributionId;
     }
@@ -201,6 +197,7 @@ contract ContributionContract is Initializable {
     function createSeedContribution(
         // string memory uri,
         uint256[] memory tracks,
+        string memory title,
         string memory previewFile,
         string memory previewFileHash,
         string memory description
@@ -219,6 +216,7 @@ contract ContributionContract is Initializable {
 
         Contribution memory contribution = Contribution({
             tracks: tracks,
+            title: title,
             createdAt: block.timestamp,
             previewFile: previewFile,
             previewFileHash: previewFileHash,
@@ -232,19 +230,28 @@ contract ContributionContract is Initializable {
 
         contributionData[contributionId] = contribution;
 
+        emitContributionCreated(contributionId, contribution, 0);
+
+        return contributionId;
+    }
+
+    function emitContributionCreated(
+        uint256 contributionId,
+        Contribution memory contribution,
+        uint256 recordId
+    ) internal {
         emit ContributionCreated(
             contributionId,
             contribution.tracks,
+            contribution.title,
             contribution.createdAt,
             contribution.previewFile,
             contribution.previewFileHash,
-            0,
+            recordId,
             contribution.seedContribution,
             contribution.roughMix,
             contribution.status,
             contribution.description
         );
-
-        return contributionId;
     }
 }

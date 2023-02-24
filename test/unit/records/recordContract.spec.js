@@ -61,6 +61,7 @@ contract("Records Contract", function() {
         //seed contribution id 1
         await this.contributionContract.createSeedContribution(
             [1, 2, 3],
+            "contribution title",
             "preview.raw",
             "preview.hash",
             "This is the description for the record 1",
@@ -92,6 +93,7 @@ contract("Records Contract", function() {
         //seed contribution id 1
         await this.contributionContract.createSeedContribution(
             [1, 2, 3],
+            "contribution title",
             "preview.raw",
             "preview.hash",
             "This is the description for the record 1",
@@ -124,6 +126,7 @@ contract("Records Contract", function() {
         //this contribution will have id of 2
         await this.contributionContract.createNewContribution(
             [4, 5],
+            "contribution title",
             "preview.raw",
             "preview.hash",
             RECORD_ID,
@@ -150,6 +153,7 @@ contract("Records Contract", function() {
         //seed contribution id 1
         await this.contributionContract.createSeedContribution(
             [1, 2, 3],
+            "contribution title",
             "preview.raw",
             "preview.hash",
             "This is the description for the record 1",
@@ -178,6 +182,7 @@ contract("Records Contract", function() {
         //seed contribution id 1
         await this.contributionContract.createSeedContribution(
             [1, 2, 3],
+            "contribution title",
             "preview.raw",
             "preview.hash",
             "This is the description for the record 1",
@@ -207,6 +212,7 @@ contract("Records Contract", function() {
         //seed contribution id 1
         await this.contributionContract.createSeedContribution(
             [1, 2, 3],
+            "contribution title",
             "preview.raw",
             "preview.hash",
             "This is the description for the record 1",
@@ -239,6 +245,7 @@ contract("Records Contract", function() {
         // Now we have created a seed contribution
         await this.contributionContract.createSeedContribution(
             [1, 2, 3],
+            "contribution title",
             "preview.raw",
             "preview.hash",
             "This is the description for the record 1",
@@ -293,6 +300,7 @@ contract("Records Contract", function() {
         //this contribution will have id of 2
         await this.contributionContract.createNewContribution(
             [4, 5],
+            "contribution title",
             "preview.raw",
             "preview.hash",
             RECORD_ID,
@@ -315,6 +323,7 @@ contract("Records Contract", function() {
         await expect(
             this.contributionContract.createSeedContribution(
                 [1, 2, 3],
+                "contribution title",
                 "preview.raw",
                 "preview.hash",
                 "This is the description for the record 1",
@@ -343,6 +352,7 @@ contract("Records Contract", function() {
             //seed contribution id 1
             await this.contributionContract.createSeedContribution(
                 [1, 2, 3],
+                "contribution title",
                 "preview.raw",
                 "preview.hash",
                 "This is the description for the record 1",
@@ -375,6 +385,7 @@ contract("Records Contract", function() {
             //this contribution will have id of 2
             await this.contributionContract.createNewContribution(
                 [4, 5],
+                "contribution title",
                 "preview.raw",
                 "preview.hash",
                 RECORD_ID,
@@ -1856,6 +1867,7 @@ contract("Records Contract", function() {
             //seed contribution id 1
             await this.contributionContractMock.createSeedContribution(
                 [1, 2, 3],
+                "contribution title",
                 "preview.raw",
                 "preview.hash",
                 "This is the description for the record 1"
@@ -1887,6 +1899,7 @@ contract("Records Contract", function() {
             //this contribution will have id of 2
             await this.contributionContractMock.createNewContribution(
                 [4, 5],
+                "contribution title",
                 "preview.raw",
                 "preview.hash",
                 RECORD_ID,

@@ -58,6 +58,7 @@ contract("Contribution Contract", function() {
         await createTrack(this.tracksContract, user1);
         const tx = await this.contributionContract.createSeedContribution(
             [1, 2, 3],
+            "contribution title",
             "preview.raw",
             "preview.hash",
             "This is the description for the record"
@@ -78,6 +79,7 @@ contract("Contribution Contract", function() {
         //seed contribution id 1
         await this.contributionContract.createSeedContribution(
             [1, 2, 3],
+            "contribution title",
             "preview.raw",
             "preview.hash",
             "This is the description for the record 1"
@@ -106,6 +108,7 @@ contract("Contribution Contract", function() {
 
             await this.contributionContract.createSeedContribution(
                 [1, 2, 3],
+                "contribution title",
                 "preview.raw",
                 "preview.hash",
                 "This is the description for the record"
@@ -135,6 +138,7 @@ contract("Contribution Contract", function() {
             await createTrack(this.tracksContract, contributionOwner);
             await this.contributionContract.createNewContribution(
                 [4, 5],
+                "contribution title",
                 "preview.raw",
                 "preview.hash",
                 RECORD_ID,
@@ -274,6 +278,7 @@ contract("Contribution Contract", function() {
             let newContributionId = 3;
             await this.contributionContract.createNewContribution(
                 [4, 5],
+                "contribution title",
                 "preview.raw",
                 "preview.hash",
                 RECORD_ID,

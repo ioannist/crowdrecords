@@ -15,6 +15,7 @@ async function generateTokens() {
 
     await this.contributionContract.createSeedContribution(
         [1, 2, 3],
+        "contribution title",
         "preview.raw",
         "preview.hash",
         "This is the description for the record"
