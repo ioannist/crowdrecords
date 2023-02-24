@@ -47,6 +47,7 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
     /// @param governanceReward This is the amount of governance token requested as reward
     /// @param governanceTokenId This is the id of governance token
     /// @param ballotId This is the ballot id of the reward
+    /// @param createdAt time when the ballot was created
     event ContributionBallotCreated(
         address requester,
         uint256 contributionId,
@@ -55,7 +56,8 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
         uint256 communityTokenId,
         uint256 governanceReward,
         uint256 governanceTokenId,
-        uint256 ballotId
+        uint256 ballotId,
+        uint256 createdAt
     );
 
     /// @dev This is when a vote is given by user.
@@ -188,7 +190,8 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
             communityTokenId: commTokenId,
             governanceReward: govReward,
             governanceTokenId: govTokenId,
-            ballotId: ballotId
+            ballotId: ballotId,
+            createdAt: block.timestamp
         });
 
         rewardMapping[contributionId] = contributionReward;

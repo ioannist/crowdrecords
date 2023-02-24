@@ -100,10 +100,13 @@ contract RecordsVotingContract is BaseVotingContract, IERC1155Receiver {
     /// @param requester Address of the requester
     /// @param versionRequestId This is the id of the recordVersionRequest structure that is linked to this ballot
     /// @param ballotId Id of the ballot where voting is stored
+    /// @param createdAt time when the ballot was created
+
     event NewVersionVotingBallotCreated(
         address requester,
         uint256 versionRequestId,
-        uint256 ballotId
+        uint256 ballotId,
+        uint256 createdAt
     );
 
     /// @dev this event is generated when result of a ballot is declared
@@ -112,12 +115,14 @@ contract RecordsVotingContract is BaseVotingContract, IERC1155Receiver {
     /// @param ballotId this is the ballot Id for which result is declared
     /// @param result this is the status of the result
     /// @param minTurnOut this status indicates if minimum amount of user showed up for voting
+    /// @param newRecordId this is the new record Id
     event NewVersionRequestResult(
         uint256 versionReqId,
         uint256 tokenId,
         uint256 ballotId,
         bool result,
-        bool minTurnOut
+        bool minTurnOut,
+        uint256 newRecordId
     );
 
     //------------------------------
@@ -263,7 +268,8 @@ contract RecordsVotingContract is BaseVotingContract, IERC1155Receiver {
             emit NewVersionVotingBallotCreated(
                 msg.sender,
                 newVersionRequestId,
-                ballotId
+                ballotId,
+                block.timestamp
             );
         }
 
@@ -302,18 +308,12 @@ contract RecordsVotingContract is BaseVotingContract, IERC1155Receiver {
 
         (bool result, bool minTurnOut) = _declareWinner(req.ballotId);
 
-        emit NewVersionRequestResult({
-            versionReqId: versionReqId,
-            tokenId: req.tokenId,
-            ballotId: req.ballotId,
-            result: result,
-            minTurnOut: minTurnOut
-        });
+        uint256 recordId = 0;
 
         if (result) {
             ITreasury treasuryContract = ITreasury(TREASURY_CONTRACT_ADDRESS);
 
-            uint256 recordId = recordsContract.createRecordFromData(
+            recordId = recordsContract.createRecordFromData(
                 req.recordData,
                 req.contributionIds
             );
@@ -337,6 +337,15 @@ contract RecordsVotingContract is BaseVotingContract, IERC1155Receiver {
             );
         }
         newVersionRequestMap[versionReqId].isAccepted = result;
+
+        emit NewVersionRequestResult({
+            versionReqId: versionReqId,
+            tokenId: req.tokenId,
+            ballotId: req.ballotId,
+            result: result,
+            minTurnOut: minTurnOut,
+            newRecordId: recordId
+        });
     }
 
     /// @dev This function is for distributing of the tokens of new record version
