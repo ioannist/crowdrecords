@@ -85,6 +85,7 @@ contract DilutionContract is BaseVotingContract {
     mapping(uint256 => uint256) public lastDilutionResultMap;
 
     uint256 public REQUEST_INTERVAL;
+    uint256 public VOTING_DEPOSIT = 1 ether;
 
     constructor(
         uint8 votingInterval,
@@ -97,12 +98,9 @@ contract DilutionContract is BaseVotingContract {
 
     /// @dev This is to set the address of the contracts
     /// @param newTreasuryContractAddress This is the address of new treasury contract
-    function initialize(address newTreasuryContractAddress)
-        public
-        override
-        initializer
-        _ownerOnly
-    {
+    function initialize(
+        address newTreasuryContractAddress
+    ) public override initializer _ownerOnly {
         BaseVotingContract.initialize(newTreasuryContractAddress);
     }
 
@@ -114,7 +112,7 @@ contract DilutionContract is BaseVotingContract {
         uint256 recordId,
         uint256 tokenId,
         uint256 amount
-    ) public {
+    ) public payable {
         require(
             activeDilutionRequestMap[tokenId] == 0,
             "INVALID: PENDING_DILUTION_REQUEST"
@@ -149,6 +147,7 @@ contract DilutionContract is BaseVotingContract {
         _dilutionIds.increment();
         uint256 dilutionId = _dilutionIds.current();
         uint256 ballotId = _createVoting(true, commTokenId);
+        _createDeposit(tx.origin, VOTING_DEPOSIT, ballotId);
 
         DilutionRequest memory dilutionRequest = DilutionRequest({
             requester: msg.sender,
@@ -198,6 +197,7 @@ contract DilutionContract is BaseVotingContract {
         (bool result, bool minTurnOut) = _declareWinner(
             dilutionRequestMap[dilutionId].ballotId
         );
+        _releaseDeposit(dilutionRequestMap[dilutionId].ballotId);
 
         emit DilutionResult({
             dilutionId: dilutionId,

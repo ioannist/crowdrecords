@@ -29,8 +29,11 @@ contract BaseVotingContractMock is BaseVotingContract {
         BaseVotingContract.initialize(newTreasuryContractAddress);
     }
 
-    function createBallot(bool canOwnerVote, uint256 tokenId) public {
-        _createVoting(canOwnerVote, tokenId);
+    event Debug(uint256 amount);
+
+    function createBallot(bool canOwnerVote, uint256 tokenId) public payable {
+        uint256 ballotId = _createVoting(canOwnerVote, tokenId);
+        _createDeposit(msg.sender, 1 ether, ballotId);
     }
 
     function castVote(uint256 ballotId, bool vote) public {
@@ -47,6 +50,7 @@ contract BaseVotingContractMock is BaseVotingContract {
 
     function declareWinner(uint256 ballotId) public {
         (bool result, bool minTurnOut) = _declareWinner(ballotId);
+        _releaseDeposit(ballotId);
         emit BallotResult(ballotId, result, minTurnOut);
     }
 }

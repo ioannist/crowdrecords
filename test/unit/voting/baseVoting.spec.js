@@ -14,6 +14,7 @@ const BN = require("bn.js");
 const chaiBN = require("chai-bn")(BN);
 const chaiAsPromised = require("chai-as-promised");
 const expectEvent = require("@openzeppelin/test-helpers/src/expectEvent");
+const { web3 } = require("@openzeppelin/test-helpers/src/setup");
 const expect = chai.expect;
 
 contract("BaseVotingContract", function() {
@@ -41,7 +42,9 @@ contract("BaseVotingContract", function() {
 
     it("Creating a voting ballot UNAUTHORIZED: OWNER_CANNOT_VOTE", async function() {
         const ballotId = 1;
-        await this.baseVotingContractMock.createBallot(false, COMMUNITY_TOKEN_ID);
+        await this.baseVotingContractMock.createBallot(false, COMMUNITY_TOKEN_ID, {
+            value: helper.VOTING_DEPOSIT_MOCK_CONTRACT,
+        });
 
         await expect(
             this.baseVotingContractMock.castVote(ballotId, true)
@@ -50,9 +53,51 @@ contract("BaseVotingContract", function() {
 
     it("Creating a voting ballot owner can vote", async function() {
         const ballotId = 1;
-        await this.baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID);
+        await this.baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID, {
+            value: helper.VOTING_DEPOSIT_MOCK_CONTRACT,
+        });
 
         await this.baseVotingContractMock.castVote(ballotId, true);
+    });
+
+    it("Creating a voting ballot, checking is deposit was made", async function() {
+        const ballotId = 1;
+        const user2 = await helper.getEthAccount(1);
+
+        const trx = await this.baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID, {
+            from: user2,
+            value: helper.VOTING_DEPOSIT_MOCK_CONTRACT,
+        });
+
+        await expectEvent(trx, "DepositCreated", {
+            ballotId: new BN(ballotId),
+            depositAmount: helper.VOTING_DEPOSIT_MOCK_CONTRACT,
+        });
+    });
+
+    it("Creating a voting ballot, single voter and declaring winner, ballot win, check for released deposit", async function() {
+        const ballotId = 1;
+        const user1 = await helper.getEthAccount(0);
+        const user2 = await helper.getEthAccount(1);
+
+        let trx = await this.baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID, {
+            from: user2,
+            value: helper.VOTING_DEPOSIT_MOCK_CONTRACT,
+        });
+        await expectEvent(trx, "DepositCreated", {
+            ballotId: new BN(ballotId),
+            depositAmount: helper.VOTING_DEPOSIT_MOCK_CONTRACT,
+        });
+
+        await this.baseVotingContractMock.castVote(ballotId, true, { from: user1 });
+
+        await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 2);
+
+        let trx2 = await this.baseVotingContractMock.declareWinner(ballotId);
+
+        await expectEvent(trx2, "BallotResult", { ballotId: new BN(ballotId), result: true });
+
+        await expectEvent(trx2, "DepositClaimed", { ballotId: new BN(ballotId) });
     });
 
     it("Creating a voting ballot, single voter and declaring winner, ballot win", async function() {
@@ -61,7 +106,10 @@ contract("BaseVotingContract", function() {
         const user2 = await helper.getEthAccount(1);
         const user3 = await helper.getEthAccount(2);
 
-        await this.baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID, { from: user2 });
+        await this.baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID, {
+            from: user2,
+            value: helper.VOTING_DEPOSIT_MOCK_CONTRACT,
+        });
 
         await this.baseVotingContractMock.castVote(ballotId, true, { from: user1 });
 
@@ -85,7 +133,10 @@ contract("BaseVotingContract", function() {
             "0xa165"
         );
 
-        await this.baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID, { from: user2 });
+        await this.baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID, {
+            from: user2,
+            value: helper.VOTING_DEPOSIT_MOCK_CONTRACT,
+        });
 
         await this.baseVotingContractMock.castVote(ballotId, true, { from: user3 });
 
@@ -109,7 +160,10 @@ contract("BaseVotingContract", function() {
             "0xa165"
         );
 
-        await this.baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID, { from: user2 });
+        await this.baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID, {
+            from: user2,
+            value: helper.VOTING_DEPOSIT_MOCK_CONTRACT,
+        });
 
         await this.baseVotingContractMock.castVote(ballotId, true, { from: user3 });
 
@@ -137,7 +191,10 @@ contract("BaseVotingContract", function() {
             "0xa165"
         );
 
-        await this.baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID, { from: user2 });
+        await this.baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID, {
+            from: user2,
+            value: helper.VOTING_DEPOSIT_MOCK_CONTRACT,
+        });
 
         await this.baseVotingContractMock.castVote(ballotId, false, { from: user1 });
         await this.baseVotingContractMock.castVote(ballotId, false, { from: user2 });
@@ -175,7 +232,10 @@ contract("BaseVotingContract", function() {
             "0xa165"
         );
 
-        await this.baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID, { from: user2 });
+        await this.baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID, {
+            from: user2,
+            value: helper.VOTING_DEPOSIT_MOCK_CONTRACT,
+        });
 
         await this.baseVotingContractMock.castVote(ballotId, true);
         await this.baseVotingContractMock.castVote(ballotId, true, { from: user3 });
@@ -208,7 +268,10 @@ contract("BaseVotingContract", function() {
             "0xa165"
         );
 
-        await this.baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID, { from: user2 });
+        await this.baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID, {
+            from: user2,
+            value: helper.VOTING_DEPOSIT_MOCK_CONTRACT,
+        });
 
         await this.baseVotingContractMock.castVote(ballotId, true, { from: user2 });
         await this.baseVotingContractMock.castVote(ballotId, true, { from: user3 });
@@ -242,7 +305,10 @@ contract("BaseVotingContract", function() {
             "0xa165"
         );
 
-        await this.baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID, { from: user2 });
+        await this.baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID, {
+            from: user2,
+            value: helper.VOTING_DEPOSIT_MOCK_CONTRACT,
+        });
 
         await this.baseVotingContractMock.castVote(ballotId, true, { from: user1 });
         await this.baseVotingContractMock.castVote(ballotId, true, { from: user2 });
@@ -270,7 +336,10 @@ contract("BaseVotingContract", function() {
         const user3 = await helper.getEthAccount(2);
         const user4 = await helper.getEthAccount(3);
 
-        await this.baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID, { from: user2 });
+        await this.baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID, {
+            from: user2,
+            value: helper.VOTING_DEPOSIT_MOCK_CONTRACT,
+        });
 
         await this.baseVotingContractMock.castVote(ballotId, true, { from: user1 });
 
@@ -316,7 +385,10 @@ contract("BaseVotingContract", function() {
             "0xa165"
         );
 
-        await this.baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID, { from: user2 });
+        await this.baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID, {
+            from: user2,
+            value: helper.VOTING_DEPOSIT_MOCK_CONTRACT,
+        });
 
         await this.baseVotingContractMock.castVote(ballotId, true, { from: user1 });
         await this.baseVotingContractMock.castVote(ballotId, true, { from: user2 });
@@ -368,7 +440,10 @@ contract("BaseVotingContract", function() {
             "0xa165"
         );
 
-        await this.baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID, { from: user2 });
+        await this.baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID, {
+            from: user2,
+            value: helper.VOTING_DEPOSIT_MOCK_CONTRACT,
+        });
 
         await this.baseVotingContractMock.castVote(ballotId, true, { from: user1 });
         await this.baseVotingContractMock.castVote(ballotId, true, { from: user2 });
@@ -410,6 +485,7 @@ contract("BaseVotingContract", function() {
 
         await this.baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID, {
             from: user2,
+            value: helper.VOTING_DEPOSIT_MOCK_CONTRACT,
         });
 
         await this.baseVotingContractMock.castVote(ballotId, true, { from: user2 });
@@ -444,6 +520,7 @@ contract("BaseVotingContract", function() {
 
         await this.baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID, {
             from: user2,
+            value: helper.VOTING_DEPOSIT_MOCK_CONTRACT,
         });
 
         await this.baseVotingContractMock.castVote(ballotId, true, { from: user2 });
@@ -471,6 +548,7 @@ contract("BaseVotingContract", function() {
 
         await this.baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID, {
             from: user2,
+            value: helper.VOTING_DEPOSIT_MOCK_CONTRACT,
         });
 
         await this.baseVotingContractMock.castVote(ballotId, true, { from: user2 });
@@ -496,6 +574,7 @@ contract("BaseVotingContract", function() {
 
         await this.baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID, {
             from: user2,
+            value: helper.VOTING_DEPOSIT_MOCK_CONTRACT,
         });
 
         await this.baseVotingContractMock.castVote(ballotId, true, { from: user2 });
@@ -530,6 +609,7 @@ contract("BaseVotingContract", function() {
 
         await this.baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID, {
             from: user2,
+            value: helper.VOTING_DEPOSIT_MOCK_CONTRACT,
         });
 
         await this.baseVotingContractMock.castVote(ballotId, true, { from: user2 });
@@ -562,7 +642,10 @@ contract("BaseVotingContract", function() {
             "0xa165"
         );
 
-        await this.baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID, { from: user2 });
+        await this.baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID, {
+            from: user2,
+            value: helper.VOTING_DEPOSIT_MOCK_CONTRACT,
+        });
 
         await this.baseVotingContractMock.castVote(ballotId, true, { from: user1 });
         await this.baseVotingContractMock.castVote(ballotId, true, { from: user2 });
@@ -605,7 +688,10 @@ contract("BaseVotingContract", function() {
             "0xa165"
         );
 
-        await this.baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID, { from: user2 });
+        await this.baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID, {
+            from: user2,
+            value: helper.VOTING_DEPOSIT_MOCK_CONTRACT,
+        });
 
         await this.baseVotingContractMock.castVote(ballotId, true, { from: user1 });
         await this.baseVotingContractMock.castVote(ballotId, true, { from: user2 });
@@ -656,7 +742,10 @@ contract("BaseVotingContract", function() {
             "0xa165"
         );
 
-        await this.baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID, { from: user2 });
+        await this.baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID, {
+            from: user2,
+            value: helper.VOTING_DEPOSIT_MOCK_CONTRACT,
+        });
 
         await this.baseVotingContractMock.castVote(ballotId, false, { from: user1 });
         await this.baseVotingContractMock.castVote(ballotId, true, { from: user4 });
@@ -708,7 +797,10 @@ contract("BaseVotingContract", function() {
             "0xa165"
         );
 
-        await this.baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID, { from: user2 });
+        await this.baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID, {
+            from: user2,
+            value: helper.VOTING_DEPOSIT_MOCK_CONTRACT,
+        });
 
         await this.baseVotingContractMock.castVote(ballotId, false, { from: user1 });
         await this.baseVotingContractMock.castVote(ballotId, true, { from: user4 });
@@ -760,7 +852,10 @@ contract("BaseVotingContract", function() {
             "0xa165"
         );
 
-        await this.baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID, { from: user2 });
+        await this.baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID, {
+            from: user2,
+            value: helper.VOTING_DEPOSIT_MOCK_CONTRACT,
+        });
 
         await this.baseVotingContractMock.castVote(ballotId, true, { from: user1 });
         await this.baseVotingContractMock.castVote(ballotId, true, { from: user2 });
@@ -794,7 +889,10 @@ contract("BaseVotingContract", function() {
             "0xa165"
         );
 
-        await this.baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID, { from: user2 });
+        await this.baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID, {
+            from: user2,
+            value: helper.VOTING_DEPOSIT_MOCK_CONTRACT,
+        });
 
         await this.baseVotingContractMock.castVote(ballotId, true, { from: user1 });
         await this.baseVotingContractMock.castVote(ballotId, false, { from: user2 });
@@ -841,6 +939,7 @@ contract("BaseVotingContract", function() {
 
         await this.baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID, {
             from: user2,
+            value: helper.VOTING_DEPOSIT_MOCK_CONTRACT,
         });
 
         await this.baseVotingContractMock.castVote(ballotId, true, { from: user3 });
@@ -878,6 +977,7 @@ contract("BaseVotingContract", function() {
 
         await this.baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID, {
             from: user2,
+            value: helper.VOTING_DEPOSIT_MOCK_CONTRACT,
         });
 
         await this.baseVotingContractMock.castVote(ballotId, true, { from: user2 });
@@ -915,7 +1015,10 @@ contract("BaseVotingContract", function() {
             from: user3,
         });
 
-        await baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID, { from: user2 });
+        await baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID, {
+            from: user2,
+            value: helper.VOTING_DEPOSIT_MOCK_CONTRACT,
+        });
 
         // Here we are voting from 2 accounts and the minTurnOut is matched
         await baseVotingContractMock.castVote(ballotId, true, { from: user2 });

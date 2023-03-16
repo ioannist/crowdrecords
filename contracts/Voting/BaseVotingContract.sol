@@ -31,6 +31,44 @@ contract BaseVotingContract is Initializable {
         bool isPresent;
     }
 
+    /// @dev this is the voting deposit struct that maintains the record for the deposit made by user for voting
+    /// @param owner This is the owner of the voting deposit
+    /// @param ballotId This is the id of the voting ballot
+    /// @param depositAmount This is the amount of token that are deposited by the user
+    /// @param isClaimed This represents if a deposit has been claimed or not
+    /// @param isPresent This represents if a deposit has been actually created or not
+    struct VotingDeposit {
+        address owner;
+        uint256 ballotId;
+        uint256 depositAmount;
+        bool isClaimed;
+        bool isPresent;
+    }
+
+    /// @dev this will be emitted when a deposit is made
+    /// @param owner This is the owner of the voting deposit
+    /// @param ballotId This is the id of the voting ballot
+    /// @param depositAmount This is the amount of token that are deposited by the user
+    /// @param isClaimed This represents if a deposit has been claimed or not
+    /// @param isPresent This represents if a deposit has been actually created or not
+    event DepositCreated(
+        address owner,
+        uint256 ballotId,
+        uint256 depositAmount,
+        bool isClaimed,
+        bool isPresent
+    );
+
+    /// @dev this will be emitted when the user makes claim
+    /// @param owner This is the owner of the voting deposit
+    /// @param ballotId This is the id of the voting ballot
+    /// @param depositAmount This is the amount of token that are deposited by the user
+    event DepositClaimed(
+        address owner,
+        uint256 ballotId,
+        uint256 depositAmount
+    );
+
     uint256 VOTING_BLOCK_PERIOD = 25;
     uint256 public MIN_TURNOUT_PERCENT = 500;
     address public TREASURY_CONTRACT_ADDRESS;
@@ -44,6 +82,9 @@ contract BaseVotingContract is Initializable {
     mapping(uint256 => mapping(address => bool)) alreadyVoted;
     //This mapping is useful if the user has voted, as this hold if user voted yes or no for a specific ballot,
     mapping(uint256 => mapping(address => bool)) userVotes;
+
+    //This mapping keeps the record for the deposit for the voting ballot
+    mapping(uint256 => VotingDeposit) public depositMap;
 
     //Active ballot list in which user have voted
     // user address => List of ballot in which user has voted
@@ -104,10 +145,10 @@ contract BaseVotingContract is Initializable {
     /// @dev This function is called by user to creata a new voting
     /// @param canOwnerVote this is if a user can vote in a voting which he created
     /// @param tokenId This is the id of the token using which voting can be done
-    function _createVoting(bool canOwnerVote, uint256 tokenId)
-        internal
-        returns (uint256)
-    {
+    function _createVoting(
+        bool canOwnerVote,
+        uint256 tokenId
+    ) internal returns (uint256) {
         votingId++;
 
         VotingBallot memory voting = VotingBallot({
@@ -129,18 +170,19 @@ contract BaseVotingContract is Initializable {
 
     /// @dev This function sets the treasury Contract address
     /// @param newTreasuryContractAddress This is the new address of treasury contract
-    function initialize(address newTreasuryContractAddress)
-        public
-        virtual
-        onlyInitializing
-    {
+    function initialize(
+        address newTreasuryContractAddress
+    ) public virtual onlyInitializing {
         TREASURY_CONTRACT_ADDRESS = newTreasuryContractAddress;
     }
 
     /// @dev This function is called by any user to cast vote
     /// @param votingBallotId this is the id of the ballot for which user is voting
     /// @param vote this is the state of the vote, if true than it means the vote is in favour of the ballot
-    function _castVote(uint256 votingBallotId, bool vote)
+    function _castVote(
+        uint256 votingBallotId,
+        bool vote
+    )
         internal
         virtual
         _checkIfBallotIsOpen(votingBallotId, msg.sender)
@@ -252,10 +294,9 @@ contract BaseVotingContract is Initializable {
 
     /// @dev This function is called by any user to cast vote
     /// @param votingBallotId this is the id of the ballot for which we need to find the winner
-    function _declareWinner(uint256 votingBallotId)
-        internal
-        returns (bool isWinner, bool minTurnOut)
-    {
+    function _declareWinner(
+        uint256 votingBallotId
+    ) internal returns (bool isWinner, bool minTurnOut) {
         require(
             votingMap[votingBallotId].isPresent == true,
             "INVALID: BALLOT_NOT_FOUND"
@@ -302,5 +343,53 @@ contract BaseVotingContract is Initializable {
         } else {
             return (false, false);
         }
+    }
+
+    /// @dev This function is responsible for transfer of the ether balance
+    /// @param owner The owner who is depositing
+    /// @param amount The amount that needs to be deposited
+    /// @param ballotId The id of the ballot for which the deposit is made
+    function _createDeposit(
+        address owner,
+        uint256 amount,
+        uint256 ballotId
+    ) internal {
+        require(amount == msg.value, "INV_DEP");
+        VotingDeposit memory votingDeposit = VotingDeposit({
+            owner: owner,
+            ballotId: ballotId,
+            depositAmount: amount,
+            isClaimed: false,
+            isPresent: true
+        });
+        emit DepositCreated(
+            votingDeposit.owner,
+            votingDeposit.ballotId,
+            votingDeposit.depositAmount,
+            votingDeposit.isClaimed,
+            votingDeposit.isPresent
+        );
+        depositMap[ballotId] = votingDeposit;
+    }
+
+    event DEBUG(uint value);
+
+    /// @dev This function is responsible releasing the ether balance that was taken as deposit
+    /// @param ballotId The id of the ballot for which the deposit is made
+    function _releaseDeposit(uint256 ballotId) internal {
+        require(depositMap[ballotId].isPresent == true, "DEP_NOT_EXIST");
+        require(depositMap[ballotId].isClaimed == false, "DEP_ALREADY_CLAIMED");
+
+        (bool sent, ) = payable(depositMap[ballotId].owner).call{
+            value: depositMap[ballotId].depositAmount
+        }("");
+
+        require(sent, "INV_DEP_CLAIM");
+
+        emit DepositClaimed(
+            depositMap[ballotId].owner,
+            ballotId,
+            depositMap[ballotId].depositAmount
+        );
     }
 }

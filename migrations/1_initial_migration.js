@@ -55,6 +55,7 @@ module.exports = async (deployer) => {
 
     await deployer.deploy(BaseVotingContractMock, VOTING_INTERVAL_BLOCKS, await getEthAccount(0));
     let baseVotingContractMock = await BaseVotingContractMock.deployed();
+
     await deployer.deploy(
         BaseVotingCounterOfferContractMock,
         VOTING_INTERVAL_BLOCKS,

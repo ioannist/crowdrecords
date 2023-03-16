@@ -136,6 +136,7 @@ contract("Records Contract", function() {
             rewardGovernanceToken,
             {
                 from: contributionOwner,
+                value: helper.VOTING_DEPOSIT_CONTRIBUTION_CONTRACT,
             }
         );
 
@@ -310,6 +311,7 @@ contract("Records Contract", function() {
             rewardGovernanceToken,
             {
                 from: contributionOwner,
+                value: helper.VOTING_DEPOSIT_CONTRIBUTION_CONTRACT,
             }
         );
     });
@@ -395,6 +397,7 @@ contract("Records Contract", function() {
                 rewardGovernanceToken,
                 {
                     from: contributionOwner,
+                    value: helper.VOTING_DEPOSIT_CONTRIBUTION_CONTRACT,
                 }
             );
         });
@@ -403,27 +406,32 @@ contract("Records Contract", function() {
         });
 
         it("Creating a new record version request, VersionRequest event emitted", async function() {
-            const tx2 = await this.recordsVotingContract.createNewRecordVersion([
-                "Test",
-                "image.png",
-                "Cat1",
-                RECORD_ID,
-                [1],
+            const tx2 = await this.recordsVotingContract.createNewRecordVersion(
                 [
-                    await web3.utils.toWei("1000000"),
-                    this.oldRecordVersionOwnerRewardGovernance,
-                    GOVERNANCE_TOKEN_BALANCE_USER1,
                     "Test",
                     "image.png",
+                    "Cat1",
+                    RECORD_ID,
+                    [1],
+                    [
+                        await web3.utils.toWei("1000000"),
+                        this.oldRecordVersionOwnerRewardGovernance,
+                        GOVERNANCE_TOKEN_BALANCE_USER1,
+                        "Test",
+                        "image.png",
+                    ],
+                    [
+                        await web3.utils.toWei("1000000"),
+                        this.oldRecordVersionOwnerRewardCommunity,
+                        COMMUNITY_TOKEN_BALANCE_USER1,
+                        "Test",
+                        "image.png",
+                    ],
                 ],
-                [
-                    await web3.utils.toWei("1000000"),
-                    this.oldRecordVersionOwnerRewardCommunity,
-                    COMMUNITY_TOKEN_BALANCE_USER1,
-                    "Test",
-                    "image.png",
-                ],
-            ]);
+                {
+                    value: helper.VOTING_DEPOSIT_RECORD_VERSION_CONTRACT,
+                }
+            );
 
             expectEvent(tx2, "VersionRequest", {
                 requestId: "1",
@@ -431,27 +439,32 @@ contract("Records Contract", function() {
         });
 
         it("creating new record request from existing records check ballot created", async function() {
-            const tx2 = await this.recordsVotingContract.createNewRecordVersion([
-                "Test",
-                "image.png",
-                "Cat1",
-                RECORD_ID,
-                [1],
+            const tx2 = await this.recordsVotingContract.createNewRecordVersion(
                 [
-                    await web3.utils.toWei("1000000"),
-                    this.oldRecordVersionOwnerRewardGovernance,
-                    GOVERNANCE_TOKEN_BALANCE_USER1,
                     "Test",
                     "image.png",
+                    "Cat1",
+                    RECORD_ID,
+                    [1],
+                    [
+                        await web3.utils.toWei("1000000"),
+                        this.oldRecordVersionOwnerRewardGovernance,
+                        GOVERNANCE_TOKEN_BALANCE_USER1,
+                        "Test",
+                        "image.png",
+                    ],
+                    [
+                        await web3.utils.toWei("1000000"),
+                        this.oldRecordVersionOwnerRewardCommunity,
+                        COMMUNITY_TOKEN_BALANCE_USER1,
+                        "Test",
+                        "image.png",
+                    ],
                 ],
-                [
-                    await web3.utils.toWei("1000000"),
-                    this.oldRecordVersionOwnerRewardCommunity,
-                    COMMUNITY_TOKEN_BALANCE_USER1,
-                    "Test",
-                    "image.png",
-                ],
-            ]);
+                {
+                    value: helper.VOTING_DEPOSIT_RECORD_VERSION_CONTRACT,
+                }
+            );
 
             expectEvent(tx2, "VersionRequest", {
                 requestId: "1",
@@ -486,27 +499,32 @@ contract("Records Contract", function() {
                 "0xa165"
             );
 
-            const tx2 = await this.recordsVotingContract.createNewRecordVersion([
-                "Test",
-                "image.png",
-                "Cat1",
-                RECORD_ID,
-                [1],
+            const tx2 = await this.recordsVotingContract.createNewRecordVersion(
                 [
-                    await web3.utils.toWei("1000000"),
-                    GOVERNANCE_TOKEN_BALANCE_USER1,
-                    GOVERNANCE_TOKEN_BALANCE_USER1,
                     "Test",
                     "image.png",
+                    "Cat1",
+                    RECORD_ID,
+                    [1],
+                    [
+                        await web3.utils.toWei("1000000"),
+                        GOVERNANCE_TOKEN_BALANCE_USER1,
+                        GOVERNANCE_TOKEN_BALANCE_USER1,
+                        "Test",
+                        "image.png",
+                    ],
+                    [
+                        await web3.utils.toWei("1000000"),
+                        GOVERNANCE_TOKEN_BALANCE_USER1,
+                        GOVERNANCE_TOKEN_BALANCE_USER1,
+                        "Test",
+                        "image.png",
+                    ],
                 ],
-                [
-                    await web3.utils.toWei("1000000"),
-                    GOVERNANCE_TOKEN_BALANCE_USER1,
-                    GOVERNANCE_TOKEN_BALANCE_USER1,
-                    "Test",
-                    "image.png",
-                ],
-            ]);
+                {
+                    value: helper.VOTING_DEPOSIT_RECORD_VERSION_CONTRACT,
+                }
+            );
 
             expectEvent(tx2, "VersionRequest", {
                 requestId: "1",
@@ -558,27 +576,32 @@ contract("Records Contract", function() {
                 "0xa165"
             );
 
-            const tx2 = await this.recordsVotingContract.createNewRecordVersion([
-                "Test",
-                "image.png",
-                "Cat1",
-                RECORD_ID,
-                [1],
+            const tx2 = await this.recordsVotingContract.createNewRecordVersion(
                 [
-                    await web3.utils.toWei("1000000"),
-                    GOVERNANCE_TOKEN_BALANCE_USER1,
-                    GOVERNANCE_TOKEN_BALANCE_USER1,
                     "Test",
                     "image.png",
+                    "Cat1",
+                    RECORD_ID,
+                    [1],
+                    [
+                        await web3.utils.toWei("1000000"),
+                        GOVERNANCE_TOKEN_BALANCE_USER1,
+                        GOVERNANCE_TOKEN_BALANCE_USER1,
+                        "Test",
+                        "image.png",
+                    ],
+                    [
+                        await web3.utils.toWei("1000000"),
+                        GOVERNANCE_TOKEN_BALANCE_USER1,
+                        GOVERNANCE_TOKEN_BALANCE_USER1,
+                        "Test",
+                        "image.png",
+                    ],
                 ],
-                [
-                    await web3.utils.toWei("1000000"),
-                    GOVERNANCE_TOKEN_BALANCE_USER1,
-                    GOVERNANCE_TOKEN_BALANCE_USER1,
-                    "Test",
-                    "image.png",
-                ],
-            ]);
+                {
+                    value: helper.VOTING_DEPOSIT_RECORD_VERSION_CONTRACT,
+                }
+            );
 
             expectEvent(tx2, "VersionRequest", {
                 requestId: "1",
@@ -634,27 +657,32 @@ contract("Records Contract", function() {
                 "0xa165"
             );
 
-            const tx2 = await this.recordsVotingContract.createNewRecordVersion([
-                "Test",
-                "image.png",
-                "Cat1",
-                RECORD_ID,
-                [1],
+            const tx2 = await this.recordsVotingContract.createNewRecordVersion(
                 [
-                    await web3.utils.toWei("1000000"),
-                    this.oldRecordVersionOwnerRewardGovernance,
-                    GOVERNANCE_TOKEN_BALANCE_USER1,
                     "Test",
                     "image.png",
+                    "Cat1",
+                    RECORD_ID,
+                    [1],
+                    [
+                        await web3.utils.toWei("1000000"),
+                        this.oldRecordVersionOwnerRewardGovernance,
+                        GOVERNANCE_TOKEN_BALANCE_USER1,
+                        "Test",
+                        "image.png",
+                    ],
+                    [
+                        await web3.utils.toWei("1000000"),
+                        this.oldRecordVersionOwnerRewardCommunity,
+                        COMMUNITY_TOKEN_BALANCE_USER1,
+                        "Test",
+                        "image.png",
+                    ],
                 ],
-                [
-                    await web3.utils.toWei("1000000"),
-                    this.oldRecordVersionOwnerRewardCommunity,
-                    COMMUNITY_TOKEN_BALANCE_USER1,
-                    "Test",
-                    "image.png",
-                ],
-            ]);
+                {
+                    value: helper.VOTING_DEPOSIT_RECORD_VERSION_CONTRACT,
+                }
+            );
 
             expectEvent(tx2, "VersionRequest", {
                 requestId: "1",
@@ -722,27 +750,32 @@ contract("Records Contract", function() {
                 "0xa165"
             );
 
-            const tx2 = await this.recordsVotingContract.createNewRecordVersion([
-                "Test",
-                "image.png",
-                "Cat1",
-                RECORD_ID,
-                [1],
+            const tx2 = await this.recordsVotingContract.createNewRecordVersion(
                 [
-                    await web3.utils.toWei("1000000"),
-                    this.oldRecordVersionOwnerRewardGovernance,
-                    GOVERNANCE_TOKEN_BALANCE_USER1,
                     "Test",
                     "image.png",
+                    "Cat1",
+                    RECORD_ID,
+                    [1],
+                    [
+                        await web3.utils.toWei("1000000"),
+                        this.oldRecordVersionOwnerRewardGovernance,
+                        GOVERNANCE_TOKEN_BALANCE_USER1,
+                        "Test",
+                        "image.png",
+                    ],
+                    [
+                        await web3.utils.toWei("1000000"),
+                        this.oldRecordVersionOwnerRewardCommunity,
+                        COMMUNITY_TOKEN_BALANCE_USER1,
+                        "Test",
+                        "image.png",
+                    ],
                 ],
-                [
-                    await web3.utils.toWei("1000000"),
-                    this.oldRecordVersionOwnerRewardCommunity,
-                    COMMUNITY_TOKEN_BALANCE_USER1,
-                    "Test",
-                    "image.png",
-                ],
-            ]);
+                {
+                    value: helper.VOTING_DEPOSIT_RECORD_VERSION_CONTRACT,
+                }
+            );
 
             expectEvent(tx2, "VersionRequest", {
                 requestId: "1",
@@ -831,27 +864,32 @@ contract("Records Contract", function() {
                 "0xa165"
             );
 
-            const tx2 = await this.recordsVotingContract.createNewRecordVersion([
-                "Test",
-                "image.png",
-                "Cat1",
-                RECORD_ID,
-                [1],
+            const tx2 = await this.recordsVotingContract.createNewRecordVersion(
                 [
-                    await web3.utils.toWei("1000000"),
-                    this.oldRecordVersionOwnerRewardGovernance,
-                    GOVERNANCE_TOKEN_BALANCE_USER1,
                     "Test",
                     "image.png",
+                    "Cat1",
+                    RECORD_ID,
+                    [1],
+                    [
+                        await web3.utils.toWei("1000000"),
+                        this.oldRecordVersionOwnerRewardGovernance,
+                        GOVERNANCE_TOKEN_BALANCE_USER1,
+                        "Test",
+                        "image.png",
+                    ],
+                    [
+                        await web3.utils.toWei("1000000"),
+                        this.oldRecordVersionOwnerRewardCommunity,
+                        COMMUNITY_TOKEN_BALANCE_USER1,
+                        "Test",
+                        "image.png",
+                    ],
                 ],
-                [
-                    await web3.utils.toWei("1000000"),
-                    this.oldRecordVersionOwnerRewardCommunity,
-                    COMMUNITY_TOKEN_BALANCE_USER1,
-                    "Test",
-                    "image.png",
-                ],
-            ]);
+                {
+                    value: helper.VOTING_DEPOSIT_RECORD_VERSION_CONTRACT,
+                }
+            );
 
             expectEvent(tx2, "VersionRequest", {
                 requestId: "1",
@@ -996,27 +1034,32 @@ contract("Records Contract", function() {
                 "0xa165"
             );
 
-            let tx2 = await this.recordsVotingContract.createNewRecordVersion([
-                "New Version 1",
-                "image.png",
-                "Cat1",
-                RECORD_ID,
-                [1],
+            let tx2 = await this.recordsVotingContract.createNewRecordVersion(
                 [
-                    await web3.utils.toWei("1000000"),
-                    oldVersionGovRewardFirstReq,
-                    GOVERNANCE_TOKEN_BALANCE_USER1,
-                    "GovernanceToken1",
+                    "New Version 1",
                     "image.png",
+                    "Cat1",
+                    RECORD_ID,
+                    [1],
+                    [
+                        await web3.utils.toWei("1000000"),
+                        oldVersionGovRewardFirstReq,
+                        GOVERNANCE_TOKEN_BALANCE_USER1,
+                        "GovernanceToken1",
+                        "image.png",
+                    ],
+                    [
+                        await web3.utils.toWei("1000000"),
+                        oldVersionCommRewardFirstReq,
+                        COMMUNITY_TOKEN_BALANCE_USER1,
+                        "CommToken1",
+                        "image.png",
+                    ],
                 ],
-                [
-                    await web3.utils.toWei("1000000"),
-                    oldVersionCommRewardFirstReq,
-                    COMMUNITY_TOKEN_BALANCE_USER1,
-                    "CommToken1",
-                    "image.png",
-                ],
-            ]);
+                {
+                    value: helper.VOTING_DEPOSIT_RECORD_VERSION_CONTRACT,
+                }
+            );
 
             expectEvent(tx2, "VersionRequest", {
                 requestId: "1",
@@ -1050,7 +1093,7 @@ contract("Records Contract", function() {
                         "image.png",
                     ],
                 ],
-                { from: this.user3 }
+                { from: this.user3, value: helper.VOTING_DEPOSIT_RECORD_VERSION_CONTRACT }
             );
 
             expectEvent(tx2, "VersionRequest", {
@@ -1222,27 +1265,32 @@ contract("Records Contract", function() {
                 "0xa165"
             );
 
-            const tx2 = await this.recordsVotingContract.createNewRecordVersion([
-                "Test",
-                "image.png",
-                "Cat1",
-                RECORD_ID,
-                [1],
+            const tx2 = await this.recordsVotingContract.createNewRecordVersion(
                 [
-                    await web3.utils.toWei("1000000"),
-                    this.oldRecordVersionOwnerRewardGovernance,
-                    GOVERNANCE_TOKEN_BALANCE_USER1,
                     "Test",
                     "image.png",
+                    "Cat1",
+                    RECORD_ID,
+                    [1],
+                    [
+                        await web3.utils.toWei("1000000"),
+                        this.oldRecordVersionOwnerRewardGovernance,
+                        GOVERNANCE_TOKEN_BALANCE_USER1,
+                        "Test",
+                        "image.png",
+                    ],
+                    [
+                        await web3.utils.toWei("1000000"),
+                        this.oldRecordVersionOwnerRewardCommunity,
+                        COMMUNITY_TOKEN_BALANCE_USER1,
+                        "Test",
+                        "image.png",
+                    ],
                 ],
-                [
-                    await web3.utils.toWei("1000000"),
-                    this.oldRecordVersionOwnerRewardCommunity,
-                    COMMUNITY_TOKEN_BALANCE_USER1,
-                    "Test",
-                    "image.png",
-                ],
-            ]);
+                {
+                    value: helper.VOTING_DEPOSIT_RECORD_VERSION_CONTRACT,
+                }
+            );
 
             expectEvent(tx2, "VersionRequest", {
                 requestId: "1",
@@ -1311,27 +1359,32 @@ contract("Records Contract", function() {
 
             // Here the tokens for user is more than the total mint amount
             await expect(
-                this.recordsVotingContract.createNewRecordVersion([
-                    "Test",
-                    "image.png",
-                    "Cat1",
-                    RECORD_ID,
-                    [1],
+                this.recordsVotingContract.createNewRecordVersion(
                     [
-                        await web3.utils.toWei("1000000"),
-                        this.oldRecordVersionOwnerRewardGovernance,
-                        await web3.utils.toWei("10000000"),
                         "Test",
                         "image.png",
+                        "Cat1",
+                        RECORD_ID,
+                        [1],
+                        [
+                            await web3.utils.toWei("1000000"),
+                            this.oldRecordVersionOwnerRewardGovernance,
+                            await web3.utils.toWei("10000000"),
+                            "Test",
+                            "image.png",
+                        ],
+                        [
+                            await web3.utils.toWei("1000000"),
+                            this.oldRecordVersionOwnerRewardCommunity,
+                            await web3.utils.toWei("10000000"),
+                            "Test",
+                            "image.png",
+                        ],
                     ],
-                    [
-                        await web3.utils.toWei("1000000"),
-                        this.oldRecordVersionOwnerRewardCommunity,
-                        await web3.utils.toWei("10000000"),
-                        "Test",
-                        "image.png",
-                    ],
-                ])
+                    {
+                        value: helper.VOTING_DEPOSIT_RECORD_VERSION_CONTRACT,
+                    }
+                )
             ).to.eventually.be.rejectedWith("INVALID: USER_BALANCE_MORE_THAN_SUPPLY");
         });
 
@@ -1364,27 +1417,32 @@ contract("Records Contract", function() {
                 "0xa165"
             );
 
-            const tx2 = await this.recordsVotingContract.createNewRecordVersion([
-                "Test",
-                "image.png",
-                "Cat1",
-                RECORD_ID,
-                [1],
+            const tx2 = await this.recordsVotingContract.createNewRecordVersion(
                 [
-                    await web3.utils.toWei("1000000"),
-                    oldVersionOwnerRewardGovernance,
-                    GOVERNANCE_TOKEN_BALANCE_USER1,
                     "Test",
                     "image.png",
+                    "Cat1",
+                    RECORD_ID,
+                    [1],
+                    [
+                        await web3.utils.toWei("1000000"),
+                        oldVersionOwnerRewardGovernance,
+                        GOVERNANCE_TOKEN_BALANCE_USER1,
+                        "Test",
+                        "image.png",
+                    ],
+                    [
+                        await web3.utils.toWei("1000000"),
+                        oldVersionOwnerRewardCommunity,
+                        COMMUNITY_TOKEN_BALANCE_USER1,
+                        "Test",
+                        "image.png",
+                    ],
                 ],
-                [
-                    await web3.utils.toWei("1000000"),
-                    oldVersionOwnerRewardCommunity,
-                    COMMUNITY_TOKEN_BALANCE_USER1,
-                    "Test",
-                    "image.png",
-                ],
-            ]);
+                {
+                    value: helper.VOTING_DEPOSIT_RECORD_VERSION_CONTRACT,
+                }
+            );
 
             expectEvent(tx2, "VersionRequest", {
                 requestId: "1",
@@ -1525,27 +1583,32 @@ contract("Records Contract", function() {
                 "0xa165"
             );
 
-            const tx2 = await this.recordsVotingContract.createNewRecordVersion([
-                "Test",
-                "image.png",
-                "Cat1",
-                RECORD_ID,
-                [1],
+            const tx2 = await this.recordsVotingContract.createNewRecordVersion(
                 [
-                    await web3.utils.toWei("1000000"),
-                    oldVersionOwnerRewardGovernance,
-                    GOVERNANCE_TOKEN_BALANCE_USER1,
                     "Test",
                     "image.png",
+                    "Cat1",
+                    RECORD_ID,
+                    [1],
+                    [
+                        await web3.utils.toWei("1000000"),
+                        oldVersionOwnerRewardGovernance,
+                        GOVERNANCE_TOKEN_BALANCE_USER1,
+                        "Test",
+                        "image.png",
+                    ],
+                    [
+                        await web3.utils.toWei("1000000"),
+                        oldVersionOwnerRewardCommunity,
+                        COMMUNITY_TOKEN_BALANCE_USER1,
+                        "Test",
+                        "image.png",
+                    ],
                 ],
-                [
-                    await web3.utils.toWei("1000000"),
-                    oldVersionOwnerRewardCommunity,
-                    COMMUNITY_TOKEN_BALANCE_USER1,
-                    "Test",
-                    "image.png",
-                ],
-            ]);
+                {
+                    value: helper.VOTING_DEPOSIT_RECORD_VERSION_CONTRACT,
+                }
+            );
 
             expectEvent(tx2, "VersionRequest", {
                 requestId: "1",
@@ -1686,27 +1749,32 @@ contract("Records Contract", function() {
                 "0xa165"
             );
 
-            const tx2 = await this.recordsVotingContract.createNewRecordVersion([
-                "Test",
-                "image.png",
-                "Cat1",
-                RECORD_ID,
-                [1],
+            const tx2 = await this.recordsVotingContract.createNewRecordVersion(
                 [
-                    await web3.utils.toWei("1000000"),
-                    oldVersionOwnerRewardGovernance,
-                    await web3.utils.toWei("1000000"),
                     "Test",
                     "image.png",
+                    "Cat1",
+                    RECORD_ID,
+                    [1],
+                    [
+                        await web3.utils.toWei("1000000"),
+                        oldVersionOwnerRewardGovernance,
+                        await web3.utils.toWei("1000000"),
+                        "Test",
+                        "image.png",
+                    ],
+                    [
+                        await web3.utils.toWei("1000000"),
+                        oldVersionOwnerRewardCommunity,
+                        await web3.utils.toWei("1000000"),
+                        "Test",
+                        "image.png",
+                    ],
                 ],
-                [
-                    await web3.utils.toWei("1000000"),
-                    oldVersionOwnerRewardCommunity,
-                    await web3.utils.toWei("1000000"),
-                    "Test",
-                    "image.png",
-                ],
-            ]);
+                {
+                    value: helper.VOTING_DEPOSIT_RECORD_VERSION_CONTRACT,
+                }
+            );
 
             expectEvent(tx2, "VersionRequest", {
                 requestId: "1",
@@ -1909,6 +1977,7 @@ contract("Records Contract", function() {
                 rewardGovernanceToken,
                 {
                     from: contributionOwner,
+                    value: helper.VOTING_DEPOSIT_CONTRIBUTION_CONTRACT,
                 }
             );
         });
@@ -1932,27 +2001,32 @@ contract("Records Contract", function() {
                 "0xa165"
             );
 
-            const tx2 = await this.recordsVotingContractMock.createNewRecordVersion([
-                "Test",
-                "image.png",
-                "Cat1",
-                RECORD_ID,
-                [1],
+            const tx2 = await this.recordsVotingContractMock.createNewRecordVersion(
                 [
-                    await web3.utils.toWei("1000000"),
-                    oldVersionOwnerRewardGovernance,
-                    GOVERNANCE_TOKEN_BALANCE_USER1,
                     "Test",
                     "image.png",
+                    "Cat1",
+                    RECORD_ID,
+                    [1],
+                    [
+                        await web3.utils.toWei("1000000"),
+                        oldVersionOwnerRewardGovernance,
+                        GOVERNANCE_TOKEN_BALANCE_USER1,
+                        "Test",
+                        "image.png",
+                    ],
+                    [
+                        await web3.utils.toWei("1000000"),
+                        oldVersionOwnerRewardCommunity,
+                        COMMUNITY_TOKEN_BALANCE_USER1,
+                        "Test",
+                        "image.png",
+                    ],
                 ],
-                [
-                    await web3.utils.toWei("1000000"),
-                    oldVersionOwnerRewardCommunity,
-                    COMMUNITY_TOKEN_BALANCE_USER1,
-                    "Test",
-                    "image.png",
-                ],
-            ]);
+                {
+                    value: helper.VOTING_DEPOSIT_RECORD_VERSION_CONTRACT,
+                }
+            );
 
             let trx3 = await this.recordsVotingContractMock.castVote(1, true, { from: user2 });
 
@@ -2015,27 +2089,32 @@ contract("Records Contract", function() {
                 "0xa165"
             );
 
-            const tx2 = await this.recordsVotingContractMock.createNewRecordVersion([
-                "Test",
-                "image.png",
-                "Cat1",
-                RECORD_ID,
-                [1],
+            const tx2 = await this.recordsVotingContractMock.createNewRecordVersion(
                 [
-                    await web3.utils.toWei("1000000"),
-                    oldVersionOwnerRewardGovernance,
-                    GOVERNANCE_TOKEN_BALANCE_USER1,
                     "Test",
                     "image.png",
+                    "Cat1",
+                    RECORD_ID,
+                    [1],
+                    [
+                        await web3.utils.toWei("1000000"),
+                        oldVersionOwnerRewardGovernance,
+                        GOVERNANCE_TOKEN_BALANCE_USER1,
+                        "Test",
+                        "image.png",
+                    ],
+                    [
+                        await web3.utils.toWei("1000000"),
+                        oldVersionOwnerRewardCommunity,
+                        COMMUNITY_TOKEN_BALANCE_USER1,
+                        "Test",
+                        "image.png",
+                    ],
                 ],
-                [
-                    await web3.utils.toWei("1000000"),
-                    oldVersionOwnerRewardCommunity,
-                    COMMUNITY_TOKEN_BALANCE_USER1,
-                    "Test",
-                    "image.png",
-                ],
-            ]);
+                {
+                    value: helper.VOTING_DEPOSIT_RECORD_VERSION_CONTRACT,
+                }
+            );
 
             let trx3 = await this.recordsVotingContractMock.castVote(1, true, { from: user2 });
 
@@ -2100,27 +2179,32 @@ contract("Records Contract", function() {
                 "0xa165"
             );
 
-            const tx2 = await this.recordsVotingContractMock.createNewRecordVersion([
-                "Test",
-                "image.png",
-                "Cat1",
-                RECORD_ID,
-                [1],
+            const tx2 = await this.recordsVotingContractMock.createNewRecordVersion(
                 [
-                    await web3.utils.toWei("1000000"),
-                    oldVersionOwnerRewardGovernance,
-                    GOVERNANCE_TOKEN_BALANCE_USER1,
                     "Test",
                     "image.png",
+                    "Cat1",
+                    RECORD_ID,
+                    [1],
+                    [
+                        await web3.utils.toWei("1000000"),
+                        oldVersionOwnerRewardGovernance,
+                        GOVERNANCE_TOKEN_BALANCE_USER1,
+                        "Test",
+                        "image.png",
+                    ],
+                    [
+                        await web3.utils.toWei("1000000"),
+                        oldVersionOwnerRewardCommunity,
+                        COMMUNITY_TOKEN_BALANCE_USER1,
+                        "Test",
+                        "image.png",
+                    ],
                 ],
-                [
-                    await web3.utils.toWei("1000000"),
-                    oldVersionOwnerRewardCommunity,
-                    COMMUNITY_TOKEN_BALANCE_USER1,
-                    "Test",
-                    "image.png",
-                ],
-            ]);
+                {
+                    value: helper.VOTING_DEPOSIT_RECORD_VERSION_CONTRACT,
+                }
+            );
 
             let trx3 = await this.recordsVotingContractMock.castVote(1, true, { from: user2 });
 

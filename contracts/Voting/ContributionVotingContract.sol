@@ -117,10 +117,12 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
     //This contains all the keys (The key's are users address) of the mapping of the counterOfferMapping.
     mapping(uint256 => address[]) contributionCounterOfferList;
     address public CONTRIBUTION_CONTRACT_ADDRESS;
+    uint256 public VOTING_DEPOSIT = 1 ether;
 
-    constructor(uint8 votingInterval, address owner)
-        BaseVotingCounterOfferContract(owner)
-    {
+    constructor(
+        uint8 votingInterval,
+        address owner
+    ) BaseVotingCounterOfferContract(owner) {
         VOTING_BLOCK_PERIOD = votingInterval;
     }
 
@@ -157,7 +159,7 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
         uint256 recordId,
         uint256 govReward,
         uint256 commReward
-    ) public _onlyContributionContract {
+    ) public payable _onlyContributionContract {
         require(
             rewardMapping[contributionId].isPresent == false,
             "INVALID: BALLOT_ALREADY_CREATED"
@@ -169,6 +171,7 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
         uint256 commTokenId = treasuryContract.getGovernanceTokenId(recordId);
 
         uint256 ballotId = _createVoting(true, govTokenId);
+        _createDeposit(tx.origin, VOTING_DEPOSIT, ballotId);
 
         ContributionReward memory contributionReward = ContributionReward({
             requester: tx.origin,
@@ -335,6 +338,7 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
         (bool result, bool minTurnOut) = _declareWinner(
             rewardMapping[contributionId].ballotId
         );
+        _releaseDeposit(rewardMapping[contributionId].ballotId);
 
         emit BallotResult(
             contributionId,

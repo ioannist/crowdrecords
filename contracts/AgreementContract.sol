@@ -148,6 +148,8 @@ contract AgreementContract is BaseVotingContract {
     //This is for the token transfer and other core functions
     address public TREASURY_CORE_CONTRACT_ADDRESS;
 
+    uint256 public VOTING_DEPOSIT = 1 ether;
+
     IERC20 private crdTokenContract;
 
     constructor(uint8 votingInterval, address owner) BaseVotingContract(owner) {
@@ -182,7 +184,7 @@ contract AgreementContract is BaseVotingContract {
         string memory title,
         string memory contractLink,
         string memory contractHash
-    ) public returns (uint256) {
+    ) public payable returns (uint256) {
         //Check if valid record id
         agreementCurrentId++;
         uint256 agreeId = agreementCurrentId;
@@ -193,8 +195,10 @@ contract AgreementContract is BaseVotingContract {
 
         uint256 ballotId = _createVoting(true, tokenId);
 
+        _createDeposit(msg.sender, VOTING_DEPOSIT, ballotId);
+
         Agreement memory agreement = Agreement({
-            requester: tx.origin,
+            requester: msg.sender,
             title: title,
             recordId: recordId,
             ballotId: ballotId,
@@ -247,6 +251,8 @@ contract AgreementContract is BaseVotingContract {
         (bool result, bool minTurnOut) = _declareWinner(
             agreementMap[agreementId].ballotId
         );
+
+        _releaseDeposit(agreementMap[agreementId].ballotId);
 
         emit BallotResult(
             agreementId,
@@ -388,11 +394,10 @@ contract AgreementContract is BaseVotingContract {
     /// @dev This function is for testing purpose for distributing the royalty payment
     /// @param royaltyId This is the id of royalty that user wants to claim
     /// @param tokenId this is the id of token that determines the royalty amount
-    function _calculateSingleRoyaltyAmount(uint256 royaltyId, uint256 tokenId)
-        internal
-        view
-        returns (uint256)
-    {
+    function _calculateSingleRoyaltyAmount(
+        uint256 royaltyId,
+        uint256 tokenId
+    ) internal view returns (uint256) {
         RoyaltyData memory dividend = royaltyDataMapping[royaltyId];
         ITreasuryCore treasuryCoreContract = ITreasuryCore(
             TREASURY_CORE_CONTRACT_ADDRESS
@@ -414,11 +419,10 @@ contract AgreementContract is BaseVotingContract {
     /// @dev This function calculates the royalty claim index
     /// @param dividendIdArray This is the array of royalties for a single user
     /// @param user this address of user whose royalty claim index needs to be identified
-    function _getNewClaimIndex(uint256[] memory dividendIdArray, address user)
-        internal
-        view
-        returns (uint256)
-    {
+    function _getNewClaimIndex(
+        uint256[] memory dividendIdArray,
+        address user
+    ) internal view returns (uint256) {
         if (dividendIdArray.length == 0) {
             return 0;
         }

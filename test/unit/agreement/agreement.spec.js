@@ -39,10 +39,10 @@ contract("AgreementContract", function() {
         const CRDToken = await this.treasuryContract.CRD();
 
         const agreementId = 1;
-        await this.agreementContract.createAgreement(RECORD_ID, "Some link", "some hash", {
+        await this.agreementContract.createAgreement(RECORD_ID, "Title", "Some link", "some hash", {
             from: user2,
+            value: helper.VOTING_DEPOSIT_AGREEMENT_CONTRACT,
         });
-
         const trx = await this.agreementContract.castVoteForAgreement(agreementId, true);
         await expectEvent(trx, "AgreementVoting", { vote: true });
 
@@ -62,8 +62,9 @@ contract("AgreementContract", function() {
         const CRDToken = await this.treasuryContract.CRD();
 
         const agreementId = 1;
-        await this.agreementContract.createAgreement(RECORD_ID, "Some link", "some hash", {
+        await this.agreementContract.createAgreement(RECORD_ID, "Title", "Some link", "some hash", {
             from: user2,
+            value: helper.VOTING_DEPOSIT_AGREEMENT_CONTRACT,
         });
 
         const trx = await this.agreementContract.castVoteForAgreement(agreementId, false);
@@ -85,8 +86,9 @@ contract("AgreementContract", function() {
         const CRDToken = await this.treasuryContract.CRD();
 
         const agreementId = 1;
-        await this.agreementContract.createAgreement(RECORD_ID, "Some link", "some hash", {
+        await this.agreementContract.createAgreement(RECORD_ID, "Title", "Some link", "some hash", {
             from: user2,
+            value: helper.VOTING_DEPOSIT_AGREEMENT_CONTRACT,
         });
 
         const trx = await this.agreementContract.castVoteForAgreement(agreementId, false);
@@ -116,9 +118,16 @@ contract("AgreementContract", function() {
             this.user2 = await helper.getEthAccount(1);
 
             this.firstAgreementId = 1;
-            await this.agreementContract.createAgreement(RECORD_ID, "Some link", "some hash", {
-                from: this.user2,
-            });
+            await this.agreementContract.createAgreement(
+                RECORD_ID,
+                "Title",
+                "Some link",
+                "some hash",
+                {
+                    from: this.user2,
+                    value: helper.VOTING_DEPOSIT_AGREEMENT_CONTRACT,
+                }
+            );
 
             const trx = await this.agreementContract.castVoteForAgreement(
                 this.firstAgreementId,
@@ -946,15 +955,36 @@ contract("AgreementContract", function() {
             const agreementThree = 3;
             const rewardForUser2 = await web3.utils.toWei("55.555555555555555");
             const rewardForUser3 = await web3.utils.toWei("111.11111111111111");
-            await this.agreementContract.createAgreement(RECORD_ID, "Some link", "some hash", {
-                from: this.user1,
-            });
-            await this.agreementContract.createAgreement(RECORD_ID, "Some link", "some hash", {
-                from: this.user2,
-            });
-            await this.agreementContract.createAgreement(RECORD_ID, "Some link", "some hash", {
-                from: this.user3,
-            });
+            await this.agreementContract.createAgreement(
+                RECORD_ID,
+                "Title",
+                "Some link",
+                "some hash",
+                {
+                    from: this.user1,
+                    value: helper.VOTING_DEPOSIT_AGREEMENT_CONTRACT,
+                }
+            );
+            await this.agreementContract.createAgreement(
+                RECORD_ID,
+                "Title",
+                "Some link",
+                "some hash",
+                {
+                    from: this.user2,
+                    value: helper.VOTING_DEPOSIT_AGREEMENT_CONTRACT,
+                }
+            );
+            await this.agreementContract.createAgreement(
+                RECORD_ID,
+                "Title",
+                "Some link",
+                "some hash",
+                {
+                    from: this.user3,
+                    value: helper.VOTING_DEPOSIT_AGREEMENT_CONTRACT,
+                }
+            );
 
             await this.agreementContract.castVoteForAgreement(agreementOne, true);
             await this.agreementContract.castVoteForAgreement(agreementTwo, true);
@@ -1008,15 +1038,36 @@ contract("AgreementContract", function() {
             const agreementOne = 1;
             const rewardForUser2 = new BN(await web3.utils.toWei("55.555555555555555"));
             const rewardForUser3 = new BN(await web3.utils.toWei("111.11111111111111"));
-            await this.agreementContract.createAgreement(RECORD_ID, "Some link", "some hash", {
-                from: this.user1,
-            });
-            await this.agreementContract.createAgreement(RECORD_ID, "Some link", "some hash", {
-                from: this.user2,
-            });
-            await this.agreementContract.createAgreement(RECORD_ID, "Some link", "some hash", {
-                from: this.user3,
-            });
+            await this.agreementContract.createAgreement(
+                RECORD_ID,
+                "Title",
+                "Some link",
+                "some hash",
+                {
+                    from: this.user1,
+                    value: helper.VOTING_DEPOSIT_AGREEMENT_CONTRACT,
+                }
+            );
+            await this.agreementContract.createAgreement(
+                RECORD_ID,
+                "Title",
+                "Some link",
+                "some hash",
+                {
+                    from: this.user2,
+                    value: helper.VOTING_DEPOSIT_AGREEMENT_CONTRACT,
+                }
+            );
+            await this.agreementContract.createAgreement(
+                RECORD_ID,
+                "Title",
+                "Some link",
+                "some hash",
+                {
+                    from: this.user3,
+                    value: helper.VOTING_DEPOSIT_AGREEMENT_CONTRACT,
+                }
+            );
 
             await this.agreementContract.castVoteForAgreement(agreementOne, true);
 
@@ -1072,9 +1123,16 @@ contract("AgreementContract", function() {
             const rewardForUser2 = new BN(await web3.utils.toWei("55.555555555555555"));
             const rewardForUser3 = new BN(await web3.utils.toWei("111.11111111111111"));
             const rewardAmount = new BN(await web3.utils.toWei("100"));
-            await this.agreementContract.createAgreement(RECORD_ID, "Some link", "some hash", {
-                from: this.user1,
-            });
+            await this.agreementContract.createAgreement(
+                RECORD_ID,
+                "Title",
+                "Some link",
+                "some hash",
+                {
+                    from: this.user1,
+                    value: helper.VOTING_DEPOSIT_AGREEMENT_CONTRACT,
+                }
+            );
 
             await this.agreementContract.castVoteForAgreement(agreementOne, true);
 

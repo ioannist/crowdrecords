@@ -37,7 +37,8 @@ contract("Dilution Contract", function() {
             this.dilutionContract.createDilutionRequest(
                 RECORD_ID,
                 10,
-                await web3.utils.toWei("450000")
+                await web3.utils.toWei("450000"),
+                { value: helper.VOTING_DEPOSIT_DILUTION_CONTRACT }
             )
         ).to.eventually.be.rejectedWith("INVALID: TOKEN_OR_RECORD");
     });
@@ -48,7 +49,10 @@ contract("Dilution Contract", function() {
                 RECORD_ID,
                 COMMUNITY_TOKEN_ID,
                 await web3.utils.toWei("450000"),
-                { from: await helper.getEthAccount(5) }
+                {
+                    from: await helper.getEthAccount(5),
+                    value: helper.VOTING_DEPOSIT_DILUTION_CONTRACT,
+                }
             )
         ).to.eventually.be.rejectedWith("INVALID: NO_TOKENS_FOUND");
     });
@@ -80,7 +84,10 @@ contract("Dilution Contract", function() {
             RECORD_ID,
             COMMUNITY_TOKEN_ID,
             await web3.utils.toWei("450000"),
-            { from: user2 }
+            {
+                from: user2,
+                value: helper.VOTING_DEPOSIT_DILUTION_CONTRACT,
+            }
         );
 
         await this.dilutionContract.castVote(dilutionId, true);
@@ -126,7 +133,7 @@ contract("Dilution Contract", function() {
             RECORD_ID,
             COMMUNITY_TOKEN_ID,
             await web3.utils.toWei("450000"),
-            { from: user2 }
+            { from: user2, value: helper.VOTING_DEPOSIT_DILUTION_CONTRACT }
         );
 
         await this.dilutionContract.castVote(dilutionId, false);
@@ -176,7 +183,7 @@ contract("Dilution Contract", function() {
                 RECORD_ID,
                 COMMUNITY_TOKEN_ID,
                 await web3.utils.toWei("450000"),
-                { from: this.user2 }
+                { from: this.user2, value: helper.VOTING_DEPOSIT_DILUTION_CONTRACT }
             );
         });
         afterEach(async function() {
@@ -352,7 +359,7 @@ contract("Dilution Contract", function() {
                     RECORD_ID,
                     COMMUNITY_TOKEN_ID,
                     await web3.utils.toWei("450000"),
-                    { from: this.user2 }
+                    { from: this.user2, value: helper.VOTING_DEPOSIT_DILUTION_CONTRACT }
                 )
             ).to.eventually.be.rejectedWith("INVALID: WAIT_SOMETIME_BEFORE_NEW_DILUTION_REQUEST");
         });
@@ -385,7 +392,7 @@ contract("Dilution Contract", function() {
                     RECORD_ID,
                     COMMUNITY_TOKEN_ID,
                     await web3.utils.toWei("450000"),
-                    { from: this.user2 }
+                    { from: this.user2, value: helper.VOTING_DEPOSIT_DILUTION_CONTRACT }
                 )
             ).to.eventually.be.rejectedWith("INVALID: WAIT_SOMETIME_BEFORE_NEW_DILUTION_REQUEST");
         });
@@ -428,7 +435,7 @@ contract("Dilution Contract", function() {
                 RECORD_ID,
                 COMMUNITY_TOKEN_ID,
                 await web3.utils.toWei("450000"),
-                { from: this.user2 }
+                { from: this.user2, value: helper.VOTING_DEPOSIT_DILUTION_CONTRACT }
             );
 
             expectEvent(tx2, "DilutionRequestCreated", { dilutionId: newDilutionId });
@@ -464,7 +471,7 @@ contract("Dilution Contract", function() {
                 RECORD_ID,
                 COMMUNITY_TOKEN_ID,
                 await web3.utils.toWei("450000"),
-                { from: this.user2 }
+                { from: this.user2, value: helper.VOTING_DEPOSIT_DILUTION_CONTRACT }
             );
 
             expectEvent(tx2, "DilutionRequestCreated", { dilutionId: newDilutionId });

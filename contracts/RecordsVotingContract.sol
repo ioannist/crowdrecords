@@ -162,6 +162,7 @@ contract RecordsVotingContract is BaseVotingContract, IERC1155Receiver {
     mapping(uint256 => NewVersionTokenDistributionStruct) newVersionCommTokenDistributionMapping;
 
     //------------------------------
+    uint256 public VOTING_DEPOSIT = 1 ether;
 
     constructor(address owner) BaseVotingContract(owner) {}
 
@@ -199,10 +200,9 @@ contract RecordsVotingContract is BaseVotingContract, IERC1155Receiver {
 
     /// @dev This function will create new record version from existing record
     /// @param params required data for creation of new record version
-    function createNewRecordVersion(NewRecordVersionParams memory params)
-        public
-        returns (uint256)
-    {
+    function createNewRecordVersion(
+        NewRecordVersionParams memory params
+    ) public payable returns (uint256) {
         RecordsContract recordsContract = RecordsContract(
             RECORDS_CONTRACT_ADDRESS
         );
@@ -224,6 +224,7 @@ contract RecordsVotingContract is BaseVotingContract, IERC1155Receiver {
             params.oldRecordId
         );
         uint256 ballotId = _createVoting(false, votingTokenId);
+        _createDeposit(msg.sender, VOTING_DEPOSIT, ballotId);
 
         treasury.setSymbolsAsUsed(
             params.governanceToken.symbol,
@@ -307,6 +308,7 @@ contract RecordsVotingContract is BaseVotingContract, IERC1155Receiver {
         NewVersionRequest memory req = newVersionRequestMap[versionReqId];
 
         (bool result, bool minTurnOut) = _declareWinner(req.ballotId);
+        _releaseDeposit(req.ballotId);
 
         uint256 recordId = 0;
 
@@ -563,11 +565,7 @@ contract RecordsVotingContract is BaseVotingContract, IERC1155Receiver {
             );
     }
 
-    function supportsInterface(bytes4 interfaceId)
-        public
-        view
-        virtual
-        override
-        returns (bool)
-    {}
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view virtual override returns (bool) {}
 }

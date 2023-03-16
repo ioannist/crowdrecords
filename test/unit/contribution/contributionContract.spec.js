@@ -148,6 +148,7 @@ contract("Contribution Contract", function() {
                 rewardGovernanceToken,
                 {
                     from: contributionOwner,
+                    value: helper.VOTING_DEPOSIT_CONTRIBUTION_CONTRACT,
                 }
             );
         });
@@ -288,6 +289,7 @@ contract("Contribution Contract", function() {
                 rewardGovernanceToken,
                 {
                     from: contributionOwner,
+                    value: helper.VOTING_DEPOSIT_CONTRIBUTION_CONTRACT,
                 }
             );
 

@@ -108,11 +108,9 @@ contract ContributionContract is Initializable {
 
     /// @dev This function returns contribution data
     /// @param contributionId Id of the contribution whose data you want
-    function getContributionData(uint256 contributionId)
-        public
-        view
-        returns (Contribution memory contribution)
-    {
+    function getContributionData(
+        uint256 contributionId
+    ) public view returns (Contribution memory contribution) {
         return contributionData[contributionId];
     }
 
@@ -139,7 +137,7 @@ contract ContributionContract is Initializable {
         string memory description,
         uint256 communityReward,
         uint256 governanceReward
-    ) public returns (uint256) {
+    ) public payable returns (uint256) {
         _contributionIds.increment();
         {
             ITracks trackInterface = ITracks(TRACKS_CONTRACT_ADDRESS);
@@ -154,12 +152,9 @@ contract ContributionContract is Initializable {
         ContributionVotingContract contributionVotingContract = ContributionVotingContract(
                 CONTRIBUTION_VOTING_CONTRACT_ADDRESS
             );
-        contributionVotingContract.createContributionVotingBallot(
-            contributionId,
-            recordId,
-            governanceReward,
-            communityReward
-        );
+        contributionVotingContract.createContributionVotingBallot{
+            value: msg.value
+        }(contributionId, recordId, governanceReward, communityReward);
 
         Contribution memory contribution = Contribution({
             tracks: tracks,
