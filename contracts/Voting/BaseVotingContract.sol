@@ -69,11 +69,13 @@ contract BaseVotingContract is Initializable {
         uint256 depositAmount
     );
 
-    uint256 VOTING_BLOCK_PERIOD = 25;
+    uint256 public VOTING_DEPOSIT = 1 ether;
+    uint256 public VOTING_BLOCK_PERIOD = 25;
     uint256 public MIN_TURNOUT_PERCENT = 500;
     address public TREASURY_CONTRACT_ADDRESS;
     address public TREASURY_HUB_ADDRESS;
     address public OWNER;
+    address public GOVERNANCE;
 
     uint256 votingId = 0;
     mapping(uint256 => VotingBallot) public votingMap;
@@ -122,6 +124,12 @@ contract BaseVotingContract is Initializable {
         _;
     }
 
+    /// @dev Modifier to check that the function is only accessible by governance.
+    modifier _governanceOnly() {
+        require(msg.sender == GOVERNANCE, "UNAUTHORIZED: ONLY_GOVERNANCE");
+        _;
+    }
+
     /// @dev This modifier checks if a ballot is open for voting or has the time expired
     /// @param votingBallotId This is the id of the ballot which we are checking
     modifier _checkIfOwnerAllowed(uint256 votingBallotId) {
@@ -140,6 +148,24 @@ contract BaseVotingContract is Initializable {
     /// @param ownerAddress This is the address of the owner
     function setOwnerAddress(address ownerAddress) public _ownerOnly {
         OWNER = ownerAddress;
+    }
+
+    /// @dev This function sets the MIN_TURN_OUT percentage
+    /// @param minTurnOut This is the new turnout percentage value
+    function setMinTurnOut(uint minTurnOut) public _governanceOnly {
+        MIN_TURNOUT_PERCENT = minTurnOut;
+    }
+
+    /// @dev This function sets the VOTING_DEPOSIT percentage
+    /// @param depositAmount This is the new turnout percentage value
+    function setDepositAmount(uint depositAmount) public _governanceOnly {
+        VOTING_DEPOSIT = depositAmount;
+    }
+
+    /// @dev This function sets the VOTING_BLOCK_PERIOD percentage
+    /// @param votingPeriod This is the voting period
+    function setVotingPeriod(uint votingPeriod) public _governanceOnly {
+        VOTING_BLOCK_PERIOD = votingPeriod;
     }
 
     /// @dev This function is called by user to creata a new voting
@@ -168,12 +194,15 @@ contract BaseVotingContract is Initializable {
         return votingId;
     }
 
-    /// @dev This function sets the treasury Contract address
+    /// @dev This function sets the treasury Contract address and the governance address
     /// @param newTreasuryContractAddress This is the new address of treasury contract
+    /// @param newGovernanceContractAddress This is the address for the governance contract
     function initialize(
-        address newTreasuryContractAddress
+        address newTreasuryContractAddress,
+        address newGovernanceContractAddress
     ) public virtual onlyInitializing {
         TREASURY_CONTRACT_ADDRESS = newTreasuryContractAddress;
+        GOVERNANCE = newGovernanceContractAddress;
     }
 
     /// @dev This function is called by any user to cast vote
@@ -347,18 +376,13 @@ contract BaseVotingContract is Initializable {
 
     /// @dev This function is responsible for transfer of the ether balance
     /// @param owner The owner who is depositing
-    /// @param amount The amount that needs to be deposited
     /// @param ballotId The id of the ballot for which the deposit is made
-    function _createDeposit(
-        address owner,
-        uint256 amount,
-        uint256 ballotId
-    ) internal {
-        require(amount == msg.value, "INV_DEP");
+    function _createDeposit(address owner, uint256 ballotId) internal {
+        require(VOTING_DEPOSIT == msg.value, "INV_DEP");
         VotingDeposit memory votingDeposit = VotingDeposit({
             owner: owner,
             ballotId: ballotId,
-            depositAmount: amount,
+            depositAmount: VOTING_DEPOSIT,
             isClaimed: false,
             isPresent: true
         });

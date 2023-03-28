@@ -2,6 +2,7 @@ const Web3 = require("web3");
 const web3 = new Web3("ws://localhost:8545");
 
 exports.VOTING_INTERVAL_BLOCKS = 25;
+exports.PROPOSAL_VOTING_TIME = 25; // 40320 blocks
 exports.DILUTION_INTERVAL_BLOCKS = 1000;
 exports.SALE_TRANSACTION_FEE_PERCENT = 0.5;
 exports.VOTING_DEPOSIT_MOCK_CONTRACT = "1000000000000000000";

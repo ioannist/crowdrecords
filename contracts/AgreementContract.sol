@@ -148,8 +148,6 @@ contract AgreementContract is BaseVotingContract {
     //This is for the token transfer and other core functions
     address public TREASURY_CORE_CONTRACT_ADDRESS;
 
-    uint256 public VOTING_DEPOSIT = 1 ether;
-
     IERC20 private crdTokenContract;
 
     constructor(uint8 votingInterval, address owner) BaseVotingContract(owner) {
@@ -160,12 +158,17 @@ contract AgreementContract is BaseVotingContract {
     /// @param newTreasuryContractAddress This is the address of new treasury contract
     /// @param newTreasuryCoreContractAddress This is the new address of treasury core contract
     /// @param newCrdTokenContractAddress This is the new address of crd token contract
+    /// @param newGovernanceContractAddress This is the address for the governance contract
     function initialize(
         address newTreasuryContractAddress,
         address newTreasuryCoreContractAddress,
-        address newCrdTokenContractAddress
+        address newCrdTokenContractAddress,
+        address newGovernanceContractAddress
     ) public initializer _ownerOnly {
-        BaseVotingContract.initialize(newTreasuryContractAddress);
+        BaseVotingContract.initialize(
+            newTreasuryContractAddress,
+            newGovernanceContractAddress
+        );
         TREASURY_CORE_CONTRACT_ADDRESS = newTreasuryCoreContractAddress;
         crdTokenContract = IERC20(newCrdTokenContractAddress);
         crdTokenContract.approve(
@@ -195,7 +198,7 @@ contract AgreementContract is BaseVotingContract {
 
         uint256 ballotId = _createVoting(true, tokenId);
 
-        _createDeposit(msg.sender, VOTING_DEPOSIT, ballotId);
+        _createDeposit(msg.sender, ballotId);
 
         Agreement memory agreement = Agreement({
             requester: msg.sender,

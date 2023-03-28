@@ -162,7 +162,6 @@ contract RecordsVotingContract is BaseVotingContract, IERC1155Receiver {
     mapping(uint256 => NewVersionTokenDistributionStruct) newVersionCommTokenDistributionMapping;
 
     //------------------------------
-    uint256 public VOTING_DEPOSIT = 1 ether;
 
     constructor(address owner) BaseVotingContract(owner) {}
 
@@ -170,12 +169,17 @@ contract RecordsVotingContract is BaseVotingContract, IERC1155Receiver {
     /// @param recordsContractAddress New records contract address
     /// @param treasuryContractAddress Takes the address of new treasury contract as parameter
     /// @param treasuryCoreContractAddress Takes the address of new treasury core contract as parameter
+    /// @param newGovernanceContractAddress This is the address for the governance contract
     function initialize(
         address recordsContractAddress,
         address treasuryContractAddress,
-        address treasuryCoreContractAddress
+        address treasuryCoreContractAddress,
+        address newGovernanceContractAddress
     ) public initializer _ownerOnly {
-        BaseVotingContract.initialize(treasuryContractAddress);
+        BaseVotingContract.initialize(
+            treasuryContractAddress,
+            newGovernanceContractAddress
+        );
         RECORDS_CONTRACT_ADDRESS = recordsContractAddress;
         TREASURY_CORE_CONTRACT_ADDRESS = treasuryCoreContractAddress;
     }
@@ -224,7 +228,7 @@ contract RecordsVotingContract is BaseVotingContract, IERC1155Receiver {
             params.oldRecordId
         );
         uint256 ballotId = _createVoting(false, votingTokenId);
-        _createDeposit(msg.sender, VOTING_DEPOSIT, ballotId);
+        _createDeposit(msg.sender, ballotId);
 
         treasury.setSymbolsAsUsed(
             params.governanceToken.symbol,

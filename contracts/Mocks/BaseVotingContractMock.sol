@@ -20,20 +20,22 @@ contract BaseVotingContractMock is BaseVotingContract {
 
     /// @dev This is to set the address of the contracts
     /// @param newTreasuryContractAddress This is the address of new treasury contract
-    function initialize(address newTreasuryContractAddress)
-        public
-        override
-        initializer
-        _ownerOnly
-    {
-        BaseVotingContract.initialize(newTreasuryContractAddress);
+    /// @param newGovernanceContractAddress This is the address for the governance contract
+    function initialize(
+        address newTreasuryContractAddress,
+        address newGovernanceContractAddress
+    ) public override initializer _ownerOnly {
+        BaseVotingContract.initialize(
+            newTreasuryContractAddress,
+            newGovernanceContractAddress
+        );
     }
 
     event Debug(uint256 amount);
 
     function createBallot(bool canOwnerVote, uint256 tokenId) public payable {
         uint256 ballotId = _createVoting(canOwnerVote, tokenId);
-        _createDeposit(msg.sender, 1 ether, ballotId);
+        _createDeposit(msg.sender, ballotId);
     }
 
     function castVote(uint256 ballotId, bool vote) public {

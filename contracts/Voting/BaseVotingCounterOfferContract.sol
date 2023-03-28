@@ -42,29 +42,32 @@ abstract contract BaseVotingCounterOfferContract is BaseVotingContract {
 
     /// @dev This function sets the treasury Contract address
     /// @param newTreasuryContractAddress This is the new address of treasury contract
-    function initialize(address newTreasuryContractAddress)
-        public
-        virtual
-        override
-        onlyInitializing
-    {
-        BaseVotingContract.initialize(newTreasuryContractAddress);
+    /// @param newGovernanceContractAddress This is the address for the governance contract
+    function initialize(
+        address newTreasuryContractAddress,
+        address newGovernanceContractAddress
+    ) public virtual override onlyInitializing {
+        BaseVotingContract.initialize(
+            newTreasuryContractAddress,
+            newGovernanceContractAddress
+        );
     }
 
     /// @dev This function is called by any user to cast vote
     /// @param votingBallotId this is the id of the ballot for which user is voting
     /// @param vote this is the state of the vote, if true than it means the vote is in favour of the ballot
-    function _castVote(uint256 votingBallotId, bool vote)
-        internal
-        override
-        _shouldNotHaveCreatedCounterOffer(votingBallotId)
-    {
+    function _castVote(
+        uint256 votingBallotId,
+        bool vote
+    ) internal override _shouldNotHaveCreatedCounterOffer(votingBallotId) {
         super._castVote(votingBallotId, vote);
     }
 
     /// @dev This function is called when you create a counter offer
     /// @param votingBallotId this is the id of the ballot for which user is voting
-    function _createCounterOffer(uint256 votingBallotId)
+    function _createCounterOffer(
+        uint256 votingBallotId
+    )
         internal
         _shouldNotHaveCreatedCounterOffer(votingBallotId)
         _checkIfBallotIsOpen(votingBallotId, msg.sender)

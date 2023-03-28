@@ -22,7 +22,13 @@ const BaseVotingCounterOfferContractMock = artifacts.require(
 const DilutionContract = artifacts.require("../contracts/voting/DilutionContract.Sol");
 const VotingHubContract = artifacts.require("../contracts/voting/VotingHubContract.Sol");
 
-const { getEthAccount, VOTING_INTERVAL_BLOCKS } = require("../test/utils/helper");
+const GovernanceContract = artifacts.require("../contracts/GovernanceContract.sol");
+
+const {
+    getEthAccount,
+    VOTING_INTERVAL_BLOCKS,
+    PROPOSAL_VOTING_TIME,
+} = require("../test/utils/helper");
 
 module.exports = async (deployer) => {
     await deployer.deploy(ContributionContract, await getEthAccount(0));
@@ -68,7 +74,11 @@ module.exports = async (deployer) => {
 
     await deployer.deploy(DilutionContract, VOTING_INTERVAL_BLOCKS, 1000, await getEthAccount(0));
     let dilutionContract = await DilutionContract.deployed();
+
     await deployer.deploy(VotingHubContract, await getEthAccount(0));
     let votingHubContract = await VotingHubContract.deployed();
+
+    await deployer.deploy(GovernanceContract, await getEthAccount(0), PROPOSAL_VOTING_TIME);
+    let governanceContract = await GovernanceContract.deployed();
 };
 

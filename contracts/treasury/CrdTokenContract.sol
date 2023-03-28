@@ -1,10 +1,10 @@
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Snapshot.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-contract CrdTokenContract is ERC20, Initializable {
+contract CrdTokenContract is ERC20Snapshot, Initializable {
     address public TREASURY_CONTRACT_ADDRESS;
     address public TREASURY_CORE_CONTRACT_ADDRESS;
     address public AGREEMENTS_CONTRACT_ADDRESS;
@@ -14,7 +14,7 @@ contract CrdTokenContract is ERC20, Initializable {
     // 18 decimal points supported
     constructor(address owner) ERC20("Crowdrecords", "CRD") {
         OWNER = owner;
-        _mint(owner, 1000000 * 10**18);
+        _mint(owner, 1000000 * 10 ** 18);
     }
 
     /// @dev Modifier to check that the person who accesses a specific function is the owner of contract himself.
@@ -52,9 +52,10 @@ contract CrdTokenContract is ERC20, Initializable {
     /// and then it will approve the max uint amount as a spender
     /// @param owner owner's address
     /// @param spender spenders address
-    function _checkAndApproveAllowance(address owner, address spender)
-        internal
-    {
+    function _checkAndApproveAllowance(
+        address owner,
+        address spender
+    ) internal {
         uint256 currentAllowance = allowance(owner, spender);
         if (currentAllowance == 0) {
             _approve(

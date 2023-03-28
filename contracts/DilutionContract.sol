@@ -85,7 +85,6 @@ contract DilutionContract is BaseVotingContract {
     mapping(uint256 => uint256) public lastDilutionResultMap;
 
     uint256 public REQUEST_INTERVAL;
-    uint256 public VOTING_DEPOSIT = 1 ether;
 
     constructor(
         uint8 votingInterval,
@@ -98,10 +97,15 @@ contract DilutionContract is BaseVotingContract {
 
     /// @dev This is to set the address of the contracts
     /// @param newTreasuryContractAddress This is the address of new treasury contract
+    /// @param newGovernanceContractAddress This is the address for the governance contract
     function initialize(
-        address newTreasuryContractAddress
+        address newTreasuryContractAddress,
+        address newGovernanceContractAddress
     ) public override initializer _ownerOnly {
-        BaseVotingContract.initialize(newTreasuryContractAddress);
+        BaseVotingContract.initialize(
+            newTreasuryContractAddress,
+            newGovernanceContractAddress
+        );
     }
 
     /// @dev This function will create a new contribution voting ballot
@@ -147,7 +151,7 @@ contract DilutionContract is BaseVotingContract {
         _dilutionIds.increment();
         uint256 dilutionId = _dilutionIds.current();
         uint256 ballotId = _createVoting(true, commTokenId);
-        _createDeposit(tx.origin, VOTING_DEPOSIT, ballotId);
+        _createDeposit(tx.origin, ballotId);
 
         DilutionRequest memory dilutionRequest = DilutionRequest({
             requester: msg.sender,

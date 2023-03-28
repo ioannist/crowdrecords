@@ -24,26 +24,29 @@ contract BaseVotingCounterOfferContractMock is BaseVotingCounterOfferContract {
     /// @param result this is the result of the counter offer that is true for accepted and false for rejected
     event CounterOfferResult(uint256 ballotId, address creator, bool result);
 
-    constructor(uint8 votingInterval, address owner)
-        BaseVotingCounterOfferContract(owner)
-    {
+    constructor(
+        uint8 votingInterval,
+        address owner
+    ) BaseVotingCounterOfferContract(owner) {
         VOTING_BLOCK_PERIOD = votingInterval;
     }
 
     /// @dev This is to set the address of the contracts
     /// @param newTreasuryContractAddress This is the address of new treasury contract
-    function initialize(address newTreasuryContractAddress)
-        public
-        override
-        initializer
-        _ownerOnly
-    {
-        BaseVotingCounterOfferContract.initialize(newTreasuryContractAddress);
+    /// @param newGovernanceContractAddress This is the address for the governance contract
+    function initialize(
+        address newTreasuryContractAddress,
+        address newGovernanceContractAddress
+    ) public override initializer _ownerOnly {
+        BaseVotingCounterOfferContract.initialize(
+            newTreasuryContractAddress,
+            newGovernanceContractAddress
+        );
     }
 
     function createBallot(bool canOwnerVote, uint256 tokenId) public payable {
         uint256 ballotId = _createVoting(canOwnerVote, tokenId);
-        _createDeposit(msg.sender, 1 ether, ballotId);
+        _createDeposit(msg.sender, ballotId);
     }
 
     function castVote(uint256 ballotId, bool vote) public {

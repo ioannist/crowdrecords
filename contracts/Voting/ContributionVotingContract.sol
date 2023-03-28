@@ -117,7 +117,6 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
     //This contains all the keys (The key's are users address) of the mapping of the counterOfferMapping.
     mapping(uint256 => address[]) contributionCounterOfferList;
     address public CONTRIBUTION_CONTRACT_ADDRESS;
-    uint256 public VOTING_DEPOSIT = 1 ether;
 
     constructor(
         uint8 votingInterval,
@@ -137,11 +136,16 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
     /// @dev This is to set the address of the contracts
     /// @param newTreasuryContractAddress This is the address of new treasury contract
     /// @param newContributionContractAddress This is the address of new voting hub contract
+    /// @param newGovernanceContractAddress This is the address for the governance contract
     function initialize(
         address newTreasuryContractAddress,
-        address newContributionContractAddress
+        address newContributionContractAddress,
+        address newGovernanceContractAddress
     ) public initializer _ownerOnly {
-        BaseVotingCounterOfferContract.initialize(newTreasuryContractAddress);
+        BaseVotingCounterOfferContract.initialize(
+            newTreasuryContractAddress,
+            newGovernanceContractAddress
+        );
         CONTRIBUTION_CONTRACT_ADDRESS = newContributionContractAddress;
     }
 
@@ -171,7 +175,7 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
         uint256 commTokenId = treasuryContract.getGovernanceTokenId(recordId);
 
         uint256 ballotId = _createVoting(true, govTokenId);
-        _createDeposit(tx.origin, VOTING_DEPOSIT, ballotId);
+        _createDeposit(tx.origin, ballotId);
 
         ContributionReward memory contributionReward = ContributionReward({
             requester: tx.origin,
