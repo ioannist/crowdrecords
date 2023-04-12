@@ -228,7 +228,7 @@ contract OrdersContract is Initializable {
             "Sale order"
         );
 
-        uint256 orderId = createOrder(
+        uint256 newOrderId = createOrder(
             params.isLockedInRatio,
             params.communityTokenId,
             params.communityTokenAmount,
@@ -239,7 +239,7 @@ contract OrdersContract is Initializable {
             params.governanceTokenCRD + params.communityTokenCRD
         );
 
-        return orderId;
+        return newOrderId;
     }
 
     function createOrder(
@@ -251,9 +251,9 @@ contract OrdersContract is Initializable {
         uint256 governanceTokenAmount,
         uint256 governanceTokenCRD,
         uint256 totalCRD
-    ) internal returns (uint256 orderId) {
-        uint256 newOrderId = orderId;
+    ) internal returns (uint256) {
         orderId++;
+        uint256 newOrderId = orderId;
 
         Order memory order = Order({
             isClosed: false,
@@ -269,10 +269,10 @@ contract OrdersContract is Initializable {
             crdBalance: totalCRD
         });
 
-        orderBook[orderId] = order;
+        orderBook[newOrderId] = order;
 
         emit BuyOrder({
-            saleId: orderId,
+            saleId: newOrderId,
             buyer: order.buyer,
             isLockedInRatio: isLockedInRatio,
             creationDate: order.creationDate,
@@ -285,7 +285,7 @@ contract OrdersContract is Initializable {
             crdBalance: totalCRD
         });
 
-        return orderId;
+        return newOrderId;
     }
 
     /// @dev This function is called to cancel the existing sale order

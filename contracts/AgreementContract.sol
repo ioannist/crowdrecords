@@ -395,13 +395,13 @@ contract AgreementContract is BaseVotingContract {
     }
 
     /// @dev This function is for testing purpose for distributing the royalty payment
-    /// @param royaltyId This is the id of royalty that user wants to claim
+    /// @param royaltyIdParam This is the id of royalty that user wants to claim
     /// @param tokenId this is the id of token that determines the royalty amount
     function _calculateSingleRoyaltyAmount(
-        uint256 royaltyId,
+        uint256 royaltyIdParam,
         uint256 tokenId
     ) internal view returns (uint256) {
-        RoyaltyData memory dividend = royaltyDataMapping[royaltyId];
+        RoyaltyData memory dividend = royaltyDataMapping[royaltyIdParam];
         ITreasuryCore treasuryCoreContract = ITreasuryCore(
             TREASURY_CORE_CONTRACT_ADDRESS
         );

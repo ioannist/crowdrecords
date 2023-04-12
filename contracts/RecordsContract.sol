@@ -135,7 +135,7 @@ contract RecordsContract is Initializable {
         string memory image,
         string memory recordCategory,
         uint256 seedId
-    ) public returns (uint256 recordId) {
+    ) public returns (uint256) {
         newTokenId++;
         uint256 recordId = newTokenId;
 
@@ -280,7 +280,7 @@ contract RecordsContract is Initializable {
         uint256 govTokenOwnerBalanace,
         uint256 commTokenTotalSupply,
         uint256 commTokenOwnerBalanace
-    ) external returns (bool) {
+    ) external view returns (bool) {
         require(
             recordData[oldVersionId].isPresent,
             "INVALID: RECORD_NOT_FOUND"

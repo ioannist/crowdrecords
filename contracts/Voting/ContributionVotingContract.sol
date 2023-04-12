@@ -318,9 +318,9 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
     /// @dev This function can be called from external source and also from within the contract
     /// @param contributionId this is the id of the contribution to which the winner is to be declared
     function declareWinner(uint256 contributionId) external {
-        address[] memory counterOfferList = contributionCounterOfferList[
-            contributionId
-        ];
+        // address[] memory counterOfferList = contributionCounterOfferList[
+        //     contributionId
+        // ];
 
         //! we should remove the below for loop as we don't need loop through all the offers
         //! as we are only calculating the votes that are accepted and rest are considered as false
