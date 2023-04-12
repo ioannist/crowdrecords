@@ -180,7 +180,7 @@ contract OrdersContract is Initializable {
         uint256 precision
     ) public pure returns (uint256 quotient) {
         // caution, check safe-to-multiply here
-        uint256 _numerator = numerator * 10**(precision + 1);
+        uint256 _numerator = numerator * 10 ** (precision + 1);
         // with rounding of last digit
         uint256 _quotient = ((_numerator / denominator) + 5) / 10;
         return (_quotient);
@@ -212,11 +212,9 @@ contract OrdersContract is Initializable {
 
     /// @dev This function is called to create a new saleOrder
     /// @param params this is the params for the buy order creation
-    function createBuyOrder(BuyOrderParams memory params)
-        public
-        buyOrderCheck(params)
-        returns (uint256 saleOrderId)
-    {
+    function createBuyOrder(
+        BuyOrderParams memory params
+    ) public buyOrderCheck(params) returns (uint256 saleOrderId) {
         ITreasuryCore treasuryCoreContract = ITreasuryCore(
             TREASURY_CORE_CONTRACT_ADDRESS
         );

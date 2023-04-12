@@ -19,7 +19,7 @@ const BaseVotingCounterOfferContractMock = artifacts.require(
 const VotingHubContract = artifacts.require("../contracts/Mocks/VotingHubContract.sol");
 const DilutionContract = artifacts.require("../contracts/DilutionContract.sol");
 
-const GovernanceContract = artifacts.require("../contracts/GovernanceContract.sol");
+const CrowdrecordsGovernor = artifacts.require("../contracts/governance/CrowdrecordsGovernor.sol");
 
 const { VOTING_INTERVAL_BLOCKS, getEthAccount } = require("./helper");
 
@@ -40,16 +40,7 @@ async function setup() {
     let baseVotingCounterOfferContractMock = await BaseVotingCounterOfferContractMock.deployed();
     let votingHubContract = await VotingHubContract.deployed();
     let dilutionContract = await DilutionContract.deployed();
-    let governanceContract = await GovernanceContract.deployed();
-
-    await governanceContract.initialize(
-        treasuryContract.address,
-        contributionVotingContract.address,
-        recordsVotingContract.address,
-        agreementContract.address,
-        dilutionContract.address,
-        await getEthAccount(0)
-    );
+    let crowdrecordsGovernor = await CrowdrecordsGovernor.deployed();
 
     await recordsContract.initialize(contributionContract.address, recordsVotingContract.address);
 
@@ -57,7 +48,7 @@ async function setup() {
         recordsContract.address,
         treasuryContract.address,
         treasuryCoreContract.address,
-        governanceContract.address
+        crowdrecordsGovernor.address
     );
 
     await contributionContract.initialize(
@@ -69,7 +60,7 @@ async function setup() {
     await contributionVotingContract.initialize(
         treasuryContract.address,
         contributionContract.address,
-        governanceContract.address
+        crowdrecordsGovernor.address
     );
 
     await ordersContract.initialize(treasuryContract.address, treasuryCoreContract.address);
@@ -79,13 +70,13 @@ async function setup() {
         treasuryContract.address,
         treasuryCoreContract.address,
         crdTokenContract.address,
-        governanceContract.address
+        crowdrecordsGovernor.address
     );
 
-    await baseVotingContractMock.initialize(treasuryContract.address, governanceContract.address);
+    await baseVotingContractMock.initialize(treasuryContract.address, crowdrecordsGovernor.address);
     await baseVotingCounterOfferContractMock.initialize(
         treasuryContract.address,
-        governanceContract.address
+        crowdrecordsGovernor.address
     );
 
     await votingHubContract.setTreasuryCoreContractAddress(treasuryCoreContract.address);
@@ -116,7 +107,7 @@ async function setup() {
         crdTokenContract.address
     );
 
-    await dilutionContract.initialize(treasuryContract.address, governanceContract.address);
+    await dilutionContract.initialize(treasuryContract.address, crowdrecordsGovernor.address);
 
     this.tracksContract = tracksContract;
     this.contributionContract = contributionContract;
@@ -132,7 +123,7 @@ async function setup() {
     this.baseVotingCounterOfferContractMock = baseVotingCounterOfferContractMock;
     this.votingHubContract = votingHubContract;
     this.dilutionContract = dilutionContract;
-    this.governanceContract = governanceContract;
+    this.crowdrecordsGovernor = crowdrecordsGovernor;
 }
 
 module.exports = setup;

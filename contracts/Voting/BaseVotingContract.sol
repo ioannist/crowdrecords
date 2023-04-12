@@ -157,7 +157,7 @@ contract BaseVotingContract is Initializable {
     }
 
     /// @dev This function sets the VOTING_DEPOSIT percentage
-    /// @param depositAmount This is the new turnout percentage value
+    /// @param depositAmount This is the new deposit amount needed for creating ballot
     function setDepositAmount(uint depositAmount) public _governanceOnly {
         VOTING_DEPOSIT = depositAmount;
     }

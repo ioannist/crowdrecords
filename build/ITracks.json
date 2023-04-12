@@ -1,0 +1,384 @@
+{
+  "contractName": "ITracks",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "uint256[]",
+          "name": "tracks",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        }
+      ],
+      "name": "checkOwner",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.8.12+commit.f00d7308\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"uint256[]\",\"name\":\"tracks\",\"type\":\"uint256[]\"},{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"checkOwner\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"project:/contracts/interface/ITracks.sol\":\"ITracks\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":438000},\"remappings\":[]},\"sources\":{\"project:/contracts/interface/ITracks.sol\":{\"keccak256\":\"0x5c32500e93ab60c040e11a061f30ad94be387acc4259b901763060f4e20d4ba5\",\"urls\":[\"bzz-raw://277870d53e4014a9198c6d6e1929dd5448c0dd5fc2d100f1091d0d1c6bee5497\",\"dweb:/ipfs/QmURdCjPn8vhEJuGA1NjQbzLrvh4cvXbd1LuXYX6vQ9FvG\"]}},\"version\":1}",
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "immutableReferences": {},
+  "generatedSources": [],
+  "deployedGeneratedSources": [],
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "pragma solidity ^0.8.0;\n\ninterface ITracks {\n    function checkOwner(uint256[] memory tracks, address owner)\n        external\n        view\n        returns (bool);\n}\n",
+  "sourcePath": "/Users/a1/Desktop/Office/projects/CrowdRecords/Contracts/contracts/interface/ITracks.sol",
+  "ast": {
+    "absolutePath": "project:/contracts/interface/ITracks.sol",
+    "exportedSymbols": {
+      "ITracks": [
+        15333
+      ]
+    },
+    "id": 15334,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 15322,
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:23:58"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "canonicalName": "ITracks",
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "id": 15333,
+        "linearizedBaseContracts": [
+          15333
+        ],
+        "name": "ITracks",
+        "nameLocation": "35:7:58",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "functionSelector": "b260c8c3",
+            "id": 15332,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "checkOwner",
+            "nameLocation": "58:10:58",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 15328,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 15325,
+                  "mutability": "mutable",
+                  "name": "tracks",
+                  "nameLocation": "86:6:58",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 15332,
+                  "src": "69:23:58",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_uint256_$dyn_memory_ptr",
+                    "typeString": "uint256[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 15323,
+                      "name": "uint256",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "69:7:58",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "id": 15324,
+                    "nodeType": "ArrayTypeName",
+                    "src": "69:9:58",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
+                      "typeString": "uint256[]"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 15327,
+                  "mutability": "mutable",
+                  "name": "owner",
+                  "nameLocation": "102:5:58",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 15332,
+                  "src": "94:13:58",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 15326,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "94:7:58",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "68:40:58"
+            },
+            "returnParameters": {
+              "id": 15331,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 15330,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 15332,
+                  "src": "156:4:58",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 15329,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "156:4:58",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "155:6:58"
+            },
+            "scope": 15333,
+            "src": "49:113:58",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "scope": 15334,
+        "src": "25:139:58",
+        "usedErrors": []
+      }
+    ],
+    "src": "0:165:58"
+  },
+  "legacyAST": {
+    "absolutePath": "project:/contracts/interface/ITracks.sol",
+    "exportedSymbols": {
+      "ITracks": [
+        15333
+      ]
+    },
+    "id": 15334,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 15322,
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:23:58"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "canonicalName": "ITracks",
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "id": 15333,
+        "linearizedBaseContracts": [
+          15333
+        ],
+        "name": "ITracks",
+        "nameLocation": "35:7:58",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "functionSelector": "b260c8c3",
+            "id": 15332,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "checkOwner",
+            "nameLocation": "58:10:58",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 15328,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 15325,
+                  "mutability": "mutable",
+                  "name": "tracks",
+                  "nameLocation": "86:6:58",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 15332,
+                  "src": "69:23:58",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_uint256_$dyn_memory_ptr",
+                    "typeString": "uint256[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 15323,
+                      "name": "uint256",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "69:7:58",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "id": 15324,
+                    "nodeType": "ArrayTypeName",
+                    "src": "69:9:58",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
+                      "typeString": "uint256[]"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 15327,
+                  "mutability": "mutable",
+                  "name": "owner",
+                  "nameLocation": "102:5:58",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 15332,
+                  "src": "94:13:58",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 15326,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "94:7:58",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "68:40:58"
+            },
+            "returnParameters": {
+              "id": 15331,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 15330,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 15332,
+                  "src": "156:4:58",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 15329,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "156:4:58",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "155:6:58"
+            },
+            "scope": 15333,
+            "src": "49:113:58",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "scope": 15334,
+        "src": "25:139:58",
+        "usedErrors": []
+      }
+    ],
+    "src": "0:165:58"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.8.12+commit.f00d7308.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.4.6",
+  "updatedAt": "2023-04-11T15:44:43.787Z",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  }
+}

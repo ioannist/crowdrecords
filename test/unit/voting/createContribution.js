@@ -22,6 +22,9 @@ const BaseVotingCounterOfferContractMock = artifacts.require(
 
 const VotingHubContract = artifacts.require("../../contracts/Mocks/VotingHubContract.sol");
 const DilutionContract = artifacts.require("../../contracts/DilutionContract.sol");
+const CrowdrecordsGovernor = artifacts.require(
+    "../../contracts/governance/CrowdrecordsGovernor.sol"
+);
 
 const {
     VOTING_INTERVAL_BLOCKS,
@@ -88,6 +91,7 @@ async function createContribution() {
         this.rewardGovernanceToken,
         {
             from: contributionOwner,
+            value: helper.VOTING_DEPOSIT_CONTRIBUTION_CONTRACT,
         }
     );
 }
@@ -123,13 +127,19 @@ async function createContributionWithMockTreasury() {
         DILUTION_INTERVAL_BLOCKS,
         await getEthAccount(0)
     );
-
+    let crowdrecordsGovernor = await CrowdrecordsGovernor.new(
+        crdTokenContract.address,
+        helper.GOV_VOTING_DELAY,
+        helper.GOV_VOTING_PERIOD,
+        helper.GOV_VOTING_THRESHOLD
+    );
     await recordsContract.initialize(contributionContract.address, recordsVotingContract.address);
 
     await recordsVotingContract.initialize(
         recordsContract.address,
         treasuryContract.address,
-        treasuryCoreContractMock.address
+        treasuryCoreContractMock.address,
+        crowdrecordsGovernor.address
     );
 
     await contributionContract.initialize(
@@ -140,7 +150,8 @@ async function createContributionWithMockTreasury() {
 
     await contributionVotingContract.initialize(
         treasuryContract.address,
-        contributionContract.address
+        contributionContract.address,
+        crowdrecordsGovernor.address
     );
 
     await ordersContract.initialize(treasuryContract.address, treasuryCoreContractMock.address);
@@ -149,11 +160,15 @@ async function createContributionWithMockTreasury() {
     await agreementContract.initialize(
         treasuryContract.address,
         treasuryCoreContractMock.address,
-        crdTokenContract.address
+        crdTokenContract.address,
+        crowdrecordsGovernor.address
     );
 
-    await baseVotingContractMock.initialize(treasuryContract.address);
-    await baseVotingCounterOfferContractMock.initialize(treasuryContract.address);
+    await baseVotingContractMock.initialize(treasuryContract.address, crowdrecordsGovernor.address);
+    await baseVotingCounterOfferContractMock.initialize(
+        treasuryContract.address,
+        crowdrecordsGovernor.address
+    );
 
     await votingHubContract.setTreasuryCoreContractAddress(treasuryCoreContractMock.address);
     await votingHubContract.addVotingContract(contributionVotingContract.address);
@@ -185,7 +200,7 @@ async function createContributionWithMockTreasury() {
         crdTokenContract.address
     );
 
-    await dilutionContract.initialize(treasuryContract.address);
+    await dilutionContract.initialize(treasuryContract.address, crowdrecordsGovernor.address);
 
     return {
         tracksContractMock: tracksContract,

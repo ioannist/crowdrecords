@@ -22,12 +22,15 @@ const BaseVotingCounterOfferContractMock = artifacts.require(
 const DilutionContract = artifacts.require("../contracts/voting/DilutionContract.Sol");
 const VotingHubContract = artifacts.require("../contracts/voting/VotingHubContract.Sol");
 
-const GovernanceContract = artifacts.require("../contracts/GovernanceContract.sol");
+const CrowdrecordsGovernor = artifacts.require("../contracts/governance/CrowdrecordsGovernor.sol");
 
 const {
     getEthAccount,
     VOTING_INTERVAL_BLOCKS,
     PROPOSAL_VOTING_TIME,
+    GOV_VOTING_DELAY,
+    GOV_VOTING_PERIOD,
+    GOV_VOTING_THRESHOLD,
 } = require("../test/utils/helper");
 
 module.exports = async (deployer) => {
@@ -78,7 +81,13 @@ module.exports = async (deployer) => {
     await deployer.deploy(VotingHubContract, await getEthAccount(0));
     let votingHubContract = await VotingHubContract.deployed();
 
-    await deployer.deploy(GovernanceContract, await getEthAccount(0), PROPOSAL_VOTING_TIME);
-    let governanceContract = await GovernanceContract.deployed();
+    await deployer.deploy(
+        CrowdrecordsGovernor,
+        crdTokenContract.address,
+        GOV_VOTING_DELAY,
+        GOV_VOTING_PERIOD,
+        GOV_VOTING_THRESHOLD
+    );
+    let crowdrecordsGovernor = await CrowdrecordsGovernor.deployed();
 };
 
