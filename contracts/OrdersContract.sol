@@ -126,6 +126,8 @@ contract OrdersContract is Initializable {
         uint256 remainingBalance
     );
 
+    ITreasury public treasuryContract;
+    ITreasuryCore public treasuryCoreContract;
     mapping(uint256 => Order) public orderBook;
     uint256 orderId = 0;
 
@@ -142,8 +144,6 @@ contract OrdersContract is Initializable {
     /// @dev Modifier checks if order params are valid or not
     /// @param params params for the buy order
     modifier buyOrderCheck(BuyOrderParams memory params) {
-        ITreasury treasuryContract = ITreasury(TREASURY_CONTRACT_ADDRESS);
-
         require(
             treasuryContract.getCommunityTokenId(params.recordId) ==
                 params.communityTokenId,
@@ -201,7 +201,9 @@ contract OrdersContract is Initializable {
         address newTreasuryCoreContractAddress
     ) public initializer ownerOnly {
         TREASURY_CONTRACT_ADDRESS = newTreasuryContractAddress;
+        treasuryContract = ITreasury(TREASURY_CONTRACT_ADDRESS);
         TREASURY_CORE_CONTRACT_ADDRESS = newTreasuryCoreContractAddress;
+        treasuryCoreContract = ITreasuryCore(TREASURY_CORE_CONTRACT_ADDRESS);
     }
 
     /// @dev This function sets the wallet address this address will receive all the transaction royalties
@@ -215,10 +217,6 @@ contract OrdersContract is Initializable {
     function createBuyOrder(
         BuyOrderParams memory params
     ) public buyOrderCheck(params) returns (uint256 saleOrderId) {
-        ITreasuryCore treasuryCoreContract = ITreasuryCore(
-            TREASURY_CORE_CONTRACT_ADDRESS
-        );
-
         // Transferring the CRD token into contract to lock it
         treasuryCoreContract.safeTransferFrom(
             tx.origin,
@@ -299,10 +297,6 @@ contract OrdersContract is Initializable {
         require(orderBook[saleId].isClosed == false, "INVALID: ORDER_CLOSED");
 
         Order memory order = orderBook[saleId];
-
-        ITreasuryCore treasuryCoreContract = ITreasuryCore(
-            TREASURY_CORE_CONTRACT_ADDRESS
-        );
 
         //--- Need to have additional checks for balance of the sale and also to deduct the tokens from the sale struct
         //Send back the remaining amount to user
@@ -477,10 +471,6 @@ contract OrdersContract is Initializable {
         uint256 transactionFee = (transactionAmount * TRANSACTION_FEE) / 10000;
         //Removing the transaction fee from the transaction amount
         transactionAmount = transactionAmount - transactionFee;
-
-        ITreasuryCore treasuryCoreContract = ITreasuryCore(
-            TREASURY_CORE_CONTRACT_ADDRESS
-        );
 
         treasuryCoreContract.safeTransferFrom(
             address(this),

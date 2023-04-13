@@ -70,7 +70,9 @@ contract ContributionContract is Initializable {
     address public OWNER;
     address public CONTRIBUTION_VOTING_CONTRACT_ADDRESS;
     address public RECORD_CONTRACT_ADDRESS;
+    IRecords public recordsContract;
     address public TRACKS_CONTRACT_ADDRESS;
+    ITracks public trackInterface;
     mapping(uint256 => Contribution) public contributionData;
     uint256 public PENDING = 1;
     uint256 public ACCEPTED = 2;
@@ -97,7 +99,9 @@ contract ContributionContract is Initializable {
     ) public initializer ownerOnly {
         CONTRIBUTION_VOTING_CONTRACT_ADDRESS = newVotingContractAddress;
         RECORD_CONTRACT_ADDRESS = newRecordsContractAddress;
+        recordsContract = IRecords(RECORD_CONTRACT_ADDRESS);
         TRACKS_CONTRACT_ADDRESS = newTracksContractAddress;
+        trackInterface = ITracks(TRACKS_CONTRACT_ADDRESS);
     }
 
     /// @dev This function sets the owner address
@@ -140,7 +144,6 @@ contract ContributionContract is Initializable {
     ) public payable returns (uint256) {
         _contributionIds.increment();
         {
-            ITracks trackInterface = ITracks(TRACKS_CONTRACT_ADDRESS);
             bool ownerStatus = trackInterface.checkOwner(tracks, msg.sender);
 
             require(ownerStatus, "INVALID: NOT_A_TRACK_OWNER");
@@ -170,7 +173,6 @@ contract ContributionContract is Initializable {
             isPresent: true
         });
 
-        IRecords recordsContract = IRecords(RECORD_CONTRACT_ADDRESS);
         recordsContract.pushContributionIdToContributionList(
             recordId,
             contributionId
@@ -198,7 +200,6 @@ contract ContributionContract is Initializable {
         string memory description
     ) public returns (uint256) {
         {
-            ITracks trackInterface = ITracks(TRACKS_CONTRACT_ADDRESS);
             bool ownerStatus = trackInterface.checkOwner(tracks, msg.sender);
 
             require(ownerStatus, "INVALID: NOT_A_TRACK_OWNER");

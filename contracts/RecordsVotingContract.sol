@@ -6,7 +6,6 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 import "./interface/IContribution.sol";
 import "./Voting/BaseVotingContract.sol";
-import "./interface/ITreasury.sol";
 import "./interface/ITreasuryCore.sol";
 import "./RecordsContract.sol";
 
@@ -23,8 +22,12 @@ contract RecordsVotingContract is BaseVotingContract, IERC1155Receiver {
     // Address of the treasury core contracts
     address public TREASURY_CORE_CONTRACT_ADDRESS;
 
+    ITreasuryCore public treasuryCoreContract;
+
     // Address of the records contract
     address public RECORDS_CONTRACT_ADDRESS;
+
+    RecordsContract public recordsContract;
 
     /// @dev This is the token data for new version of record
     /// @param totalSupply This is the total amount of tokens that will be created
@@ -181,7 +184,9 @@ contract RecordsVotingContract is BaseVotingContract, IERC1155Receiver {
             newGovernanceContractAddress
         );
         RECORDS_CONTRACT_ADDRESS = recordsContractAddress;
+        recordsContract = RecordsContract(RECORDS_CONTRACT_ADDRESS);
         TREASURY_CORE_CONTRACT_ADDRESS = treasuryCoreContractAddress;
+        treasuryCoreContract = ITreasuryCore(TREASURY_CORE_CONTRACT_ADDRESS);
     }
 
     /// @dev This struct holds the required data for new version creation
@@ -207,10 +212,6 @@ contract RecordsVotingContract is BaseVotingContract, IERC1155Receiver {
     function createNewRecordVersion(
         NewRecordVersionParams memory params
     ) public payable returns (uint256) {
-        RecordsContract recordsContract = RecordsContract(
-            RECORDS_CONTRACT_ADDRESS
-        );
-
         {
             recordsContract.validateNewRecordVersionParams(
                 params.oldRecordId,
@@ -223,14 +224,13 @@ contract RecordsVotingContract is BaseVotingContract, IERC1155Receiver {
 
         newVersionRequestId++;
 
-        ITreasury treasury = ITreasury(TREASURY_CONTRACT_ADDRESS);
-        uint256 votingTokenId = treasury.getCommunityTokenId(
+        uint256 votingTokenId = treasuryContract.getCommunityTokenId(
             params.oldRecordId
         );
         uint256 ballotId = _createVoting(false, votingTokenId);
         _createDeposit(msg.sender, ballotId);
 
-        treasury.setSymbolsAsUsed(
+        treasuryContract.setSymbolsAsUsed(
             params.governanceToken.symbol,
             params.communityToken.symbol
         );
@@ -305,10 +305,6 @@ contract RecordsVotingContract is BaseVotingContract, IERC1155Receiver {
     /// @dev This function can be called from external source and also from within the contract
     /// @param versionReqId this is the id of the new version request to which the winner is to be declared
     function declareWinner(uint256 versionReqId) external {
-        RecordsContract recordsContract = RecordsContract(
-            RECORDS_CONTRACT_ADDRESS
-        );
-
         NewVersionRequest memory req = newVersionRequestMap[versionReqId];
 
         (bool result, bool minTurnOut) = _declareWinner(req.ballotId);
@@ -317,8 +313,6 @@ contract RecordsVotingContract is BaseVotingContract, IERC1155Receiver {
         uint256 recordId = 0;
 
         if (result) {
-            ITreasury treasuryContract = ITreasury(TREASURY_CONTRACT_ADDRESS);
-
             recordId = recordsContract.createRecordFromData(
                 req.recordData,
                 req.contributionIds
@@ -406,10 +400,6 @@ contract RecordsVotingContract is BaseVotingContract, IERC1155Receiver {
     function calculateRewardTokens(
         NewVersionTokenDistributionStruct memory tokenData
     ) internal returns (uint256) {
-        ITreasuryCore treasuryCoreContract = ITreasuryCore(
-            TREASURY_CORE_CONTRACT_ADDRESS
-        );
-
         uint256 tokenBal = treasuryCoreContract.balanceOfAt(
             msg.sender,
             tokenData.snapshotId,
@@ -443,8 +433,6 @@ contract RecordsVotingContract is BaseVotingContract, IERC1155Receiver {
         bool isGovernanceToken,
         address requester
     ) internal {
-        ITreasury treasuryContract = ITreasury(TREASURY_CONTRACT_ADDRESS);
-
         uint256 tokenId = decidingTokenId;
         uint256 totalSupply = treasuryContract.totalCirculatingSupply(tokenId);
 
@@ -506,8 +494,6 @@ contract RecordsVotingContract is BaseVotingContract, IERC1155Receiver {
         uint256 recordId,
         address owner
     ) internal returns (uint256) {
-        ITreasury treasuryContract = ITreasury(TREASURY_CONTRACT_ADDRESS);
-
         return
             treasuryContract.createNewGovernanceTokenNewRecordVersion(
                 recordId,
@@ -525,8 +511,6 @@ contract RecordsVotingContract is BaseVotingContract, IERC1155Receiver {
         uint256 recordId,
         address owner
     ) internal returns (uint256) {
-        ITreasury treasuryContract = ITreasury(TREASURY_CONTRACT_ADDRESS);
-
         return
             treasuryContract.createNewCommunityTokenNewRecordVersion(
                 recordId,

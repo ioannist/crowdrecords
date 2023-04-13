@@ -8,6 +8,7 @@ contract VotingHubContract {
     address[] public VOTING_CONTRACTS_ADDRESS;
     address public TREASURY_CORE_CONTRACT_ADDRESS;
     address public OWNER;
+    ITreasuryCore public iTreasury;
 
     constructor(address owner) {
         OWNER = owner;
@@ -50,7 +51,6 @@ contract VotingHubContract {
         uint256 amount,
         uint256 tokenId
     ) public _onlyTreasuryCore {
-        ITreasuryCore iTreasury = ITreasuryCore(TREASURY_CORE_CONTRACT_ADDRESS);
         for (uint256 i = 0; i < VOTING_CONTRACTS_ADDRESS.length; i++) {
             IBaseVoting iBaseVoting = IBaseVoting(VOTING_CONTRACTS_ADDRESS[i]);
             if (sender != address(0)) {
@@ -80,11 +80,11 @@ contract VotingHubContract {
 
     /// @notice
     /// @dev This function sets the treasury Contract address
-    function setTreasuryCoreContractAddress(address newTreasuryContractAddress)
-        public
-        _ownerOnly
-    {
+    function setTreasuryCoreContractAddress(
+        address newTreasuryContractAddress
+    ) public _ownerOnly {
         TREASURY_CORE_CONTRACT_ADDRESS = newTreasuryContractAddress;
+        iTreasury = ITreasuryCore(TREASURY_CORE_CONTRACT_ADDRESS);
     }
 
     /// @notice

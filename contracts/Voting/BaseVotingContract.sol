@@ -73,6 +73,7 @@ contract BaseVotingContract is Initializable {
     uint256 public VOTING_BLOCK_PERIOD = 25;
     uint256 public MIN_TURNOUT_PERCENT = 500;
     address public TREASURY_CONTRACT_ADDRESS;
+    ITreasury public treasuryContract;
     address public TREASURY_HUB_ADDRESS;
     address public OWNER;
     address public GOVERNANCE;
@@ -202,6 +203,7 @@ contract BaseVotingContract is Initializable {
         address newGovernanceContractAddress
     ) public virtual onlyInitializing {
         TREASURY_CONTRACT_ADDRESS = newTreasuryContractAddress;
+        treasuryContract = ITreasury(TREASURY_CONTRACT_ADDRESS);
         GOVERNANCE = newGovernanceContractAddress;
     }
 
@@ -241,7 +243,6 @@ contract BaseVotingContract is Initializable {
         bool vote,
         address voter
     ) private {
-        ITreasury treasuryContract = ITreasury(TREASURY_CONTRACT_ADDRESS);
         VotingBallot memory votingBallot = votingMap[votingBallotId];
         uint256 bal = treasuryContract.balanceOf(voter, votingBallot.tokenId);
 
@@ -346,8 +347,6 @@ contract BaseVotingContract is Initializable {
         uint256 totalNo = votingBallot.noWeight;
 
         // Currently to win you would need to around 66% of votes to be yes
-        ITreasury treasuryContract = ITreasury(TREASURY_CONTRACT_ADDRESS);
-
         votingMap[votingBallotId].isResultDeclared = true;
 
         uint256 totalCirculatingSupply = treasuryContract

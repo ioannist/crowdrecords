@@ -147,8 +147,9 @@ contract AgreementContract is BaseVotingContract {
 
     //This is for the token transfer and other core functions
     address public TREASURY_CORE_CONTRACT_ADDRESS;
+    ITreasuryCore public treasuryCoreContract;
 
-    IERC20 private crdTokenContract;
+    IERC20 public crdTokenContract;
 
     constructor(uint8 votingInterval, address owner) BaseVotingContract(owner) {
         VOTING_BLOCK_PERIOD = votingInterval;
@@ -170,6 +171,8 @@ contract AgreementContract is BaseVotingContract {
             newGovernanceContractAddress
         );
         TREASURY_CORE_CONTRACT_ADDRESS = newTreasuryCoreContractAddress;
+        treasuryCoreContract = ITreasuryCore(TREASURY_CORE_CONTRACT_ADDRESS);
+
         crdTokenContract = IERC20(newCrdTokenContractAddress);
         crdTokenContract.approve(
             TREASURY_CORE_CONTRACT_ADDRESS,
@@ -298,9 +301,6 @@ contract AgreementContract is BaseVotingContract {
             snapshotId: treasuryContract.snapshot()
         });
 
-        ITreasuryCore treasuryCoreContract = ITreasuryCore(
-            TREASURY_CORE_CONTRACT_ADDRESS
-        );
         treasuryCoreContract.safeTransferFrom(
             msg.sender,
             address(this),
@@ -381,9 +381,6 @@ contract AgreementContract is BaseVotingContract {
             -     - does not trigger an invalid opcode by other means (ex: accessing an array out of bounds).
        */
         // require(false, "NO_PENDING_CLAIMS");
-        ITreasuryCore treasuryCoreContract = ITreasuryCore(
-            TREASURY_CORE_CONTRACT_ADDRESS
-        );
 
         treasuryCoreContract.safeTransferFrom(
             address(this),
@@ -402,9 +399,6 @@ contract AgreementContract is BaseVotingContract {
         uint256 tokenId
     ) internal view returns (uint256) {
         RoyaltyData memory dividend = royaltyDataMapping[royaltyIdParam];
-        ITreasuryCore treasuryCoreContract = ITreasuryCore(
-            TREASURY_CORE_CONTRACT_ADDRESS
-        );
 
         uint256 tokenBal = treasuryCoreContract.balanceOfAt(
             msg.sender,
