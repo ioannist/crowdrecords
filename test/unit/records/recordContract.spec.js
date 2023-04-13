@@ -226,7 +226,7 @@ contract("Records Contract", function() {
                 "image.png",
                 "Cat1",
                 SEED_CONTRIBUTION_ID,
-                { from: user2 }
+                { from: user2, gas: 30_000_000 }
             )
         ).to.eventually.be.rejectedWith("INVALID: ONLY_CONTRIBUTION_OWNER");
     });

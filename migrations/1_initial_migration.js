@@ -36,10 +36,15 @@ const {
 module.exports = async (deployer) => {
     await deployer.deploy(ContributionContract, await getEthAccount(0));
     let contributionContract = await ContributionContract.deployed();
-    await deployer.deploy(RecordsContract, await getEthAccount(0));
-    let recordsContract = await RecordsContract.deployed();
     await deployer.deploy(RecordsVotingContract, await getEthAccount(0));
     let recordsVotingContract = await RecordsVotingContract.deployed();
+    await deployer.deploy(
+        RecordsContract,
+        await getEthAccount(0),
+        contributionContract.address,
+        recordsVotingContract.address
+    );
+    let recordsContract = await RecordsContract.deployed();
     await deployer.deploy(TracksContract);
     let tracksContract = await TracksContract.deployed();
     await deployer.deploy(CrdTokenContract, await getEthAccount(0));

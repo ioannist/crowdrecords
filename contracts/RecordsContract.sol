@@ -25,13 +25,16 @@ contract RecordsContract is Initializable {
     mapping(uint256 => uint256[]) public recordContributions;
 
     // Address of the contribution contracts
-    address public CONTRIBUTION_CONTRACT_ADDRESS;
+    address public immutable CONTRIBUTION_CONTRACT_ADDRESS;
 
     // Address of the records voting contracts
-    address public RECORDS_VOTING_CONTRACT_ADDRESS;
+    address public immutable RECORDS_VOTING_CONTRACT_ADDRESS;
 
     // Address of the owner
-    address public OWNER;
+    address public immutable OWNER;
+
+    // Contribution contract
+    IContribution public immutable contributionContract;
 
     /// @dev This struct holds the data for record token
     /// @param name Name of the record
@@ -86,8 +89,15 @@ contract RecordsContract is Initializable {
         uint256 creationDate
     );
 
-    constructor(address owner) {
+    constructor(
+        address owner,
+        address contributionContractAddress,
+        address recordsVotingContract
+    ) {
         OWNER = owner;
+        CONTRIBUTION_CONTRACT_ADDRESS = contributionContractAddress;
+        RECORDS_VOTING_CONTRACT_ADDRESS = recordsVotingContract;
+        contributionContract = IContribution(CONTRIBUTION_CONTRACT_ADDRESS);
     }
 
     /// @dev Modifier to check that the function is only being called from the contribution contract
@@ -114,17 +124,6 @@ contract RecordsContract is Initializable {
         _;
     }
 
-    /// @dev This is to set the address of the contracts
-    /// @param contributionContractAddress Takes the address of new contribution contract as parameter
-    /// @param recordsVotingContract Takes the address of new voting contract as parameter
-    function initialize(
-        address contributionContractAddress,
-        address recordsVotingContract
-    ) public initializer onlyOwner {
-        CONTRIBUTION_CONTRACT_ADDRESS = contributionContractAddress;
-        RECORDS_VOTING_CONTRACT_ADDRESS = recordsVotingContract;
-    }
-
     /// @dev This function creates new record
     /// @param name This is the name of the record
     /// @param image This is the image/logo of the record
@@ -140,10 +139,6 @@ contract RecordsContract is Initializable {
         uint256 recordId = newTokenId;
 
         require(seedIdUsed[seedId] == false, "INVALID: SEED_ALREADY_USED");
-
-        IContribution contributionContract = IContribution(
-            CONTRIBUTION_CONTRACT_ADDRESS
-        );
 
         IContribution.Contribution memory contribution = contributionContract
             .getContributionData(seedId);

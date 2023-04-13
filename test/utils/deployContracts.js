@@ -42,8 +42,6 @@ async function setup() {
     let dilutionContract = await DilutionContract.deployed();
     let crowdrecordsGovernor = await CrowdrecordsGovernor.deployed();
 
-    await recordsContract.initialize(contributionContract.address, recordsVotingContract.address);
-
     await recordsVotingContract.initialize(
         recordsContract.address,
         treasuryContract.address,

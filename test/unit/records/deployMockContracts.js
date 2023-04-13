@@ -35,8 +35,12 @@ const {
 async function getMockContractsForRecordTesting() {
     let tracksContract = await TracksContract.new();
     let contributionContract = await ContributionContract.new(await getEthAccount(0));
-    let recordsContract = await RecordsContract.new(await getEthAccount(0));
     let recordsVotingContract = await RecordsVotingContract.new(await getEthAccount(0));
+    let recordsContract = await RecordsContract.new(
+        await getEthAccount(0),
+        contributionContract.address,
+        recordsVotingContract.address
+    );
     let treasuryCoreContractMock = await TreasuryCoreContractMock.new(await getEthAccount(0));
     let treasuryContract = await TreasuryContract.new(await getEthAccount(0));
     let crdTokenContract = await CrdTokenContract.new(await getEthAccount(0));
@@ -70,8 +74,6 @@ async function getMockContractsForRecordTesting() {
         GOV_VOTING_PERIOD,
         GOV_VOTING_THRESHOLD
     );
-
-    await recordsContract.initialize(contributionContract.address, recordsVotingContract.address);
 
     await recordsVotingContract.initialize(
         recordsContract.address,
