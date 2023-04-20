@@ -172,7 +172,6 @@ async function createContributionWithMockTreasury() {
     );
 
     await ordersContract.initialize(treasuryContract.address, treasuryCoreContractMock.address);
-    await ordersContract.setWalletAddress(await getEthAccount(9));
 
     await agreementContract.initialize(
         treasuryContract.address,

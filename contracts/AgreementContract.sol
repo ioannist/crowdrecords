@@ -340,8 +340,6 @@ contract AgreementContract is BaseVotingContract {
             "NO_PENDING_CLAIMS"
         );
 
-        ITreasury treasuryContract = ITreasury(TREASURY_CONTRACT_ADDRESS);
-
         uint256 tokenId = treasuryContract.getCommunityTokenId(recordId);
         uint256 totalReward = 0;
 

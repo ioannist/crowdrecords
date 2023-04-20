@@ -277,12 +277,7 @@ contract("Not Ratio Locked Sales", function() {
         // deduction of the fess.
         await expect(
             this.treasuryContract.balanceOf(user1, CRDTokenId)
-        ).to.eventually.be.bignumber.equals(await web3.utils.toWei("994005"));
-
-        // Checking the wallet for the transaction cut balance
-        await expect(
-            this.treasuryContract.balanceOf(await this.ordersContract.WALLET_ADDRESS(), CRDTokenId)
-        ).to.eventually.be.bignumber.equals(await web3.utils.toWei("4995"));
+        ).to.eventually.be.bignumber.equals(await web3.utils.toWei("999000"));
     });
 
     it("Sale tokens should belong to same record, expect revert", async function() {
@@ -665,85 +660,7 @@ contract("Not Ratio Locked Sales", function() {
         });
     });
 
-    it("Buy order is fulfilled and the transaction fees are transferred to wallet", async function() {
-        const user1 = await helper.getEthAccount(0);
-        const user2 = await helper.getEthAccount(1);
-
-        //Seller Approval
-        await this.treasuryCoreContract.setApprovalForAll(this.ordersContract.address, true);
-        //Purchaser Approval
-        await this.treasuryCoreContract.setApprovalForAll(this.ordersContract.address, true, {
-            from: user2,
-        });
-
-        //Transferring CRD token to user2
-        await this.treasuryCoreContract.safeTransferFrom(
-            user1,
-            user2,
-            CRDTokenId,
-            await web3.utils.toWei("100000"),
-            "0x0"
-        );
-
-        let trx = await this.ordersContract.createBuyOrder(
-            [
-                false,
-                RECORD_ID,
-                COMMUNITY_TOKEN_ID,
-                await web3.utils.toWei("0.5"),
-                await web3.utils.toWei((0.5 * 0.19).toString()),
-                GOVERNANCE_TOKEN_ID,
-                await web3.utils.toWei("0.5"),
-                await web3.utils.toWei((0.5 * 0.89).toString()),
-            ],
-            await helper.getEthAccount(8),
-            0,
-            { value: 0, from: user2 }
-        );
-        let saleId = trx?.logs[0].args.saleId;
-        expectEvent(trx, "BuyOrder", {
-            buyer: user2,
-            isLockedInRatio: false,
-        });
-
-        //-----------------------------------------------------------------------------//
-        // Purchase asset completely
-        trx = await this.ordersContract.acceptBuyOrder(
-            saleId, //SaleId
-            await web3.utils.toWei("0.5"), //communityTokenAmount
-            await web3.utils.toWei("0.5"), //governanceTokenAmount
-            { from: user1 }
-        );
-
-        expectEvent(trx, "SaleBought", {
-            saleId: saleId,
-            buyer: user1,
-            seller: user2,
-        });
-
-        await expect(
-            this.treasuryContract.balanceOf(user2, COMMUNITY_TOKEN_ID)
-        ).to.eventually.be.bignumber.equal(web3.utils.toWei("0.5"));
-
-        await expect(
-            this.treasuryContract.balanceOf(user2, GOVERNANCE_TOKEN_ID)
-        ).to.eventually.be.bignumber.equal(web3.utils.toWei("0.5"));
-
-        expectEvent(trx, "OrderClose", {
-            saleId: saleId,
-        });
-
-        const totalFee = (helper.SALE_TRANSACTION_FEE_PERCENT * (0.5 * 0.19 + 0.5 * 0.89)) / 100;
-
-        await expect(
-            this.treasuryContract.balanceOf(
-                await this.ordersContract.WALLET_ADDRESS(),
-                await this.treasuryContract.CRD()
-            )
-        ).to.eventually.be.bignumber.equal(web3.utils.toWei(totalFee.toString()));
-    });
-
-    it("Buy order is fulfilled and the transaction fees are transferred to wallet. Order amount is greater than 1", async function() {
+    it("Buy order is fulfilled. Order amount is greater than 1", async function() {
         const user1 = await helper.getEthAccount(0);
         const user2 = await helper.getEthAccount(1);
 
@@ -810,15 +727,6 @@ contract("Not Ratio Locked Sales", function() {
         expectEvent(trx, "OrderClose", {
             saleId: saleId,
         });
-
-        const totalFee = (helper.SALE_TRANSACTION_FEE_PERCENT * (157 * 0.19 + 157 * 0.89)) / 100;
-
-        await expect(
-            this.treasuryContract.balanceOf(
-                await this.ordersContract.WALLET_ADDRESS(),
-                await this.treasuryContract.CRD()
-            )
-        ).to.eventually.be.bignumber.equal(web3.utils.toWei(totalFee.toString()));
     });
 });
 

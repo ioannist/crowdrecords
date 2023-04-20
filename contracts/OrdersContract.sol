@@ -11,8 +11,6 @@ contract OrdersContract is Initializable {
     address public VOTING_CONTRACT_ADDRESS;
     address public TREASURY_CONTRACT_ADDRESS;
     address public TREASURY_CORE_CONTRACT_ADDRESS;
-    address public WALLET_ADDRESS;
-    uint8 TRANSACTION_FEE = 50; //This is 0.50%
     address public OWNER;
 
     /// @dev this is event which is created when a user creates order to sell his tokens
@@ -99,8 +97,6 @@ contract OrdersContract is Initializable {
     /// @param governanceTokenAmount this is the community token amount for sale
     /// @param governanceTokenCRD Total CRD tokens available for the purchase of governance token
     /// @param amountTransferred this is the total amount paid
-    /// @param platformFees this is the platform fees taken by crowdrecords
-
     event SaleBought(
         uint256 saleId,
         address seller,
@@ -112,8 +108,7 @@ contract OrdersContract is Initializable {
         uint256 governanceTokenId,
         uint256 governanceTokenAmount,
         uint256 governanceTokenCRD,
-        uint256 amountTransferred,
-        uint256 platformFees
+        uint256 amountTransferred
     );
 
     /// @dev this event is emmited when user closes his/her sale order
@@ -204,12 +199,6 @@ contract OrdersContract is Initializable {
         treasuryContract = ITreasury(TREASURY_CONTRACT_ADDRESS);
         TREASURY_CORE_CONTRACT_ADDRESS = newTreasuryCoreContractAddress;
         treasuryCoreContract = ITreasuryCore(TREASURY_CORE_CONTRACT_ADDRESS);
-    }
-
-    /// @dev This function sets the wallet address this address will receive all the transaction royalties
-    /// @param newWalletAddress the is the new newWalletAddress
-    function setWalletAddress(address newWalletAddress) public ownerOnly {
-        WALLET_ADDRESS = newWalletAddress;
     }
 
     /// @dev This function is called to create a new saleOrder
@@ -379,42 +368,28 @@ contract OrdersContract is Initializable {
             }
         }
 
-        uint256[4] memory costArr;
+        uint256[2] memory costArr;
         if (order.communityTokenAmount > 0) {
-            (
-                uint256 cost,
-                uint256 platformFees
-            ) = _transferTokensAndTransactionCharge(
-                    communityTokenAmount,
-                    (order.communityTokenCRD * 1e6) /
-                        order.communityTokenAmount,
-                    order.communityTokenId,
-                    order.buyer
-                );
-            order.communityTokenCRD =
-                order.communityTokenCRD -
-                (cost + platformFees);
+            uint256 cost = _transferTokensAndTransactionCharge(
+                communityTokenAmount,
+                (order.communityTokenCRD * 1e6) / order.communityTokenAmount,
+                order.communityTokenId,
+                order.buyer
+            );
+            order.communityTokenCRD = order.communityTokenCRD - cost;
 
             costArr[0] = cost;
-            costArr[1] = platformFees;
         }
 
         if (order.governanceTokenAmount > 0) {
-            (
-                uint256 cost,
-                uint256 platformFees
-            ) = _transferTokensAndTransactionCharge(
-                    governanceTokenAmount,
-                    (order.governanceTokenCRD * 1e6) /
-                        order.governanceTokenAmount,
-                    order.governanceTokenId,
-                    order.buyer
-                );
-            order.governanceTokenCRD =
-                order.governanceTokenCRD -
-                (cost + platformFees);
-            costArr[2] = cost;
-            costArr[3] = platformFees;
+            uint256 cost = _transferTokensAndTransactionCharge(
+                governanceTokenAmount,
+                (order.governanceTokenCRD * 1e6) / order.governanceTokenAmount,
+                order.governanceTokenId,
+                order.buyer
+            );
+            order.governanceTokenCRD = order.governanceTokenCRD - cost;
+            costArr[1] = cost;
         }
 
         emit SaleBought({
@@ -424,15 +399,11 @@ contract OrdersContract is Initializable {
             creationDate: block.timestamp,
             communityTokenId: order.communityTokenId,
             communityTokenAmount: communityTokenAmount,
-            communityTokenCRD: costArr[0] + costArr[1],
+            communityTokenCRD: costArr[0],
             governanceTokenId: order.governanceTokenId,
             governanceTokenAmount: governanceTokenAmount,
-            governanceTokenCRD: costArr[2] + costArr[3],
-            amountTransferred: costArr[0] +
-                costArr[1] +
-                costArr[2] +
-                costArr[3],
-            platformFees: costArr[1] + costArr[3]
+            governanceTokenCRD: costArr[1],
+            amountTransferred: costArr[0] + costArr[1]
         });
 
         order.communityTokenAmount =
@@ -443,9 +414,7 @@ contract OrdersContract is Initializable {
             order.governanceTokenAmount -
             governanceTokenAmount;
 
-        order.crdBalance =
-            order.crdBalance -
-            (costArr[0] + costArr[1] + costArr[2] + costArr[3]);
+        order.crdBalance = order.crdBalance - (costArr[0] + costArr[1]);
 
         if (
             order.communityTokenAmount == 0 && order.governanceTokenAmount == 0
@@ -470,23 +439,11 @@ contract OrdersContract is Initializable {
         uint256 tokenPrice,
         uint256 tokenId,
         address receiver
-    ) internal returns (uint256 totalCost, uint256 totalFee) {
+    ) internal returns (uint256 totalCost) {
         // Change the function so that it will transfer the governance and governance tokens from the sellers
         // account to buyer account then it would transfer the CRD governance from contract account to sellers
-        //account after deducting the transaction fees.
 
         uint256 transactionAmount = (tokenAmount * tokenPrice) / 1e6;
-        uint256 transactionFee = (transactionAmount * TRANSACTION_FEE) / 10000;
-        //Removing the transaction fee from the transaction amount
-        transactionAmount = transactionAmount - transactionFee;
-
-        treasuryCoreContract.safeTransferFrom(
-            address(this),
-            WALLET_ADDRESS,
-            treasuryCoreContract.CRD(),
-            transactionFee,
-            "Sale transaction fee"
-        );
 
         treasuryCoreContract.safeTransferFrom(
             address(this),
@@ -504,7 +461,7 @@ contract OrdersContract is Initializable {
             "Sale token transfer to buyer"
         );
 
-        return (transactionAmount, transactionFee);
+        return (transactionAmount);
     }
 
     function onERC1155Received(

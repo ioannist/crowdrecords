@@ -547,64 +547,6 @@ contract("Ratio Locked Sales", function() {
             });
         });
 
-        it("Check platform fee amount", async function() {
-            //-----------------------------------------------------------------------------//
-            // Here we are performing partial transfer
-            // That is we will only purchase some amount of the order
-            trx = await this.ordersContract.acceptBuyOrder(
-                this.saleId, //SaleId
-                await web3.utils.toWei("10"), //communityTokenAmount
-                await web3.utils.toWei("0.5"), //governanceTokenAmount
-                { from: this.user1 }
-            );
-
-            expectEvent(trx, "SaleBought", {
-                saleId: this.saleId,
-            });
-
-            await expect(
-                this.treasuryContract.balanceOf(this.user2, COMMUNITY_TOKEN_ID)
-            ).to.eventually.be.bignumber.equals(await web3.utils.toWei("10"));
-
-            await expect(
-                this.treasuryContract.balanceOf(this.user2, GOVERNANCE_TOKEN_ID)
-            ).to.eventually.be.bignumber.equals(await web3.utils.toWei("0.5"));
-
-            //-----------------------------------------------------------------------------//
-            // Here we will purchase all the remaining asset and it should result in sale close event genration
-            trx = await this.ordersContract.acceptBuyOrder(
-                this.saleId, //SaleId
-                await web3.utils.toWei("90"), //communityTokenAmount
-                await web3.utils.toWei("4.5"), //governanceTokenAmount
-                { from: this.user3 }
-            );
-
-            expectEvent(trx, "SaleBought", {
-                saleId: this.saleId,
-            });
-
-            await expect(
-                this.treasuryContract.balanceOf(this.user2, COMMUNITY_TOKEN_ID)
-            ).to.eventually.be.bignumber.equals(await web3.utils.toWei("100"));
-
-            await expect(
-                this.treasuryContract.balanceOf(this.user2, GOVERNANCE_TOKEN_ID)
-            ).to.eventually.be.bignumber.equals(await web3.utils.toWei("5"));
-
-            expectEvent(trx, "OrderClose", {
-                saleId: trx?.logs[0].args.saleId,
-            });
-
-            const totalFee = (helper.SALE_TRANSACTION_FEE_PERCENT * (100 * 1 + 5 * 2)) / 100;
-
-            await expect(
-                this.treasuryContract.balanceOf(
-                    await this.ordersContract.WALLET_ADDRESS(),
-                    await this.treasuryContract.CRD()
-                )
-            ).to.eventually.be.bignumber.equal(web3.utils.toWei(totalFee.toString()));
-        });
-
         it("Should able to purchase locked asset with decimal values and sale should close", async function() {
             user1 = await helper.getEthAccount(0);
             user2 = await helper.getEthAccount(1);

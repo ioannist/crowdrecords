@@ -62,7 +62,6 @@ async function setup() {
     );
 
     await ordersContract.initialize(treasuryContract.address, treasuryCoreContract.address);
-    await ordersContract.setWalletAddress(await getEthAccount(9));
 
     await agreementContract.initialize(
         treasuryContract.address,
