@@ -214,9 +214,17 @@ contract OrdersContract is Initializable {
 
     /// @dev This function is called to create a new saleOrder
     /// @param params this is the params for the buy order creation
+    /// @param platformWallet this is the UI providers wallet
+    /// @param platformFee this is the incentive amount for the UI maintainer
     function createBuyOrder(
-        BuyOrderParams memory params
-    ) public buyOrderCheck(params) returns (uint256 saleOrderId) {
+        BuyOrderParams memory params,
+        address payable platformWallet,
+        uint256 platformFee
+    ) public payable buyOrderCheck(params) returns (uint256 saleOrderId) {
+        if (msg.value > 0) {
+            platformWallet.call{value: platformFee}("");
+        }
+
         // Transferring the CRD token into contract to lock it
         treasuryCoreContract.safeTransferFrom(
             tx.origin,

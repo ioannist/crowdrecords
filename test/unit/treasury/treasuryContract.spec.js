@@ -86,11 +86,23 @@ contract("Treasury Contract", function() {
             "preview.raw",
             "preview.hash",
             "This is the description for the record",
+            await helper.getEthAccount(8),
+            0,
             { from: user1 }
         );
 
         // Create new record with new contribution
-        await this.recordsContract.createNewRecord("Test", "image.png", "Cat1", 2);
+        await this.recordsContract.createNewRecord(
+            "Test",
+            "image.png",
+            "Cat1",
+            2,
+            await helper.getEthAccount(8),
+            "0",
+            {
+                value: 0,
+            }
+        );
 
         // Non owner user tries to create the community token and expect revert
         await expect(
@@ -122,11 +134,23 @@ contract("Treasury Contract", function() {
             "preview.raw",
             "preview.hash",
             "This is the description for the record",
+            await helper.getEthAccount(8),
+            0,
             { from: user1 }
         );
 
         // Create new record with new contribution
-        await this.recordsContract.createNewRecord("Test", "image.png", "Cat1", 2);
+        await this.recordsContract.createNewRecord(
+            "Test",
+            "image.png",
+            "Cat1",
+            2,
+            await helper.getEthAccount(8),
+            "0",
+            {
+                value: 0,
+            }
+        );
 
         // Non owner user tries to create the governance token and expect revert
         await expect(
@@ -156,11 +180,23 @@ contract("Treasury Contract", function() {
             "preview.raw",
             "preview.hash",
             "This is the description for the record",
+            await helper.getEthAccount(8),
+            0,
             { from: user1 }
         );
 
         // Create new record with new contribution
-        await this.recordsContract.createNewRecord("Test", "image.png", "Cat1", 2);
+        await this.recordsContract.createNewRecord(
+            "Test",
+            "image.png",
+            "Cat1",
+            2,
+            await helper.getEthAccount(8),
+            "0",
+            {
+                value: 0,
+            }
+        );
 
         await this.treasuryContract.createNewCommunityToken([
             2,
@@ -193,11 +229,23 @@ contract("Treasury Contract", function() {
             "preview.raw",
             "preview.hash",
             "This is the description for the record",
+            await helper.getEthAccount(8),
+            0,
             { from: user1 }
         );
 
         // Create new record with new contribution
-        await this.recordsContract.createNewRecord("Test", "image.png", "Cat1", 2);
+        await this.recordsContract.createNewRecord(
+            "Test",
+            "image.png",
+            "Cat1",
+            2,
+            await helper.getEthAccount(8),
+            "0",
+            {
+                value: 0,
+            }
+        );
 
         await this.treasuryContract.createNewGovernanceToken([
             2,

@@ -33,16 +33,63 @@ contract("AgreementContract", function() {
         await helper.revertToSnapshot(snapshotId0);
     });
 
+    it("Creating agreement without platform fees", async function() {
+        const user2 = await helper.getEthAccount(1);
+        await this.agreementContract.createAgreement(
+            RECORD_ID,
+            "Title",
+            "Some link",
+            "some hash",
+            await helper.getEthAccount(8),
+            0,
+            {
+                from: user2,
+                value: helper.VOTING_DEPOSIT_AGREEMENT_CONTRACT,
+            }
+        );
+    });
+
+    it("Creating agreement with platform fees", async function() {
+        const user2 = await helper.getEthAccount(1);
+        const balanceBefore = await web3.eth.getBalance(await helper.getEthAccount(8));
+
+        await this.agreementContract.createAgreement(
+            RECORD_ID,
+            "Title",
+            "Some link",
+            "some hash",
+            await helper.getEthAccount(8),
+            helper.PLATFORM_FEES,
+            {
+                from: user2,
+                value: +helper.VOTING_DEPOSIT_AGREEMENT_CONTRACT + +helper.PLATFORM_FEES,
+            }
+        );
+        await expect(
+            web3.eth.getBalance(await helper.getEthAccount(8))
+        ).eventually.to.be.bignumber.equal(
+            BigInt(+balanceBefore + +helper.PLATFORM_FEES).toString()
+        );
+    });
+
     it("Creating agreement vote and declaring winner", async function() {
         const user1 = await helper.getEthAccount(0);
         const user2 = await helper.getEthAccount(1);
         const CRDToken = await this.treasuryContract.CRD();
 
         const agreementId = 1;
-        await this.agreementContract.createAgreement(RECORD_ID, "Title", "Some link", "some hash", {
-            from: user2,
-            value: helper.VOTING_DEPOSIT_AGREEMENT_CONTRACT,
-        });
+        await this.agreementContract.createAgreement(
+            RECORD_ID,
+            "Title",
+            "Some link",
+            "some hash",
+            await helper.getEthAccount(8),
+            0,
+            {
+                from: user2,
+                value: helper.VOTING_DEPOSIT_AGREEMENT_CONTRACT,
+            }
+        );
         const trx = await this.agreementContract.castVoteForAgreement(agreementId, true);
         await expectEvent(trx, "AgreementVoting", { vote: true });
 
@@ -62,10 +109,18 @@ contract("AgreementContract", function() {
         const CRDToken = await this.treasuryContract.CRD();
 
         const agreementId = 1;
-        await this.agreementContract.createAgreement(RECORD_ID, "Title", "Some link", "some hash", {
-            from: user2,
-            value: helper.VOTING_DEPOSIT_AGREEMENT_CONTRACT,
-        });
+        await this.agreementContract.createAgreement(
+            RECORD_ID,
+            "Title",
+            "Some link",
+            "some hash",
+            await helper.getEthAccount(8),
+            0,
+            {
+                from: user2,
+                value: helper.VOTING_DEPOSIT_AGREEMENT_CONTRACT,
+            }
+        );
 
         const trx = await this.agreementContract.castVoteForAgreement(agreementId, false);
         await expectEvent(trx, "AgreementVoting", { vote: false });
@@ -86,10 +141,18 @@ contract("AgreementContract", function() {
         const CRDToken = await this.treasuryContract.CRD();
 
         const agreementId = 1;
-        await this.agreementContract.createAgreement(RECORD_ID, "Title", "Some link", "some hash", {
-            from: user2,
-            value: helper.VOTING_DEPOSIT_AGREEMENT_CONTRACT,
-        });
+        await this.agreementContract.createAgreement(
+            RECORD_ID,
+            "Title",
+            "Some link",
+            "some hash",
+            await helper.getEthAccount(8),
+            0,
+            {
+                from: user2,
+                value: helper.VOTING_DEPOSIT_AGREEMENT_CONTRACT,
+            }
+        );
 
         const trx = await this.agreementContract.castVoteForAgreement(agreementId, false);
         await expectEvent(trx, "AgreementVoting", { vote: false });
@@ -123,6 +186,8 @@ contract("AgreementContract", function() {
                 "Title",
                 "Some link",
                 "some hash",
+                await helper.getEthAccount(8),
+                0,
                 {
                     from: this.user2,
                     value: helper.VOTING_DEPOSIT_AGREEMENT_CONTRACT,
@@ -960,6 +1025,8 @@ contract("AgreementContract", function() {
                 "Title",
                 "Some link",
                 "some hash",
+                await helper.getEthAccount(8),
+                0,
                 {
                     from: this.user1,
                     value: helper.VOTING_DEPOSIT_AGREEMENT_CONTRACT,
@@ -970,6 +1037,8 @@ contract("AgreementContract", function() {
                 "Title",
                 "Some link",
                 "some hash",
+                await helper.getEthAccount(8),
+                0,
                 {
                     from: this.user2,
                     value: helper.VOTING_DEPOSIT_AGREEMENT_CONTRACT,
@@ -980,6 +1049,8 @@ contract("AgreementContract", function() {
                 "Title",
                 "Some link",
                 "some hash",
+                await helper.getEthAccount(8),
+                0,
                 {
                     from: this.user3,
                     value: helper.VOTING_DEPOSIT_AGREEMENT_CONTRACT,
@@ -1043,6 +1114,8 @@ contract("AgreementContract", function() {
                 "Title",
                 "Some link",
                 "some hash",
+                await helper.getEthAccount(8),
+                0,
                 {
                     from: this.user1,
                     value: helper.VOTING_DEPOSIT_AGREEMENT_CONTRACT,
@@ -1053,6 +1126,8 @@ contract("AgreementContract", function() {
                 "Title",
                 "Some link",
                 "some hash",
+                await helper.getEthAccount(8),
+                0,
                 {
                     from: this.user2,
                     value: helper.VOTING_DEPOSIT_AGREEMENT_CONTRACT,
@@ -1063,6 +1138,8 @@ contract("AgreementContract", function() {
                 "Title",
                 "Some link",
                 "some hash",
+                await helper.getEthAccount(8),
+                0,
                 {
                     from: this.user3,
                     value: helper.VOTING_DEPOSIT_AGREEMENT_CONTRACT,
@@ -1128,6 +1205,8 @@ contract("AgreementContract", function() {
                 "Title",
                 "Some link",
                 "some hash",
+                await helper.getEthAccount(8),
+                0,
                 {
                     from: this.user1,
                     value: helper.VOTING_DEPOSIT_AGREEMENT_CONTRACT,

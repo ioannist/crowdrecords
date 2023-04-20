@@ -5,6 +5,7 @@ const BN = require("bn.js");
 const expectEvent = require("@openzeppelin/test-helpers/src/expectEvent");
 const chaiBN = require("chai-bn")(BN);
 const chaiAsPromised = require("chai-as-promised");
+const { web3 } = require("@openzeppelin/test-helpers/src/setup");
 chai.use(chaiAsPromised);
 const expect = chai.expect;
 
@@ -51,7 +52,7 @@ contract("Contribution Contract", function() {
         await helper.revertToSnapshot(snapshotId);
     });
 
-    it("Creating a seed contribution", async function() {
+    it("Creating a seed contribution, without platform fee", async function() {
         const user1 = await helper.getEthAccount(0);
         await createTrack(this.tracksContract, user1);
         await createTrack(this.tracksContract, user1);
@@ -61,8 +62,36 @@ contract("Contribution Contract", function() {
             "contribution title",
             "preview.raw",
             "preview.hash",
-            "This is the description for the record"
+            "This is the description for the record",
+            await helper.getEthAccount(8),
+            0
         );
+
+        expectEvent(tx, "ContributionCreated", {
+            contributionId: "1",
+            recordId: "0",
+        });
+    });
+
+    it("Creating a seed contribution, with platform fee", async function() {
+        const user1 = await helper.getEthAccount(0);
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
+        const before = await web3.eth.getBalance(await helper.getEthAccount(8));
+        const tx = await this.contributionContract.createSeedContribution(
+            [1, 2, 3],
+            "contribution title",
+            "preview.raw",
+            "preview.hash",
+            "This is the description for the record",
+            await helper.getEthAccount(8),
+            helper.PLATFORM_FEES,
+            { value: helper.PLATFORM_FEES }
+        );
+        await expect(
+            web3.eth.getBalance(await helper.getEthAccount(8))
+        ).to.eventually.be.bignumber.equal(BigInt(+before + +helper.PLATFORM_FEES).toString());
 
         expectEvent(tx, "ContributionCreated", {
             contributionId: "1",
@@ -82,17 +111,176 @@ contract("Contribution Contract", function() {
             "contribution title",
             "preview.raw",
             "preview.hash",
-            "This is the description for the record 1"
+            "This is the description for the record 1",
+            await helper.getEthAccount(8),
+            0
         );
         const tx = await this.recordsContract.createNewRecord(
             "Test",
             "image.png",
             "Cat1",
-            SEED_CONTRIBUTION_ID
+            SEED_CONTRIBUTION_ID,
+            await helper.getEthAccount(8),
+            "0",
+            {
+                value: 0,
+            }
         );
         expectEvent(tx, "RecordCreated", {
             seedId: "1",
         });
+    });
+
+    it("Create new contribution with platform fees and deposit, check both are transferred", async function() {
+        snapShot2 = await helper.takeSnapshot();
+        snapshotId2 = snapShot2["result"];
+
+        const user1 = await helper.getEthAccount(0);
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
+
+        await this.contributionContract.createSeedContribution(
+            [1, 2, 3],
+            "contribution title",
+            "preview.raw",
+            "preview.hash",
+            "This is the description for the record",
+            await helper.getEthAccount(8),
+            0
+        );
+        await this.recordsContract.createNewRecord(
+            "Test",
+            "image.png",
+            "Cat1",
+            SEED_CONTRIBUTION_ID,
+            await helper.getEthAccount(8),
+            "0",
+            {
+                value: 0,
+            }
+        );
+        await this.treasuryContract.createNewCommunityToken([
+            RECORD_ID,
+            await web3.utils.toWei("1000000"),
+            COMMUNITY_TOKEN_BALANCE_USER1,
+            "Test",
+            "image.png",
+        ]);
+        await this.treasuryContract.createNewGovernanceToken([
+            RECORD_ID,
+            await web3.utils.toWei("1000000"),
+            GOVERNANCE_TOKEN_BALANCE_USER1,
+            "Test",
+            "image.png",
+        ]);
+
+        const balanceBefore = await web3.eth.getBalance(await helper.getEthAccount(8));
+
+        await createTrack(this.tracksContract, contributionOwner);
+        await createTrack(this.tracksContract, contributionOwner);
+        await this.contributionContract.createNewContribution(
+            [4, 5],
+            "contribution title",
+            "preview.raw",
+            "preview.hash",
+            RECORD_ID,
+            false,
+            "Test description",
+            rewardCommunityToken,
+            rewardGovernanceToken,
+            await helper.getEthAccount(8),
+            helper.PLATFORM_FEES,
+            {
+                from: contributionOwner,
+                value: +helper.VOTING_DEPOSIT_CONTRIBUTION_CONTRACT + +helper.PLATFORM_FEES,
+            }
+        );
+
+        await expect(
+            web3.eth.getBalance(await helper.getEthAccount(8))
+        ).eventually.to.be.bignumber.equal(
+            BigInt(+balanceBefore + +helper.PLATFORM_FEES).toString()
+        );
+
+        await expect(
+            web3.eth.getBalance(this.contributionVotingContract.address)
+        ).eventually.to.be.bignumber.equal(helper.VOTING_DEPOSIT_CONTRIBUTION_CONTRACT);
+    });
+
+    it("Create new contribution without platform fees and deposit, check the deposit", async function() {
+        snapShot2 = await helper.takeSnapshot();
+        snapshotId2 = snapShot2["result"];
+
+        const user1 = await helper.getEthAccount(0);
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
+
+        await this.contributionContract.createSeedContribution(
+            [1, 2, 3],
+            "contribution title",
+            "preview.raw",
+            "preview.hash",
+            "This is the description for the record",
+            await helper.getEthAccount(8),
+            0
+        );
+        await this.recordsContract.createNewRecord(
+            "Test",
+            "image.png",
+            "Cat1",
+            SEED_CONTRIBUTION_ID,
+            await helper.getEthAccount(8),
+            "0",
+            {
+                value: 0,
+            }
+        );
+        await this.treasuryContract.createNewCommunityToken([
+            RECORD_ID,
+            await web3.utils.toWei("1000000"),
+            COMMUNITY_TOKEN_BALANCE_USER1,
+            "Test",
+            "image.png",
+        ]);
+        await this.treasuryContract.createNewGovernanceToken([
+            RECORD_ID,
+            await web3.utils.toWei("1000000"),
+            GOVERNANCE_TOKEN_BALANCE_USER1,
+            "Test",
+            "image.png",
+        ]);
+
+        const balanceBefore = await web3.eth.getBalance(await helper.getEthAccount(8));
+
+        await createTrack(this.tracksContract, contributionOwner);
+        await createTrack(this.tracksContract, contributionOwner);
+        await this.contributionContract.createNewContribution(
+            [4, 5],
+            "contribution title",
+            "preview.raw",
+            "preview.hash",
+            RECORD_ID,
+            false,
+            "Test description",
+            rewardCommunityToken,
+            rewardGovernanceToken,
+            await helper.getEthAccount(8),
+            "0",
+            {
+                from: contributionOwner,
+                value: +helper.VOTING_DEPOSIT_CONTRIBUTION_CONTRACT,
+            }
+        );
+
+        await expect(
+            web3.eth.getBalance(await helper.getEthAccount(8))
+        ).eventually.to.be.bignumber.equal(BigInt(+balanceBefore).toString());
+
+        await expect(
+            web3.eth.getBalance(this.contributionVotingContract.address)
+        ).eventually.to.be.bignumber.equal(helper.VOTING_DEPOSIT_CONTRIBUTION_CONTRACT);
     });
 
     context("Testing contribution voting", function() {
@@ -111,13 +299,20 @@ contract("Contribution Contract", function() {
                 "contribution title",
                 "preview.raw",
                 "preview.hash",
-                "This is the description for the record"
+                "This is the description for the record",
+                await helper.getEthAccount(8),
+                0
             );
             await this.recordsContract.createNewRecord(
                 "Test",
                 "image.png",
                 "Cat1",
-                SEED_CONTRIBUTION_ID
+                SEED_CONTRIBUTION_ID,
+                await helper.getEthAccount(8),
+                "0",
+                {
+                    value: 0,
+                }
             );
             await this.treasuryContract.createNewCommunityToken([
                 RECORD_ID,
@@ -146,9 +341,11 @@ contract("Contribution Contract", function() {
                 "Test description",
                 rewardCommunityToken,
                 rewardGovernanceToken,
+                await helper.getEthAccount(8),
+                helper.PLATFORM_FEES,
                 {
                     from: contributionOwner,
-                    value: helper.VOTING_DEPOSIT_CONTRIBUTION_CONTRACT,
+                    value: +helper.VOTING_DEPOSIT_CONTRIBUTION_CONTRACT + +helper.PLATFORM_FEES,
                 }
             );
         });
@@ -287,9 +484,11 @@ contract("Contribution Contract", function() {
                 "Test description",
                 rewardCommunityToken,
                 rewardGovernanceToken,
+                await helper.getEthAccount(8),
+                helper.PLATFORM_FEES,
                 {
                     from: contributionOwner,
-                    value: helper.VOTING_DEPOSIT_CONTRIBUTION_CONTRACT,
+                    value: +helper.VOTING_DEPOSIT_CONTRIBUTION_CONTRACT + +helper.PLATFORM_FEES,
                 }
             );
 

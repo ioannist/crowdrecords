@@ -18,9 +18,21 @@ async function generateTokens() {
         "contribution title",
         "preview.raw",
         "preview.hash",
-        "This is the description for the record"
+        "This is the description for the record",
+        await helper.getEthAccount(8),
+        0
     );
-    await this.recordsContract.createNewRecord("Test", "image.png", "Cat1", SEED_CONTRIBUTION_ID);
+    await this.recordsContract.createNewRecord(
+        "Test",
+        "image.png",
+        "Cat1",
+        SEED_CONTRIBUTION_ID,
+        await helper.getEthAccount(8),
+        0,
+        {
+            value: 0,
+        }
+    );
     await this.treasuryContract.createNewCommunityToken([
         RECORD_ID,
         await web3.utils.toWei("1000000"),

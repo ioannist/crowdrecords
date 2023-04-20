@@ -69,6 +69,7 @@ contract ContributionContract is Initializable {
     Counters.Counter private _contributionIds;
     address public OWNER;
     address public CONTRIBUTION_VOTING_CONTRACT_ADDRESS;
+    ContributionVotingContract contributionVotingContract;
     address public RECORD_CONTRACT_ADDRESS;
     IRecords public recordsContract;
     address public TRACKS_CONTRACT_ADDRESS;
@@ -98,6 +99,9 @@ contract ContributionContract is Initializable {
         address newTracksContractAddress
     ) public initializer ownerOnly {
         CONTRIBUTION_VOTING_CONTRACT_ADDRESS = newVotingContractAddress;
+        contributionVotingContract = ContributionVotingContract(
+            CONTRIBUTION_VOTING_CONTRACT_ADDRESS
+        );
         RECORD_CONTRACT_ADDRESS = newRecordsContractAddress;
         recordsContract = IRecords(RECORD_CONTRACT_ADDRESS);
         TRACKS_CONTRACT_ADDRESS = newTracksContractAddress;
@@ -130,6 +134,8 @@ contract ContributionContract is Initializable {
     /// for his work contribution.
     /// @param governanceReward this is the amount of governance token that the contributor is requesting for his
     /// work contribution.
+    /// @param platformWallet this is the UI providers wallet
+    /// @param platformFee this is the incentive amount for the UI maintainer
     function createNewContribution(
         // string memory uri,
         uint256[] memory tracks,
@@ -140,8 +146,14 @@ contract ContributionContract is Initializable {
         bool roughMix,
         string memory description,
         uint256 communityReward,
-        uint256 governanceReward
+        uint256 governanceReward,
+        address payable platformWallet,
+        uint256 platformFee
     ) public payable returns (uint256) {
+        if (msg.value > 0) {
+            platformWallet.call{value: platformFee}("");
+        }
+
         _contributionIds.increment();
         {
             bool ownerStatus = trackInterface.checkOwner(tracks, msg.sender);
@@ -150,13 +162,8 @@ contract ContributionContract is Initializable {
         }
 
         uint256 contributionId = _contributionIds.current();
-        // _mint(msg.sender, contributionId);
-
-        ContributionVotingContract contributionVotingContract = ContributionVotingContract(
-                CONTRIBUTION_VOTING_CONTRACT_ADDRESS
-            );
         contributionVotingContract.createContributionVotingBallot{
-            value: msg.value
+            value: msg.value - platformFee
         }(contributionId, recordId, governanceReward, communityReward);
 
         Contribution memory contribution = Contribution({
@@ -191,15 +198,22 @@ contract ContributionContract is Initializable {
     /// @param previewFile this is preview file of the contribution
     /// @param previewFileHash this is hash of the preview file
     /// @param description this is the description of the new contribution that is created.
+    /// @param platformWallet this is the UI providers wallet
+    /// @param platformFee this is the incentive amount for the UI maintainer
     function createSeedContribution(
-        // string memory uri,
         uint256[] memory tracks,
         string memory title,
         string memory previewFile,
         string memory previewFileHash,
-        string memory description
-    ) public returns (uint256) {
+        string memory description,
+        address payable platformWallet,
+        uint256 platformFee
+    ) public payable returns (uint256) {
         {
+            if (msg.value > 0) {
+                platformWallet.call{value: platformFee}("");
+            }
+
             bool ownerStatus = trackInterface.checkOwner(tracks, msg.sender);
 
             require(ownerStatus, "INVALID: NOT_A_TRACK_OWNER");
@@ -208,7 +222,6 @@ contract ContributionContract is Initializable {
         _contributionIds.increment();
 
         uint256 contributionId = _contributionIds.current();
-        // _mint(msg.sender, contributionId);
 
         Contribution memory contribution = Contribution({
             tracks: tracks,

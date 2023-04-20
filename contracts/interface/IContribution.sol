@@ -44,6 +44,8 @@ interface IContribution {
     /// @param communityReward this is the amount of community token that the contributor is requesting
     /// for his work contribution.
     /// @param governanceReward this is the amount of governance token that the contributor is requesting for
+    /// @param platformWallet this is the UI providers wallet
+    /// @param platformFee this is the incentive amount for the UI maintainer
     /// his work contribution.
     function createNewContribution(
         // string memory uri,
@@ -55,7 +57,9 @@ interface IContribution {
         bool roughMix,
         string memory description,
         uint256 communityReward,
-        uint256 governanceReward
+        uint256 governanceReward,
+        address payable platformWallet,
+        uint256 platformFee
     ) external returns (uint256);
 
     /// @dev This function will be called by the user to create a new seed contribution as there will be not
@@ -64,17 +68,20 @@ interface IContribution {
     /// @param previewFile this is preview file of the contribution
     /// @param previewFileHash this is hash of the preview file
     /// @param description this is the description of the new contribution that is created.
+    /// @param platformWallet this is the UI providers wallet
+    /// @param platformFee this is the incentive amount for the UI maintainer
     function createSeedContribution(
         uint256[] memory tracks,
         string memory previewFile,
         string memory previewFileHash,
-        string memory description
-    ) external returns (uint256);
+        string memory description,
+        address payable platformWallet,
+        uint256 platformFee
+    ) external payable returns (uint256);
 
     /// @dev This function returns contribution data
     /// @param contributionId Id of the contribution whose data you want
-    function getContributionData(uint256 contributionId)
-        external
-        view
-        returns (Contribution memory contribution);
+    function getContributionData(
+        uint256 contributionId
+    ) external view returns (Contribution memory contribution);
 }

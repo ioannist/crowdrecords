@@ -209,9 +209,16 @@ contract RecordsVotingContract is BaseVotingContract, IERC1155Receiver {
 
     /// @dev This function will create new record version from existing record
     /// @param params required data for creation of new record version
+    /// @param platformWallet this is the UI providers wallet
+    /// @param platformFee this is the incentive amount for the UI maintainer
     function createNewRecordVersion(
-        NewRecordVersionParams memory params
+        NewRecordVersionParams memory params,
+        address payable platformWallet,
+        uint256 platformFee
     ) public payable returns (uint256) {
+        if (msg.value > 0) {
+            platformWallet.call{value: platformFee}("");
+        }
         {
             recordsContract.validateNewRecordVersionParams(
                 params.oldRecordId,
@@ -228,7 +235,7 @@ contract RecordsVotingContract is BaseVotingContract, IERC1155Receiver {
             params.oldRecordId
         );
         uint256 ballotId = _createVoting(false, votingTokenId);
-        _createDeposit(msg.sender, ballotId);
+        _createDeposit(msg.sender, msg.value - platformFee, ballotId);
 
         treasuryContract.setSymbolsAsUsed(
             params.governanceToken.symbol,

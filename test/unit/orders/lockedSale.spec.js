@@ -35,19 +35,96 @@ contract("Ratio Locked Sales", function() {
         await helper.revertToSnapshot(snapshotId);
     });
 
+    it("User can create lock sale request, without platforms fee", async function() {
+        await this.treasuryCoreContract.setApprovalForAll(this.ordersContract.address, true);
+
+        let trx = await this.ordersContract.createBuyOrder(
+            [
+                true,
+                RECORD_ID,
+                COMMUNITY_TOKEN_ID,
+                await web3.utils.toWei("100"),
+                await web3.utils.toWei("1"),
+                GOVERNANCE_TOKEN_ID,
+                await web3.utils.toWei("5"),
+                await web3.utils.toWei("2"),
+            ],
+            await helper.getEthAccount(8),
+            0,
+            { value: 0 }
+        );
+        expectEvent(trx, "BuyOrder", {
+            buyer: await helper.getEthAccount(0),
+            isLockedInRatio: true,
+        });
+
+        let saleId = trx?.logs[0].args.saleId;
+        trx = await this.ordersContract.cancelBuyOrder(saleId);
+
+        expectEvent(trx, "OrderClose", {
+            saleId: saleId,
+        });
+
+        //The CRD tokens that were transferred to ordersContract needs to be returned
+        await expect(
+            this.treasuryContract.balanceOf(await helper.getEthAccount(0), CRDTokenId)
+        ).to.eventually.be.bignumber.equals(await web3.utils.toWei("1000000"));
+    });
+
+    it("User can create lock sale request, with platforms fee", async function() {
+        await this.treasuryCoreContract.setApprovalForAll(this.ordersContract.address, true);
+
+        let trx = await this.ordersContract.createBuyOrder(
+            [
+                true,
+                RECORD_ID,
+                COMMUNITY_TOKEN_ID,
+                await web3.utils.toWei("100"),
+                await web3.utils.toWei("1"),
+                GOVERNANCE_TOKEN_ID,
+                await web3.utils.toWei("5"),
+                await web3.utils.toWei("2"),
+            ],
+            await helper.getEthAccount(8),
+            helper.PLATFORM_FEES,
+            { value: helper.PLATFORM_FEES }
+        );
+        expectEvent(trx, "BuyOrder", {
+            buyer: await helper.getEthAccount(0),
+            isLockedInRatio: true,
+        });
+
+        let saleId = trx?.logs[0].args.saleId;
+        trx = await this.ordersContract.cancelBuyOrder(saleId);
+
+        expectEvent(trx, "OrderClose", {
+            saleId: saleId,
+        });
+
+        //The CRD tokens that were transferred to ordersContract needs to be returned
+        await expect(
+            this.treasuryContract.balanceOf(await helper.getEthAccount(0), CRDTokenId)
+        ).to.eventually.be.bignumber.equals(await web3.utils.toWei("1000000"));
+    });
+
     it("User can create lock sale request and cancel it", async function() {
         await this.treasuryCoreContract.setApprovalForAll(this.ordersContract.address, true);
 
-        let trx = await this.ordersContract.createBuyOrder([
-            true,
-            RECORD_ID,
-            COMMUNITY_TOKEN_ID,
-            await web3.utils.toWei("100"),
-            await web3.utils.toWei("1"),
-            GOVERNANCE_TOKEN_ID,
-            await web3.utils.toWei("5"),
-            await web3.utils.toWei("2"),
-        ]);
+        let trx = await this.ordersContract.createBuyOrder(
+            [
+                true,
+                RECORD_ID,
+                COMMUNITY_TOKEN_ID,
+                await web3.utils.toWei("100"),
+                await web3.utils.toWei("1"),
+                GOVERNANCE_TOKEN_ID,
+                await web3.utils.toWei("5"),
+                await web3.utils.toWei("2"),
+            ],
+            await helper.getEthAccount(8),
+            0,
+            { value: 0 }
+        );
         expectEvent(trx, "BuyOrder", {
             buyer: await helper.getEthAccount(0),
             isLockedInRatio: true,
@@ -69,28 +146,38 @@ contract("Ratio Locked Sales", function() {
     it("Sale tokens should belong to single record only", async function() {
         await this.treasuryCoreContract.setApprovalForAll(this.ordersContract.address, true);
         await expect(
-            this.ordersContract.createBuyOrder([
-                true,
-                RECORD_ID,
-                COMMUNITY_TOKEN_ID,
-                await web3.utils.toWei("100"),
-                await web3.utils.toWei((100 * 1).toString()),
-                GOVERNANCE_TOKEN_ID + 2, //INVALID: GOVERNANCE_TOKEN_ID
-                await web3.utils.toWei("5"),
-                await web3.utils.toWei((5 * 2).toString()),
-            ])
+            this.ordersContract.createBuyOrder(
+                [
+                    true,
+                    RECORD_ID,
+                    COMMUNITY_TOKEN_ID,
+                    await web3.utils.toWei("100"),
+                    await web3.utils.toWei((100 * 1).toString()),
+                    GOVERNANCE_TOKEN_ID + 2, //INVALID: GOVERNANCE_TOKEN_ID
+                    await web3.utils.toWei("5"),
+                    await web3.utils.toWei((5 * 2).toString()),
+                ],
+                await helper.getEthAccount(8),
+                0,
+                { value: 0 }
+            )
         ).to.eventually.be.rejectedWith("INVALID: GOVERNANCE_TOKEN_ID");
         await expect(
-            this.ordersContract.createBuyOrder([
-                true,
-                RECORD_ID,
-                COMMUNITY_TOKEN_ID + 2, //INVALID: COMMUNITY_TOKEN_ID
-                await web3.utils.toWei("100"),
-                await web3.utils.toWei((100 * 1).toString()),
-                GOVERNANCE_TOKEN_ID,
-                await web3.utils.toWei("5"),
-                await web3.utils.toWei((5 * 2).toString()),
-            ])
+            this.ordersContract.createBuyOrder(
+                [
+                    true,
+                    RECORD_ID,
+                    COMMUNITY_TOKEN_ID + 2, //INVALID: COMMUNITY_TOKEN_ID
+                    await web3.utils.toWei("100"),
+                    await web3.utils.toWei((100 * 1).toString()),
+                    GOVERNANCE_TOKEN_ID,
+                    await web3.utils.toWei("5"),
+                    await web3.utils.toWei((5 * 2).toString()),
+                ],
+                await helper.getEthAccount(8),
+                0,
+                { value: 0 }
+            )
         ).to.eventually.be.rejectedWith("INVALID: COMMUNITY_TOKEN_ID");
     });
 
@@ -111,7 +198,9 @@ contract("Ratio Locked Sales", function() {
                     await web3.utils.toWei("5"),
                     await web3.utils.toWei((5 * 2).toString()),
                 ],
-                { from: user4 }
+                await helper.getEthAccount(8),
+                0,
+                { value: 0, from: user4 }
             )
         ).to.eventually.be.rejectedWith("ERC20: transfer amount exceeds balance");
     });
@@ -183,7 +272,9 @@ contract("Ratio Locked Sales", function() {
                     await web3.utils.toWei("5"),
                     await web3.utils.toWei((5 * 2).toString()),
                 ],
-                { from: this.user2 }
+                await helper.getEthAccount(8),
+                0,
+                { value: 0, from: this.user2 }
             );
             this.saleId = trx?.logs[0].args.saleId;
         });
@@ -276,7 +367,9 @@ contract("Ratio Locked Sales", function() {
                     await web3.utils.toWei("0.1"),
                     await web3.utils.toWei((0.1 * 2).toString()),
                 ],
-                { from: this.user1 }
+                await helper.getEthAccount(8),
+                0,
+                { value: 0, from: this.user1 }
             );
 
             let saleId = trx?.logs[0].args.saleId;
@@ -312,7 +405,9 @@ contract("Ratio Locked Sales", function() {
                     await web3.utils.toWei("0.1"),
                     await web3.utils.toWei((0.1 * 2).toString()),
                 ],
-                { from: this.user2 }
+                await helper.getEthAccount(8),
+                0,
+                { value: 0, from: this.user2 }
             );
 
             let saleId = trx?.logs[0].args.saleId;
@@ -541,7 +636,9 @@ contract("Ratio Locked Sales", function() {
                     await web3.utils.toWei("4.6100"),
                     await web3.utils.toWei("2"),
                 ],
-                { from: user2 }
+                await helper.getEthAccount(8),
+                0,
+                { value: 0, from: user2 }
             );
             const saleId = trx?.logs[0].args.saleId;
 

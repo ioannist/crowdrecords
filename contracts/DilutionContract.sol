@@ -148,7 +148,7 @@ contract DilutionContract is BaseVotingContract {
         _dilutionIds.increment();
         uint256 dilutionId = _dilutionIds.current();
         uint256 ballotId = _createVoting(true, commTokenId);
-        _createDeposit(tx.origin, ballotId);
+        _createDeposit(tx.origin, msg.value, ballotId);
 
         DilutionRequest memory dilutionRequest = DilutionRequest({
             requester: msg.sender,

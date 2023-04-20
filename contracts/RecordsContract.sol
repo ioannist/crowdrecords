@@ -129,12 +129,20 @@ contract RecordsContract is Initializable {
     /// @param image This is the image/logo of the record
     /// @param recordCategory This is the category to which record belongs
     /// @param seedId This is the seed contribution id
+    /// @param platformWallet this is the UI providers wallet
+    /// @param platformFee this is the incentive amount for the UI maintainer
     function createNewRecord(
         string memory name,
         string memory image,
         string memory recordCategory,
-        uint256 seedId
-    ) public returns (uint256) {
+        uint256 seedId,
+        address payable platformWallet,
+        uint256 platformFee
+    ) public payable returns (uint256) {
+        if (msg.value > 0) {
+            platformWallet.call{value: platformFee}("");
+        }
+
         newTokenId++;
         uint256 recordId = newTokenId;
 

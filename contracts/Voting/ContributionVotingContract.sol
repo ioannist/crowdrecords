@@ -175,7 +175,7 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
         uint256 commTokenId = treasuryContract.getGovernanceTokenId(recordId);
 
         uint256 ballotId = _createVoting(true, govTokenId);
-        _createDeposit(tx.origin, ballotId);
+        _createDeposit(tx.origin, msg.value, ballotId);
 
         ContributionReward memory contributionReward = ContributionReward({
             requester: tx.origin,

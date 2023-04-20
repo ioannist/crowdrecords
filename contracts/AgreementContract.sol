@@ -185,23 +185,26 @@ contract AgreementContract is BaseVotingContract {
     /// @param title This is the agreement title
     /// @param contractLink this is the link of the agreement contract
     /// @param contractHash this is the hash of the agreement contract file
+    /// @param platformWallet this is the UI providers wallet
+    /// @param platformFee this is the incentive amount for the UI maintainer
     function createAgreement(
         uint256 recordId,
         string memory title,
         string memory contractLink,
-        string memory contractHash
+        string memory contractHash,
+        address payable platformWallet,
+        uint256 platformFee
     ) public payable returns (uint256) {
+        if (msg.value > 0) {
+            platformWallet.call{value: platformFee}("");
+        }
         //Check if valid record id
         agreementCurrentId++;
-        uint256 agreeId = agreementCurrentId;
-
-        ITreasury treasuryContract = ITreasury(TREASURY_CONTRACT_ADDRESS);
-
         uint256 tokenId = treasuryContract.getGovernanceTokenId(recordId);
 
         uint256 ballotId = _createVoting(true, tokenId);
 
-        _createDeposit(msg.sender, ballotId);
+        _createDeposit(msg.sender, msg.value - platformFee, ballotId);
 
         Agreement memory agreement = Agreement({
             requester: msg.sender,
@@ -221,7 +224,7 @@ contract AgreementContract is BaseVotingContract {
             title: title,
             recordId: recordId,
             ballotId: ballotId,
-            agreementId: agreeId,
+            agreementId: agreementCurrentId,
             tokenId: tokenId,
             contractLink: contractLink,
             contractHash: contractHash,
@@ -231,9 +234,9 @@ contract AgreementContract is BaseVotingContract {
 
         agreementMap[ballotId] = agreement;
 
-        recordAgreementList[recordId].push(agreeId);
+        recordAgreementList[recordId].push(agreementCurrentId);
 
-        return agreeId;
+        return agreementCurrentId;
     }
 
     /// @dev This function is called by any user to cast vote
@@ -281,7 +284,6 @@ contract AgreementContract is BaseVotingContract {
         require(agreementMap[agreementId].isActive, "INVALID: AGREEMENT_ID");
         uint256 recordId = agreementMap[agreementId].recordId;
         royaltyId += 1;
-        ITreasury treasuryContract = ITreasury(TREASURY_CONTRACT_ADDRESS);
         uint256 tokenId = treasuryContract.getCommunityTokenId(recordId);
         uint256 totalSupply = treasuryContract.totalCirculatingSupply(tokenId);
 

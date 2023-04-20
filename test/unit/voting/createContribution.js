@@ -54,9 +54,21 @@ async function createContribution() {
         "contribution title",
         "preview.raw",
         "preview.hash",
-        "This is the description for the record"
+        "This is the description for the record",
+        await helper.getEthAccount(8),
+        0
     );
-    await this.recordsContract.createNewRecord("Test", "image.png", "Cat1", SEED_CONTRIBUTION_ID);
+    await this.recordsContract.createNewRecord(
+        "Test",
+        "image.png",
+        "Cat1",
+        SEED_CONTRIBUTION_ID,
+        await helper.getEthAccount(8),
+        0,
+        {
+            value: 0,
+        }
+    );
     await this.treasuryContract.createNewCommunityToken([
         RECORD_ID,
         await web3.utils.toWei("1000000"),
@@ -89,6 +101,8 @@ async function createContribution() {
         "Test description",
         this.rewardCommunityToken,
         this.rewardGovernanceToken,
+        await helper.getEthAccount(8),
+        0,
         {
             from: contributionOwner,
             value: helper.VOTING_DEPOSIT_CONTRIBUTION_CONTRACT,
@@ -137,7 +151,6 @@ async function createContributionWithMockTreasury() {
         helper.GOV_VOTING_PERIOD,
         helper.GOV_VOTING_THRESHOLD
     );
-    await recordsContract.initialize(contributionContract.address, recordsVotingContract.address);
 
     await recordsVotingContract.initialize(
         recordsContract.address,

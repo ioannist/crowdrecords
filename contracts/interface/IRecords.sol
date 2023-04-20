@@ -40,19 +40,24 @@ interface IRecords {
 
     /// @dev This function sets the contribution Contract address
     /// @param contributionContractAddress Takes the address of new contribution contract as parameter
-    function setContributionContractAddress(address contributionContractAddress)
-        external;
+    function setContributionContractAddress(
+        address contributionContractAddress
+    ) external;
 
     /// @dev This function creates new record
     /// @param name This is the name of the record
     /// @param image This is the image/logo of the record
     /// @param recordCategory This is the category to which record belongs
     /// @param seedId This is the seed contribution id
+    /// @param platformWallet this is the UI providers wallet
+    /// @param platformFee this is the incentive amount for the UI maintainer
     function createNewRecord(
         string memory name,
         string memory image,
         string memory recordCategory,
-        uint256 seedId
+        uint256 seedId,
+        address payable platformWallet,
+        uint256 platformFee
     ) external;
 
     /// @dev This function pushes a contribution into the array of the record
@@ -68,7 +73,9 @@ interface IRecords {
     function ownerOf(uint256 recordId) external returns (address);
 
     /// @dev This function return the id of CRD token
-    function newVersionRequestMap(uint256 index)
+    function newVersionRequestMap(
+        uint256 index
+    )
         external
         view
         returns (

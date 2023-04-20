@@ -375,9 +375,14 @@ contract BaseVotingContract is Initializable {
 
     /// @dev This function is responsible for transfer of the ether balance
     /// @param owner The owner who is depositing
+    /// @param depositAmount The amount to be deposited
     /// @param ballotId The id of the ballot for which the deposit is made
-    function _createDeposit(address owner, uint256 ballotId) internal {
-        require(VOTING_DEPOSIT == msg.value, "INV_DEP");
+    function _createDeposit(
+        address owner,
+        uint depositAmount,
+        uint256 ballotId
+    ) internal {
+        require(VOTING_DEPOSIT == depositAmount, "INV_DEP");
         VotingDeposit memory votingDeposit = VotingDeposit({
             owner: owner,
             ballotId: ballotId,

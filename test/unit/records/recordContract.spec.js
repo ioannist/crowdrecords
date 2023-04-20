@@ -53,7 +53,7 @@ contract("Records Contract", function() {
         await helper.revertToSnapshot(snapshotId);
     });
 
-    it("Creating seed contribution and record", async function() {
+    it("Creating seed contribution and record, without platform fee", async function() {
         const user1 = await helper.getEthAccount(0);
         await createTrack(this.tracksContract, user1);
         await createTrack(this.tracksContract, user1);
@@ -65,22 +65,77 @@ contract("Records Contract", function() {
             "preview.raw",
             "preview.hash",
             "This is the description for the record 1",
+            await helper.getEthAccount(8),
+            0,
             { from: user1 }
         );
         const tx = await this.recordsContract.createNewRecord(
             "Test",
             "image.png",
             "Cat1",
-            SEED_CONTRIBUTION_ID
+            SEED_CONTRIBUTION_ID,
+            await helper.getEthAccount(8),
+            "0",
+            {
+                value: 0,
+            }
         );
         expectEvent(tx, "RecordCreated", {
             seedId: "1",
         });
     });
 
+    it("Creating seed contribution and record, with platform fee", async function() {
+        const user1 = await helper.getEthAccount(0);
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
+        //seed contribution id 1
+        await this.contributionContract.createSeedContribution(
+            [1, 2, 3],
+            "contribution title",
+            "preview.raw",
+            "preview.hash",
+            "This is the description for the record 1",
+            await helper.getEthAccount(8),
+            0,
+            { from: user1 }
+        );
+
+        const before = await web3.eth.getBalance(await helper.getEthAccount(8));
+        const tx = await this.recordsContract.createNewRecord(
+            "Test",
+            "image.png",
+            "Cat1",
+            SEED_CONTRIBUTION_ID,
+            await helper.getEthAccount(8),
+            helper.PLATFORM_FEES,
+            {
+                value: helper.PLATFORM_FEES,
+            }
+        );
+        expectEvent(tx, "RecordCreated", {
+            seedId: "1",
+        });
+
+        await expect(
+            web3.eth.getBalance(await helper.getEthAccount(8))
+        ).to.eventually.be.bignumber.equal(BigInt(+before + +helper.PLATFORM_FEES).toString());
+    });
+
     it("Creating record with invalid seed contribution Id, expect revert", async function() {
         await expect(
-            this.recordsContract.createNewRecord("Test", "image.png", "Cat1", 3)
+            this.recordsContract.createNewRecord(
+                "Test",
+                "image.png",
+                "Cat1",
+                3,
+                await helper.getEthAccount(8),
+                0,
+                {
+                    value: 0,
+                }
+            )
         ).to.eventually.rejectedWith("INVALID: CONTRIBUTION_NOT_FOUND");
     });
 
@@ -97,13 +152,20 @@ contract("Records Contract", function() {
             "preview.raw",
             "preview.hash",
             "This is the description for the record 1",
+            await helper.getEthAccount(8),
+            0,
             { from: user1 }
         );
         await this.recordsContract.createNewRecord(
             "Test",
             "image.png",
             "Cat1",
-            SEED_CONTRIBUTION_ID
+            SEED_CONTRIBUTION_ID,
+            await helper.getEthAccount(8),
+            "0",
+            {
+                value: 0,
+            }
         );
         await this.treasuryContract.createNewCommunityToken([
             RECORD_ID,
@@ -134,6 +196,8 @@ contract("Records Contract", function() {
             "Test description",
             rewardCommunityToken,
             rewardGovernanceToken,
+            await helper.getEthAccount(8),
+            0,
             {
                 from: contributionOwner,
                 value: helper.VOTING_DEPOSIT_CONTRIBUTION_CONTRACT,
@@ -141,7 +205,17 @@ contract("Records Contract", function() {
         );
 
         await expect(
-            this.recordsContract.createNewRecord("Test", "image.png", "Cat1", 2)
+            this.recordsContract.createNewRecord(
+                "Test",
+                "image.png",
+                "Cat1",
+                2,
+                await helper.getEthAccount(8),
+                0,
+                {
+                    value: 0,
+                }
+            )
         ).to.eventually.rejectedWith("INVALID: NOT_SEED_CONTRIBUTION");
     });
 
@@ -158,20 +232,37 @@ contract("Records Contract", function() {
             "preview.raw",
             "preview.hash",
             "This is the description for the record 1",
+            await helper.getEthAccount(8),
+            0,
             { from: user1 }
         );
         const tx = await this.recordsContract.createNewRecord(
             "Test",
             "image.png",
             "Cat1",
-            SEED_CONTRIBUTION_ID
+            SEED_CONTRIBUTION_ID,
+            await helper.getEthAccount(8),
+            "0",
+            {
+                value: 0,
+            }
         );
         expectEvent(tx, "RecordCreated", {
             seedId: "1",
         });
 
         await expect(
-            this.recordsContract.createNewRecord("Test", "image.png", "Cat1", SEED_CONTRIBUTION_ID)
+            this.recordsContract.createNewRecord(
+                "Test",
+                "image.png",
+                "Cat1",
+                SEED_CONTRIBUTION_ID,
+                await helper.getEthAccount(8),
+                0,
+                {
+                    value: 0,
+                }
+            )
         ).to.eventually.be.rejectedWith("INVALID: SEED_ALREADY_USED");
     });
     it("User create seed contribution, creates new record, tries to create one more record with same see but rejected", async function() {
@@ -187,20 +278,37 @@ contract("Records Contract", function() {
             "preview.raw",
             "preview.hash",
             "This is the description for the record 1",
+            await helper.getEthAccount(8),
+            0,
             { from: user1 }
         );
         const tx = await this.recordsContract.createNewRecord(
             "Test",
             "image.png",
             "Cat1",
-            SEED_CONTRIBUTION_ID
+            SEED_CONTRIBUTION_ID,
+            await helper.getEthAccount(8),
+            "0",
+            {
+                value: 0,
+            }
         );
         expectEvent(tx, "RecordCreated", {
             seedId: "1",
         });
 
         await expect(
-            this.recordsContract.createNewRecord("Test", "image.png", "Cat1", SEED_CONTRIBUTION_ID)
+            this.recordsContract.createNewRecord(
+                "Test",
+                "image.png",
+                "Cat1",
+                SEED_CONTRIBUTION_ID,
+                await helper.getEthAccount(8),
+                0,
+                {
+                    value: 0,
+                }
+            )
         ).to.eventually.be.rejectedWith("INVALID: SEED_ALREADY_USED");
     });
     it("User create seed contribution, different user tries to create rejected. (only the same user should be able to create new record, incase of new version anyone can create it", async function() {
@@ -217,6 +325,8 @@ contract("Records Contract", function() {
             "preview.raw",
             "preview.hash",
             "This is the description for the record 1",
+            await helper.getEthAccount(8),
+            0,
             { from: user1 }
         );
 
@@ -226,14 +336,26 @@ contract("Records Contract", function() {
                 "image.png",
                 "Cat1",
                 SEED_CONTRIBUTION_ID,
-                { from: user2, gas: 30_000_000 }
+                await helper.getEthAccount(8),
+                "0",
+                { from: user2, gas: 30_000_000, value: 0 }
             )
         ).to.eventually.be.rejectedWith("INVALID: ONLY_CONTRIBUTION_OWNER");
     });
     it("Mashing up the orders of the creation of record, expect rejection", async function() {
         // Try to create a record without seed contribution, will receive rejection
         await expect(
-            this.recordsContract.createNewRecord("Test", "image.png", "Cat1", SEED_CONTRIBUTION_ID)
+            this.recordsContract.createNewRecord(
+                "Test",
+                "image.png",
+                "Cat1",
+                SEED_CONTRIBUTION_ID,
+                await helper.getEthAccount(8),
+                0,
+                {
+                    value: 0,
+                }
+            )
         ).to.eventually.be.rejectedWith("INVALID: CONTRIBUTION_NOT_FOUND");
 
         const user1 = await helper.getEthAccount(0);
@@ -250,6 +372,8 @@ contract("Records Contract", function() {
             "preview.raw",
             "preview.hash",
             "This is the description for the record 1",
+            await helper.getEthAccount(8),
+            0,
             { from: user1 }
         );
 
@@ -278,7 +402,12 @@ contract("Records Contract", function() {
             "Test",
             "image.png",
             "Cat1",
-            SEED_CONTRIBUTION_ID
+            SEED_CONTRIBUTION_ID,
+            await helper.getEthAccount(8),
+            "0",
+            {
+                value: 0,
+            }
         );
         await this.treasuryContract.createNewCommunityToken([
             RECORD_ID,
@@ -309,6 +438,8 @@ contract("Records Contract", function() {
             "Test description",
             rewardCommunityToken,
             rewardGovernanceToken,
+            await helper.getEthAccount(8),
+            0,
             {
                 from: contributionOwner,
                 value: helper.VOTING_DEPOSIT_CONTRIBUTION_CONTRACT,
@@ -329,6 +460,8 @@ contract("Records Contract", function() {
                 "preview.raw",
                 "preview.hash",
                 "This is the description for the record 1",
+                await helper.getEthAccount(8),
+                0,
                 { from: await helper.getEthAccount(2) }
             )
         ).to.eventually.be.rejectedWith("INVALID: NOT_A_TRACK_OWNER");
@@ -358,13 +491,20 @@ contract("Records Contract", function() {
                 "preview.raw",
                 "preview.hash",
                 "This is the description for the record 1",
+                await helper.getEthAccount(8),
+                0,
                 { from: this.user1 }
             );
             const tx = await this.recordsContract.createNewRecord(
                 "Test",
                 "image.png",
                 "Cat1",
-                SEED_CONTRIBUTION_ID
+                SEED_CONTRIBUTION_ID,
+                await helper.getEthAccount(8),
+                0,
+                {
+                    value: 0,
+                }
             );
             await this.treasuryContract.createNewCommunityToken([
                 RECORD_ID,
@@ -395,6 +535,8 @@ contract("Records Contract", function() {
                 "Test description",
                 rewardCommunityToken,
                 rewardGovernanceToken,
+                await helper.getEthAccount(8),
+                0,
                 {
                     from: contributionOwner,
                     value: helper.VOTING_DEPOSIT_CONTRIBUTION_CONTRACT,
@@ -405,7 +547,7 @@ contract("Records Contract", function() {
             await helper.revertToSnapshot(snapshotId2);
         });
 
-        it("Creating a new record version request, VersionRequest event emitted", async function() {
+        it("Creating a new record version request, without platform fee, VersionRequest event emitted", async function() {
             const tx2 = await this.recordsVotingContract.createNewRecordVersion(
                 [
                     "Test",
@@ -428,10 +570,53 @@ contract("Records Contract", function() {
                         "image.png",
                     ],
                 ],
+                await helper.getEthAccount(8),
+                0,
                 {
                     value: helper.VOTING_DEPOSIT_RECORD_VERSION_CONTRACT,
                 }
             );
+
+            expectEvent(tx2, "VersionRequest", {
+                requestId: "1",
+            });
+        });
+
+        it("Creating a new record version request, with platform fee, VersionRequest event emitted", async function() {
+            const before = await web3.eth.getBalance(await helper.getEthAccount(8));
+
+            const tx2 = await this.recordsVotingContract.createNewRecordVersion(
+                [
+                    "Test",
+                    "image.png",
+                    "Cat1",
+                    RECORD_ID,
+                    [1],
+                    [
+                        await web3.utils.toWei("1000000"),
+                        this.oldRecordVersionOwnerRewardGovernance,
+                        GOVERNANCE_TOKEN_BALANCE_USER1,
+                        "Test",
+                        "image.png",
+                    ],
+                    [
+                        await web3.utils.toWei("1000000"),
+                        this.oldRecordVersionOwnerRewardCommunity,
+                        COMMUNITY_TOKEN_BALANCE_USER1,
+                        "Test",
+                        "image.png",
+                    ],
+                ],
+                await helper.getEthAccount(8),
+                helper.PLATFORM_FEES,
+                {
+                    value: +helper.VOTING_DEPOSIT_RECORD_VERSION_CONTRACT + +helper.PLATFORM_FEES,
+                }
+            );
+
+            await expect(
+                web3.eth.getBalance(await helper.getEthAccount(8))
+            ).to.eventually.be.bignumber.equal(BigInt(+before + +helper.PLATFORM_FEES).toString());
 
             expectEvent(tx2, "VersionRequest", {
                 requestId: "1",
@@ -461,6 +646,8 @@ contract("Records Contract", function() {
                         "image.png",
                     ],
                 ],
+                await helper.getEthAccount(8),
+                0,
                 {
                     value: helper.VOTING_DEPOSIT_RECORD_VERSION_CONTRACT,
                 }
@@ -521,6 +708,8 @@ contract("Records Contract", function() {
                         "image.png",
                     ],
                 ],
+                await helper.getEthAccount(8),
+                0,
                 {
                     value: helper.VOTING_DEPOSIT_RECORD_VERSION_CONTRACT,
                 }
@@ -598,6 +787,8 @@ contract("Records Contract", function() {
                         "image.png",
                     ],
                 ],
+                await helper.getEthAccount(8),
+                0,
                 {
                     value: helper.VOTING_DEPOSIT_RECORD_VERSION_CONTRACT,
                 }
@@ -679,6 +870,8 @@ contract("Records Contract", function() {
                         "image.png",
                     ],
                 ],
+                await helper.getEthAccount(8),
+                0,
                 {
                     value: helper.VOTING_DEPOSIT_RECORD_VERSION_CONTRACT,
                 }
@@ -772,6 +965,8 @@ contract("Records Contract", function() {
                         "image.png",
                     ],
                 ],
+                await helper.getEthAccount(8),
+                0,
                 {
                     value: helper.VOTING_DEPOSIT_RECORD_VERSION_CONTRACT,
                 }
@@ -886,6 +1081,8 @@ contract("Records Contract", function() {
                         "image.png",
                     ],
                 ],
+                await helper.getEthAccount(8),
+                0,
                 {
                     value: helper.VOTING_DEPOSIT_RECORD_VERSION_CONTRACT,
                 }
@@ -1056,6 +1253,8 @@ contract("Records Contract", function() {
                         "image.png",
                     ],
                 ],
+                await helper.getEthAccount(8),
+                0,
                 {
                     value: helper.VOTING_DEPOSIT_RECORD_VERSION_CONTRACT,
                 }
@@ -1093,6 +1292,8 @@ contract("Records Contract", function() {
                         "image.png",
                     ],
                 ],
+                await helper.getEthAccount(8),
+                0,
                 { from: this.user3, value: helper.VOTING_DEPOSIT_RECORD_VERSION_CONTRACT }
             );
 
@@ -1287,6 +1488,8 @@ contract("Records Contract", function() {
                         "image.png",
                     ],
                 ],
+                await helper.getEthAccount(8),
+                0,
                 {
                     value: helper.VOTING_DEPOSIT_RECORD_VERSION_CONTRACT,
                 }
@@ -1381,6 +1584,8 @@ contract("Records Contract", function() {
                             "image.png",
                         ],
                     ],
+                    await helper.getEthAccount(8),
+                    0,
                     {
                         value: helper.VOTING_DEPOSIT_RECORD_VERSION_CONTRACT,
                     }
@@ -1439,6 +1644,8 @@ contract("Records Contract", function() {
                         "image.png",
                     ],
                 ],
+                await helper.getEthAccount(8),
+                0,
                 {
                     value: helper.VOTING_DEPOSIT_RECORD_VERSION_CONTRACT,
                 }
@@ -1605,6 +1812,8 @@ contract("Records Contract", function() {
                         "image.png",
                     ],
                 ],
+                await helper.getEthAccount(8),
+                0,
                 {
                     value: helper.VOTING_DEPOSIT_RECORD_VERSION_CONTRACT,
                 }
@@ -1771,6 +1980,8 @@ contract("Records Contract", function() {
                         "image.png",
                     ],
                 ],
+                await helper.getEthAccount(8),
+                0,
                 {
                     value: helper.VOTING_DEPOSIT_RECORD_VERSION_CONTRACT,
                 }
@@ -1938,13 +2149,17 @@ contract("Records Contract", function() {
                 "contribution title",
                 "preview.raw",
                 "preview.hash",
-                "This is the description for the record 1"
+                "This is the description for the record 1",
+                await helper.getEthAccount(8),
+                0
             );
             const tx = await this.recordsContractMock.createNewRecord(
                 "Test",
                 "image.png",
                 "Cat1",
-                SEED_CONTRIBUTION_ID
+                SEED_CONTRIBUTION_ID,
+                await helper.getEthAccount(8),
+                0
             );
             await this.treasuryContractMock.createNewCommunityToken([
                 RECORD_ID,
@@ -1975,6 +2190,8 @@ contract("Records Contract", function() {
                 "Test description",
                 rewardCommunityToken,
                 rewardGovernanceToken,
+                await helper.getEthAccount(8),
+                0,
                 {
                     from: contributionOwner,
                     value: helper.VOTING_DEPOSIT_CONTRIBUTION_CONTRACT,
@@ -2023,6 +2240,8 @@ contract("Records Contract", function() {
                         "image.png",
                     ],
                 ],
+                await helper.getEthAccount(8),
+                0,
                 {
                     value: helper.VOTING_DEPOSIT_RECORD_VERSION_CONTRACT,
                 }
@@ -2111,6 +2330,8 @@ contract("Records Contract", function() {
                         "image.png",
                     ],
                 ],
+                await helper.getEthAccount(8),
+                0,
                 {
                     value: helper.VOTING_DEPOSIT_RECORD_VERSION_CONTRACT,
                 }
@@ -2201,6 +2422,8 @@ contract("Records Contract", function() {
                         "image.png",
                     ],
                 ],
+                await helper.getEthAccount(8),
+                0,
                 {
                     value: helper.VOTING_DEPOSIT_RECORD_VERSION_CONTRACT,
                 }

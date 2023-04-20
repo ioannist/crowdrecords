@@ -46,7 +46,7 @@ contract BaseVotingCounterOfferContractMock is BaseVotingCounterOfferContract {
 
     function createBallot(bool canOwnerVote, uint256 tokenId) public payable {
         uint256 ballotId = _createVoting(canOwnerVote, tokenId);
-        _createDeposit(msg.sender, ballotId);
+        _createDeposit(msg.sender, msg.value, ballotId);
     }
 
     function castVote(uint256 ballotId, bool vote) public {
