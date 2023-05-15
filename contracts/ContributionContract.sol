@@ -66,6 +66,42 @@ contract ContributionContract is Initializable {
         bool isPresent;
     }
 
+    /// @param tracks Id of tracks that are part of this contribution
+    /// @param title title of the contribution
+    /// @param previewFile this is preview file of the contribution
+    /// @param previewFileHash this is hash of the preview file
+    /// @param recordId this is the id of the record to which contribution belongs to.
+    /// @param roughMix this represents if a contribution is a roughMix or is a new contribution
+    /// @param description this is the description of the new contribution that is created.
+    /// @param communityReward this is the amount of community token that the contributor is requesting
+    /// for his work contribution.
+    /// @param governanceReward this is the amount of governance token that the contributor is requesting for his
+    /// work contribution.
+    struct NewContributionPayload {
+        uint256[] tracks;
+        string title;
+        string previewFile;
+        string previewFileHash;
+        uint256 recordId;
+        bool roughMix;
+        string description;
+        uint256 communityReward;
+        uint256 governanceReward;
+    }
+
+    /// @param tracks Id of tracks that are part of this contribution
+    /// @param title it is the title of the contribution
+    /// @param previewFile this is preview file of the contribution
+    /// @param previewFileHash this is hash of the preview file
+    /// @param description this is the description of the new contribution that is created.
+    struct SeedContributionPayload {
+        uint256[] tracks;
+        string title;
+        string previewFile;
+        string previewFileHash;
+        string description;
+    }
+
     Counters.Counter private _contributionIds;
     address public OWNER;
     address public CONTRIBUTION_VOTING_CONTRACT_ADDRESS;
@@ -74,6 +110,7 @@ contract ContributionContract is Initializable {
     IRecords public recordsContract;
     address public TRACKS_CONTRACT_ADDRESS;
     ITracks public trackInterface;
+    address public CONTROLLER_CONTRACT_ADDRESS;
     mapping(uint256 => Contribution) public contributionData;
     uint256 public PENDING = 1;
     uint256 public ACCEPTED = 2;
@@ -89,14 +126,25 @@ contract ContributionContract is Initializable {
         _;
     }
 
+    /// @dev Modifier to restrict the function call from controller contract
+    modifier controllerContractOnly() {
+        require(
+            msg.sender == CONTROLLER_CONTRACT_ADDRESS,
+            "UNAUTHORIZED: CANNOT_PERFORM_ACTION"
+        );
+        _;
+    }
+
     /// @dev This is to set the address of the contracts
     /// @param newVotingContractAddress this is the address of new voting contract
     /// @param newRecordsContractAddress this is the address of new Records contract
     /// @param newTracksContractAddress this is the address of new tracks contract
+    /// @param controllerContractAddress this is the address of controller contract
     function initialize(
         address newVotingContractAddress,
         address newRecordsContractAddress,
-        address newTracksContractAddress
+        address newTracksContractAddress,
+        address controllerContractAddress
     ) public initializer ownerOnly {
         CONTRIBUTION_VOTING_CONTRACT_ADDRESS = newVotingContractAddress;
         contributionVotingContract = ContributionVotingContract(
@@ -106,6 +154,7 @@ contract ContributionContract is Initializable {
         recordsContract = IRecords(RECORD_CONTRACT_ADDRESS);
         TRACKS_CONTRACT_ADDRESS = newTracksContractAddress;
         trackInterface = ITracks(TRACKS_CONTRACT_ADDRESS);
+        CONTROLLER_CONTRACT_ADDRESS = controllerContractAddress;
     }
 
     /// @dev This function sets the owner address
@@ -123,89 +172,11 @@ contract ContributionContract is Initializable {
     }
 
     /// @dev This function will be called by the user to create a new contribution
-    /// @param tracks Id of tracks that are part of this contribution
-    /// @param title title of the contribution
-    /// @param previewFile this is preview file of the contribution
-    /// @param previewFileHash this is hash of the preview file
-    /// @param recordId this is the id of the record to which contribution belongs to.
-    /// @param roughMix this represents if a contribution is a roughMix or is a new contribution
-    /// @param description this is the description of the new contribution that is created.
-    /// @param communityReward this is the amount of community token that the contributor is requesting
-    /// for his work contribution.
-    /// @param governanceReward this is the amount of governance token that the contributor is requesting for his
-    /// work contribution.
+    /// @param payload this is the data required for creation of new contribution
     /// @param platformWallet this is the UI providers wallet
     /// @param platformFee this is the incentive amount for the UI maintainer
     function createNewContribution(
-        // string memory uri,
-        uint256[] memory tracks,
-        string memory title,
-        string memory previewFile,
-        string memory previewFileHash,
-        uint256 recordId,
-        bool roughMix,
-        string memory description,
-        uint256 communityReward,
-        uint256 governanceReward,
-        address payable platformWallet,
-        uint256 platformFee
-    ) public payable returns (uint256) {
-        if (msg.value > 0) {
-            platformWallet.call{value: platformFee}("");
-        }
-
-        _contributionIds.increment();
-        {
-            bool ownerStatus = trackInterface.checkOwner(tracks, msg.sender);
-
-            require(ownerStatus, "INVALID: NOT_A_TRACK_OWNER");
-        }
-
-        uint256 contributionId = _contributionIds.current();
-        contributionVotingContract.createContributionVotingBallot{
-            value: msg.value - platformFee
-        }(contributionId, recordId, governanceReward, communityReward);
-
-        Contribution memory contribution = Contribution({
-            tracks: tracks,
-            title: title,
-            createdAt: block.timestamp,
-            previewFile: previewFile,
-            previewFileHash: previewFileHash,
-            roughMix: roughMix,
-            status: PENDING,
-            description: description,
-            seedContribution: false,
-            owner: msg.sender,
-            isPresent: true
-        });
-
-        recordsContract.pushContributionIdToContributionList(
-            recordId,
-            contributionId
-        );
-
-        contributionData[contributionId] = contribution;
-
-        emitContributionCreated(contributionId, contribution, recordId);
-
-        return contributionId;
-    }
-
-    /// @dev This function will be called by the user to create a new seed contribution as there will be not voting
-    /// or anything like that
-    /// @param tracks Id of tracks that are part of this contribution
-    /// @param previewFile this is preview file of the contribution
-    /// @param previewFileHash this is hash of the preview file
-    /// @param description this is the description of the new contribution that is created.
-    /// @param platformWallet this is the UI providers wallet
-    /// @param platformFee this is the incentive amount for the UI maintainer
-    function createSeedContribution(
-        uint256[] memory tracks,
-        string memory title,
-        string memory previewFile,
-        string memory previewFileHash,
-        string memory description,
+        NewContributionPayload memory payload,
         address payable platformWallet,
         uint256 platformFee
     ) public payable returns (uint256) {
@@ -214,11 +185,154 @@ contract ContributionContract is Initializable {
                 platformWallet.call{value: platformFee}("");
             }
 
-            bool ownerStatus = trackInterface.checkOwner(tracks, msg.sender);
+            bool ownerStatus = trackInterface.checkOwner(
+                payload.tracks,
+                msg.sender
+            );
 
             require(ownerStatus, "INVALID: NOT_A_TRACK_OWNER");
         }
 
+        return
+            createContributionAndVoting(
+                payload,
+                msg.sender,
+                msg.value - platformFee
+            );
+    }
+
+    /// @dev This function will be called by the controller contract to create a new contribution and voting
+    /// @param payload this is the data required for creation of new contribution
+    /// @param owner this is the owner of the new contribution which is to be created
+    function controllerCreateNewContribution(
+        NewContributionPayload memory payload,
+        address owner
+    ) public payable controllerContractOnly returns (uint256) {
+        return createContributionAndVoting(payload, owner, msg.value);
+    }
+
+    /// @dev This function is responsible to create a non seed contribution and to create voting for contribution
+    /// @param payload this is the data required for creation of new contribution
+    /// @param owner this is the owner of the contribution
+    /// @param depositAmount this is the deposit amount for voting creation
+    function createContributionAndVoting(
+        NewContributionPayload memory payload,
+        address owner,
+        uint256 depositAmount
+    ) internal returns (uint256) {
+        uint256 contributionId = _createContribution(
+            payload.tracks,
+            payload.title,
+            payload.previewFile,
+            payload.previewFileHash,
+            payload.description,
+            payload.roughMix,
+            PENDING,
+            false,
+            owner,
+            payload.recordId
+        );
+
+        {
+            contributionVotingContract.createContributionVotingBallot{
+                value: depositAmount
+            }(
+                contributionId,
+                payload.recordId,
+                payload.governanceReward,
+                payload.communityReward
+            );
+
+            recordsContract.pushContributionIdToContributionList(
+                payload.recordId,
+                contributionId
+            );
+        }
+        return contributionId;
+    }
+
+    /// @dev This function will be called by the user to create a new seed contribution as there will be not voting
+    /// or anything like that
+    /// @param payload data for the seed contribution creation
+    /// @param platformWallet this is the UI providers wallet
+    /// @param platformFee this is the incentive amount for the UI maintainer
+    function createSeedContribution(
+        SeedContributionPayload memory payload,
+        address payable platformWallet,
+        uint256 platformFee
+    ) public payable returns (uint256) {
+        {
+            if (msg.value > 0) {
+                platformWallet.call{value: platformFee}("");
+            }
+
+            bool ownerStatus = trackInterface.checkOwner(
+                payload.tracks,
+                msg.sender
+            );
+
+            require(ownerStatus, "INVALID: NOT_A_TRACK_OWNER");
+        }
+
+        return
+            _createContribution(
+                payload.tracks,
+                payload.title,
+                payload.previewFile,
+                payload.previewFileHash,
+                payload.description,
+                false,
+                ACCEPTED,
+                true,
+                msg.sender,
+                0
+            );
+    }
+
+    /// @dev This function is to be called only by the controller contract that is created to bundle multiple contract calls into single function
+    /// @param payload data for the seed contribution creation
+    /// @param owner address of the owner of the seed contribution
+    function controllerCreateSeedContribution(
+        SeedContributionPayload memory payload,
+        address owner
+    ) public controllerContractOnly returns (uint256) {
+        return
+            _createContribution(
+                payload.tracks,
+                payload.title,
+                payload.previewFile,
+                payload.previewFileHash,
+                payload.description,
+                false,
+                ACCEPTED,
+                true,
+                owner,
+                0
+            );
+    }
+
+    /// @dev This function is an internal function that creates the contribution
+    /// @param tracks Id of tracks that are part of this contribution
+    /// @param previewFile this is preview file of the contribution
+    /// @param previewFileHash this is hash of the preview file
+    /// @param description this is the description of the new contribution that is created.
+    /// @param roughMix this flag denotes if the contribution is a rough mix or a new contributions
+    /// @param status this is the status of the contribution
+    /// @param isSeed this denotes if it is seed contribution or not
+    /// @param owner this is the owner address
+    /// @param recordId this is the record id to which the contribution belongs
+    function _createContribution(
+        uint256[] memory tracks,
+        string memory title,
+        string memory previewFile,
+        string memory previewFileHash,
+        string memory description,
+        bool roughMix,
+        uint status,
+        bool isSeed,
+        address owner,
+        uint recordId
+    ) internal returns (uint256) {
         _contributionIds.increment();
 
         uint256 contributionId = _contributionIds.current();
@@ -230,16 +344,16 @@ contract ContributionContract is Initializable {
             previewFile: previewFile,
             previewFileHash: previewFileHash,
             roughMix: false,
-            status: ACCEPTED,
+            status: status,
             description: description,
-            seedContribution: true,
-            owner: msg.sender,
+            seedContribution: isSeed,
+            owner: owner,
             isPresent: true
         });
 
         contributionData[contributionId] = contribution;
 
-        emitContributionCreated(contributionId, contribution, 0);
+        emitContributionCreated(contributionId, contribution, recordId);
 
         return contributionId;
     }

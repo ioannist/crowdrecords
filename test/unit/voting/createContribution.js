@@ -25,6 +25,7 @@ const DilutionContract = artifacts.require("../../contracts/DilutionContract.sol
 const CrowdrecordsGovernor = artifacts.require(
     "../../contracts/governance/CrowdrecordsGovernor.sol"
 );
+const ControllerContract = artifacts.require("../contracts/ControllerContract.sol");
 
 const {
     VOTING_INTERVAL_BLOCKS,
@@ -45,24 +46,23 @@ async function createContribution() {
     this.rewardCommunityToken = await web3.utils.toWei("1000");
     this.rewardGovernanceToken = await web3.utils.toWei("1000");
 
-    await this.tracksContract.createNewTrack("fileHash1", "fileLink1", "Category1");
-    await this.tracksContract.createNewTrack("fileHash2", "fileLink2", "Category2");
-    await this.tracksContract.createNewTrack("fileHash3", "fileLink3", "Category3");
+    await this.tracksContract.createNewTracks([["fileHash1", "fileLink1", "Category1"]]);
+    await this.tracksContract.createNewTracks([["fileHash2", "fileLink2", "Category2"]]);
+    await this.tracksContract.createNewTracks([["fileHash3", "fileLink3", "Category3"]]);
 
     await this.contributionContract.createSeedContribution(
-        [1, 2, 3],
-        "contribution title",
-        "preview.raw",
-        "preview.hash",
-        "This is the description for the record",
+        [
+            [1, 2, 3],
+            "contribution title",
+            "preview.raw",
+            "preview.hash",
+            "This is the description for the record",
+        ],
         await helper.getEthAccount(8),
         0
     );
     await this.recordsContract.createNewRecord(
-        "Test",
-        "image.png",
-        "Cat1",
-        SEED_CONTRIBUTION_ID,
+        ["Test", "image.png", "Cat1", SEED_CONTRIBUTION_ID],
         await helper.getEthAccount(8),
         0,
         {
@@ -84,23 +84,25 @@ async function createContribution() {
         "image.png",
     ]);
 
-    await this.tracksContract.createNewTrack("fileHash1", "fileLink1", "Category1", {
+    await this.tracksContract.createNewTracks([["fileHash1", "fileLink1", "Category1"]], {
         from: contributionOwner,
     });
-    await this.tracksContract.createNewTrack("fileHash2", "fileLink2", "Category2", {
+    await this.tracksContract.createNewTracks([["fileHash2", "fileLink2", "Category2"]], {
         from: contributionOwner,
     });
 
     await this.contributionContract.createNewContribution(
-        [4, 5],
-        "contribution title",
-        "preview.raw",
-        "preview.hash",
-        RECORD_ID,
-        false,
-        "Test description",
-        this.rewardCommunityToken,
-        this.rewardGovernanceToken,
+        [
+            [4, 5],
+            "contribution title",
+            "preview.raw",
+            "preview.hash",
+            RECORD_ID,
+            false,
+            "Test description",
+            this.rewardCommunityToken,
+            this.rewardGovernanceToken,
+        ],
         await helper.getEthAccount(8),
         0,
         {
@@ -152,6 +154,13 @@ async function createContributionWithMockTreasury() {
         helper.GOV_VOTING_THRESHOLD
     );
 
+    let controllerContract = await ControllerContract.new(
+        tracksContract.address,
+        contributionContract.address,
+        recordsContract.address,
+        treasuryContract.address
+    );
+
     await recordsVotingContract.initialize(
         recordsContract.address,
         treasuryContract.address,
@@ -162,7 +171,8 @@ async function createContributionWithMockTreasury() {
     await contributionContract.initialize(
         contributionVotingContract.address,
         recordsContract.address,
-        tracksContract.address
+        tracksContract.address,
+        controllerContract.address
     );
 
     await contributionVotingContract.initialize(
@@ -213,10 +223,12 @@ async function createContributionWithMockTreasury() {
     await treasuryCoreContractMock.initialize(
         votingHubContract.address,
         treasuryContract.address,
-        crdTokenContract.address
+        crdTokenContract.address,
+        controllerContract.address
     );
 
     await dilutionContract.initialize(treasuryContract.address, crowdrecordsGovernor.address);
+    await recordsContract.initialize(controllerContract.address);
 
     return {
         tracksContractMock: tracksContract,
@@ -233,6 +245,7 @@ async function createContributionWithMockTreasury() {
         baseVotingCounterOfferContractMock: baseVotingCounterOfferContractMock,
         votingHubContractMock: votingHubContract,
         dilutionContractMock: dilutionContract,
+        controllerContractMock: controllerContract,
     };
 }
 

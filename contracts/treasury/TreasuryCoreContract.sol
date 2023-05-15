@@ -22,6 +22,7 @@ contract TreasuryCoreContract is
     uint256 private LastTokenId = 1;
     address public VOTING_HUB_ADDRESS;
     address public TREASURY_CONTRACT_ADDRESS;
+    address public CONTROLLER_CONTRACT_ADDRESS;
     address public OWNER;
     string private PREFIX_GOVERNANCE = "CRDG_";
     string private PREFIX_COMMUNITY = "CRD_";
@@ -123,6 +124,8 @@ contract TreasuryCoreContract is
     mapping(uint256 => Token) public govTokenMapping;
     mapping(uint256 => Token) public commTokenMapping;
 
+    // TokenSymbol => boolean, it denotes if a token name is taken or not,
+    // if it is true it means that the token name is already taken
     mapping(string => bool) public govTokenSym;
     mapping(string => bool) public commTokenSym;
 
@@ -138,10 +141,20 @@ contract TreasuryCoreContract is
         _;
     }
 
-    /// @dev Modifier to check that the person who accesses a specific function is the owner of contract himself.
+    /// @dev Modifier to check that the caller is the treasury contract
     modifier onlyTreasuryContract() {
         require(
             msg.sender == TREASURY_CONTRACT_ADDRESS,
+            "UNAUTHORIZED: CANNOT_PERFORM_ACTION"
+        );
+        _;
+    }
+
+    /// @dev Modifier to check that the caller is the treasury contract or controller contract
+    modifier onlyTreasuryAndControllerContract() {
+        require(
+            msg.sender == TREASURY_CONTRACT_ADDRESS ||
+                msg.sender == CONTROLLER_CONTRACT_ADDRESS,
             "UNAUTHORIZED: CANNOT_PERFORM_ACTION"
         );
         _;
@@ -151,13 +164,16 @@ contract TreasuryCoreContract is
     /// @param newVotingHubContract This is the address of new voting hub contract
     /// @param newTreasuryAddress This is the address of new voting hub contract
     /// @param crdTokenAddress This is the address of CRD token contract
+    /// @param controllerContractAddress This is the address of Controller contract
     function initialize(
         address newVotingHubContract,
         address newTreasuryAddress,
-        address crdTokenAddress
+        address crdTokenAddress,
+        address controllerContractAddress
     ) public initializer ownerOnly {
         VOTING_HUB_ADDRESS = newVotingHubContract;
         TREASURY_CONTRACT_ADDRESS = newTreasuryAddress;
+        CONTROLLER_CONTRACT_ADDRESS = controllerContractAddress;
         crdTokenContract = IERC20(crdTokenAddress);
     }
 
@@ -167,7 +183,7 @@ contract TreasuryCoreContract is
     function createNewGovernanceToken(
         NewTokenData memory newTokenData,
         address userAddress
-    ) external onlyTreasuryContract returns (uint256) {
+    ) external onlyTreasuryAndControllerContract returns (uint256) {
         {
             bytes memory preString = abi.encodePacked(PREFIX_GOVERNANCE);
             newTokenData.symbol = string(
@@ -185,17 +201,18 @@ contract TreasuryCoreContract is
             TOKEN_TYPE_GOVERNANCE,
             userAddress
         );
+        govTokenSym[newTokenData.symbol] = true;
 
         return newTokenId;
     }
 
-    /// @dev This function creats new community tokens for specified record
+    /// @dev This function creates new community tokens for specified record
     /// @param newTokenData This contains all the parameters needed to create a new community token that are
     /// @param userAddress - This is the address of the user who is the creator of the token
     function createNewCommunityToken(
         NewTokenData memory newTokenData,
         address userAddress
-    ) external onlyTreasuryContract returns (uint256) {
+    ) external onlyTreasuryAndControllerContract returns (uint256) {
         {
             bytes memory preString = abi.encodePacked(PREFIX_COMMUNITY);
             newTokenData.symbol = string(
@@ -213,6 +230,7 @@ contract TreasuryCoreContract is
             TOKEN_TYPE_COMMUNITY,
             userAddress
         );
+        commTokenSym[newTokenData.symbol] = true;
 
         return newTokenId;
     }
@@ -389,8 +407,19 @@ contract TreasuryCoreContract is
         string memory governanceSymbol,
         string memory communitySymbol
     ) external onlyTreasuryContract {
-        commTokenSym[communitySymbol] = true;
-        govTokenSym[governanceSymbol] = true;
+        commTokenSym[communitySymbol] = false;
+        govTokenSym[governanceSymbol] = false;
+    }
+
+    /// @dev This function checks if symbol are available or not
+    /// @param governanceSymbol Symbol for governance token
+    /// @param communitySymbol Symbol for community token
+    function isSymbolAvailable(
+        string memory governanceSymbol,
+        string memory communitySymbol
+    ) external onlyTreasuryContract {
+        require(!commTokenSym[communitySymbol], "SYMBOL_C_TAKEN");
+        require(!govTokenSym[governanceSymbol], "SYMBOL_G_TAKEN");
     }
 
     /// @dev this function is responsible for minting of new tokens for records
@@ -440,13 +469,10 @@ contract TreasuryCoreContract is
     /// @param account this is the address of the user whose balance you want to check
     /// @param id this is the id of the token that is to be transferred
     /// @return balance This is the balance of the user
-    function balanceOf(address account, uint256 id)
-        public
-        view
-        virtual
-        override
-        returns (uint256)
-    {
+    function balanceOf(
+        address account,
+        uint256 id
+    ) public view virtual override returns (uint256) {
         if (id == CRD) return crdTokenContract.balanceOf(account);
         else return super.balanceOf(account, id);
     }
@@ -459,10 +485,10 @@ contract TreasuryCoreContract is
         return _snapshot();
     }
 
-    function mint(uint256 tokenId, uint256 amount)
-        external
-        onlyTreasuryContract
-    {
+    function mint(
+        uint256 tokenId,
+        uint256 amount
+    ) external onlyTreasuryContract {
         _mint(address(this), tokenId, amount, "New tokens minted");
     }
 

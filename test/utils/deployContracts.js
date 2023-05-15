@@ -20,6 +20,7 @@ const VotingHubContract = artifacts.require("../contracts/Mocks/VotingHubContrac
 const DilutionContract = artifacts.require("../contracts/DilutionContract.sol");
 
 const CrowdrecordsGovernor = artifacts.require("../contracts/governance/CrowdrecordsGovernor.sol");
+const ControllerContract = artifacts.require("../contracts/ControllerContract.sol");
 
 const { VOTING_INTERVAL_BLOCKS, getEthAccount } = require("./helper");
 
@@ -41,70 +42,7 @@ async function setup() {
     let votingHubContract = await VotingHubContract.deployed();
     let dilutionContract = await DilutionContract.deployed();
     let crowdrecordsGovernor = await CrowdrecordsGovernor.deployed();
-
-    await recordsVotingContract.initialize(
-        recordsContract.address,
-        treasuryContract.address,
-        treasuryCoreContract.address,
-        crowdrecordsGovernor.address
-    );
-
-    await contributionContract.initialize(
-        contributionVotingContract.address,
-        recordsContract.address,
-        tracksContract.address
-    );
-
-    await contributionVotingContract.initialize(
-        treasuryContract.address,
-        contributionContract.address,
-        crowdrecordsGovernor.address
-    );
-
-    await ordersContract.initialize(treasuryContract.address, treasuryCoreContract.address);
-
-    await agreementContract.initialize(
-        treasuryContract.address,
-        treasuryCoreContract.address,
-        crdTokenContract.address,
-        crowdrecordsGovernor.address
-    );
-
-    await baseVotingContractMock.initialize(treasuryContract.address, crowdrecordsGovernor.address);
-    await baseVotingCounterOfferContractMock.initialize(
-        treasuryContract.address,
-        crowdrecordsGovernor.address
-    );
-
-    await votingHubContract.setTreasuryCoreContractAddress(treasuryCoreContract.address);
-    await votingHubContract.addVotingContract(contributionVotingContract.address);
-    await votingHubContract.addVotingContract(agreementContract.address);
-    await votingHubContract.addVotingContract(dilutionContract.address);
-    await votingHubContract.addVotingContract(recordsVotingContract.address);
-
-    await treasuryContract.initialize(
-        treasuryCoreContract.address,
-        recordsContract.address,
-        recordsVotingContract.address,
-        dilutionContract.address,
-        contributionVotingContract.address
-    );
-    await treasuryContract.addSnapshotCaller(agreementContract.address);
-    await treasuryContract.addSnapshotCaller(recordsVotingContract.address);
-
-    await crdTokenContract.initialize(
-        treasuryContract.address,
-        treasuryCoreContract.address,
-        agreementContract.address
-    );
-
-    await treasuryCoreContract.initialize(
-        votingHubContract.address,
-        treasuryContract.address,
-        crdTokenContract.address
-    );
-
-    await dilutionContract.initialize(treasuryContract.address, crowdrecordsGovernor.address);
+    let controllerContract = await ControllerContract.deployed();
 
     this.tracksContract = tracksContract;
     this.contributionContract = contributionContract;
@@ -121,6 +59,7 @@ async function setup() {
     this.votingHubContract = votingHubContract;
     this.dilutionContract = dilutionContract;
     this.crowdrecordsGovernor = crowdrecordsGovernor;
+    this.controllerContract = controllerContract;
 }
 
 module.exports = setup;

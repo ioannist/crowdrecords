@@ -36,8 +36,9 @@ interface ITreasury {
     }
 
     /// @dev This function sets the Records Contract address
-    function setRecordsContractAddress(address newRecordsContractAddress)
-        external;
+    function setRecordsContractAddress(
+        address newRecordsContractAddress
+    ) external;
 
     /// @dev This function sets the Voting Contract address
     function setContributionVotingContractAddress(
@@ -113,33 +114,30 @@ interface ITreasury {
 
     /// @dev This function gives you the community token id of the recordId that you pass
     /// @param recordId This is the Id of the token that you want to check
-    function getCommunityTokenId(uint256 recordId)
-        external
-        view
-        returns (uint256);
+    function getCommunityTokenId(
+        uint256 recordId
+    ) external view returns (uint256);
 
     /// @dev This function gives you the governance token id of the recordId that you pass
     /// @param recordId This is the Id of the token that you want to check
-    function getGovernanceTokenId(uint256 recordId)
-        external
-        view
-        returns (uint256);
+    function getGovernanceTokenId(
+        uint256 recordId
+    ) external view returns (uint256);
 
     /// @dev This function returns the amount of total tokens that are in circulation
     /// @param tokenId This is the token whoes circulating supply you  want to find out
-    function totalCirculatingSupply(uint256 tokenId)
-        external
-        view
-        returns (uint256);
+    function totalCirculatingSupply(
+        uint256 tokenId
+    ) external view returns (uint256);
 
     /// @dev This function creates a snapshot of current state of values and returns the id of the current snapshot
     /// @return snapshotId This is the id of the snapshot that was created just now
     function snapshot() external returns (uint256 snapshotId);
 
-    function balanceOf(address account, uint256 tokenId)
-        external
-        view
-        returns (uint256);
+    function balanceOf(
+        address account,
+        uint256 tokenId
+    ) external view returns (uint256);
 
     /// @dev This function sets the symbol name as used, this function is called from records
     // contract to reserve symbol for new version creation
@@ -155,6 +153,14 @@ interface ITreasury {
     /// @param governanceSymbol Symbol for governance token
     /// @param communitySymbol Symbol for community token
     function setSymbolsAsAvailable(
+        string memory governanceSymbol,
+        string memory communitySymbol
+    ) external;
+
+    /// @dev This function checks if symbol are available or not
+    /// @param governanceSymbol Symbol for governance token
+    /// @param communitySymbol Symbol for community token
+    function isSymbolAvailable(
         string memory governanceSymbol,
         string memory communitySymbol
     ) external;

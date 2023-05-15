@@ -30,6 +30,9 @@ contract RecordsContract is Initializable {
     // Address of the records voting contracts
     address public immutable RECORDS_VOTING_CONTRACT_ADDRESS;
 
+    // Address of the controller contract
+    address public CONTROLLER_CONTRACT_ADDRESS;
+
     // Address of the owner
     address public immutable OWNER;
 
@@ -70,6 +73,17 @@ contract RecordsContract is Initializable {
         string image;
     }
 
+    /// @param name This is the name of the record
+    /// @param image This is the image/logo of the record
+    /// @param recordCategory This is the category to which record belongs
+    /// @param seedId This is the seed contribution id
+    struct NewRecordPayload {
+        string name;
+        string image;
+        string recordCategory;
+        uint256 seedId;
+    }
+
     /// @dev This event is emited when new record is created
     /// @param recordId This is the recordId
     /// @param name Name of the record
@@ -100,6 +114,14 @@ contract RecordsContract is Initializable {
         contributionContract = IContribution(CONTRIBUTION_CONTRACT_ADDRESS);
     }
 
+    /// @dev This is to set the address of the contracts
+    /// @param controllerContractAddress this is the address of controller contract
+    function initialize(
+        address controllerContractAddress
+    ) public initializer onlyOwner {
+        CONTROLLER_CONTRACT_ADDRESS = controllerContractAddress;
+    }
+
     /// @dev Modifier to check that the function is only being called from the contribution contract
     modifier onlyOwner() {
         require(msg.sender == OWNER, "UNAUTHORIZED: ONLY_OWNER");
@@ -124,18 +146,38 @@ contract RecordsContract is Initializable {
         _;
     }
 
+    /// @dev Modifier to check that the function is only being called from the controller contract
+    modifier onlyControllerContract() {
+        require(
+            msg.sender == CONTROLLER_CONTRACT_ADDRESS,
+            "UNAUTHORIZED: ONLY_CONTROLLER_CONTRACT"
+        );
+        _;
+    }
+
     /// @dev This function creates new record
-    /// @param name This is the name of the record
-    /// @param image This is the image/logo of the record
-    /// @param recordCategory This is the category to which record belongs
-    /// @param seedId This is the seed contribution id
+    /// @param payload this is the record payload
+    /// @param owner this is the owner of the record
+    function controllerCreateNewRecord(
+        NewRecordPayload memory payload,
+        address owner
+    ) public onlyControllerContract returns (uint256) {
+        return
+            _createNewRecord(
+                payload.name,
+                payload.image,
+                payload.recordCategory,
+                payload.seedId,
+                owner
+            );
+    }
+
+    /// @dev This function creates new record, this function can be called by anyone
+    /// @param payload this is the record payload
     /// @param platformWallet this is the UI providers wallet
     /// @param platformFee this is the incentive amount for the UI maintainer
     function createNewRecord(
-        string memory name,
-        string memory image,
-        string memory recordCategory,
-        uint256 seedId,
+        NewRecordPayload memory payload,
         address payable platformWallet,
         uint256 platformFee
     ) public payable returns (uint256) {
@@ -143,13 +185,13 @@ contract RecordsContract is Initializable {
             platformWallet.call{value: platformFee}("");
         }
 
-        newTokenId++;
-        uint256 recordId = newTokenId;
-
-        require(seedIdUsed[seedId] == false, "INVALID: SEED_ALREADY_USED");
+        require(
+            seedIdUsed[payload.seedId] == false,
+            "INVALID: SEED_ALREADY_USED"
+        );
 
         IContribution.Contribution memory contribution = contributionContract
-            .getContributionData(seedId);
+            .getContributionData(payload.seedId);
 
         require(
             contribution.isPresent == true,
@@ -166,12 +208,37 @@ contract RecordsContract is Initializable {
             "INVALID: ONLY_CONTRIBUTION_OWNER"
         );
 
+        return
+            _createNewRecord(
+                payload.name,
+                payload.image,
+                payload.recordCategory,
+                payload.seedId,
+                msg.sender
+            );
+    }
+
+    /// @dev This function creates new record, this function is to be called only from within contract
+    /// @param name This is the name of the record
+    /// @param image This is the image/logo of the record
+    /// @param recordCategory This is the category to which record belongs
+    /// @param seedId This is the seed contribution id
+    function _createNewRecord(
+        string memory name,
+        string memory image,
+        string memory recordCategory,
+        uint256 seedId,
+        address owner
+    ) internal returns (uint256) {
+        newTokenId++;
+        uint256 recordId = newTokenId;
+
         RecordStruct memory recordStruct = RecordStruct({
             name: name,
             image: image,
             seedId: seedId,
             parentId: 0,
-            owner: msg.sender,
+            owner: owner,
             recordCategory: recordCategory,
             creationDate: block.timestamp,
             isPresent: true
@@ -185,7 +252,7 @@ contract RecordsContract is Initializable {
             name: name,
             image: image,
             seedId: seedId,
-            owner: msg.sender,
+            owner: owner,
             parentId: 0,
             recordCategory: recordCategory,
             creationDate: recordStruct.creationDate

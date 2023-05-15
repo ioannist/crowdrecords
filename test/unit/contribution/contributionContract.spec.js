@@ -11,12 +11,11 @@ const expect = chai.expect;
 
 contract("Contribution Contract", function() {
     async function createTrack(tracksContract, owner) {
-        const tx = await tracksContract.createNewTrack("fileHash", "fileLink", "Category", {
+        const tx = await tracksContract.createNewTracks([["fileHash", "fileLink", "Category"]], {
             from: owner,
         });
         await expectEvent(tx, "TrackCreated", {
             filehash: "fileHash",
-            filelink: "fileLink",
             category: "Category",
         });
     }
@@ -58,11 +57,13 @@ contract("Contribution Contract", function() {
         await createTrack(this.tracksContract, user1);
         await createTrack(this.tracksContract, user1);
         const tx = await this.contributionContract.createSeedContribution(
-            [1, 2, 3],
-            "contribution title",
-            "preview.raw",
-            "preview.hash",
-            "This is the description for the record",
+            [
+                [1, 2, 3],
+                "contribution title",
+                "preview.raw",
+                "preview.hash",
+                "This is the description for the record",
+            ],
             await helper.getEthAccount(8),
             0
         );
@@ -80,11 +81,13 @@ contract("Contribution Contract", function() {
         await createTrack(this.tracksContract, user1);
         const before = await web3.eth.getBalance(await helper.getEthAccount(8));
         const tx = await this.contributionContract.createSeedContribution(
-            [1, 2, 3],
-            "contribution title",
-            "preview.raw",
-            "preview.hash",
-            "This is the description for the record",
+            [
+                [1, 2, 3],
+                "contribution title",
+                "preview.raw",
+                "preview.hash",
+                "This is the description for the record",
+            ],
             await helper.getEthAccount(8),
             helper.PLATFORM_FEES,
             { value: helper.PLATFORM_FEES }
@@ -107,19 +110,18 @@ contract("Contribution Contract", function() {
 
         //seed contribution id 1
         await this.contributionContract.createSeedContribution(
-            [1, 2, 3],
-            "contribution title",
-            "preview.raw",
-            "preview.hash",
-            "This is the description for the record 1",
+            [
+                [1, 2, 3],
+                "contribution title",
+                "preview.raw",
+                "preview.hash",
+                "This is the description for the record 1",
+            ],
             await helper.getEthAccount(8),
             0
         );
         const tx = await this.recordsContract.createNewRecord(
-            "Test",
-            "image.png",
-            "Cat1",
-            SEED_CONTRIBUTION_ID,
+            ["Test", "image.png", "Cat1", SEED_CONTRIBUTION_ID],
             await helper.getEthAccount(8),
             "0",
             {
@@ -141,19 +143,18 @@ contract("Contribution Contract", function() {
         await createTrack(this.tracksContract, user1);
 
         await this.contributionContract.createSeedContribution(
-            [1, 2, 3],
-            "contribution title",
-            "preview.raw",
-            "preview.hash",
-            "This is the description for the record",
+            [
+                [1, 2, 3],
+                "contribution title",
+                "preview.raw",
+                "preview.hash",
+                "This is the description for the record",
+            ],
             await helper.getEthAccount(8),
             0
         );
         await this.recordsContract.createNewRecord(
-            "Test",
-            "image.png",
-            "Cat1",
-            SEED_CONTRIBUTION_ID,
+            ["Test", "image.png", "Cat1", SEED_CONTRIBUTION_ID],
             await helper.getEthAccount(8),
             "0",
             {
@@ -180,15 +181,17 @@ contract("Contribution Contract", function() {
         await createTrack(this.tracksContract, contributionOwner);
         await createTrack(this.tracksContract, contributionOwner);
         await this.contributionContract.createNewContribution(
-            [4, 5],
-            "contribution title",
-            "preview.raw",
-            "preview.hash",
-            RECORD_ID,
-            false,
-            "Test description",
-            rewardCommunityToken,
-            rewardGovernanceToken,
+            [
+                [4, 5],
+                "contribution title",
+                "preview.raw",
+                "preview.hash",
+                RECORD_ID,
+                false,
+                "Test description",
+                rewardCommunityToken,
+                rewardGovernanceToken,
+            ],
             await helper.getEthAccount(8),
             helper.PLATFORM_FEES,
             {
@@ -218,19 +221,18 @@ contract("Contribution Contract", function() {
         await createTrack(this.tracksContract, user1);
 
         await this.contributionContract.createSeedContribution(
-            [1, 2, 3],
-            "contribution title",
-            "preview.raw",
-            "preview.hash",
-            "This is the description for the record",
+            [
+                [1, 2, 3],
+                "contribution title",
+                "preview.raw",
+                "preview.hash",
+                "This is the description for the record",
+            ],
             await helper.getEthAccount(8),
             0
         );
         await this.recordsContract.createNewRecord(
-            "Test",
-            "image.png",
-            "Cat1",
-            SEED_CONTRIBUTION_ID,
+            ["Test", "image.png", "Cat1", SEED_CONTRIBUTION_ID],
             await helper.getEthAccount(8),
             "0",
             {
@@ -257,15 +259,17 @@ contract("Contribution Contract", function() {
         await createTrack(this.tracksContract, contributionOwner);
         await createTrack(this.tracksContract, contributionOwner);
         await this.contributionContract.createNewContribution(
-            [4, 5],
-            "contribution title",
-            "preview.raw",
-            "preview.hash",
-            RECORD_ID,
-            false,
-            "Test description",
-            rewardCommunityToken,
-            rewardGovernanceToken,
+            [
+                [4, 5],
+                "contribution title",
+                "preview.raw",
+                "preview.hash",
+                RECORD_ID,
+                false,
+                "Test description",
+                rewardCommunityToken,
+                rewardGovernanceToken,
+            ],
             await helper.getEthAccount(8),
             "0",
             {
@@ -295,19 +299,18 @@ contract("Contribution Contract", function() {
             await createTrack(this.tracksContract, user1);
 
             await this.contributionContract.createSeedContribution(
-                [1, 2, 3],
-                "contribution title",
-                "preview.raw",
-                "preview.hash",
-                "This is the description for the record",
+                [
+                    [1, 2, 3],
+                    "contribution title",
+                    "preview.raw",
+                    "preview.hash",
+                    "This is the description for the record",
+                ],
                 await helper.getEthAccount(8),
                 0
             );
             await this.recordsContract.createNewRecord(
-                "Test",
-                "image.png",
-                "Cat1",
-                SEED_CONTRIBUTION_ID,
+                ["Test", "image.png", "Cat1", SEED_CONTRIBUTION_ID],
                 await helper.getEthAccount(8),
                 "0",
                 {
@@ -332,15 +335,17 @@ contract("Contribution Contract", function() {
             await createTrack(this.tracksContract, contributionOwner);
             await createTrack(this.tracksContract, contributionOwner);
             await this.contributionContract.createNewContribution(
-                [4, 5],
-                "contribution title",
-                "preview.raw",
-                "preview.hash",
-                RECORD_ID,
-                false,
-                "Test description",
-                rewardCommunityToken,
-                rewardGovernanceToken,
+                [
+                    [4, 5],
+                    "contribution title",
+                    "preview.raw",
+                    "preview.hash",
+                    RECORD_ID,
+                    false,
+                    "Test description",
+                    rewardCommunityToken,
+                    rewardGovernanceToken,
+                ],
                 await helper.getEthAccount(8),
                 helper.PLATFORM_FEES,
                 {
@@ -475,15 +480,17 @@ contract("Contribution Contract", function() {
             //user[0] creates a new contribution and other user votes
             let newContributionId = 3;
             await this.contributionContract.createNewContribution(
-                [4, 5],
-                "contribution title",
-                "preview.raw",
-                "preview.hash",
-                RECORD_ID,
-                false,
-                "Test description",
-                rewardCommunityToken,
-                rewardGovernanceToken,
+                [
+                    [4, 5],
+                    "contribution title",
+                    "preview.raw",
+                    "preview.hash",
+                    RECORD_ID,
+                    false,
+                    "Test description",
+                    rewardCommunityToken,
+                    rewardGovernanceToken,
+                ],
                 await helper.getEthAccount(8),
                 helper.PLATFORM_FEES,
                 {

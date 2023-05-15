@@ -20,6 +20,7 @@ contract TreasuryContract is Initializable {
     address public CONTRIBUTION_VOTING_CONTRACT_ADDRESS;
     address public DILUTION_CONTRACT_ADDRESS;
     address public TREASURY_CORE_CONTRACT_ADDRESS;
+    TreasuryCoreContract treasuryCoreContract;
 
     address[] public SNAPSHOT_CALLER;
 
@@ -129,6 +130,9 @@ contract TreasuryContract is Initializable {
         address newVotingContractAddress
     ) public initializer ownerOnly {
         TREASURY_CORE_CONTRACT_ADDRESS = newTreasuryCoreContractAddress;
+        treasuryCoreContract = TreasuryCoreContract(
+            TREASURY_CORE_CONTRACT_ADDRESS
+        );
         RECORDS_CONTRACT_ADDRESS = newRecordsContractAddress;
         RECORDS_VOTING_CONTRACT_ADDRESS = newRecordsVotingContractAddress;
         DILUTION_CONTRACT_ADDRESS = newDilutionContract;
@@ -139,10 +143,7 @@ contract TreasuryContract is Initializable {
     /// @param newTokenData This contains all the parameters needed to create a new governance token that are
     function createNewGovernanceToken(
         TreasuryCoreContract.NewTokenData memory newTokenData
-    ) external payable canCreateToken(newTokenData) returns (uint256) {
-        TreasuryCoreContract treasuryCoreContract = TreasuryCoreContract(
-            TREASURY_CORE_CONTRACT_ADDRESS
-        );
+    ) external canCreateToken(newTokenData) returns (uint256) {
         (, , , , bool isPresent, ) = treasuryCoreContract.govTokenMapping(
             newTokenData.recordId
         );
@@ -159,14 +160,11 @@ contract TreasuryContract is Initializable {
             );
     }
 
-    /// @dev This function creats new community tokens for specified record, this function should only be called by the owner of the record
+    /// @dev This function creates new community tokens for specified record, this function should only be called by the owner of the record
     /// @param newTokenData This contains all the parameters needed to create a new community token that are
     function createNewCommunityToken(
         TreasuryCoreContract.NewTokenData memory newTokenData
-    ) external payable canCreateToken(newTokenData) returns (uint256) {
-        TreasuryCoreContract treasuryCoreContract = TreasuryCoreContract(
-            TREASURY_CORE_CONTRACT_ADDRESS
-        );
+    ) external canCreateToken(newTokenData) returns (uint256) {
         (, , , , bool isPresent, ) = treasuryCoreContract.commTokenMapping(
             newTokenData.recordId
         );
@@ -201,9 +199,6 @@ contract TreasuryContract is Initializable {
         uint256 tokensForOldContributors,
         address userAddress
     ) external payable onlyRecordsVotingContract returns (uint256) {
-        TreasuryCoreContract treasuryCoreContract = TreasuryCoreContract(
-            TREASURY_CORE_CONTRACT_ADDRESS
-        );
         TreasuryCoreContract.NewTokenData
             memory newTokenData = TreasuryCoreContract.NewTokenData(
                 recordId,
@@ -242,9 +237,6 @@ contract TreasuryContract is Initializable {
         uint256 tokensForOldContributors,
         address userAddress
     ) external payable onlyRecordsVotingContract returns (uint256) {
-        TreasuryCoreContract treasuryCoreContract = TreasuryCoreContract(
-            TREASURY_CORE_CONTRACT_ADDRESS
-        );
         TreasuryCoreContract.NewTokenData
             memory newTokenData = TreasuryCoreContract.NewTokenData(
                 recordId,
@@ -274,10 +266,6 @@ contract TreasuryContract is Initializable {
         uint256 tokenId,
         uint256 tokenAmount
     ) external payable onlyContributionVotingContract {
-        // call super method
-        TreasuryCoreContract treasuryCoreContract = TreasuryCoreContract(
-            TREASURY_CORE_CONTRACT_ADDRESS
-        );
         treasuryCoreContract.mintTokens(recordId, tokenId, tokenAmount);
     }
 
@@ -294,9 +282,6 @@ contract TreasuryContract is Initializable {
         uint256 rewardGovernance,
         uint256 rewardCommunity
     ) external payable onlyContributionVotingContract {
-        TreasuryCoreContract treasuryCoreContract = TreasuryCoreContract(
-            TREASURY_CORE_CONTRACT_ADDRESS
-        );
         // call super method
         treasuryCoreContract.transferRewardAmount(
             to,
@@ -309,14 +294,9 @@ contract TreasuryContract is Initializable {
 
     /// @dev This function gives you the community token id of the recordId that you pass
     /// @param recordId This is the Id of the token that you want to check
-    function getCommunityTokenId(uint256 recordId)
-        public
-        view
-        returns (uint256)
-    {
-        TreasuryCoreContract treasuryCoreContract = TreasuryCoreContract(
-            TREASURY_CORE_CONTRACT_ADDRESS
-        );
+    function getCommunityTokenId(
+        uint256 recordId
+    ) public view returns (uint256) {
         (, , , , bool isPresent, uint256 tokenId) = treasuryCoreContract
             .commTokenMapping(recordId);
         if (isPresent) {
@@ -328,14 +308,9 @@ contract TreasuryContract is Initializable {
 
     /// @dev This function gives you the governance token id of the recordId that you pass
     /// @param recordId This is the Id of the token that you want to check
-    function getGovernanceTokenId(uint256 recordId)
-        public
-        view
-        returns (uint256)
-    {
-        TreasuryCoreContract treasuryCoreContract = TreasuryCoreContract(
-            TREASURY_CORE_CONTRACT_ADDRESS
-        );
+    function getGovernanceTokenId(
+        uint256 recordId
+    ) public view returns (uint256) {
         (, , , , bool isPresent, uint256 tokenId) = treasuryCoreContract
             .govTokenMapping(recordId);
         if (isPresent) {
@@ -347,14 +322,9 @@ contract TreasuryContract is Initializable {
 
     /// @dev This function returns the amount of total tokens that are in circulation
     /// @param tokenId This is the token whose circulating supply you  want to find out
-    function totalCirculatingSupply(uint256 tokenId)
-        public
-        view
-        returns (uint256)
-    {
-        TreasuryCoreContract treasuryCoreContract = TreasuryCoreContract(
-            TREASURY_CORE_CONTRACT_ADDRESS
-        );
+    function totalCirculatingSupply(
+        uint256 tokenId
+    ) public view returns (uint256) {
         uint256 totalCirculatingBalance = SafeMath.sub(
             treasuryCoreContract.totalSupply(tokenId),
             treasuryCoreContract.balanceOf(
@@ -368,15 +338,10 @@ contract TreasuryContract is Initializable {
 
     /// @dev This function returns the amount of total tokens that are in circulation
     /// @param tokenId This is the token whose circulating supply you  want to find out
-    function balanceOf(address account, uint256 tokenId)
-        public
-        view
-        returns (uint256)
-    {
-        TreasuryCoreContract treasuryCoreContract = TreasuryCoreContract(
-            TREASURY_CORE_CONTRACT_ADDRESS
-        );
-
+    function balanceOf(
+        address account,
+        uint256 tokenId
+    ) public view returns (uint256) {
         return treasuryCoreContract.balanceOf(account, tokenId);
     }
 
@@ -388,9 +353,6 @@ contract TreasuryContract is Initializable {
         string memory governanceSymbol,
         string memory communitySymbol
     ) external onlyRecordsVotingContract {
-        TreasuryCoreContract treasuryCoreContract = TreasuryCoreContract(
-            TREASURY_CORE_CONTRACT_ADDRESS
-        );
         require(
             treasuryCoreContract.govTokenSym(governanceSymbol) == false,
             "INVALID: TOKEN_SYMBOL_ALREADY_IN_USE"
@@ -414,32 +376,36 @@ contract TreasuryContract is Initializable {
         string memory governanceSymbol,
         string memory communitySymbol
     ) external onlyRecordsVotingContract {
-        TreasuryCoreContract treasuryCoreContract = TreasuryCoreContract(
-            TREASURY_CORE_CONTRACT_ADDRESS
-        );
         treasuryCoreContract.setSymbolsAsAvailable(
             governanceSymbol,
             communitySymbol
         );
     }
 
-    function snapshot() public onlySnapshotCaller returns (uint256 snapshotId) {
-        TreasuryCoreContract treasuryCoreContract = TreasuryCoreContract(
-            TREASURY_CORE_CONTRACT_ADDRESS
+    /// @dev This function checks if symbol are available or not
+    /// @param governanceSymbol Symbol for governance token
+    /// @param communitySymbol Symbol for community token
+    function isSymbolAvailable(
+        string memory governanceSymbol,
+        string memory communitySymbol
+    ) external {
+        treasuryCoreContract.isSymbolAvailable(
+            governanceSymbol,
+            communitySymbol
         );
+    }
+
+    function snapshot() public onlySnapshotCaller returns (uint256 snapshotId) {
         return treasuryCoreContract.snapshot();
     }
 
     /// @dev this function is responsible for minting of new tokens for records
     /// @param tokenId Id this is the tokenId that is to minted
     /// @param amount the amount that is to be minted
-    function mintTokens(uint256 tokenId, uint256 amount)
-        public
-        onlyDilutionContract
-    {
-        TreasuryCoreContract treasuryCoreContract = TreasuryCoreContract(
-            TREASURY_CORE_CONTRACT_ADDRESS
-        );
+    function mintTokens(
+        uint256 tokenId,
+        uint256 amount
+    ) public onlyDilutionContract {
         treasuryCoreContract.mint(tokenId, amount);
     }
 }

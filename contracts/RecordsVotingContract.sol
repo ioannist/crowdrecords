@@ -237,6 +237,10 @@ contract RecordsVotingContract is BaseVotingContract, IERC1155Receiver {
         uint256 ballotId = _createVoting(false, votingTokenId);
         _createDeposit(msg.sender, msg.value - platformFee, ballotId);
 
+        treasuryContract.isSymbolAvailable(
+            params.governanceToken.symbol,
+            params.communityToken.symbol
+        );
         treasuryContract.setSymbolsAsUsed(
             params.governanceToken.symbol,
             params.communityToken.symbol

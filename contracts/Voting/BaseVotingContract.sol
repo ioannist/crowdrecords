@@ -4,7 +4,6 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "../interface/ITreasury.sol";
-import "../OrdersContract.sol";
 
 contract BaseVotingContract is Initializable {
     /// @dev this is Contribution Create event this event will be emited when a new contribution is created.

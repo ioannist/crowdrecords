@@ -21,7 +21,7 @@ const BaseVotingCounterOfferContractMock = artifacts.require(
 const VotingHubContract = artifacts.require("../../contracts/Mocks/VotingHubContract.sol");
 const DilutionContract = artifacts.require("../../contracts/DilutionContract.sol");
 const CrowdrecordsGovernor = artifacts.require("../contracts/governance/CrowdrecordsGovernor.sol");
-
+const ControllerContract = artifacts.require("../contracts/ControllerContract.sol");
 const {
     VOTING_INTERVAL_BLOCKS,
     DILUTION_INTERVAL_BLOCKS,
@@ -75,6 +75,13 @@ async function getMockContractsForRecordTesting() {
         GOV_VOTING_THRESHOLD
     );
 
+    let controllerContract = await ControllerContract.new(
+        tracksContract.address,
+        contributionContract.address,
+        recordsContract.address,
+        treasuryContract.address
+    );
+
     await recordsVotingContract.initialize(
         recordsContract.address,
         treasuryContract.address,
@@ -85,7 +92,8 @@ async function getMockContractsForRecordTesting() {
     await contributionContract.initialize(
         contributionVotingContract.address,
         recordsContract.address,
-        tracksContract.address
+        tracksContract.address,
+        controllerContract.address
     );
 
     await contributionVotingContract.initialize(
@@ -134,10 +142,12 @@ async function getMockContractsForRecordTesting() {
     await treasuryCoreContractMock.initialize(
         votingHubContract.address,
         treasuryContract.address,
-        crdTokenContract.address
+        crdTokenContract.address,
+        controllerContract.address
     );
 
     await dilutionContract.initialize(treasuryContract.address, crowdrecordsGovernor.address);
+    await recordsContract.initialize(controllerContract.address);
 
     return {
         tracksContractMock: tracksContract,
@@ -154,6 +164,7 @@ async function getMockContractsForRecordTesting() {
         baseVotingCounterOfferContractMock: baseVotingCounterOfferContractMock,
         votingHubContractMock: votingHubContract,
         dilutionContractMock: dilutionContract,
+        controllerContractMock: controllerContract,
     };
 }
 

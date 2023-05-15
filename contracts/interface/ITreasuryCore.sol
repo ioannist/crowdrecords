@@ -49,10 +49,10 @@ interface ITreasuryCore {
         bytes calldata data
     ) external;
 
-    function balanceOf(address account, uint256 tokenId)
-        external
-        view
-        returns (uint256);
+    function balanceOf(
+        address account,
+        uint256 tokenId
+    ) external view returns (uint256);
 
     /// @dev Retrieves the balance of `account` at the time `snapshotId` was created.
     function balanceOfAt(
@@ -60,4 +60,20 @@ interface ITreasuryCore {
         uint256 snapshotId,
         uint256 tokenId
     ) external view returns (uint256);
+
+    /// @dev This function creates new governance tokens for specified record
+    /// @param newTokenData This contains all the parameters needed to create a new governance token that are
+    /// @param userAddress - This is the address of the user who is the creator of the token
+    function createNewGovernanceToken(
+        NewTokenData memory newTokenData,
+        address userAddress
+    ) external returns (uint256);
+
+    /// @dev This function creates new community tokens for specified record
+    /// @param newTokenData This contains all the parameters needed to create a new community token that are
+    /// @param userAddress - This is the address of the user who is the creator of the token
+    function createNewCommunityToken(
+        NewTokenData memory newTokenData,
+        address userAddress
+    ) external returns (uint256);
 }

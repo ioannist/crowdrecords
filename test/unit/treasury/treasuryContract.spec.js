@@ -23,12 +23,11 @@ const expect = chai.expect;
  */
 contract("Treasury Contract", function() {
     async function createTrack(tracksContract, owner) {
-        const tx = await tracksContract.createNewTrack("fileHash", "fileLink", "Category", {
+        const tx = await tracksContract.createNewTracks([["fileHash", "fileLink", "Category"]], {
             from: owner,
         });
         await expectEvent(tx, "TrackCreated", {
             filehash: "fileHash",
-            filelink: "fileLink",
             category: "Category",
         });
     }
@@ -81,11 +80,13 @@ contract("Treasury Contract", function() {
 
         // Create new contribution token, it's id will be 2
         await this.contributionContract.createSeedContribution(
-            [1, 2, 3],
-            "contribution title",
-            "preview.raw",
-            "preview.hash",
-            "This is the description for the record",
+            [
+                [1, 2, 3],
+                "contribution title",
+                "preview.raw",
+                "preview.hash",
+                "This is the description for the record",
+            ],
             await helper.getEthAccount(8),
             0,
             { from: user1 }
@@ -93,10 +94,7 @@ contract("Treasury Contract", function() {
 
         // Create new record with new contribution
         await this.recordsContract.createNewRecord(
-            "Test",
-            "image.png",
-            "Cat1",
-            2,
+            ["Test", "image.png", "Cat1", 2],
             await helper.getEthAccount(8),
             "0",
             {
@@ -129,11 +127,13 @@ contract("Treasury Contract", function() {
 
         // Create new contribution token, it's id will be 2
         await this.contributionContract.createSeedContribution(
-            [1, 2, 3],
-            "contribution title",
-            "preview.raw",
-            "preview.hash",
-            "This is the description for the record",
+            [
+                [1, 2, 3],
+                "contribution title",
+                "preview.raw",
+                "preview.hash",
+                "This is the description for the record",
+            ],
             await helper.getEthAccount(8),
             0,
             { from: user1 }
@@ -141,10 +141,7 @@ contract("Treasury Contract", function() {
 
         // Create new record with new contribution
         await this.recordsContract.createNewRecord(
-            "Test",
-            "image.png",
-            "Cat1",
-            2,
+            ["Test", "image.png", "Cat1", 2],
             await helper.getEthAccount(8),
             "0",
             {
@@ -175,11 +172,13 @@ contract("Treasury Contract", function() {
 
         // Create new contribution token, it's id will be 2
         await this.contributionContract.createSeedContribution(
-            [1, 2, 3],
-            "contribution title",
-            "preview.raw",
-            "preview.hash",
-            "This is the description for the record",
+            [
+                [1, 2, 3],
+                "contribution title",
+                "preview.raw",
+                "preview.hash",
+                "This is the description for the record",
+            ],
             await helper.getEthAccount(8),
             0,
             { from: user1 }
@@ -187,10 +186,7 @@ contract("Treasury Contract", function() {
 
         // Create new record with new contribution
         await this.recordsContract.createNewRecord(
-            "Test",
-            "image.png",
-            "Cat1",
-            2,
+            ["Test", "image.png", "Cat1", 2],
             await helper.getEthAccount(8),
             "0",
             {
@@ -224,11 +220,13 @@ contract("Treasury Contract", function() {
 
         // Create new contribution token, it's id will be 2
         await this.contributionContract.createSeedContribution(
-            [1, 2, 3],
-            "contribution title",
-            "preview.raw",
-            "preview.hash",
-            "This is the description for the record",
+            [
+                [1, 2, 3],
+                "contribution title",
+                "preview.raw",
+                "preview.hash",
+                "This is the description for the record",
+            ],
             await helper.getEthAccount(8),
             0,
             { from: user1 }
@@ -236,10 +234,7 @@ contract("Treasury Contract", function() {
 
         // Create new record with new contribution
         await this.recordsContract.createNewRecord(
-            "Test",
-            "image.png",
-            "Cat1",
-            2,
+            ["Test", "image.png", "Cat1", 2],
             await helper.getEthAccount(8),
             "0",
             {

@@ -34,6 +34,13 @@ interface IRecords {
         string image;
     }
 
+    struct NewRecordPayload {
+        string name;
+        string image;
+        string recordCategory;
+        uint256 seedId;
+    }
+
     /// @dev This function sets the owner address
     /// @param ownerAddress Takes the address of new owner as parameter
     function setOwnerAddress(address ownerAddress) external;
@@ -44,21 +51,23 @@ interface IRecords {
         address contributionContractAddress
     ) external;
 
-    /// @dev This function creates new record
-    /// @param name This is the name of the record
-    /// @param image This is the image/logo of the record
-    /// @param recordCategory This is the category to which record belongs
-    /// @param seedId This is the seed contribution id
+    /// @dev This function creates new record, this function can be called by anyone
+    /// @param payload this is the record payload
     /// @param platformWallet this is the UI providers wallet
     /// @param platformFee this is the incentive amount for the UI maintainer
     function createNewRecord(
-        string memory name,
-        string memory image,
-        string memory recordCategory,
-        uint256 seedId,
+        NewRecordPayload memory payload,
         address payable platformWallet,
         uint256 platformFee
     ) external;
+
+    /// @dev This function creates new record
+    /// @param payload this is the record payload
+    /// @param owner this is the owner of the record
+    function controllerCreateNewRecord(
+        NewRecordPayload memory payload,
+        address owner
+    ) external returns (uint256);
 
     /// @dev This function pushes a contribution into the array of the record
     /// @param recordId This is the recordId to which contribution is to be added

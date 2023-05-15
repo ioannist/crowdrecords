@@ -27,6 +27,26 @@ interface IContribution {
         bool isPresent;
     }
 
+    struct SeedContributionPayload {
+        uint256[] tracks;
+        string title;
+        string previewFile;
+        string previewFileHash;
+        string description;
+    }
+
+    struct NewContributionPayload {
+        uint256[] tracks;
+        string title;
+        string previewFile;
+        string previewFileHash;
+        uint256 recordId;
+        bool roughMix;
+        string description;
+        uint256 communityReward;
+        uint256 governanceReward;
+    }
+
     /// @dev This function sets the Voting Contract address
     /// @param newVotingContractAddress this is the address of new voting contract
     function setContributionVotingContractAddress(
@@ -34,50 +54,33 @@ interface IContribution {
     ) external;
 
     /// @dev This function will be called by the user to create a new contribution
-    /// @param tracks Id of tracks that are part of this contribution
-    /// @param title title of the contribution
-    /// @param previewFile this is preview file of the contribution
-    /// @param previewFileHash this is hash of the preview file
-    /// @param recordId this is the id of the record to which contribution belongs to.
-    /// @param roughMix this represents if a contribution is a roughMix or is a new contribution
-    /// @param description this is the description of the new contribution that is created.
-    /// @param communityReward this is the amount of community token that the contributor is requesting
-    /// for his work contribution.
-    /// @param governanceReward this is the amount of governance token that the contributor is requesting for
+    /// @param payload this is the data required for creation of new contribution
     /// @param platformWallet this is the UI providers wallet
     /// @param platformFee this is the incentive amount for the UI maintainer
-    /// his work contribution.
     function createNewContribution(
-        // string memory uri,
-        uint256[] memory tracks,
-        string memory title,
-        string memory previewFile,
-        string memory previewFileHash,
-        uint256 recordId,
-        bool roughMix,
-        string memory description,
-        uint256 communityReward,
-        uint256 governanceReward,
+        NewContributionPayload memory payload,
         address payable platformWallet,
         uint256 platformFee
     ) external returns (uint256);
 
-    /// @dev This function will be called by the user to create a new seed contribution as there will be not
-    /// voting or anything like that
-    /// @param tracks Id of tracks that are part of this contribution
-    /// @param previewFile this is preview file of the contribution
-    /// @param previewFileHash this is hash of the preview file
-    /// @param description this is the description of the new contribution that is created.
+    /// @dev This function will be called by the user to create a new seed contribution as there will be not voting
+    /// or anything like that
+    /// @param payload data for the seed contribution creation
     /// @param platformWallet this is the UI providers wallet
     /// @param platformFee this is the incentive amount for the UI maintainer
     function createSeedContribution(
-        uint256[] memory tracks,
-        string memory previewFile,
-        string memory previewFileHash,
-        string memory description,
+        SeedContributionPayload memory payload,
         address payable platformWallet,
         uint256 platformFee
     ) external payable returns (uint256);
+
+    /// @dev This function is to be called only by the controller contract that is created to bundle multiple contract calls into single function
+    /// @param payload data for the seed contribution creation
+    /// @param owner address of the owner of the seed contribution
+    function controllerCreateSeedContribution(
+        SeedContributionPayload memory payload,
+        address owner
+    ) external returns (uint256);
 
     /// @dev This function returns contribution data
     /// @param contributionId Id of the contribution whose data you want
