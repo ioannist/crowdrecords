@@ -8,7 +8,6 @@ import "./interface/ITreasuryCore.sol";
 import "./interface/ITreasury.sol";
 
 contract OrdersContract is Initializable {
-    address public VOTING_CONTRACT_ADDRESS;
     address public TREASURY_CONTRACT_ADDRESS;
     address public TREASURY_CORE_CONTRACT_ADDRESS;
     address public OWNER;
@@ -210,6 +209,7 @@ contract OrdersContract is Initializable {
         address payable platformWallet,
         uint256 platformFee
     ) public payable buyOrderCheck(params) returns (uint256 saleOrderId) {
+        require(msg.value >= platformFee, "INV: INSUFFICIENT_PLATFORM_FEE");
         if (msg.value > 0) {
             platformWallet.call{value: platformFee}("");
         }

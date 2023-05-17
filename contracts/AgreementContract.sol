@@ -195,6 +195,7 @@ contract AgreementContract is BaseVotingContract {
         address payable platformWallet,
         uint256 platformFee
     ) public payable returns (uint256) {
+        require(msg.value >= platformFee, "INV: INSUFFICIENT_PLATFORM_FEE");
         if (msg.value > 0) {
             platformWallet.call{value: platformFee}("");
         }

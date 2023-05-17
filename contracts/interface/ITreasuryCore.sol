@@ -5,6 +5,16 @@ interface ITreasuryCore {
     /// @return tokenId it is the ID of CRD token
     function CRD() external view returns (uint256);
 
+    /// @dev this function is for accessing the symbol mapping
+    /// @param symbol takes the symbol as string input
+    /// @return it return boolean value, true if it is taken and false if it is available
+    function govTokenSym(string calldata symbol) external view returns (bool);
+
+    /// @dev this function is for accessing the symbol mapping
+    /// @param symbol takes the symbol as string input
+    /// @return it return boolean value, true if it is taken and false if it is available
+    function commTokenSym(string calldata symbol) external view returns (bool);
+
     /// @dev This structure will store information of tokens for each records
     /// @param recordId This is the id of record to which a token belongs
     /// @param symbol This is the symbol of a token

@@ -253,6 +253,7 @@ contract("Records Contract", function() {
             )
         ).to.eventually.be.rejectedWith("INVALID: SEED_ALREADY_USED");
     });
+
     it("User create seed contribution, creates new record, tries to create one more record with same see but rejected", async function() {
         const user1 = await helper.getEthAccount(0);
 
@@ -295,6 +296,7 @@ contract("Records Contract", function() {
             )
         ).to.eventually.be.rejectedWith("INVALID: SEED_ALREADY_USED");
     });
+
     it("User create seed contribution, different user tries to create rejected. (only the same user should be able to create new record, incase of new version anyone can create it", async function() {
         let user2 = await helper.getEthAccount(1);
         const user1 = await helper.getEthAccount(0);
@@ -325,6 +327,7 @@ contract("Records Contract", function() {
             )
         ).to.eventually.be.rejectedWith("INVALID: ONLY_CONTRIBUTION_OWNER");
     });
+
     it("Mashing up the orders of the creation of record, expect rejection", async function() {
         // Try to create a record without seed contribution, will receive rejection
         await expect(

@@ -112,7 +112,7 @@ module.exports = async (deployer) => {
         tracksContract.address,
         contributionContract.address,
         recordsContract.address,
-        treasuryContract.address
+        treasuryCoreContract.address
     );
     let controllerContract = await ControllerContract.deployed();
 

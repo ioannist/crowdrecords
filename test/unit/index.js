@@ -10,5 +10,6 @@ describe("Unit Tests", function() {
     require("./dilution");
     require("./treasury");
     require("./governance");
+    require("./controller");
 });
 

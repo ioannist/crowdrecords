@@ -24,9 +24,45 @@
       ],
       "stateMutability": "view",
       "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "string",
+              "name": "filehash",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "filelink",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "category",
+              "type": "string"
+            }
+          ],
+          "internalType": "struct ITracks.TrackPayload[]",
+          "name": "tracksPayload",
+          "type": "tuple[]"
+        }
+      ],
+      "name": "createNewTracks",
+      "outputs": [
+        {
+          "internalType": "uint256[]",
+          "name": "",
+          "type": "uint256[]"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
     }
   ],
-  "metadata": "{\"compiler\":{\"version\":\"0.8.12+commit.f00d7308\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"uint256[]\",\"name\":\"tracks\",\"type\":\"uint256[]\"},{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"checkOwner\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"project:/contracts/interface/ITracks.sol\":\"ITracks\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":438000},\"remappings\":[]},\"sources\":{\"project:/contracts/interface/ITracks.sol\":{\"keccak256\":\"0x5c32500e93ab60c040e11a061f30ad94be387acc4259b901763060f4e20d4ba5\",\"urls\":[\"bzz-raw://277870d53e4014a9198c6d6e1929dd5448c0dd5fc2d100f1091d0d1c6bee5497\",\"dweb:/ipfs/QmURdCjPn8vhEJuGA1NjQbzLrvh4cvXbd1LuXYX6vQ9FvG\"]}},\"version\":1}",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.12+commit.f00d7308\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"uint256[]\",\"name\":\"tracks\",\"type\":\"uint256[]\"},{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"checkOwner\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"string\",\"name\":\"filehash\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"filelink\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"category\",\"type\":\"string\"}],\"internalType\":\"struct ITracks.TrackPayload[]\",\"name\":\"tracksPayload\",\"type\":\"tuple[]\"}],\"name\":\"createNewTracks\",\"outputs\":[{\"internalType\":\"uint256[]\",\"name\":\"\",\"type\":\"uint256[]\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"project:/contracts/interface/ITracks.sol\":\"ITracks\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":438000},\"remappings\":[]},\"sources\":{\"project:/contracts/interface/ITracks.sol\":{\"keccak256\":\"0xb1052d0ea769629dc51e64e411650742db2f65104edb3c1fdbf70b93413515f7\",\"urls\":[\"bzz-raw://1705e1b9042a4bb10c8064a6c7ca1165548d69d0d12b50461070a653dd924e15\",\"dweb:/ipfs/QmaiceEMH7mV6QNPmR4E3AoSsbtuYJVgBw8KebMLE7QfS1\"]}},\"version\":1}",
   "bytecode": "0x",
   "deployedBytecode": "0x",
   "immutableReferences": {},
@@ -34,20 +70,20 @@
   "deployedGeneratedSources": [],
   "sourceMap": "",
   "deployedSourceMap": "",
-  "source": "pragma solidity ^0.8.0;\n\ninterface ITracks {\n    function checkOwner(uint256[] memory tracks, address owner)\n        external\n        view\n        returns (bool);\n}\n",
+  "source": "pragma solidity ^0.8.0;\n\ninterface ITracks {\n    struct TrackPayload {\n        string filehash;\n        string filelink;\n        string category;\n    }\n\n    function checkOwner(\n        uint256[] memory tracks,\n        address owner\n    ) external view returns (bool);\n\n    function createNewTracks(\n        TrackPayload[] memory tracksPayload\n    ) external returns (uint256[] memory);\n}\n",
   "sourcePath": "/Users/a1/Desktop/Office/projects/CrowdRecords/Contracts/contracts/interface/ITracks.sol",
   "ast": {
     "absolutePath": "project:/contracts/interface/ITracks.sol",
     "exportedSymbols": {
       "ITracks": [
-        15333
+        10325
       ]
     },
-    "id": 15334,
+    "id": 10326,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 15322,
+        "id": 10297,
         "literals": [
           "solidity",
           "^",
@@ -55,7 +91,7 @@
           ".0"
         ],
         "nodeType": "PragmaDirective",
-        "src": "0:23:58"
+        "src": "0:23:37"
       },
       {
         "abstract": false,
@@ -64,36 +100,129 @@
         "contractDependencies": [],
         "contractKind": "interface",
         "fullyImplemented": false,
-        "id": 15333,
+        "id": 10325,
         "linearizedBaseContracts": [
-          15333
+          10325
         ],
         "name": "ITracks",
-        "nameLocation": "35:7:58",
+        "nameLocation": "35:7:37",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
+            "canonicalName": "ITracks.TrackPayload",
+            "id": 10304,
+            "members": [
+              {
+                "constant": false,
+                "id": 10299,
+                "mutability": "mutable",
+                "name": "filehash",
+                "nameLocation": "86:8:37",
+                "nodeType": "VariableDeclaration",
+                "scope": 10304,
+                "src": "79:15:37",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_string_storage_ptr",
+                  "typeString": "string"
+                },
+                "typeName": {
+                  "id": 10298,
+                  "name": "string",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "79:6:37",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_storage_ptr",
+                    "typeString": "string"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 10301,
+                "mutability": "mutable",
+                "name": "filelink",
+                "nameLocation": "111:8:37",
+                "nodeType": "VariableDeclaration",
+                "scope": 10304,
+                "src": "104:15:37",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_string_storage_ptr",
+                  "typeString": "string"
+                },
+                "typeName": {
+                  "id": 10300,
+                  "name": "string",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "104:6:37",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_storage_ptr",
+                    "typeString": "string"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 10303,
+                "mutability": "mutable",
+                "name": "category",
+                "nameLocation": "136:8:37",
+                "nodeType": "VariableDeclaration",
+                "scope": 10304,
+                "src": "129:15:37",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_string_storage_ptr",
+                  "typeString": "string"
+                },
+                "typeName": {
+                  "id": 10302,
+                  "name": "string",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "129:6:37",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_storage_ptr",
+                    "typeString": "string"
+                  }
+                },
+                "visibility": "internal"
+              }
+            ],
+            "name": "TrackPayload",
+            "nameLocation": "56:12:37",
+            "nodeType": "StructDefinition",
+            "scope": 10325,
+            "src": "49:102:37",
+            "visibility": "public"
+          },
+          {
             "functionSelector": "b260c8c3",
-            "id": 15332,
+            "id": 10314,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "checkOwner",
-            "nameLocation": "58:10:58",
+            "nameLocation": "166:10:37",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 15328,
+              "id": 10310,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 15325,
+                  "id": 10307,
                   "mutability": "mutable",
                   "name": "tracks",
-                  "nameLocation": "86:6:58",
+                  "nameLocation": "203:6:37",
                   "nodeType": "VariableDeclaration",
-                  "scope": 15332,
-                  "src": "69:23:58",
+                  "scope": 10314,
+                  "src": "186:23:37",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -102,18 +231,18 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 15323,
+                      "id": 10305,
                       "name": "uint256",
                       "nodeType": "ElementaryTypeName",
-                      "src": "69:7:58",
+                      "src": "186:7:37",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "id": 15324,
+                    "id": 10306,
                     "nodeType": "ArrayTypeName",
-                    "src": "69:9:58",
+                    "src": "186:9:37",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
                       "typeString": "uint256[]"
@@ -123,13 +252,13 @@
                 },
                 {
                   "constant": false,
-                  "id": 15327,
+                  "id": 10309,
                   "mutability": "mutable",
                   "name": "owner",
-                  "nameLocation": "102:5:58",
+                  "nameLocation": "227:5:37",
                   "nodeType": "VariableDeclaration",
-                  "scope": 15332,
-                  "src": "94:13:58",
+                  "scope": 10314,
+                  "src": "219:13:37",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -137,10 +266,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 15326,
+                    "id": 10308,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "94:7:58",
+                    "src": "219:7:37",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -150,21 +279,21 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "68:40:58"
+              "src": "176:62:37"
             },
             "returnParameters": {
-              "id": 15331,
+              "id": 10313,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 15330,
+                  "id": 10312,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 15332,
-                  "src": "156:4:58",
+                  "scope": 10314,
+                  "src": "262:4:37",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -172,10 +301,10 @@
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 15329,
+                    "id": 10311,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
-                    "src": "156:4:58",
+                    "src": "262:4:37",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
@@ -184,34 +313,142 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "155:6:58"
+              "src": "261:6:37"
             },
-            "scope": 15333,
-            "src": "49:113:58",
+            "scope": 10325,
+            "src": "157:111:37",
             "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "functionSelector": "24833c20",
+            "id": 10324,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "createNewTracks",
+            "nameLocation": "283:15:37",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 10319,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 10318,
+                  "mutability": "mutable",
+                  "name": "tracksPayload",
+                  "nameLocation": "330:13:37",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 10324,
+                  "src": "308:35:37",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_struct$_TrackPayload_$10304_memory_ptr_$dyn_memory_ptr",
+                    "typeString": "struct ITracks.TrackPayload[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 10316,
+                      "nodeType": "UserDefinedTypeName",
+                      "pathNode": {
+                        "id": 10315,
+                        "name": "TrackPayload",
+                        "nodeType": "IdentifierPath",
+                        "referencedDeclaration": 10304,
+                        "src": "308:12:37"
+                      },
+                      "referencedDeclaration": 10304,
+                      "src": "308:12:37",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_struct$_TrackPayload_$10304_storage_ptr",
+                        "typeString": "struct ITracks.TrackPayload"
+                      }
+                    },
+                    "id": 10317,
+                    "nodeType": "ArrayTypeName",
+                    "src": "308:14:37",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_struct$_TrackPayload_$10304_storage_$dyn_storage_ptr",
+                      "typeString": "struct ITracks.TrackPayload[]"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "298:51:37"
+            },
+            "returnParameters": {
+              "id": 10323,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 10322,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 10324,
+                  "src": "368:16:37",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_uint256_$dyn_memory_ptr",
+                    "typeString": "uint256[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 10320,
+                      "name": "uint256",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "368:7:37",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "id": 10321,
+                    "nodeType": "ArrayTypeName",
+                    "src": "368:9:37",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
+                      "typeString": "uint256[]"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "367:18:37"
+            },
+            "scope": 10325,
+            "src": "274:112:37",
+            "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           }
         ],
-        "scope": 15334,
-        "src": "25:139:58",
+        "scope": 10326,
+        "src": "25:363:37",
         "usedErrors": []
       }
     ],
-    "src": "0:165:58"
+    "src": "0:389:37"
   },
   "legacyAST": {
     "absolutePath": "project:/contracts/interface/ITracks.sol",
     "exportedSymbols": {
       "ITracks": [
-        15333
+        10325
       ]
     },
-    "id": 15334,
+    "id": 10326,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 15322,
+        "id": 10297,
         "literals": [
           "solidity",
           "^",
@@ -219,7 +456,7 @@
           ".0"
         ],
         "nodeType": "PragmaDirective",
-        "src": "0:23:58"
+        "src": "0:23:37"
       },
       {
         "abstract": false,
@@ -228,36 +465,129 @@
         "contractDependencies": [],
         "contractKind": "interface",
         "fullyImplemented": false,
-        "id": 15333,
+        "id": 10325,
         "linearizedBaseContracts": [
-          15333
+          10325
         ],
         "name": "ITracks",
-        "nameLocation": "35:7:58",
+        "nameLocation": "35:7:37",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
+            "canonicalName": "ITracks.TrackPayload",
+            "id": 10304,
+            "members": [
+              {
+                "constant": false,
+                "id": 10299,
+                "mutability": "mutable",
+                "name": "filehash",
+                "nameLocation": "86:8:37",
+                "nodeType": "VariableDeclaration",
+                "scope": 10304,
+                "src": "79:15:37",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_string_storage_ptr",
+                  "typeString": "string"
+                },
+                "typeName": {
+                  "id": 10298,
+                  "name": "string",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "79:6:37",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_storage_ptr",
+                    "typeString": "string"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 10301,
+                "mutability": "mutable",
+                "name": "filelink",
+                "nameLocation": "111:8:37",
+                "nodeType": "VariableDeclaration",
+                "scope": 10304,
+                "src": "104:15:37",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_string_storage_ptr",
+                  "typeString": "string"
+                },
+                "typeName": {
+                  "id": 10300,
+                  "name": "string",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "104:6:37",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_storage_ptr",
+                    "typeString": "string"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 10303,
+                "mutability": "mutable",
+                "name": "category",
+                "nameLocation": "136:8:37",
+                "nodeType": "VariableDeclaration",
+                "scope": 10304,
+                "src": "129:15:37",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_string_storage_ptr",
+                  "typeString": "string"
+                },
+                "typeName": {
+                  "id": 10302,
+                  "name": "string",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "129:6:37",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_storage_ptr",
+                    "typeString": "string"
+                  }
+                },
+                "visibility": "internal"
+              }
+            ],
+            "name": "TrackPayload",
+            "nameLocation": "56:12:37",
+            "nodeType": "StructDefinition",
+            "scope": 10325,
+            "src": "49:102:37",
+            "visibility": "public"
+          },
+          {
             "functionSelector": "b260c8c3",
-            "id": 15332,
+            "id": 10314,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "checkOwner",
-            "nameLocation": "58:10:58",
+            "nameLocation": "166:10:37",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 15328,
+              "id": 10310,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 15325,
+                  "id": 10307,
                   "mutability": "mutable",
                   "name": "tracks",
-                  "nameLocation": "86:6:58",
+                  "nameLocation": "203:6:37",
                   "nodeType": "VariableDeclaration",
-                  "scope": 15332,
-                  "src": "69:23:58",
+                  "scope": 10314,
+                  "src": "186:23:37",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -266,18 +596,18 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 15323,
+                      "id": 10305,
                       "name": "uint256",
                       "nodeType": "ElementaryTypeName",
-                      "src": "69:7:58",
+                      "src": "186:7:37",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "id": 15324,
+                    "id": 10306,
                     "nodeType": "ArrayTypeName",
-                    "src": "69:9:58",
+                    "src": "186:9:37",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
                       "typeString": "uint256[]"
@@ -287,13 +617,13 @@
                 },
                 {
                   "constant": false,
-                  "id": 15327,
+                  "id": 10309,
                   "mutability": "mutable",
                   "name": "owner",
-                  "nameLocation": "102:5:58",
+                  "nameLocation": "227:5:37",
                   "nodeType": "VariableDeclaration",
-                  "scope": 15332,
-                  "src": "94:13:58",
+                  "scope": 10314,
+                  "src": "219:13:37",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -301,10 +631,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 15326,
+                    "id": 10308,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "94:7:58",
+                    "src": "219:7:37",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -314,21 +644,21 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "68:40:58"
+              "src": "176:62:37"
             },
             "returnParameters": {
-              "id": 15331,
+              "id": 10313,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 15330,
+                  "id": 10312,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 15332,
-                  "src": "156:4:58",
+                  "scope": 10314,
+                  "src": "262:4:37",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -336,10 +666,10 @@
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 15329,
+                    "id": 10311,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
-                    "src": "156:4:58",
+                    "src": "262:4:37",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
@@ -348,21 +678,129 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "155:6:58"
+              "src": "261:6:37"
             },
-            "scope": 15333,
-            "src": "49:113:58",
+            "scope": 10325,
+            "src": "157:111:37",
             "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "functionSelector": "24833c20",
+            "id": 10324,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "createNewTracks",
+            "nameLocation": "283:15:37",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 10319,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 10318,
+                  "mutability": "mutable",
+                  "name": "tracksPayload",
+                  "nameLocation": "330:13:37",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 10324,
+                  "src": "308:35:37",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_struct$_TrackPayload_$10304_memory_ptr_$dyn_memory_ptr",
+                    "typeString": "struct ITracks.TrackPayload[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 10316,
+                      "nodeType": "UserDefinedTypeName",
+                      "pathNode": {
+                        "id": 10315,
+                        "name": "TrackPayload",
+                        "nodeType": "IdentifierPath",
+                        "referencedDeclaration": 10304,
+                        "src": "308:12:37"
+                      },
+                      "referencedDeclaration": 10304,
+                      "src": "308:12:37",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_struct$_TrackPayload_$10304_storage_ptr",
+                        "typeString": "struct ITracks.TrackPayload"
+                      }
+                    },
+                    "id": 10317,
+                    "nodeType": "ArrayTypeName",
+                    "src": "308:14:37",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_struct$_TrackPayload_$10304_storage_$dyn_storage_ptr",
+                      "typeString": "struct ITracks.TrackPayload[]"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "298:51:37"
+            },
+            "returnParameters": {
+              "id": 10323,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 10322,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 10324,
+                  "src": "368:16:37",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_uint256_$dyn_memory_ptr",
+                    "typeString": "uint256[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 10320,
+                      "name": "uint256",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "368:7:37",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "id": 10321,
+                    "nodeType": "ArrayTypeName",
+                    "src": "368:9:37",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
+                      "typeString": "uint256[]"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "367:18:37"
+            },
+            "scope": 10325,
+            "src": "274:112:37",
+            "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           }
         ],
-        "scope": 15334,
-        "src": "25:139:58",
+        "scope": 10326,
+        "src": "25:363:37",
         "usedErrors": []
       }
     ],
-    "src": "0:165:58"
+    "src": "0:389:37"
   },
   "compiler": {
     "name": "solc",
@@ -370,7 +808,7 @@
   },
   "networks": {},
   "schemaVersion": "3.4.6",
-  "updatedAt": "2023-04-11T15:44:43.787Z",
+  "updatedAt": "2023-05-14T19:01:53.504Z",
   "devdoc": {
     "kind": "dev",
     "methods": {},

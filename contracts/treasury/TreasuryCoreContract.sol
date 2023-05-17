@@ -185,6 +185,7 @@ contract TreasuryCoreContract is
         address userAddress
     ) external onlyTreasuryAndControllerContract returns (uint256) {
         {
+            govTokenSym[newTokenData.symbol] = true;
             bytes memory preString = abi.encodePacked(PREFIX_GOVERNANCE);
             newTokenData.symbol = string(
                 abi.encodePacked(preString, newTokenData.symbol)
@@ -201,7 +202,6 @@ contract TreasuryCoreContract is
             TOKEN_TYPE_GOVERNANCE,
             userAddress
         );
-        govTokenSym[newTokenData.symbol] = true;
 
         return newTokenId;
     }
@@ -214,6 +214,7 @@ contract TreasuryCoreContract is
         address userAddress
     ) external onlyTreasuryAndControllerContract returns (uint256) {
         {
+            commTokenSym[newTokenData.symbol] = true;
             bytes memory preString = abi.encodePacked(PREFIX_COMMUNITY);
             newTokenData.symbol = string(
                 abi.encodePacked(preString, newTokenData.symbol)
@@ -230,7 +231,6 @@ contract TreasuryCoreContract is
             TOKEN_TYPE_COMMUNITY,
             userAddress
         );
-        commTokenSym[newTokenData.symbol] = true;
 
         return newTokenId;
     }

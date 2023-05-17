@@ -181,6 +181,7 @@ contract ContributionContract is Initializable {
         uint256 platformFee
     ) public payable returns (uint256) {
         {
+            require(msg.value >= platformFee, "INV: INSUFFICIENT_PLATFORM_FEE");
             if (msg.value > 0) {
                 platformWallet.call{value: platformFee}("");
             }
@@ -262,6 +263,7 @@ contract ContributionContract is Initializable {
         uint256 platformFee
     ) public payable returns (uint256) {
         {
+            require(msg.value >= platformFee, "INV: INSUFFICIENT_PLATFORM_FEE");
             if (msg.value > 0) {
                 platformWallet.call{value: platformFee}("");
             }

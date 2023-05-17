@@ -68,7 +68,7 @@ contract BaseVotingContract is Initializable {
         uint256 depositAmount
     );
 
-    uint256 public VOTING_DEPOSIT = 1 ether;
+    uint256 public VOTING_DEPOSIT = 1 ether / 100;
     uint256 public VOTING_BLOCK_PERIOD = 25;
     uint256 public MIN_TURNOUT_PERCENT = 500;
     address public TREASURY_CONTRACT_ADDRESS;

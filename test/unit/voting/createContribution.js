@@ -158,7 +158,7 @@ async function createContributionWithMockTreasury() {
         tracksContract.address,
         contributionContract.address,
         recordsContract.address,
-        treasuryContract.address
+        treasuryCoreContract.address
     );
 
     await recordsVotingContract.initialize(
