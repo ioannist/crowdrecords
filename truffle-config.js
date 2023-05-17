@@ -1,3 +1,6 @@
+const HDWalletProvider = require("@truffle/hdwallet-provider");
+require("dotenv").config();
+
 /**
  * Use this file to configure your truffle project. It's seeded with some
  * common settings for different networks and features like migrations,
@@ -46,12 +49,22 @@ module.exports = {
             port: 8545, // Standard Ethereum port (default: none)
             network_id: "*", // Any network (default: none)
         },
+        moonbase: {
+            provider: function() {
+                return new HDWalletProvider(
+                    process.env.PRIVATE_KEY,
+                    "http://45.82.64.32:9933/"
+                    // "https://rpc.api.moonbase.moonbeam.network"
+                );
+            },
+            network_id: "1287",
+        },
         // Another network with more advanced options...
         // advanced: {
         // port: 8777,             // Custom port
         // network_id: 1342,       // Custom network
         // gas: 8500000,           // Gas sent with each transaction (default: ~6700000)
-        // gasPrice: 20000000000,  // 20 gwei (in wei) (default: 100 gwei)
+        // ,gasPrice: 20000000000  // 20 gwei (in wei) (default: 100 gwei)
         // from: <address>,        // Account to send txs from (default: accounts[0])
         // websocket: true        // Enable EventEmitter interface for web3 (default: false)
         // },
@@ -116,5 +129,9 @@ module.exports = {
     //   }
     // }
     // }
+    plugins: ["truffle-plugin-verify"],
+    api_keys: {
+        moonbase_moonscan: process.env.MOONBASE_API,
+    },
 };
 
