@@ -147,8 +147,8 @@ contract("All Contract Deployment", function() {
         await expect(this.dilutionContract.TREASURY_CONTRACT_ADDRESS()).eventually.to.be.equal(
             this.treasuryContract.address
         );
-        await expect(this.dilutionContract.CONTROLLER_CONTRACT_ADDRESS()).eventually.to.be.equal(
-            this.controllerContract.address
+        await expect(this.dilutionContract.GOVERNANCE()).eventually.to.be.equal(
+            this.crowdrecordsGovernor.address
         );
     });
 

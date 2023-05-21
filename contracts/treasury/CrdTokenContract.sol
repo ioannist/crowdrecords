@@ -40,12 +40,12 @@ contract CrdTokenContract is ERC20, ERC20Permit, ERC20Votes, Initializable {
     }
 
     /// @dev This is to set the address of the contracts
-    /// @param newTreasuryCoreAddress This is the address of new treasury core contract
     /// @param newTreasuryAddress This is the address of new treasury contract
+    /// @param newTreasuryCoreAddress This is the address of new treasury core contract
     /// @param newAgreementsAddress This is the address of new Agreement contract
     function initialize(
-        address newTreasuryCoreAddress,
         address newTreasuryAddress,
+        address newTreasuryCoreAddress,
         address newAgreementsAddress
     ) public initializer ownerOnly {
         TREASURY_CORE_CONTRACT_ADDRESS = newTreasuryCoreAddress;
