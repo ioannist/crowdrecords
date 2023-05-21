@@ -81,14 +81,23 @@ contract("All Contract Deployment", function() {
         await expect(this.recordsContract.CONTROLLER_CONTRACT_ADDRESS()).eventually.to.be.equal(
             this.controllerContract.address
         );
+        await expect(this.recordsContract.CONTROLLER_CONTRACT_ADDRESS()).eventually.to.be.equal(
+            this.controllerContract.address
+        );
     });
 
     it("check if address for recordsVotingContract is set", async function() {
+        await expect(this.recordsVotingContract.RECORDS_CONTRACT_ADDRESS()).eventually.to.be.equal(
+            this.recordsContract.address
+        );
         await expect(this.recordsVotingContract.TREASURY_CONTRACT_ADDRESS()).eventually.to.be.equal(
             this.treasuryContract.address
         );
-        await expect(this.recordsVotingContract.RECORDS_CONTRACT_ADDRESS()).eventually.to.be.equal(
-            this.recordsContract.address
+        await expect(
+            this.recordsVotingContract.TREASURY_CORE_CONTRACT_ADDRESS()
+        ).eventually.to.be.equal(this.treasuryCoreContract.address);
+        await expect(this.recordsVotingContract.GOVERNANCE()).eventually.to.be.equal(
+            this.crowdrecordsGovernor.address
         );
     });
 
@@ -100,6 +109,10 @@ contract("All Contract Deployment", function() {
         await expect(
             this.contributionVotingContract.TREASURY_CONTRACT_ADDRESS()
         ).eventually.to.be.equal(this.treasuryContract.address);
+
+        await expect(this.contributionVotingContract.GOVERNANCE()).eventually.to.be.equal(
+            this.crowdrecordsGovernor.address
+        );
     });
 
     it("check if address for ordersContract is set", async function() {
@@ -118,6 +131,10 @@ contract("All Contract Deployment", function() {
         await expect(
             this.agreementContract.TREASURY_CORE_CONTRACT_ADDRESS()
         ).eventually.to.be.equal(this.treasuryCoreContract.address);
+
+        await expect(this.agreementContract.GOVERNANCE()).eventually.to.be.equal(
+            this.crowdrecordsGovernor.address
+        );
     });
 
     it("check if address for baseVotingContractMock is set", async function() {
@@ -130,23 +147,33 @@ contract("All Contract Deployment", function() {
         await expect(this.dilutionContract.TREASURY_CONTRACT_ADDRESS()).eventually.to.be.equal(
             this.treasuryContract.address
         );
+        await expect(this.dilutionContract.CONTROLLER_CONTRACT_ADDRESS()).eventually.to.be.equal(
+            this.controllerContract.address
+        );
     });
 
     it("check if address for treasuryContract is set", async function() {
+        await expect(this.treasuryContract.TREASURY_CORE_CONTRACT_ADDRESS()).eventually.to.be.equal(
+            this.treasuryCoreContract.address
+        );
         await expect(this.treasuryContract.RECORDS_CONTRACT_ADDRESS()).eventually.to.be.equal(
             this.recordsContract.address
         );
         await expect(
             this.treasuryContract.RECORDS_VOTING_CONTRACT_ADDRESS()
         ).eventually.to.be.equal(this.recordsVotingContract.address);
-        await expect(
-            this.treasuryContract.CONTRIBUTION_VOTING_CONTRACT_ADDRESS()
-        ).eventually.to.be.equal(this.contributionVotingContract.address);
         await expect(this.treasuryContract.DILUTION_CONTRACT_ADDRESS()).eventually.to.be.equal(
             this.dilutionContract.address
         );
-        await expect(this.treasuryContract.TREASURY_CORE_CONTRACT_ADDRESS()).eventually.to.be.equal(
-            this.treasuryCoreContract.address
+        await expect(
+            this.treasuryContract.CONTRIBUTION_VOTING_CONTRACT_ADDRESS()
+        ).eventually.to.be.equal(this.contributionVotingContract.address);
+
+        await expect(this.treasuryContract.SNAPSHOT_CALLER(0)).eventually.to.be.equal(
+            this.agreementContract.address
+        );
+        await expect(this.treasuryContract.SNAPSHOT_CALLER(1)).eventually.to.be.equal(
+            this.recordsVotingContract.address
         );
     });
 
@@ -185,6 +212,17 @@ contract("All Contract Deployment", function() {
         await expect(
             this.treasuryCoreContract.CONTROLLER_CONTRACT_ADDRESS()
         ).eventually.to.be.equal(this.controllerContract.address);
+    });
+    it("check if address for crdTokenContract set", async function() {
+        await expect(this.crdTokenContract.TREASURY_CONTRACT_ADDRESS()).eventually.to.be.equal(
+            this.treasuryContract.address
+        );
+        await expect(this.crdTokenContract.TREASURY_CORE_CONTRACT_ADDRESS()).eventually.to.be.equal(
+            this.treasuryCoreContract.address
+        );
+        await expect(this.crdTokenContract.AGREEMENTS_CONTRACT_ADDRESS()).eventually.to.be.equal(
+            this.agreementContract.address
+        );
     });
 });
 

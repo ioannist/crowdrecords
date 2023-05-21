@@ -4,59 +4,59 @@ const exec = require("child_process").exec;
 const contracts = [
     {
         name: "ContributionContract",
-        address: "0x06D6DBE9d93ADB85523c1FDAe38229aA97953E15",
+        address: "0x4Da92c898b3396337Fd71A5A5e901a6d8f4a5929",
     },
     {
         name: "RecordsVotingContract",
-        address: "0x95219Bf8124bE39aEa772447b7DF8A5F62a5D579",
+        address: "0x996171246F379d5Db3E6406F489905316BB5C3F0",
     },
     {
         name: "RecordsContract",
-        address: "0x88D3F1F3e1256BAbb7634A18a95D33F877036E64",
+        address: "0xD8EcB49424B49f32Dce7B4e8A7fc83E3Ab18cd9A",
     },
     {
         name: "TracksContract",
-        address: "0x369B67A677Eb936a8023ae490865517dC59b4f40",
+        address: "0x5E3a6992bb312E3c3ce508399C78a5b627C41C6b",
     },
     {
         name: "CrdTokenContract",
-        address: "0x805855957235CEa526108686df62433FB91040A2",
+        address: "0x0B273c45567750aa9afF7E1C85C05B1aA9f85C13",
     },
     {
         name: "TreasuryContract",
-        address: "0x887710D1446ECbfDb77E3Ea743C977807bb29e20",
+        address: "0x82e9A20871339a4Ea87df826127db5d1f50B3ECd",
     },
     {
         name: "TreasuryCoreContract",
-        address: "0x54e7d56447b2e1099932B284DC046e6685791Ffd",
+        address: "0xA535E7ECA76BF1dbdbED9d8745b9158632Dca0d7",
     },
     {
         name: "ContributionVotingContract",
-        address: "0x68F01d4CC98f585849277EbeF6332b3443a208c9",
+        address: "0x351C5B7D1D27085ea38DeEdCF174C7429AfEB6fF",
     },
     {
         name: "OrdersContract",
-        address: "0xC6e28A465E19E8aD89c10f8a5430398f5a245e0B",
+        address: "0x44962548Df35ca445317807dbFdfc506f10E6d10",
     },
     {
         name: "AgreementContract",
-        address: "0xbeaFBe8D2774249996465B6Ef6DF877457602756",
+        address: "0xDcCE68C4Ca62ee121a1159D76bEFFC739985B79e",
     },
     {
         name: "DilutionContract",
-        address: "0xFC8FaFda01387A31319F669C1552902a677c9F9f",
+        address: "0x566d4F1f70E9b71137f9BdF4ec215BA42e52640C",
     },
     {
         name: "VotingHubContract",
-        address: "0x2FB5A7fDb2C8d3C0b6F339B513AD5f70BA4B308C",
+        address: "0x5f012a247e6fEF13E6550A6c461f79E87eEA6300",
     },
     {
         name: "CrowdrecordsGovernor",
-        address: "0xF5Bb04430d51401631CAdB30fCcAF3f0dcB0a6Cf",
+        address: "0x11Ea313301b18d1d458eEBf6A90762c7D99B3988",
     },
     {
         name: "ControllerContract",
-        address: "0xc5C2daFE2f3BE1e903A190F75e73117a6F0703B7",
+        address: "0x18403e52D67Bc29aC1fB7281946b74868c209255",
     },
     // Add more contracts as needed
 ];

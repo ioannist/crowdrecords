@@ -15,6 +15,12 @@ contract ControllerContract {
         uint commTokenId
     );
 
+    event createNewContributionCalled(
+        address caller,
+        uint[] tracksId,
+        uint contributionId
+    );
+
     ITracks public tracksContract;
     IContribution public contributionsContract;
     IRecords public recordsContract;
@@ -41,6 +47,8 @@ contract ControllerContract {
     /// @param recordPayload Data required to create record
     /// @param govTokenData Data required to create a governance token
     /// @param commTokenData Data required to create a community token
+    /// @param platformWallet this is the UI providers wallet
+    /// @param platformFee this is the incentive amount for the UI maintainer
     function setupNewRecord(
         ITracks.TrackPayload[] memory tracksPayload,
         IContribution.SeedContributionPayload memory payload,
@@ -103,6 +111,42 @@ contract ControllerContract {
                 recordId,
                 govTokenId,
                 commTokenId
+            );
+        }
+    }
+
+    /// @notice This function is created to make the contribution creation flow simple, it will take the tracks and contribution data as parameter and then call the underlying functions.
+    /// @param tracksPayload Data required to create tracks
+    /// @param payload Data required to create new contribution
+    /// @param platformWallet this is the UI providers wallet
+    /// @param platformFee this is the incentive amount for the UI maintainer
+    function createNewContribution(
+        ITracks.TrackPayload[] memory tracksPayload,
+        IContribution.NewContributionPayload memory payload,
+        address payable platformWallet,
+        uint256 platformFee
+    ) public payable {
+        {
+            require(msg.value >= platformFee, "INV: INSUFFICIENT_PLATFORM_FEE");
+            if (msg.value > 0) {
+                platformWallet.call{value: platformFee}("");
+            }
+        }
+        uint256[] memory trackIds = tracksContract.createNewTracks(
+            tracksPayload
+        );
+        payload.tracks = trackIds;
+        uint256 contributionId = contributionsContract
+            .controllerCreateNewContribution{value: msg.value - platformFee}(
+            payload,
+            msg.sender
+        );
+
+        {
+            emit createNewContributionCalled(
+                msg.sender,
+                trackIds,
+                contributionId
             );
         }
     }

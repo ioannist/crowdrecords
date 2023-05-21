@@ -243,6 +243,7 @@ module.exports = async (deployer) => {
     }, 1000);
 
     try {
+        console.log("initializing recordsVotingContract");
         await this.recordsVotingContract.initialize(
             this.recordsContract.address,
             this.treasuryContract.address,
@@ -254,6 +255,7 @@ module.exports = async (deployer) => {
     }
 
     try {
+        console.log("initializing contributionContract");
         await this.contributionContract.initialize(
             this.contributionVotingContract.address,
             this.recordsContract.address,
@@ -265,6 +267,7 @@ module.exports = async (deployer) => {
     }
 
     try {
+        console.log("initializing contributionVotingContract");
         await this.contributionVotingContract.initialize(
             this.treasuryContract.address,
             this.contributionContract.address,
@@ -275,6 +278,7 @@ module.exports = async (deployer) => {
     }
 
     try {
+        console.log("initializing ordersContract");
         await this.ordersContract.initialize(
             this.treasuryContract.address,
             this.treasuryCoreContract.address
@@ -284,6 +288,7 @@ module.exports = async (deployer) => {
     }
 
     try {
+        console.log("initializing agreementContract");
         await this.agreementContract.initialize(
             this.treasuryContract.address,
             this.treasuryCoreContract.address,
@@ -295,6 +300,7 @@ module.exports = async (deployer) => {
     }
 
     try {
+        console.log("initializing votingHubContract");
         await this.votingHubContract.setTreasuryCoreContractAddress(
             this.treasuryCoreContract.address
         );
@@ -302,27 +308,32 @@ module.exports = async (deployer) => {
         console.log(err);
     }
     try {
+        console.log("addVotingContract for contributionVotingContract");
         await this.votingHubContract.addVotingContract(this.contributionVotingContract.address);
     } catch (err) {
         console.log(err);
     }
     try {
+        console.log("addVotingContract for agreementContract");
         await this.votingHubContract.addVotingContract(this.agreementContract.address);
     } catch (err) {
         console.log(err);
     }
     try {
+        console.log("addVotingContract for dilutionContract");
         await this.votingHubContract.addVotingContract(this.dilutionContract.address);
     } catch (err) {
         console.log(err);
     }
     try {
+        console.log("addVotingContract for recordsVotingContract");
         await this.votingHubContract.addVotingContract(this.recordsVotingContract.address);
     } catch (err) {
         console.log(err);
     }
 
     try {
+        console.log("initializing treasuryContract");
         await this.treasuryContract.initialize(
             this.treasuryCoreContract.address,
             this.recordsContract.address,
@@ -334,17 +345,20 @@ module.exports = async (deployer) => {
         console.log(err);
     }
     try {
+        console.log("addSnapshotCaller for agreementContract");
         await this.treasuryContract.addSnapshotCaller(this.agreementContract.address);
     } catch (err) {
         console.log(err);
     }
     try {
+        console.log("addSnapshotCaller for recordsVotingContract");
         await this.treasuryContract.addSnapshotCaller(this.recordsVotingContract.address);
     } catch (err) {
         console.log(err);
     }
 
     try {
+        console.log("initializing crdTokenContract");
         await this.crdTokenContract.initialize(
             this.treasuryContract.address,
             this.treasuryCoreContract.address,
@@ -355,6 +369,7 @@ module.exports = async (deployer) => {
     }
 
     try {
+        console.log("initializing treasuryCoreContract");
         await this.treasuryCoreContract.initialize(
             this.votingHubContract.address,
             this.treasuryContract.address,
@@ -366,6 +381,7 @@ module.exports = async (deployer) => {
     }
 
     try {
+        console.log("initializing dilutionContract");
         await this.dilutionContract.initialize(
             this.treasuryContract.address,
             this.crowdrecordsGovernor.address
@@ -375,6 +391,7 @@ module.exports = async (deployer) => {
     }
 
     try {
+        console.log("initializing recordsContract");
         await this.recordsContract.initialize(this.controllerContract.address);
     } catch (err) {
         console.log(err);

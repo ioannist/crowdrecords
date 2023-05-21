@@ -82,6 +82,14 @@ interface IContribution {
         address owner
     ) external returns (uint256);
 
+    /// @dev This function will be called by the controller contract to create a new contribution and voting
+    /// @param payload this is the data required for creation of new contribution
+    /// @param owner this is the owner of the new contribution which is to be created
+    function controllerCreateNewContribution(
+        NewContributionPayload memory payload,
+        address owner
+    ) external payable returns (uint256);
+
     /// @dev This function returns contribution data
     /// @param contributionId Id of the contribution whose data you want
     function getContributionData(

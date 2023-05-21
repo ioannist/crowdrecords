@@ -190,7 +190,7 @@ contract("ControllerContract - setupNewRecord", function() {
     });
 
     it("Should revert for insufficient platform fee", async function() {
-        const insufficientPlatformFee = "0";
+        const insufficientPlatformFee = new BN("0");
 
         await expect(
             this.controllerContract.setupNewRecord(
@@ -203,7 +203,108 @@ contract("ControllerContract - setupNewRecord", function() {
                 helper.PLATFORM_FEES,
                 { value: insufficientPlatformFee }
             )
-        ).to.eventually.be.rejectedWith("INV: INSUFFICIENT_PLATFORM_FEE)");
+        ).to.eventually.be.rejectedWith("INV: INSUFFICIENT_PLATFORM_FEE");
+    });
+
+    context("Testing for new contribution", function() {
+        let snapShot1, snapshotId1;
+        beforeEach(async function() {
+            snapShot1 = await helper.takeSnapshot();
+            snapshotId1 = snapShot1["result"];
+
+            // Call the setupNewRecord function
+            const tx = await this.controllerContract.setupNewRecord(
+                this.tracksPayload,
+                this.seedContributionPayload,
+                this.newRecordPayload,
+                this.govTokenData,
+                this.commTokenData,
+                await helper.getEthAccount(8),
+                0,
+                { value: 0 }
+            );
+
+            expectEvent(tx, "setupNewRecordCalled");
+
+            this.tracksPayloadForContribution = [
+                {
+                    filehash: "Qmexample1",
+                    filelink: "https://example.com/file1",
+                    category: "category1",
+                },
+                {
+                    filehash: "Qmexample2",
+                    filelink: "https://example.com/file2",
+                    category: "category2",
+                },
+            ];
+
+            this.payloadForContribution = {
+                tracks: [], // Will be filled in the createNewContribution function
+                title: "Test Title",
+                previewFile: "https://example.com/preview",
+                previewFileHash: "QmexamplePreview",
+                recordId: 1,
+                roughMix: true,
+                description: "Test Description",
+                communityReward: 500,
+                governanceReward: 200,
+            };
+            this.newRecordId = 1;
+        });
+        afterEach(async function() {
+            await helper.revertToSnapshot(snapshotId1);
+        });
+
+        it("Should create new contribution, no platform fees", async function() {
+            // Call the createNewContribution function
+            const tx = await this.controllerContract.createNewContribution(
+                this.tracksPayloadForContribution,
+                this.payloadForContribution,
+                await helper.getEthAccount(8),
+                0,
+                { value: helper.VOTING_DEPOSIT_CONTRIBUTION_CONTRACT }
+            );
+
+            // Extract the emitted event from the transaction receipt
+            expectEvent(tx, "createNewContributionCalled");
+        });
+
+        it("Should create new contribution, with platform fees", async function() {
+            const before = await web3.eth.getBalance(await helper.getEthAccount(8));
+
+            // Call the createNewContribution function
+            const tx = await this.controllerContract.createNewContribution(
+                this.tracksPayloadForContribution,
+                this.payloadForContribution,
+                await helper.getEthAccount(8),
+                helper.PLATFORM_FEES,
+                { value: +helper.PLATFORM_FEES + +helper.VOTING_DEPOSIT_CONTRIBUTION_CONTRACT }
+            );
+
+            // Extract the emitted event from the transaction receipt
+            expectEvent(tx, "createNewContributionCalled");
+
+            await expect(
+                web3.eth.getBalance(await helper.getEthAccount(8))
+            ).to.eventually.be.bignumber.equal(BigInt(+before + +helper.PLATFORM_FEES).toString());
+        });
+        it("Try to create new contribution with less platform fees, should fail", async function() {
+            await expect(
+                this.controllerContract.createNewContribution(
+                    this.tracksPayloadForContribution,
+                    this.payloadForContribution,
+                    await helper.getEthAccount(8),
+                    helper.PLATFORM_FEES,
+                    {
+                        value:
+                            +helper.PLATFORM_FEES -
+                            +helper.PLATFORM_FEES +
+                            +helper.VOTING_DEPOSIT_CONTRIBUTION_CONTRACT,
+                    }
+                )
+            ).to.eventually.be.rejectedWith("INV: INSUFFICIENT_PLATFORM_FEE");
+        });
     });
 });
 
