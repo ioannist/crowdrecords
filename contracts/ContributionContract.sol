@@ -345,7 +345,7 @@ contract ContributionContract is Initializable {
             createdAt: block.timestamp,
             previewFile: previewFile,
             previewFileHash: previewFileHash,
-            roughMix: false,
+            roughMix: roughMix,
             status: status,
             description: description,
             seedContribution: isSeed,

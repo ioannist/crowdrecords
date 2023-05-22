@@ -529,6 +529,334 @@ contract("Contribution Contract", function() {
                 this.treasuryContract.balanceOf(contributionOwner, GOVERNANCE_TOKEN_ID)
             ).to.eventually.be.bignumber.equals(new BN(await web3.utils.toWei("1000")));
         });
+
+        it("Tries to propose counter offer to invalid contribution id, expect revert", async function() {
+            const invalidContributionId = 3;
+            const newCommunityReward = "1000000000";
+            const newGovernanceReward = "1000000000";
+            await expect(
+                this.contributionVotingContract.proposeCounterOffer(
+                    invalidContributionId,
+                    newCommunityReward,
+                    newGovernanceReward
+                )
+            ).to.eventually.be.rejectedWith("INVALID: BALLOT_NOT_FOUND");
+        });
+
+        it("User proposes counter offer vote and event is emitted", async function() {
+            const newCommunityReward = "1000000000";
+            const newGovernanceReward = "1000000000";
+            const trx = await this.contributionVotingContract.proposeCounterOffer(
+                NEW_CONTRIBUTION_1_ID,
+                newCommunityReward,
+                newGovernanceReward
+            );
+            expectEvent(trx, "CounterOfferForContribution", {
+                contributionId: new BN(NEW_CONTRIBUTION_1_ID),
+            });
+        });
+
+        it("Cannot create counter offer more than once", async function() {
+            const newCommunityReward = "1000000000";
+            const newGovernanceReward = "1000000000";
+            await this.contributionVotingContract.proposeCounterOffer(
+                NEW_CONTRIBUTION_1_ID,
+                newCommunityReward,
+                newGovernanceReward
+            );
+            await expect(
+                this.contributionVotingContract.proposeCounterOffer(
+                    NEW_CONTRIBUTION_1_ID,
+                    newCommunityReward,
+                    newGovernanceReward
+                )
+            ).to.eventually.be.rejectedWith("INVALID: ALREADY_COUNTER_OFFERED");
+        });
+
+        it("Cannot create counter offer after voting", async function() {
+            // Voting from users account
+            await this.contributionVotingContract.castVoteForContribution(
+                NEW_CONTRIBUTION_1_ID,
+                true
+            );
+
+            const newCommunityReward = "1000000000";
+            const newGovernanceReward = "1000000000";
+
+            // Trying to create counter offer from user account who has already voted
+            await expect(
+                this.contributionVotingContract.proposeCounterOffer(
+                    NEW_CONTRIBUTION_1_ID,
+                    newCommunityReward,
+                    newGovernanceReward
+                )
+            ).to.eventually.be.rejectedWith("INVALID: ALREADY_VOTED");
+        });
+
+        it("Cannot vote after create counter offer", async function() {
+            const newCommunityReward = "1000000000";
+            const newGovernanceReward = "1000000000";
+
+            // Create counter offer
+            this.contributionVotingContract.proposeCounterOffer(
+                NEW_CONTRIBUTION_1_ID,
+                newCommunityReward,
+                newGovernanceReward
+            );
+
+            // Trying to vote from user account who has already
+            await expect(
+                this.contributionVotingContract.castVoteForContribution(NEW_CONTRIBUTION_1_ID, true)
+            ).to.eventually.be.rejectedWith("INVALID: ALREADY_COUNTER_OFFERED");
+        });
+
+        it("Owner accepts counter offer, and declares winner, contribution should pass", async function() {
+            const newCommunityReward = "1000000000";
+            const newGovernanceReward = "1000000000";
+            await this.contributionVotingContract.proposeCounterOffer(
+                NEW_CONTRIBUTION_1_ID,
+                newCommunityReward,
+                newGovernanceReward,
+                {
+                    from: await helper.getEthAccount(0),
+                }
+            );
+
+            // Accepting counter offer
+            const trx = await this.contributionVotingContract.actionOnCounterOffer(
+                NEW_CONTRIBUTION_1_ID,
+                [await helper.getEthAccount(0)],
+                true,
+                {
+                    from: contributionOwner,
+                }
+            );
+
+            expectEvent(trx, "counterOfferAction");
+
+            //Incrementing the blocks so that we can declare winner
+            await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 1);
+
+            let tx = await this.contributionVotingContract.declareWinner(NEW_CONTRIBUTION_1_ID);
+
+            expectEvent(tx, "BallotResult", { result: true });
+
+            await expect(
+                this.treasuryContract.balanceOf(contributionOwner, COMMUNITY_TOKEN_ID)
+            ).to.eventually.be.bignumber.equals(newCommunityReward);
+
+            await expect(
+                this.treasuryContract.balanceOf(contributionOwner, GOVERNANCE_TOKEN_ID)
+            ).to.eventually.be.bignumber.equals(newGovernanceReward);
+        });
+
+        it("Owner rejects counter offer, and declares winner, contribution should fail", async function() {
+            const newCommunityReward = "1000000000";
+            const newGovernanceReward = "1000000000";
+            await this.contributionVotingContract.proposeCounterOffer(
+                NEW_CONTRIBUTION_1_ID,
+                newCommunityReward,
+                newGovernanceReward,
+                {
+                    from: await helper.getEthAccount(0),
+                }
+            );
+
+            // Rejecting counter offer
+            const trx = await this.contributionVotingContract.actionOnCounterOffer(
+                NEW_CONTRIBUTION_1_ID,
+                [await helper.getEthAccount(0)],
+                false,
+                {
+                    from: contributionOwner,
+                }
+            );
+
+            expectEvent(trx, "counterOfferAction");
+
+            //Incrementing the blocks so that we can declare winner
+            await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 1);
+
+            let tx = await this.contributionVotingContract.declareWinner(NEW_CONTRIBUTION_1_ID);
+
+            expectEvent(tx, "BallotResult", { result: false });
+
+            await expect(
+                this.treasuryContract.balanceOf(contributionOwner, COMMUNITY_TOKEN_ID)
+            ).to.eventually.be.bignumber.equals("0");
+
+            await expect(
+                this.treasuryContract.balanceOf(contributionOwner, GOVERNANCE_TOKEN_ID)
+            ).to.eventually.be.bignumber.equals("0");
+        });
+
+        it("Owner rejects multiple counter offer", async function() {
+            //Transferring governance to other account so they can vote
+            await this.treasuryCoreContract.safeTransferFrom(
+                await helper.getEthAccount(0),
+                await helper.getEthAccount(2),
+                GOVERNANCE_TOKEN_ID,
+                await web3.utils.toWei("500"),
+                "0x0"
+            );
+            await this.treasuryCoreContract.safeTransferFrom(
+                await helper.getEthAccount(0),
+                await helper.getEthAccount(3),
+                GOVERNANCE_TOKEN_ID,
+                await web3.utils.toWei("500"),
+                "0x0"
+            );
+            await this.treasuryCoreContract.safeTransferFrom(
+                await helper.getEthAccount(0),
+                await helper.getEthAccount(4),
+                GOVERNANCE_TOKEN_ID,
+                await web3.utils.toWei("500"),
+                "0x0"
+            );
+
+            const newCommunityReward = "1000000000";
+            const newGovernanceReward = "1000000000";
+            await this.contributionVotingContract.proposeCounterOffer(
+                NEW_CONTRIBUTION_1_ID,
+                newCommunityReward,
+                newGovernanceReward,
+                {
+                    from: await helper.getEthAccount(0),
+                }
+            );
+            await this.contributionVotingContract.proposeCounterOffer(
+                NEW_CONTRIBUTION_1_ID,
+                newCommunityReward,
+                newGovernanceReward,
+                {
+                    from: await helper.getEthAccount(2),
+                }
+            );
+            await this.contributionVotingContract.proposeCounterOffer(
+                NEW_CONTRIBUTION_1_ID,
+                newCommunityReward,
+                newGovernanceReward,
+                {
+                    from: await helper.getEthAccount(3),
+                }
+            );
+
+            // Rejecting counter offer
+            const trx = await this.contributionVotingContract.actionOnCounterOffer(
+                NEW_CONTRIBUTION_1_ID,
+                [
+                    await helper.getEthAccount(0),
+                    await helper.getEthAccount(2),
+                    await helper.getEthAccount(3),
+                    await helper.getEthAccount(4),
+                ],
+                false,
+                {
+                    from: contributionOwner,
+                }
+            );
+
+            expectEvent(trx, "counterOfferAction");
+
+            //Incrementing the blocks so that we can declare winner
+            await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 1);
+
+            let tx = await this.contributionVotingContract.declareWinner(NEW_CONTRIBUTION_1_ID);
+
+            expectEvent(tx, "BallotResult", { result: false });
+
+            await expect(
+                this.treasuryContract.balanceOf(contributionOwner, COMMUNITY_TOKEN_ID)
+            ).to.eventually.be.bignumber.equals("0");
+
+            await expect(
+                this.treasuryContract.balanceOf(contributionOwner, GOVERNANCE_TOKEN_ID)
+            ).to.eventually.be.bignumber.equals("0");
+        });
+
+        it("Owner accepts multiple counter offer", async function() {
+            //Transferring governance to other account so they can vote
+            await this.treasuryCoreContract.safeTransferFrom(
+                await helper.getEthAccount(0),
+                await helper.getEthAccount(2),
+                GOVERNANCE_TOKEN_ID,
+                await web3.utils.toWei("500"),
+                "0x0"
+            );
+            await this.treasuryCoreContract.safeTransferFrom(
+                await helper.getEthAccount(0),
+                await helper.getEthAccount(3),
+                GOVERNANCE_TOKEN_ID,
+                await web3.utils.toWei("500"),
+                "0x0"
+            );
+            await this.treasuryCoreContract.safeTransferFrom(
+                await helper.getEthAccount(0),
+                await helper.getEthAccount(4),
+                GOVERNANCE_TOKEN_ID,
+                await web3.utils.toWei("500"),
+                "0x0"
+            );
+
+            const newCommunityReward = "1000000000";
+            const newGovernanceReward = "1000000000";
+            await this.contributionVotingContract.proposeCounterOffer(
+                NEW_CONTRIBUTION_1_ID,
+                newCommunityReward,
+                newGovernanceReward,
+                {
+                    from: await helper.getEthAccount(0),
+                }
+            );
+            await this.contributionVotingContract.proposeCounterOffer(
+                NEW_CONTRIBUTION_1_ID,
+                newCommunityReward,
+                newGovernanceReward,
+                {
+                    from: await helper.getEthAccount(2),
+                }
+            );
+            await this.contributionVotingContract.proposeCounterOffer(
+                NEW_CONTRIBUTION_1_ID,
+                newCommunityReward,
+                newGovernanceReward,
+                {
+                    from: await helper.getEthAccount(3),
+                }
+            );
+
+            // Rejecting counter offer
+            const trx = await this.contributionVotingContract.actionOnCounterOffer(
+                NEW_CONTRIBUTION_1_ID,
+                [
+                    await helper.getEthAccount(0),
+                    await helper.getEthAccount(2),
+                    await helper.getEthAccount(3),
+                    await helper.getEthAccount(4),
+                ],
+                true,
+                {
+                    from: contributionOwner,
+                }
+            );
+
+            expectEvent(trx, "counterOfferAction");
+
+            //Incrementing the blocks so that we can declare winner
+            await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 1);
+
+            let tx = await this.contributionVotingContract.declareWinner(NEW_CONTRIBUTION_1_ID);
+
+            expectEvent(tx, "BallotResult", { result: true });
+
+            await expect(
+                this.treasuryContract.balanceOf(contributionOwner, COMMUNITY_TOKEN_ID)
+            ).to.eventually.be.bignumber.equals(newCommunityReward);
+
+            await expect(
+                this.treasuryContract.balanceOf(contributionOwner, GOVERNANCE_TOKEN_ID)
+            ).to.eventually.be.bignumber.equals(newGovernanceReward);
+        });
     });
 });
 

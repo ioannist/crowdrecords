@@ -270,14 +270,13 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
                 contributionCounterOfferMap[contributionId][counterOfferIds[i]]
                     .status == 1
             ) {
+                uint256 newGovernanceReward = contributionCounterOfferMap[
+                    contributionId
+                ][counterOfferIds[i]].newGovernanceReward;
+                uint256 newCommunityReward = contributionCounterOfferMap[
+                    contributionId
+                ][counterOfferIds[i]].newCommunityReward;
                 if (action) {
-                    uint256 newGovernanceReward = contributionCounterOfferMap[
-                        contributionId
-                    ][counterOfferIds[i]].newGovernanceReward;
-                    uint256 newCommunityReward = contributionCounterOfferMap[
-                        contributionId
-                    ][counterOfferIds[i]].newCommunityReward;
-
                     //Set new reward for the contribution
                     rewardMapping[contributionId]
                         .communityReward = newCommunityReward;
@@ -310,6 +309,13 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
                     contributionCounterOfferMap[contributionId][
                         counterOfferIds[i]
                     ].status = 3;
+                    emit counterOfferAction(
+                        contributionId,
+                        counterOfferIds[i],
+                        newGovernanceReward,
+                        newCommunityReward,
+                        3
+                    );
                 }
             }
         }
