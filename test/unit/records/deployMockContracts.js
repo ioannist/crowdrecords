@@ -79,7 +79,7 @@ async function getMockContractsForRecordTesting() {
         tracksContract.address,
         contributionContract.address,
         recordsContract.address,
-        treasuryCoreContract.address
+        treasuryCoreContractMock.address
     );
 
     await recordsVotingContract.initialize(

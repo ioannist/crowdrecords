@@ -58,7 +58,7 @@ contract AgreementContract is BaseVotingContract {
     /// @dev This evet is emitted when as royalty payment is done by a user for a royalty agreement.
     /// @param agreementId This is the id of the agreement that was created
     /// @param recordId This is the record id to which the agreement belongs to
-    /// @param totalSupplyEther This is the total amount of tokens that are in circulation in ether value
+    /// @param totalSupplyWei This is the total amount of tokens that are in circulation in wei value
     /// during the distribution was made
     /// @param royaltyAmountWei This is the amount of royalty that has been paid by user in wei amount
     /// @param royaltyId This is the id of royalty that has been paid
@@ -68,7 +68,7 @@ contract AgreementContract is BaseVotingContract {
     event RoyaltyPayment(
         uint256 agreementId,
         uint256 recordId,
-        uint256 totalSupplyEther,
+        uint256 totalSupplyWei,
         uint256 royaltyAmountWei,
         uint256 royaltyId,
         uint256 tokenId,
@@ -91,14 +91,14 @@ contract AgreementContract is BaseVotingContract {
     );
 
     /// @dev This structure holds data of each royalty payment made by user
-    /// @param totalSupplyEther This is the total amount of tokens that are in circulation in ether value
+    /// @param totalSupplyWei This is the total amount of tokens that are in circulation in wei value
     /// @param royaltyAmountWei This is the amount of royalty that has been paid by user in wei amount
     /// @param royaltyId This is the id of royalty that has been paid
     /// @param tokenId This is the id of tokens that will used to determine the royalty ratio (it is holding tokenid)
     /// @param royaltyPerTokenWei This is how many wei each user will get for each token (token of "tokenId") he holds.
     /// @param snapshotId This is the snapshot id when the user distributed the reward
     struct RoyaltyData {
-        uint256 totalSupplyEther;
+        uint256 totalSupplyWei;
         uint256 royaltyAmountWei;
         uint256 royaltyId;
         uint256 tokenId;
@@ -132,18 +132,18 @@ contract AgreementContract is BaseVotingContract {
     );
 
     uint256 public agreementCurrentId = 0;
-    mapping(uint256 => Agreement) agreementMap;
+    mapping(uint256 => Agreement) public agreementMap;
     //The below mapping contains the list of agreementId
     // mapping works as (recordId => [agreementId])
-    mapping(uint256 => uint256[]) recordAgreementList;
+    mapping(uint256 => uint256[]) public recordAgreementList;
 
     uint256 royaltyId = 0;
     //agreementId => array of royalties
-    mapping(uint256 => uint256[]) royaltyListMapping;
+    mapping(uint256 => uint256[]) public royaltyListMapping;
     //Dividend id => dividend data
-    mapping(uint256 => RoyaltyData) royaltyDataMapping;
+    mapping(uint256 => RoyaltyData) public royaltyDataMapping;
     //royaltyId => userAddress => bool
-    mapping(uint256 => mapping(address => bool)) royaltyClaimMapping;
+    mapping(uint256 => mapping(address => bool)) public royaltyClaimMapping;
 
     //This is for the token transfer and other core functions
     address public TREASURY_CORE_CONTRACT_ADDRESS;
@@ -288,15 +288,15 @@ contract AgreementContract is BaseVotingContract {
         uint256 tokenId = treasuryContract.getCommunityTokenId(recordId);
         uint256 totalSupply = treasuryContract.totalCirculatingSupply(tokenId);
 
-        uint256 totalSupplyEther = totalSupply / 1 ether;
-        uint256 royaltyPerTokenWei = amount / totalSupplyEther;
+        // uint256 totalSupplyEther = totalSupply / 1 ether;
+        uint256 royaltyPerTokenWei = (amount * 1 ether) / totalSupply;
         require(
             royaltyPerTokenWei > 0,
             "INSUFFICIENT_AMOUNT: NEED_GREATER_AMOUNT"
         );
 
         RoyaltyData memory dividend = RoyaltyData({
-            totalSupplyEther: totalSupply / 1 ether,
+            totalSupplyWei: totalSupply,
             royaltyAmountWei: amount,
             royaltyId: royaltyId,
             royaltyPerTokenWei: royaltyPerTokenWei,
@@ -315,7 +315,7 @@ contract AgreementContract is BaseVotingContract {
         emit RoyaltyPayment({
             agreementId: agreementId,
             recordId: recordId,
-            totalSupplyEther: dividend.totalSupplyEther,
+            totalSupplyWei: dividend.totalSupplyWei,
             royaltyAmountWei: dividend.royaltyAmountWei,
             royaltyId: dividend.royaltyId,
             tokenId: dividend.tokenId,

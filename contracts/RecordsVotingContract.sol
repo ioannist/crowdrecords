@@ -133,7 +133,7 @@ contract RecordsVotingContract is BaseVotingContract, IERC1155Receiver {
     ///@param tokenId it is the id of the token on which basis we distribute the reward
     ///@param rewardTokenId it is the id of the new tokenId
     struct NewVersionTokenDistributionStruct {
-        uint256 totalSupplyEther;
+        uint256 totalSupplyWei;
         uint256 rewardAmountWei;
         uint256 versionRequestId;
         uint256 tokenId;
@@ -144,7 +144,7 @@ contract RecordsVotingContract is BaseVotingContract, IERC1155Receiver {
 
     event NewVersionTokenDistribution(
         uint256 versionRequestId,
-        uint256 totalSupplyEther,
+        uint256 totalSupplyWei,
         uint256 rewardAmountWei,
         uint256 tokenId,
         uint256 rewardTokenId,
@@ -465,13 +465,13 @@ contract RecordsVotingContract is BaseVotingContract, IERC1155Receiver {
 
         NewVersionTokenDistributionStruct
             memory newVersionToken = NewVersionTokenDistributionStruct({
-                totalSupplyEther: totalSupply / 1 ether,
+                totalSupplyWei: totalSupply,
                 rewardAmountWei: tokenData.oldContributorShare,
                 versionRequestId: versionReqId,
                 tokenId: tokenId,
                 rewardTokenId: newTokenId,
-                rewardPerTokenWei: tokenData.oldContributorShare /
-                    (totalSupply / 1 ether),
+                rewardPerTokenWei: (tokenData.oldContributorShare * 1 ether) /
+                    totalSupply,
                 snapshotId: treasuryContract.snapshot()
             });
 
@@ -482,7 +482,7 @@ contract RecordsVotingContract is BaseVotingContract, IERC1155Receiver {
 
         emit NewVersionTokenDistribution({
             versionRequestId: versionReqId,
-            totalSupplyEther: newVersionToken.totalSupplyEther,
+            totalSupplyWei: newVersionToken.totalSupplyWei,
             rewardAmountWei: newVersionToken.rewardAmountWei,
             tokenId: newVersionToken.tokenId,
             rewardTokenId: newTokenId,

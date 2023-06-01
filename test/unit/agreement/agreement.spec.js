@@ -344,10 +344,7 @@ contract("AgreementContract", function() {
 
                 expectEvent(payRoyaltyResult, "RoyaltyPayment", {
                     recordId: new BN(RECORD_ID),
-                    totalSupplyEther: await web3.utils.fromWei(
-                        COMMUNITY_TOKEN_BALANCE_USER1,
-                        "ether"
-                    ),
+                    totalSupplyWei: COMMUNITY_TOKEN_BALANCE_USER1,
                     royaltyAmountWei: this.singleRewardAmount,
                     royaltyId: new BN(1),
                     tokenId: new BN(COMMUNITY_TOKEN_ID),
@@ -1349,6 +1346,530 @@ contract("AgreementContract", function() {
                 "gasCostWithTenPendingPaymentZeroClaimedPayments = ",
                 gasCostWithTenPendingPaymentZeroClaimedPayments
             );
+        });
+    });
+
+    // Write test cases which checks the reward distribution for record with community token less then 1 ether
+    describe("After winning the voting for agreement contract with community token for the record less than 1 ether comm token", async function() {
+        let snapShot, snapshotId;
+        beforeEach(async function() {
+            snapShot = await helper.takeSnapshot();
+            snapshotId = snapShot["result"];
+
+            const tracksPayload = [
+                {
+                    filehash: "QmXKQTJp7ATCzy4op4V4Q2YvZ8hDQ2x6x3xA6X9P6jyL6U",
+                    filelink: "https://ipfs.io/ipfs/QmXKQTJp7ATCzy4op4V4Q2YvZ8hDQ2x6x3xA6X9P6jyL6U",
+                    category: "Rock",
+                },
+            ];
+
+            const seedContributionPayload = {
+                tracks: [], // This will be filled later after tracks are created
+                title: "My New Album",
+                previewFile: "https://ipfs.io/ipfs/QmYwAPJzv5CZsnA625s3Xf2nemtYgPpHdWEz79ojWnPbdG",
+                previewFileHash: "QmYwAPJzv5CZsnA625s3Xf2nemtYgPpHdWEz79ojWnPbdG",
+                description: "This is my new album description",
+            };
+
+            const newRecordPayload = {
+                name: "My Record",
+                image: "someImageLink",
+                recordCategory: "Rock",
+                seedId: 0, // This will be filled later after seed contribution is created
+            };
+
+            const govTokenData = {
+                recordId: 0, // This will be filled later after the record is created
+                totalSupply: "1000000",
+                userBalance: "10000",
+                symbol: "GOV",
+                image: "someImageLink",
+            };
+
+            const commTokenData = {
+                recordId: 0, // This will be filled later after the record is created
+                totalSupply: "2000000",
+                userBalance: "20000",
+                symbol: "COMM",
+                image: "someImageLink",
+            };
+
+            this.user1 = await helper.getEthAccount(0);
+            this.user2 = await helper.getEthAccount(1);
+
+            // Creating new record with controller contract and the community and governance
+            // tokens would be less then 1 ether
+            const tx = await this.controllerContract.setupNewRecord(
+                tracksPayload,
+                seedContributionPayload,
+                newRecordPayload,
+                govTokenData,
+                commTokenData,
+                await helper.getEthAccount(8),
+                0,
+                { value: 0, from: this.user1 }
+            );
+
+            const newRecordId = tx.receipt.logs[0].args.recordId.toString();
+            this.newCommunityTokenId = tx.receipt.logs[0].args.commTokenId.toString();
+            this.newGovernanceTokenId = tx.receipt.logs[0].args.govTokenId.toString();
+
+            const trx = await this.agreementContract.createAgreement(
+                newRecordId,
+                "Title",
+                "Some link",
+                "some hash",
+                await helper.getEthAccount(8),
+                0,
+                {
+                    from: this.user2,
+                    value: helper.VOTING_DEPOSIT_AGREEMENT_CONTRACT,
+                }
+            );
+            this.newAgreementId = trx.receipt.logs[1].args.agreementId.toString();
+
+            await this.agreementContract.castVoteForAgreement(this.newAgreementId, true);
+
+            await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 2);
+
+            const winner = await this.agreementContract.declareWinner(this.newAgreementId);
+
+            await expectEvent(winner, "BallotResult", {
+                agreementId: new BN(this.newAgreementId),
+                result: true,
+            });
+        });
+        afterEach(async function() {
+            await helper.revertToSnapshot(snapshotId);
+        });
+
+        it("Paying for royalty agreement when community token is less than 1 ether", async function() {
+            const singleRewardAmount = await web3.utils.toWei("1");
+            const totalReward = await web3.utils.toWei("9");
+            const user2RewardAmount = await web3.utils.toWei("4.5");
+
+            await this.treasuryCoreContract.setApprovalForAll(this.agreementContract.address, true);
+
+            const CRDToken = await this.treasuryContract.CRD();
+            await this.treasuryCoreContract.safeTransferFrom(
+                this.user1,
+                this.user2,
+                this.newCommunityTokenId,
+                "10000",
+                "0xa165"
+            );
+
+            for (let i = 0; i < 9; i++) {
+                await this.agreementContract.payRoyaltyAmount(
+                    this.newAgreementId,
+                    singleRewardAmount
+                );
+            }
+
+            await expect(
+                this.treasuryContract.balanceOf(this.agreementContract.address, CRDToken)
+            ).eventually.to.be.bignumber.equal(totalReward);
+
+            await this.agreementContract.claimRoyaltyAmount(this.newAgreementId, {
+                from: this.user2,
+            });
+
+            // Checking the claim action for user2
+            await expect(
+                this.treasuryContract.balanceOf(this.user2, CRDToken)
+            ).eventually.to.be.bignumber.equal(user2RewardAmount);
+        });
+    });
+
+    describe("After winning the voting for agreement contract with community token for the record with 1 ether comm token", async function() {
+        let snapShot, snapshotId;
+        beforeEach(async function() {
+            snapShot = await helper.takeSnapshot();
+            snapshotId = snapShot["result"];
+
+            const tracksPayload = [
+                {
+                    filehash: "QmXKQTJp7ATCzy4op4V4Q2YvZ8hDQ2x6x3xA6X9P6jyL6U",
+                    filelink: "https://ipfs.io/ipfs/QmXKQTJp7ATCzy4op4V4Q2YvZ8hDQ2x6x3xA6X9P6jyL6U",
+                    category: "Rock",
+                },
+            ];
+
+            const seedContributionPayload = {
+                tracks: [], // This will be filled later after tracks are created
+                title: "My New Album",
+                previewFile: "https://ipfs.io/ipfs/QmYwAPJzv5CZsnA625s3Xf2nemtYgPpHdWEz79ojWnPbdG",
+                previewFileHash: "QmYwAPJzv5CZsnA625s3Xf2nemtYgPpHdWEz79ojWnPbdG",
+                description: "This is my new album description",
+            };
+
+            const newRecordPayload = {
+                name: "My Record",
+                image: "someImageLink",
+                recordCategory: "Rock",
+                seedId: 0, // This will be filled later after seed contribution is created
+            };
+
+            const govTokenData = {
+                recordId: 0, // This will be filled later after the record is created
+                totalSupply: web3.utils.toWei("100"),
+                userBalance: web3.utils.toWei("1"),
+                symbol: "GOV",
+                image: "someImageLink",
+            };
+
+            const commTokenData = {
+                recordId: 0, // This will be filled later after the record is created
+                totalSupply: web3.utils.toWei("100"),
+                userBalance: web3.utils.toWei("1"),
+                symbol: "COMM",
+                image: "someImageLink",
+            };
+
+            this.user1 = await helper.getEthAccount(0);
+            this.user2 = await helper.getEthAccount(1);
+
+            // Creating new record with controller contract and the community and governance
+            // tokens would be less then 1 ether
+            const tx = await this.controllerContract.setupNewRecord(
+                tracksPayload,
+                seedContributionPayload,
+                newRecordPayload,
+                govTokenData,
+                commTokenData,
+                await helper.getEthAccount(8),
+                0,
+                { value: 0, from: this.user1 }
+            );
+
+            const newRecordId = tx.receipt.logs[0].args.recordId.toString();
+            this.newCommunityTokenId = tx.receipt.logs[0].args.commTokenId.toString();
+            this.newGovernanceTokenId = tx.receipt.logs[0].args.govTokenId.toString();
+
+            const trx = await this.agreementContract.createAgreement(
+                newRecordId,
+                "Title",
+                "Some link",
+                "some hash",
+                await helper.getEthAccount(8),
+                0,
+                {
+                    from: this.user2,
+                    value: helper.VOTING_DEPOSIT_AGREEMENT_CONTRACT,
+                }
+            );
+            this.newAgreementId = trx.receipt.logs[1].args.agreementId.toString();
+
+            await this.agreementContract.castVoteForAgreement(this.newAgreementId, true);
+
+            await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 2);
+
+            const winner = await this.agreementContract.declareWinner(this.newAgreementId);
+
+            await expectEvent(winner, "BallotResult", {
+                agreementId: new BN(this.newAgreementId),
+                result: true,
+            });
+        });
+        afterEach(async function() {
+            await helper.revertToSnapshot(snapshotId);
+        });
+
+        it("Paying for royalty agreement when when user owns 50%", async function() {
+            const singleRewardAmount = await web3.utils.toWei("1");
+            const totalReward = await web3.utils.toWei("9");
+            const user2RewardAmount = await web3.utils.toWei("4.5");
+
+            await this.treasuryCoreContract.setApprovalForAll(this.agreementContract.address, true);
+
+            const CRDToken = await this.treasuryContract.CRD();
+            await this.treasuryCoreContract.safeTransferFrom(
+                this.user1,
+                this.user2,
+                this.newCommunityTokenId,
+                web3.utils.toWei("0.5"),
+                "0xa165"
+            );
+
+            for (let i = 0; i < 9; i++) {
+                await this.agreementContract.payRoyaltyAmount(
+                    this.newAgreementId,
+                    singleRewardAmount
+                );
+            }
+
+            await expect(
+                this.treasuryContract.balanceOf(this.agreementContract.address, CRDToken)
+            ).eventually.to.be.bignumber.equal(totalReward);
+
+            await this.agreementContract.claimRoyaltyAmount(this.newAgreementId, {
+                from: this.user2,
+            });
+
+            // Checking the claim action for user2
+            await expect(
+                this.treasuryContract.balanceOf(this.user2, CRDToken)
+            ).eventually.to.be.bignumber.equal(user2RewardAmount);
+        });
+
+        it("Paying for royalty agreement when when user owns 25%", async function() {
+            const singleRewardAmount = await web3.utils.toWei("1");
+            const totalReward = await web3.utils.toWei("9");
+            const user2RewardAmount = await web3.utils.toWei("2.25");
+
+            await this.treasuryCoreContract.setApprovalForAll(this.agreementContract.address, true);
+
+            const CRDToken = await this.treasuryContract.CRD();
+            await this.treasuryCoreContract.safeTransferFrom(
+                this.user1,
+                this.user2,
+                this.newCommunityTokenId,
+                web3.utils.toWei("0.25"),
+                "0xa165"
+            );
+
+            for (let i = 0; i < 9; i++) {
+                await this.agreementContract.payRoyaltyAmount(
+                    this.newAgreementId,
+                    singleRewardAmount
+                );
+            }
+
+            await expect(
+                this.treasuryContract.balanceOf(this.agreementContract.address, CRDToken)
+            ).eventually.to.be.bignumber.equal(totalReward);
+
+            await this.agreementContract.claimRoyaltyAmount(this.newAgreementId, {
+                from: this.user2,
+            });
+
+            // Checking the claim action for user2
+            await expect(
+                this.treasuryContract.balanceOf(this.user2, CRDToken)
+            ).eventually.to.be.bignumber.equal(user2RewardAmount);
+        });
+
+        it("Paying for royalty agreement when when user owns 1%", async function() {
+            const singleRewardAmount = await web3.utils.toWei("1");
+            const totalReward = await web3.utils.toWei("9");
+            const user2RewardAmount = await web3.utils.toWei("0.09");
+
+            await this.treasuryCoreContract.setApprovalForAll(this.agreementContract.address, true);
+
+            const CRDToken = await this.treasuryContract.CRD();
+            await this.treasuryCoreContract.safeTransferFrom(
+                this.user1,
+                this.user2,
+                this.newCommunityTokenId,
+                web3.utils.toWei("0.01"),
+                "0xa165"
+            );
+
+            for (let i = 0; i < 9; i++) {
+                await this.agreementContract.payRoyaltyAmount(
+                    this.newAgreementId,
+                    singleRewardAmount
+                );
+            }
+
+            await expect(
+                this.treasuryContract.balanceOf(this.agreementContract.address, CRDToken)
+            ).eventually.to.be.bignumber.equal(totalReward);
+
+            await this.agreementContract.claimRoyaltyAmount(this.newAgreementId, {
+                from: this.user2,
+            });
+
+            // Checking the claim action for user2
+            await expect(
+                this.treasuryContract.balanceOf(this.user2, CRDToken)
+            ).eventually.to.be.bignumber.equal(user2RewardAmount);
+        });
+
+        it("Paying for royalty agreement when when user owns 0.001%", async function() {
+            const singleRewardAmount = await web3.utils.toWei("1");
+            const totalReward = await web3.utils.toWei("9");
+            const user2RewardAmount = await web3.utils.toWei("0.009");
+
+            await this.treasuryCoreContract.setApprovalForAll(this.agreementContract.address, true);
+
+            const CRDToken = await this.treasuryContract.CRD();
+            await this.treasuryCoreContract.safeTransferFrom(
+                this.user1,
+                this.user2,
+                this.newCommunityTokenId,
+                web3.utils.toWei("0.001"),
+                "0xa165"
+            );
+
+            for (let i = 0; i < 9; i++) {
+                await this.agreementContract.payRoyaltyAmount(
+                    this.newAgreementId,
+                    singleRewardAmount
+                );
+            }
+
+            await expect(
+                this.treasuryContract.balanceOf(this.agreementContract.address, CRDToken)
+            ).eventually.to.be.bignumber.equal(totalReward);
+
+            await this.agreementContract.claimRoyaltyAmount(this.newAgreementId, {
+                from: this.user2,
+            });
+
+            // Checking the claim action for user2
+            await expect(
+                this.treasuryContract.balanceOf(this.user2, CRDToken)
+            ).eventually.to.be.bignumber.equal(user2RewardAmount);
+        });
+
+        it("Paying for royalty agreement when when user owns 0.000000001%", async function() {
+            const singleRewardAmount = await web3.utils.toWei("1");
+            const totalReward = await web3.utils.toWei("9");
+            const user2RewardAmount = await web3.utils.toWei("0.000000009");
+
+            await this.treasuryCoreContract.setApprovalForAll(this.agreementContract.address, true);
+
+            const CRDToken = await this.treasuryContract.CRD();
+            await this.treasuryCoreContract.safeTransferFrom(
+                this.user1,
+                this.user2,
+                this.newCommunityTokenId,
+                web3.utils.toWei("0.000000001"),
+                "0xa165"
+            );
+
+            for (let i = 0; i < 9; i++) {
+                await this.agreementContract.payRoyaltyAmount(
+                    this.newAgreementId,
+                    singleRewardAmount
+                );
+            }
+
+            await expect(
+                this.treasuryContract.balanceOf(this.agreementContract.address, CRDToken)
+            ).eventually.to.be.bignumber.equal(totalReward);
+
+            await this.agreementContract.claimRoyaltyAmount(this.newAgreementId, {
+                from: this.user2,
+            });
+
+            // Checking the claim action for user2
+            await expect(
+                this.treasuryContract.balanceOf(this.user2, CRDToken)
+            ).eventually.to.be.bignumber.equal(user2RewardAmount);
+        });
+
+        it("Paying for royalty agreement when when user owns 0.000000000001%", async function() {
+            const singleRewardAmount = await web3.utils.toWei("1");
+            const totalReward = await web3.utils.toWei("9");
+            const user2RewardAmount = await web3.utils.toWei("0.000000000009");
+
+            await this.treasuryCoreContract.setApprovalForAll(this.agreementContract.address, true);
+
+            const CRDToken = await this.treasuryContract.CRD();
+            await this.treasuryCoreContract.safeTransferFrom(
+                this.user1,
+                this.user2,
+                this.newCommunityTokenId,
+                web3.utils.toWei("0.000000000001"),
+                "0xa165"
+            );
+
+            for (let i = 0; i < 9; i++) {
+                await this.agreementContract.payRoyaltyAmount(
+                    this.newAgreementId,
+                    singleRewardAmount
+                );
+            }
+
+            await expect(
+                this.treasuryContract.balanceOf(this.agreementContract.address, CRDToken)
+            ).eventually.to.be.bignumber.equal(totalReward);
+
+            await this.agreementContract.claimRoyaltyAmount(this.newAgreementId, {
+                from: this.user2,
+            });
+
+            // Checking the claim action for user2
+            await expect(
+                this.treasuryContract.balanceOf(this.user2, CRDToken)
+            ).eventually.to.be.bignumber.equal(user2RewardAmount);
+        });
+
+        it("Paying for royalty agreement when when user owns 0.000000000000001%", async function() {
+            const singleRewardAmount = await web3.utils.toWei("1");
+            const totalReward = await web3.utils.toWei("9");
+            const user2RewardAmount = await web3.utils.toWei("0.000000000000009");
+
+            await this.treasuryCoreContract.setApprovalForAll(this.agreementContract.address, true);
+
+            const CRDToken = await this.treasuryContract.CRD();
+            await this.treasuryCoreContract.safeTransferFrom(
+                this.user1,
+                this.user2,
+                this.newCommunityTokenId,
+                web3.utils.toWei("0.000000000000001"),
+                "0xa165"
+            );
+
+            for (let i = 0; i < 9; i++) {
+                await this.agreementContract.payRoyaltyAmount(
+                    this.newAgreementId,
+                    singleRewardAmount
+                );
+            }
+
+            await expect(
+                this.treasuryContract.balanceOf(this.agreementContract.address, CRDToken)
+            ).eventually.to.be.bignumber.equal(totalReward);
+
+            await this.agreementContract.claimRoyaltyAmount(this.newAgreementId, {
+                from: this.user2,
+            });
+
+            // Checking the claim action for user2
+            await expect(
+                this.treasuryContract.balanceOf(this.user2, CRDToken)
+            ).eventually.to.be.bignumber.equal(user2RewardAmount);
+        });
+
+        it("Paying for royalty agreement when when user owns 0.000000000000000001%", async function() {
+            const singleRewardAmount = await web3.utils.toWei("1");
+            const totalReward = await web3.utils.toWei("9");
+            const user2RewardAmount = await web3.utils.toWei("0.000000000000000009");
+
+            await this.treasuryCoreContract.setApprovalForAll(this.agreementContract.address, true);
+
+            const CRDToken = await this.treasuryContract.CRD();
+            await this.treasuryCoreContract.safeTransferFrom(
+                this.user1,
+                this.user2,
+                this.newCommunityTokenId,
+                web3.utils.toWei("0.000000000000000001"),
+                "0xa165"
+            );
+
+            for (let i = 0; i < 9; i++) {
+                await this.agreementContract.payRoyaltyAmount(
+                    this.newAgreementId,
+                    singleRewardAmount
+                );
+            }
+
+            await expect(
+                this.treasuryContract.balanceOf(this.agreementContract.address, CRDToken)
+            ).eventually.to.be.bignumber.equal(totalReward);
+
+            await this.agreementContract.claimRoyaltyAmount(this.newAgreementId, {
+                from: this.user2,
+            });
+
+            // Checking the claim action for user2
+            await expect(
+                this.treasuryContract.balanceOf(this.user2, CRDToken)
+            ).eventually.to.be.bignumber.equal(user2RewardAmount);
         });
     });
 });

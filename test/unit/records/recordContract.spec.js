@@ -495,14 +495,14 @@ contract("Records Contract", function() {
                 RECORD_ID,
                 await web3.utils.toWei("1000000"),
                 COMMUNITY_TOKEN_BALANCE_USER1,
-                "Test",
+                "Test_COM",
                 "image.png",
             ]);
             await this.treasuryContract.createNewGovernanceToken([
                 RECORD_ID,
                 await web3.utils.toWei("1000000"),
                 GOVERNANCE_TOKEN_BALANCE_USER1,
-                "Test",
+                "Test_GOV",
                 "image.png",
             ]);
 
@@ -2151,14 +2151,14 @@ contract("Records Contract", function() {
                 RECORD_ID,
                 await web3.utils.toWei("1000000"),
                 COMMUNITY_TOKEN_BALANCE_USER1,
-                "Test",
+                "Test_COM",
                 "image.png",
             ]);
             await this.treasuryContractMock.createNewGovernanceToken([
                 RECORD_ID,
                 await web3.utils.toWei("1000000"),
                 GOVERNANCE_TOKEN_BALANCE_USER1,
-                "Test",
+                "Test_GOV",
                 "image.png",
             ]);
 
