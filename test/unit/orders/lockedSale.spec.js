@@ -393,7 +393,7 @@ contract("Ratio Locked Sales", function() {
             ).to.eventually.be.rejectedWith("INVALID: TOKEN_RATIO");
         });
 
-        it("Should not be able to purchase locked asset if the ratio is wrong, expect revert", async function() {
+        it("Should be able to purchase locked asset if the ratio is correct", async function() {
             let trx = await this.ordersContract.createBuyOrder(
                 [
                     true,
@@ -411,7 +411,6 @@ contract("Ratio Locked Sales", function() {
             );
 
             let saleId = trx?.logs[0].args.saleId;
-            // Here we are performing wrong ratio transfer it should be reject.
             await this.ordersContract.acceptBuyOrder(
                 saleId, //SaleId
                 await web3.utils.toWei("5000"), //communityTokenAmount

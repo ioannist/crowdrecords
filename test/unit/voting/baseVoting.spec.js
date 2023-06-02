@@ -16,6 +16,8 @@ const chaiAsPromised = require("chai-as-promised");
 const expectEvent = require("@openzeppelin/test-helpers/src/expectEvent");
 const { web3 } = require("@openzeppelin/test-helpers/src/setup");
 const expect = chai.expect;
+chai.use(chaiBN);
+chai.use(chaiAsPromised);
 
 contract("BaseVotingContract", function() {
     before(setup);
