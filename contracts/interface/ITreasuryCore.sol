@@ -86,4 +86,8 @@ interface ITreasuryCore {
         NewTokenData memory newTokenData,
         address userAddress
     ) external returns (uint256);
+
+    /// @dev This function returns the total supply of token
+    /// @param tokenId This is the tokens id who's supply we want to find
+    function totalSupply(uint tokenId) external returns (uint256);
 }

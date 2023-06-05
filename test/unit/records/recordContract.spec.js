@@ -569,6 +569,134 @@ contract("Records Contract", function() {
             });
         });
 
+        it("Creating a new record version request with community more than 1 Billion, expect revert", async function() {
+            const tx2 = await expect(
+                this.recordsVotingContract.createNewRecordVersion(
+                    [
+                        "Test",
+                        "image.png",
+                        "Cat1",
+                        RECORD_ID,
+                        [1],
+                        [
+                            await web3.utils.toWei("1000000"),
+                            this.oldRecordVersionOwnerRewardGovernance,
+                            GOVERNANCE_TOKEN_BALANCE_USER1,
+                            "Test",
+                            "image.png",
+                        ],
+                        [
+                            await web3.utils.toWei("1000000001"),
+                            this.oldRecordVersionOwnerRewardCommunity,
+                            COMMUNITY_TOKEN_BALANCE_USER1,
+                            "Test",
+                            "image.png",
+                        ],
+                    ],
+                    await helper.getEthAccount(8),
+                    0,
+                    {
+                        value: helper.VOTING_DEPOSIT_RECORD_VERSION_CONTRACT,
+                    }
+                )
+            ).to.eventually.be.rejectedWith("INVALID: COMM_SUPPLY_LIMIT_REACHED");
+        });
+
+        it("Creating a new record version request with governance more than 1 Billion, expect revert", async function() {
+            const tx2 = await expect(
+                this.recordsVotingContract.createNewRecordVersion(
+                    [
+                        "Test",
+                        "image.png",
+                        "Cat1",
+                        RECORD_ID,
+                        [1],
+                        [
+                            await web3.utils.toWei("1000000001"),
+                            this.oldRecordVersionOwnerRewardGovernance,
+                            GOVERNANCE_TOKEN_BALANCE_USER1,
+                            "Test",
+                            "image.png",
+                        ],
+                        [
+                            await web3.utils.toWei("1000000000"),
+                            this.oldRecordVersionOwnerRewardCommunity,
+                            COMMUNITY_TOKEN_BALANCE_USER1,
+                            "Test",
+                            "image.png",
+                        ],
+                    ],
+                    await helper.getEthAccount(8),
+                    0,
+                    {
+                        value: helper.VOTING_DEPOSIT_RECORD_VERSION_CONTRACT,
+                    }
+                )
+            ).to.eventually.be.rejectedWith("INVALID: GOV_SUPPLY_LIMIT_REACHED");
+        });
+
+        it("Creating a new record version request with community exact 1 Billion", async function() {
+            const tx2 = await this.recordsVotingContract.createNewRecordVersion(
+                [
+                    "Test",
+                    "image.png",
+                    "Cat1",
+                    RECORD_ID,
+                    [1],
+                    [
+                        await web3.utils.toWei("1000000"),
+                        this.oldRecordVersionOwnerRewardGovernance,
+                        GOVERNANCE_TOKEN_BALANCE_USER1,
+                        "Test",
+                        "image.png",
+                    ],
+                    [
+                        await web3.utils.toWei("1000000000"),
+                        this.oldRecordVersionOwnerRewardCommunity,
+                        COMMUNITY_TOKEN_BALANCE_USER1,
+                        "Test",
+                        "image.png",
+                    ],
+                ],
+                await helper.getEthAccount(8),
+                0,
+                {
+                    value: helper.VOTING_DEPOSIT_RECORD_VERSION_CONTRACT,
+                }
+            );
+        });
+
+        it("Creating a new record version request with governance exact 1 Billion", async function() {
+            const tx2 = await this.recordsVotingContract.createNewRecordVersion(
+                [
+                    "Test",
+                    "image.png",
+                    "Cat1",
+                    RECORD_ID,
+                    [1],
+                    [
+                        await web3.utils.toWei("1000000000"),
+                        this.oldRecordVersionOwnerRewardGovernance,
+                        GOVERNANCE_TOKEN_BALANCE_USER1,
+                        "Test",
+                        "image.png",
+                    ],
+                    [
+                        await web3.utils.toWei("1000000"),
+                        this.oldRecordVersionOwnerRewardCommunity,
+                        COMMUNITY_TOKEN_BALANCE_USER1,
+                        "Test",
+                        "image.png",
+                    ],
+                ],
+                await helper.getEthAccount(8),
+                0,
+                {
+                    value: helper.VOTING_DEPOSIT_RECORD_VERSION_CONTRACT,
+                }
+            );
+        });
+
         it("Creating a new record version request, with platform fee, VersionRequest event emitted", async function() {
             const before = await web3.eth.getBalance(await helper.getEthAccount(8));
 

@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "./Voting/BaseVotingContract.sol";
+import "./interface/ITreasuryCore.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
 contract DilutionContract is BaseVotingContract {
@@ -70,6 +71,7 @@ contract DilutionContract is BaseVotingContract {
 
     using Counters for Counters.Counter;
     Counters.Counter private _dilutionIds;
+    ITreasuryCore public treasuryCoreContract;
 
     // This mapping contains data with respect to dilution id
     // _dilutionId => dilutionData
@@ -96,15 +98,18 @@ contract DilutionContract is BaseVotingContract {
 
     /// @dev This is to set the address of the contracts
     /// @param newTreasuryContractAddress This is the address of new treasury contract
+    /// @param newTreasuryCoreContractAddress This is the address of new treasury core contract
     /// @param newGovernanceContractAddress This is the address for the governance contract
     function initialize(
         address newTreasuryContractAddress,
+        address newTreasuryCoreContractAddress,
         address newGovernanceContractAddress
-    ) public override initializer _ownerOnly {
+    ) public initializer _ownerOnly {
         BaseVotingContract.initialize(
             newTreasuryContractAddress,
             newGovernanceContractAddress
         );
+        treasuryCoreContract = ITreasuryCore(newTreasuryCoreContractAddress);
     }
 
     /// @dev This function will create a new contribution voting ballot
@@ -123,17 +128,23 @@ contract DilutionContract is BaseVotingContract {
 
         uint256 commTokenId = treasuryContract.getCommunityTokenId(recordId);
         uint256 govTokenId = treasuryContract.getGovernanceTokenId(recordId);
+        {
+            require(
+                govTokenId == tokenId || commTokenId == tokenId,
+                "INVALID: TOKEN_OR_RECORD"
+            );
 
-        require(
-            govTokenId == tokenId || commTokenId == tokenId,
-            "INVALID: TOKEN_OR_RECORD"
-        );
+            require(
+                treasuryContract.balanceOf(msg.sender, tokenId) > 0,
+                "INVALID: NO_TOKENS_FOUND"
+            );
 
-        require(
-            treasuryContract.balanceOf(msg.sender, tokenId) > 0,
-            "INVALID: NO_TOKENS_FOUND"
-        );
-
+            uint256 totalSupply = treasuryCoreContract.totalSupply(tokenId);
+            require(
+                totalSupply + amount <= 1 * 10 ** 9 * 1 ether, //The token supply created shouldn't be more than 1 billion
+                "INVALID: SUPPLY_LIMIT_REACHED"
+            );
+        }
         // We need to check if there were any previous request made,
         // and if any request are made then has sufficient time passed or not.
         // If the block number is 0 then it means that no request has been created

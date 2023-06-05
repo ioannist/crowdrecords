@@ -43,6 +43,57 @@ contract("Dilution Contract", function() {
         ).to.eventually.be.rejectedWith("INVALID: TOKEN_OR_RECORD");
     });
 
+    it("Create request to mint more than 1 billion token, reject", async function() {
+        await expect(
+            this.dilutionContract.createDilutionRequest(
+                RECORD_ID,
+                COMMUNITY_TOKEN_ID,
+                await web3.utils.toWei("1000000001"),
+                { value: helper.VOTING_DEPOSIT_DILUTION_CONTRACT }
+            )
+        ).to.eventually.be.rejectedWith("INVALID: SUPPLY_LIMIT_REACHED");
+    });
+
+    it("Create request to mint token, new total supply would be more than 1 Billion, reject", async function() {
+        await expect(
+            this.dilutionContract.createDilutionRequest(
+                RECORD_ID,
+                COMMUNITY_TOKEN_ID,
+                await web3.utils.toWei("999000001"), // Already 1 Million tokens have been minted, now we required to mint 999,000,001 which makes total supply more than 1 billion
+                { value: helper.VOTING_DEPOSIT_DILUTION_CONTRACT }
+            )
+        ).to.eventually.be.rejectedWith("INVALID: SUPPLY_LIMIT_REACHED");
+    });
+
+    it("Create request to mint token, new total supply would be less than 1 Billion", async function() {
+        this.dilutionContract.createDilutionRequest(
+            RECORD_ID,
+            COMMUNITY_TOKEN_ID,
+            await web3.utils.toWei("998000001"), // Already 1 Million tokens have been minted
+            { value: helper.VOTING_DEPOSIT_DILUTION_CONTRACT }
+        );
+    });
+
+    it("Create request to mint token, new total supply would be exactly 1 Billion", async function() {
+        this.dilutionContract.createDilutionRequest(
+            RECORD_ID,
+            COMMUNITY_TOKEN_ID,
+            await web3.utils.toWei("999000000"), // Already 1 Million tokens have been minted
+            { value: helper.VOTING_DEPOSIT_DILUTION_CONTRACT }
+        );
+    });
+
+    it("Create request to mint more than 1 billion token, reject", async function() {
+        await expect(
+            this.dilutionContract.createDilutionRequest(
+                RECORD_ID,
+                COMMUNITY_TOKEN_ID,
+                await web3.utils.toWei("1000000000"),
+                { value: helper.VOTING_DEPOSIT_DILUTION_CONTRACT }
+            )
+        ).to.eventually.be.rejectedWith("INVALID: SUPPLY_LIMIT_REACHED");
+    });
+
     it("Create a request without owning the token, reject", async function() {
         await expect(
             this.dilutionContract.createDilutionRequest(

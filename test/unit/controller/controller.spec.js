@@ -189,6 +189,94 @@ contract("ControllerContract - setupNewRecord", function() {
         ).to.eventually.be.rejectedWith("INVALID: COMM_TOKEN_SYMBOL_ALREADY_IN_USE");
     });
 
+    it("Try to create record with more than 1 Billion Community Token, should revert", async function() {
+        const commTokenData2 = {
+            recordId: 0, // This will be filled later after the record is created
+            totalSupply: web3.utils.toWei("1000000001"),
+            userBalance: web3.utils.toWei("20000"),
+            symbol: "COMM2",
+            image: "someImageLink",
+        };
+
+        await expect(
+            this.controllerContract.setupNewRecord(
+                this.tracksPayload,
+                this.seedContributionPayload,
+                this.newRecordPayload,
+                this.govTokenData,
+                commTokenData2,
+                await helper.getEthAccount(8),
+                helper.PLATFORM_FEES,
+                { value: helper.PLATFORM_FEES }
+            )
+        ).to.eventually.be.rejectedWith("INVALID: COM_SUPPLY_LIMIT_REACHED");
+    });
+
+    it("Try to create record with more than 1 Billion Governance Token, should revert", async function() {
+        const govTokenData2 = {
+            recordId: 0, // This will be filled later after the record is created
+            totalSupply: web3.utils.toWei("1000000001"),
+            userBalance: web3.utils.toWei("10000"),
+            symbol: "GOV2",
+            image: "someImageLink",
+        };
+
+        await expect(
+            this.controllerContract.setupNewRecord(
+                this.tracksPayload,
+                this.seedContributionPayload,
+                this.newRecordPayload,
+                govTokenData2,
+                this.commTokenData,
+                await helper.getEthAccount(8),
+                helper.PLATFORM_FEES,
+                { value: helper.PLATFORM_FEES }
+            )
+        ).to.eventually.be.rejectedWith("INVALID: GOV_SUPPLY_LIMIT_REACHED");
+    });
+
+    it("Create record with exact 1 Billion Community Token", async function() {
+        const commTokenData2 = {
+            recordId: 0, // This will be filled later after the record is created
+            totalSupply: web3.utils.toWei("1000000000"),
+            userBalance: web3.utils.toWei("20000"),
+            symbol: "COMM2",
+            image: "someImageLink",
+        };
+
+        await this.controllerContract.setupNewRecord(
+            this.tracksPayload,
+            this.seedContributionPayload,
+            this.newRecordPayload,
+            this.govTokenData,
+            commTokenData2,
+            await helper.getEthAccount(8),
+            helper.PLATFORM_FEES,
+            { value: helper.PLATFORM_FEES }
+        );
+    });
+
+    it("Create record with exact 1 Billion Governance Token", async function() {
+        const govTokenData2 = {
+            recordId: 0, // This will be filled later after the record is created
+            totalSupply: web3.utils.toWei("1000000000"),
+            userBalance: web3.utils.toWei("10000"),
+            symbol: "GOV2",
+            image: "someImageLink",
+        };
+
+        await this.controllerContract.setupNewRecord(
+            this.tracksPayload,
+            this.seedContributionPayload,
+            this.newRecordPayload,
+            govTokenData2,
+            this.commTokenData,
+            await helper.getEthAccount(8),
+            helper.PLATFORM_FEES,
+            { value: helper.PLATFORM_FEES }
+        );
+    });
+
     it("Should revert for insufficient platform fee", async function() {
         const insufficientPlatformFee = new BN("0");
 
@@ -289,6 +377,7 @@ contract("ControllerContract - setupNewRecord", function() {
                 web3.eth.getBalance(await helper.getEthAccount(8))
             ).to.eventually.be.bignumber.equal(BigInt(+before + +helper.PLATFORM_FEES).toString());
         });
+
         it("Try to create new contribution with less platform fees, should fail", async function() {
             await expect(
                 this.controllerContract.createNewContribution(

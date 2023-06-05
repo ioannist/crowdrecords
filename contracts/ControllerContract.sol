@@ -72,6 +72,10 @@ contract ControllerContract {
                 isSymbolInUse == false,
                 "INVALID: COMM_TOKEN_SYMBOL_ALREADY_IN_USE"
             );
+            require(
+                govTokenData.totalSupply <= 1 * 10 ** 9 * 1 ether, //The token supply created shouldn't be more than1 billion
+                "INVALID: GOV_SUPPLY_LIMIT_REACHED"
+            );
 
             isSymbolInUse = treasuryCoreContract.govTokenSym(
                 govTokenData.symbol
@@ -79,6 +83,10 @@ contract ControllerContract {
             require(
                 isSymbolInUse == false,
                 "INVALID: GOV_TOKEN_SYMBOL_ALREADY_IN_USE"
+            );
+            require(
+                commTokenData.totalSupply <= 1 * 10 ** 9 * 1 ether, //The token supply created shouldn't be more than1 billion
+                "INVALID: COM_SUPPLY_LIMIT_REACHED"
             );
         }
         uint256[] memory trackIds = tracksContract.createNewTracks(

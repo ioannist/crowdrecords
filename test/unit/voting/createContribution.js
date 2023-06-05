@@ -227,7 +227,11 @@ async function createContributionWithMockTreasury() {
         controllerContract.address
     );
 
-    await dilutionContract.initialize(treasuryContract.address, crowdrecordsGovernor.address);
+    await dilutionContract.initialize(
+        treasuryContract.address,
+        treasuryCoreContractMock.address,
+        crowdrecordsGovernor.address
+    );
     await recordsContract.initialize(controllerContract.address);
 
     return {

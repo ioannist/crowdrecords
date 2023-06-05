@@ -198,8 +198,8 @@ contract("Treasury Contract", function() {
             2,
             await web3.utils.toWei("1000000"),
             COMMUNITY_TOKEN_BALANCE_USER1,
-            "Test",
-            "TEST",
+            "Test 1",
+            "TEST 1",
         ]);
         await expect(
             this.treasuryContract.createNewCommunityToken([
@@ -246,8 +246,8 @@ contract("Treasury Contract", function() {
             2,
             await web3.utils.toWei("1000000"),
             COMMUNITY_TOKEN_BALANCE_USER1,
-            "Test",
-            "TEST",
+            "Test 1",
+            "TEST 1",
         ]);
         await expect(
             this.treasuryContract.createNewGovernanceToken([
@@ -286,6 +286,166 @@ contract("Treasury Contract", function() {
                 await helper.getEthAccount(0)
             )
         ).to.eventually.be.rejectedWith("UNAUTHORIZED: ONLY_RECORDS_CONTRACT");
+    });
+
+    it("Create a record, try to create governance token with more than 1 billion token supply, reject.", async function() {
+        const user1 = await helper.getEthAccount(0);
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
+
+        // Create new contribution token, it's id will be 2
+        await this.contributionContract.createSeedContribution(
+            [
+                [1, 2, 3],
+                "contribution title",
+                "preview.raw",
+                "preview.hash",
+                "This is the description for the record",
+            ],
+            await helper.getEthAccount(8),
+            0,
+            { from: user1 }
+        );
+
+        // Create new record with new contribution
+        await this.recordsContract.createNewRecord(
+            ["Test", "image.png", "Cat1", 2],
+            await helper.getEthAccount(8),
+            "0",
+            {
+                value: 0,
+            }
+        );
+
+        await expect(
+            this.treasuryContract.createNewGovernanceToken([
+                2,
+                await web3.utils.toWei("1000000001"),
+                COMMUNITY_TOKEN_BALANCE_USER1,
+                "Test 2",
+                "TEST 2",
+            ])
+        ).to.eventually.rejectedWith("INVALID: SUPPLY_LIMIT_REACHED");
+    });
+
+    it("Create a record, create community token with more than 1 Billion token supply, reject.", async function() {
+        const user1 = await helper.getEthAccount(0);
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
+
+        // Create new contribution token, it's id will be 2
+        await this.contributionContract.createSeedContribution(
+            [
+                [1, 2, 3],
+                "contribution title",
+                "preview.raw",
+                "preview.hash",
+                "This is the description for the record",
+            ],
+            await helper.getEthAccount(8),
+            0,
+            { from: user1 }
+        );
+
+        // Create new record with new contribution
+        await this.recordsContract.createNewRecord(
+            ["Test", "image.png", "Cat1", 2],
+            await helper.getEthAccount(8),
+            "0",
+            {
+                value: 0,
+            }
+        );
+
+        await expect(
+            this.treasuryContract.createNewCommunityToken([
+                2,
+                await web3.utils.toWei("1000000001"),
+                COMMUNITY_TOKEN_BALANCE_USER1,
+                "Test 2",
+                "TEST 2",
+            ])
+        ).to.eventually.rejectedWith("INVALID: SUPPLY_LIMIT_REACHED");
+    });
+
+    it("Create a record, create governance token with exact than 1 billion token supply", async function() {
+        const user1 = await helper.getEthAccount(0);
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
+
+        // Create new contribution token, it's id will be 2
+        await this.contributionContract.createSeedContribution(
+            [
+                [1, 2, 3],
+                "contribution title",
+                "preview.raw",
+                "preview.hash",
+                "This is the description for the record",
+            ],
+            await helper.getEthAccount(8),
+            0,
+            { from: user1 }
+        );
+
+        // Create new record with new contribution
+        await this.recordsContract.createNewRecord(
+            ["Test", "image.png", "Cat1", 2],
+            await helper.getEthAccount(8),
+            "0",
+            {
+                value: 0,
+            }
+        );
+
+        await this.treasuryContract.createNewGovernanceToken([
+            2,
+            await web3.utils.toWei("1000000000"),
+            COMMUNITY_TOKEN_BALANCE_USER1,
+            "Test 2",
+            "TEST 2",
+        ]);
+    });
+
+    it("Create a record, create community token with exact than 1 Billion token supply", async function() {
+        const user1 = await helper.getEthAccount(0);
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
+
+        // Create new contribution token, it's id will be 2
+        await this.contributionContract.createSeedContribution(
+            [
+                [1, 2, 3],
+                "contribution title",
+                "preview.raw",
+                "preview.hash",
+                "This is the description for the record",
+            ],
+            await helper.getEthAccount(8),
+            0,
+            { from: user1 }
+        );
+
+        // Create new record with new contribution
+        await this.recordsContract.createNewRecord(
+            ["Test", "image.png", "Cat1", 2],
+            await helper.getEthAccount(8),
+            "0",
+            {
+                value: 0,
+            }
+        );
+
+        await this.treasuryContract.createNewCommunityToken([
+            2,
+            await web3.utils.toWei("1000000000"),
+            COMMUNITY_TOKEN_BALANCE_USER1,
+            "Test 2",
+            "TEST 2",
+        ]);
     });
 
     it("Calling from outside of the contribution contract mintTokens with 3 params function and getting rejected", async function() {

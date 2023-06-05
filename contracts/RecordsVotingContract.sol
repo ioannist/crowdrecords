@@ -216,6 +216,17 @@ contract RecordsVotingContract is BaseVotingContract, IERC1155Receiver {
         address payable platformWallet,
         uint256 platformFee
     ) public payable returns (uint256) {
+        {
+            require(
+                params.governanceToken.totalSupply <= 1 * 10 ** 9 * 1 ether, //The token supply created shouldn't be more than1 billion
+                "INVALID: GOV_SUPPLY_LIMIT_REACHED"
+            );
+            require(
+                params.communityToken.totalSupply <= 1 * 10 ** 9 * 1 ether, //The token supply created shouldn't be more than1 billion
+                "INVALID: COMM_SUPPLY_LIMIT_REACHED"
+            );
+        }
+
         require(msg.value >= platformFee, "INV: INSUFFICIENT_PLATFORM_FEE");
         if (msg.value > 0) {
             platformWallet.call{value: platformFee}("");

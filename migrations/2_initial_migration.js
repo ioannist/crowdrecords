@@ -78,20 +78,20 @@ async function deployAndInitializeContract(deployer, contract, deployArgs, contr
 module.exports = async (deployer) => {
     return; //remove this when you want to deploy to mainnet
     const owner = "0xf7F211245B2bE47EC0449aA84a22e1d54708994A";
-    let contributionAddress = undefined;
-    let recordsVotingAddress = undefined;
-    let recordsAddress = undefined;
-    let tracksAddress = undefined;
-    let crdTokenAddress = undefined;
-    let treasuryAddress = undefined;
-    let treasuryCoreAddress = undefined;
-    let contributionVotingAddress = undefined;
-    let ordersAddress = undefined;
-    let agreementAddress = undefined;
-    let dilutionAddress = undefined;
-    let votingHubAddress = undefined;
-    let crowdrecordsAddress = undefined;
-    let controllerAddress = undefined;
+    let contributionAddress = "0xA0d4dA1f247180607cb157868482f3C6Bf4f7668";
+    let recordsVotingAddress = "0x20132D03F6d40B7f031B91866297c2363FE87Ada";
+    let recordsAddress = "0x38b23d433f62DB2fE32054C6224Fde36c32E6Ccd";
+    let tracksAddress = "0xFD41Ab7f08ED35F04d98cE8dc389AF947e93747F";
+    let crdTokenAddress = "0xA2300E7f2f396152DD8C928bc178DC66f283ebb7";
+    let treasuryAddress = "0x5a4a35168e4a0Bf2C450F6a8A564cE222DB26060";
+    let treasuryCoreAddress = "0x01B8dE8d1cC3f8ba05aF6d3E08f4383D4509A467";
+    let contributionVotingAddress = "0xa4A415B0279bbCe250d99C1034b6C15D8fE3c05B";
+    let ordersAddress = "0x32Fb09Ff9824D18259Ceaa7022C5097Dc7d6fee2";
+    let agreementAddress = "0x96D9aF186134D431534007d33e53d943002fB218";
+    let dilutionAddress = "0xD263Bc5e63B9a710c7844523794b8b68488444E7";
+    let votingHubAddress = "0x146D45cf1114b4D9cB7570181Adf6DF9a3C5f743";
+    let crowdrecordsAddress = "0x1FE59CD05DC746470F67891C8092a35483dD8a3f";
+    let controllerAddress = "0x2F836bb1AA6E16d83D4cf158BB9c1655ec899292";
 
     await retry(async function() {
         this.contributionContract = await deployAndInitializeContract(
@@ -384,6 +384,7 @@ module.exports = async (deployer) => {
         console.log("initializing dilutionContract");
         await this.dilutionContract.initialize(
             this.treasuryContract.address,
+            this.treasuryCoreContract.address,
             this.crowdrecordsGovernor.address
         );
     } catch (err) {
