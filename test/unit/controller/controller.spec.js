@@ -7,8 +7,9 @@ const chaiBN = require("chai-bn")(BN);
 const chaiAsPromised = require("chai-as-promised");
 const { web3 } = require("@openzeppelin/test-helpers/src/setup");
 const { expectRevert } = require("@openzeppelin/test-helpers");
-chai.use(chaiAsPromised);
 const expect = chai.expect;
+chai.use(chaiBN);
+chai.use(chaiAsPromised);
 
 contract("ControllerContract - setupNewRecord", function() {
     before(setup);
@@ -103,9 +104,10 @@ contract("ControllerContract - setupNewRecord", function() {
         // Extract the emitted event from the transaction receipt
         const event = expectEvent(tx, "setupNewRecordCalled");
 
-        await expect(
-            web3.eth.getBalance(await helper.getEthAccount(8))
-        ).to.eventually.be.bignumber.equal(BigInt(+before + +helper.PLATFORM_FEES).toString());
+        const balance = await web3.eth.getBalance(await helper.getEthAccount(8));
+        const expectedBalance = BigInt(+before + +helper.PLATFORM_FEES).toString();
+
+        expect(balance).to.be.bignumber.equal(expectedBalance);
 
         await expect(event.args.caller).to.equal(await helper.getEthAccount(0));
         await expect(event.args.tracksId.length).to.equal(this.tracksPayload.length);
@@ -187,6 +189,54 @@ contract("ControllerContract - setupNewRecord", function() {
                 { value: helper.PLATFORM_FEES }
             )
         ).to.eventually.be.rejectedWith("INVALID: COMM_TOKEN_SYMBOL_ALREADY_IN_USE");
+    });
+
+    it("Try to create record with MAX_INT Community Token, should revert", async function() {
+        const maxIntAmount = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+        const commTokenData2 = {
+            recordId: 0, // This will be filled later after the record is created
+            totalSupply: maxIntAmount,
+            userBalance: web3.utils.toWei("20000"),
+            symbol: "COMM2",
+            image: "someImageLink",
+        };
+
+        await expect(
+            this.controllerContract.setupNewRecord(
+                this.tracksPayload,
+                this.seedContributionPayload,
+                this.newRecordPayload,
+                this.govTokenData,
+                commTokenData2,
+                await helper.getEthAccount(8),
+                helper.PLATFORM_FEES,
+                { value: helper.PLATFORM_FEES }
+            )
+        ).to.eventually.be.rejectedWith("INVALID: COM_SUPPLY_LIMIT_REACHED");
+    });
+
+    it("Try to create record with MAX_INT Governance Token, should revert", async function() {
+        const maxIntAmount = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+        const govTokenData2 = {
+            recordId: 0, // This will be filled later after the record is created
+            totalSupply: maxIntAmount,
+            userBalance: web3.utils.toWei("10000"),
+            symbol: "GOV2",
+            image: "someImageLink",
+        };
+
+        await expect(
+            this.controllerContract.setupNewRecord(
+                this.tracksPayload,
+                this.seedContributionPayload,
+                this.newRecordPayload,
+                govTokenData2,
+                this.commTokenData,
+                await helper.getEthAccount(8),
+                helper.PLATFORM_FEES,
+                { value: helper.PLATFORM_FEES }
+            )
+        ).to.eventually.be.rejectedWith("INVALID: GOV_SUPPLY_LIMIT_REACHED");
     });
 
     it("Try to create record with more than 1 Billion Community Token, should revert", async function() {
@@ -371,11 +421,10 @@ contract("ControllerContract - setupNewRecord", function() {
             );
 
             // Extract the emitted event from the transaction receipt
-            expectEvent(tx, "createNewContributionCalled");
+            const balance = await web3.eth.getBalance(await helper.getEthAccount(8));
+            const expectedBalance = BigInt(+before + +helper.PLATFORM_FEES).toString();
 
-            await expect(
-                web3.eth.getBalance(await helper.getEthAccount(8))
-            ).to.eventually.be.bignumber.equal(BigInt(+before + +helper.PLATFORM_FEES).toString());
+            expect(balance).to.be.bignumber.equal(expectedBalance);
         });
 
         it("Try to create new contribution with less platform fees, should fail", async function() {

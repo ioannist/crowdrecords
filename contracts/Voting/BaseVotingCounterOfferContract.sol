@@ -88,6 +88,7 @@ abstract contract BaseVotingCounterOfferContract is BaseVotingContract {
         internal
         _shouldHaveCreatedCounterOffer(votingBallotId, user)
         _onlyBallotOwner(votingBallotId)
+        _checkIfBallotIsOpen(votingBallotId, user)
     {
         super._castVoteForOther(votingBallotId, vote, user);
     }

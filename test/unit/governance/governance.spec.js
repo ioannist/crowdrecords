@@ -2,9 +2,11 @@ const setup = require("../../utils/deployContracts");
 const helper = require("../../utils/helper");
 const chai = require("chai");
 const chaiAsPromised = require("chai-as-promised");
-chai.use(chaiAsPromised);
 const expect = chai.expect;
 const agreementAbi = require("../../../build/AgreementContract.json");
+const BN = require("bn.js");
+const chaiBN = require("chai-bn")(BN);
+chai.use(chaiAsPromised);
 
 contract("Governance Contract", function() {
     before(setup);
@@ -78,9 +80,10 @@ contract("Governance Contract", function() {
             descriptionHash
         );
 
-        await expect(this.agreementContract.MIN_TURNOUT_PERCENT()).eventually.to.be.bignumber.equal(
-            "40"
-        );
+        const minTurnoutPercent = await this.agreementContract.MIN_TURNOUT_PERCENT();
+        const expectedMinTurnoutPercent = "40";
+
+        expect(minTurnoutPercent).to.be.bignumber.equal(expectedMinTurnoutPercent);
     });
 });
 

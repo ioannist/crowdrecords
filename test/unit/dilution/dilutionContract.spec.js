@@ -94,6 +94,18 @@ contract("Dilution Contract", function() {
         ).to.eventually.be.rejectedWith("INVALID: SUPPLY_LIMIT_REACHED");
     });
 
+    it("Passing the MAX_INT to the payload of createDilutionRequest, should reject", async function() {
+        const maxIntAmount = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+        await expect(
+            this.dilutionContract.createDilutionRequest(
+                RECORD_ID,
+                COMMUNITY_TOKEN_ID,
+                maxIntAmount,
+                { value: helper.VOTING_DEPOSIT_DILUTION_CONTRACT }
+            )
+        ).to.eventually.be.rejectedWith("Panic: Arithmetic overflow");
+    });
+
     it("Create a request without owning the token, reject", async function() {
         await expect(
             this.dilutionContract.createDilutionRequest(

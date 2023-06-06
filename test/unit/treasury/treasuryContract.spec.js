@@ -329,6 +329,90 @@ contract("Treasury Contract", function() {
         ).to.eventually.rejectedWith("INVALID: SUPPLY_LIMIT_REACHED");
     });
 
+    it("Create a record, create community token with MAX_INT value token supply, reject.", async function() {
+        const user1 = await helper.getEthAccount(0);
+        const maxIntAmount = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
+
+        // Create new contribution token, it's id will be 2
+        await this.contributionContract.createSeedContribution(
+            [
+                [1, 2, 3],
+                "contribution title",
+                "preview.raw",
+                "preview.hash",
+                "This is the description for the record",
+            ],
+            await helper.getEthAccount(8),
+            0,
+            { from: user1 }
+        );
+
+        // Create new record with new contribution
+        await this.recordsContract.createNewRecord(
+            ["Test", "image.png", "Cat1", 2],
+            await helper.getEthAccount(8),
+            "0",
+            {
+                value: 0,
+            }
+        );
+
+        await expect(
+            this.treasuryContract.createNewCommunityToken([
+                2,
+                maxIntAmount,
+                COMMUNITY_TOKEN_BALANCE_USER1,
+                "Test 2",
+                "TEST 2",
+            ])
+        ).to.eventually.rejectedWith("INVALID: SUPPLY_LIMIT_REACHED");
+    });
+
+    it("Create a record, create governance token with MAX_INT value token supply, reject.", async function() {
+        const user1 = await helper.getEthAccount(0);
+        const maxIntAmount = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
+
+        // Create new contribution token, it's id will be 2
+        await this.contributionContract.createSeedContribution(
+            [
+                [1, 2, 3],
+                "contribution title",
+                "preview.raw",
+                "preview.hash",
+                "This is the description for the record",
+            ],
+            await helper.getEthAccount(8),
+            0,
+            { from: user1 }
+        );
+
+        // Create new record with new contribution
+        await this.recordsContract.createNewRecord(
+            ["Test", "image.png", "Cat1", 2],
+            await helper.getEthAccount(8),
+            "0",
+            {
+                value: 0,
+            }
+        );
+
+        await expect(
+            this.treasuryContract.createNewGovernanceToken([
+                2,
+                maxIntAmount,
+                COMMUNITY_TOKEN_BALANCE_USER1,
+                "Test 2",
+                "TEST 2",
+            ])
+        ).to.eventually.rejectedWith("INVALID: SUPPLY_LIMIT_REACHED");
+    });
+
     it("Create a record, create community token with more than 1 Billion token supply, reject.", async function() {
         const user1 = await helper.getEthAccount(0);
         await createTrack(this.tracksContract, user1);

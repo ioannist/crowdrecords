@@ -212,6 +212,7 @@ contract("AgreementContract", function() {
         afterEach(async function() {
             await helper.revertToSnapshot(snapshotId);
         });
+
         it("Paying for royalty agreement 9000 tokens", async function() {
             const user1 = await helper.getEthAccount(0);
             const user2 = await helper.getEthAccount(1);
@@ -297,6 +298,26 @@ contract("AgreementContract", function() {
             await expect(
                 this.treasuryContract.balanceOf(this.agreementContract.address, CRDToken)
             ).eventually.to.be.bignumber.equal(totalReward);
+        });
+
+        it("Paying for royalty agreement MAX_INT tokens, expect revert", async function() {
+            const user1 = await helper.getEthAccount(0);
+            const user2 = await helper.getEthAccount(1);
+            let maxIntAmount = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+
+            await this.treasuryCoreContract.safeTransferFrom(
+                user1,
+                user2,
+                COMMUNITY_TOKEN_ID,
+                await web3.utils.toWei("5000"),
+                "0xa165"
+            );
+
+            await this.treasuryCoreContract.setApprovalForAll(this.agreementContract.address, true);
+
+            await expect(
+                this.agreementContract.payRoyaltyAmount(this.firstAgreementId, maxIntAmount)
+            ).to.eventually.be.rejectedWith("Panic: Arithmetic overflow");
         });
 
         describe("Royalty event check", async function() {
@@ -1349,7 +1370,6 @@ contract("AgreementContract", function() {
         });
     });
 
-    // Write test cases which checks the reward distribution for record with community token less then 1 ether
     describe("After winning the voting for agreement contract with community token for the record less than 1 ether comm token", async function() {
         let snapShot, snapshotId;
         beforeEach(async function() {

@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 
 import "../ERC1155/SnapshotERC1155.sol";
 
-contract ERC20SnapshotMock is SnapshotERC1155 {
+contract ERC1155SnapshotMock is SnapshotERC1155 {
     uint256 private LastTokenId = 1;
 
     constructor(
@@ -20,11 +20,7 @@ contract ERC20SnapshotMock is SnapshotERC1155 {
         _snapshot();
     }
 
-    function mint(
-        address account,
-        uint256 tokenId,
-        uint256 amount
-    ) public {
+    function mint(address account, uint256 tokenId, uint256 amount) public {
         if (tokenId >= LastTokenId) {
             revert("Invalid token");
         }
@@ -36,11 +32,7 @@ contract ERC20SnapshotMock is SnapshotERC1155 {
         LastTokenId += 1;
     }
 
-    function burn(
-        address account,
-        uint256 tokenId,
-        uint256 amount
-    ) public {
+    function burn(address account, uint256 tokenId, uint256 amount) public {
         _burn(account, tokenId, amount);
     }
 }

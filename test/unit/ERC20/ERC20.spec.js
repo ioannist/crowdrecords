@@ -2,8 +2,11 @@ const setup = require("../../utils/deployContracts");
 const helper = require("../../utils/helper");
 const chai = require("chai");
 const chaiAsPromised = require("chai-as-promised");
-chai.use(chaiAsPromised);
 const expect = chai.expect;
+const BN = require("bn.js");
+const chaiBN = require("chai-bn")(BN);
+chai.use(chaiBN);
+chai.use(chaiAsPromised);
 
 contract("ERC20 Transfer Test", function() {
     before(setup);

@@ -1,4 +1,4 @@
-const ERC20SnapshotMock = artifacts.require("ERC20SnapshotMock");
+const ERC1155SnapshotMock = artifacts.require("ERC1155SnapshotMock");
 const setup = require("../../utils/deployContracts");
 const helper = require("../../utils/helper");
 const chai = require("chai");
@@ -31,7 +31,7 @@ contract("SnapshotERC1155", function() {
         recipient = await helper.getEthAccount(1);
         other = await helper.getEthAccount(2);
 
-        this.token = await ERC20SnapshotMock.new(uri, initialHolder, initialSupply);
+        this.token = await ERC1155SnapshotMock.new(uri, initialHolder, initialSupply);
     });
     afterEach(async function() {
         await helper.revertToSnapshot(snapshotId);

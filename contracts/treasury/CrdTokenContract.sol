@@ -96,11 +96,6 @@ contract CrdTokenContract is ERC20, ERC20Permit, ERC20Votes, Initializable {
         super._afterTokenTransfer(from, to, amount);
     }
 
-    //! remove
-    function mint(address to, uint256 amount) public {
-        super._mint(to, amount);
-    }
-
     function _mint(
         address to,
         uint256 amount

@@ -11,21 +11,24 @@ Overall, Crowd Records makes it simpler for musicians to work together and make 
 ## Useful Links:
 
 ### [Pitch Deck](https://crowdrecords.com/downloads/CRD_PD.pptx)
+
 Powerpoint presentation for Crowd Records
 
 ### [UI Template](https://crowdrecords.netlify.app/)
+
 A mock app to get a sense of the user experience.
 
 ### [Landing Page](https://crowdrecords.com)
+
 The official website of Crowd Records
 
 ### [Tests](tests.md)
+
 Summary of tests and progress
 
 ### [Contracts](contracts/)
+
 All CRD contracts
-
-
 
 ## Features:
 
@@ -37,9 +40,16 @@ All CRD contracts
 
 • Royalties Processing: Music royalties can be paid to song wallets which then split the funds among token holders.
 
-• Crowd Funding: Musicians can raise funds by selling song tokens, and use the funds to pay for contributions. Song tokens are tradeable and transferable outside Crowd 
+• Crowd Funding: Musicians can raise funds by selling song tokens, and use the funds to pay for contributions. Song tokens are tradeable and transferable outside Crowd
 Records.
 
 • Song Version Control
 
 • Anonymous (optional)
+
+1. To deploy contracts firstly make sure the 1_initial_migration code is commented and 2_inital_migration should be in use
+   `truffle migrate --network moonbase`
+
+2. To verify the contracts go to verify.js and enter the contract name and it's addresses and run the below command
+   `node verify.js`
+

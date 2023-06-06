@@ -15,6 +15,8 @@ const chaiBN = require("chai-bn")(BN);
 const chaiAsPromised = require("chai-as-promised");
 const expectEvent = require("@openzeppelin/test-helpers/src/expectEvent");
 const expect = chai.expect;
+chai.use(chaiBN);
+chai.use(chaiAsPromised);
 
 contract("BaseVotingCounterOfferContract", function() {
     before(setup);
