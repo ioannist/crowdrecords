@@ -6,6 +6,7 @@ const expect = chai.expect;
 const agreementAbi = require("../../../build/AgreementContract.json");
 const BN = require("bn.js");
 const chaiBN = require("chai-bn")(BN);
+chai.use(chaiBN);
 chai.use(chaiAsPromised);
 
 contract("Governance Contract", function() {

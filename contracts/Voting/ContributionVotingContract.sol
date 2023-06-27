@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 
 import "./BaseVotingCounterOfferContract.sol";
 import "../interface/ITreasury.sol";
+import "../interface/IContribution.sol";
 
 contract ContributionVotingContract is BaseVotingCounterOfferContract {
     /// @dev This structure will hold the data for contribution rewards
@@ -98,7 +99,7 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
         uint256 status
     );
 
-    /// @dev this event is genrated when result of a ballot is declared
+    /// @dev this event is generated when result of a ballot is declared
     /// @param contributionId This is the id of the contribution that is linked to this ballot
     /// @param ballotId this is the ballot Id for which result is declared
     /// @param result this is the status of the result, either true if user won that is
@@ -111,12 +112,16 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
         bool minTurnOut
     );
 
-    mapping(uint256 => ContributionReward) rewardMapping;
+    mapping(uint256 => ContributionReward) public rewardMapping;
     //Bellow mapping is ContributionId => User's address => Counter Offer data
-    mapping(uint256 => mapping(address => CounterOffer)) contributionCounterOfferMap;
+    mapping(uint256 => mapping(address => CounterOffer))
+        public contributionCounterOfferMap;
     //This contains all the keys (The key's are users address) of the mapping of the counterOfferMapping.
     mapping(uint256 => address[]) contributionCounterOfferList;
     address public CONTRIBUTION_CONTRACT_ADDRESS;
+
+    // Contribution contract
+    IContribution public contributionContract;
 
     constructor(
         uint8 votingInterval,
@@ -147,6 +152,7 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
             newGovernanceContractAddress
         );
         CONTRIBUTION_CONTRACT_ADDRESS = newContributionContractAddress;
+        contributionContract = IContribution(CONTRIBUTION_CONTRACT_ADDRESS);
     }
 
     /// @dev Sets the contribution contract address so that the voting ballot for contribution can
@@ -264,6 +270,19 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
         address[] memory counterOfferIds,
         bool action
     ) public {
+        IContribution.Contribution memory contribution = contributionContract
+            .getContributionData(contributionId);
+
+        require(
+            contribution.owner == msg.sender,
+            "INVALID: ONLY_CONTRIBUTION_OWNER"
+        );
+
+        uint256 currentContributionReward = rewardMapping[contributionId]
+            .communityReward;
+        uint256 currentGovernanceReward = rewardMapping[contributionId]
+            .governanceReward;
+
         //only vote once check
         for (uint256 i = 0; i < counterOfferIds.length; i++) {
             if (
@@ -276,39 +295,59 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
                 uint256 newCommunityReward = contributionCounterOfferMap[
                     contributionId
                 ][counterOfferIds[i]].newCommunityReward;
+
+                // We have 3 different cases here,
+                // one is where the new reward is greater then existing one
+                // two is where the new reward is less then existing one
+                // three is where the new reward is not comparable to current one such as where community can be greater then existing and governance can be smaller then existing or vice versa
                 if (action) {
-                    //Set new reward for the contribution
-                    rewardMapping[contributionId]
-                        .communityReward = newCommunityReward;
-                    rewardMapping[contributionId]
-                        .governanceReward = newGovernanceReward;
+                    // There is possibility to accepting the reward is when the new reward is greater or smaller, if it falls under 3rd case then you cannot accept it
+                    // Here the counter offer could only be accepted if both contribution and governance reward are either greater or smaller then the current one
+                    if (
+                        (currentContributionReward >= newGovernanceReward &&
+                            currentGovernanceReward >= newCommunityReward) ||
+                        (currentContributionReward <= newGovernanceReward &&
+                            currentGovernanceReward <= newCommunityReward)
+                    ) {
+                        // Only if the current contribution is greater then the new one it would replace the reward or else it would just stay the same
+                        if (
+                            currentContributionReward > newGovernanceReward &&
+                            currentGovernanceReward > newCommunityReward
+                        ) {
+                            //Set new reward for the contribution
+                            rewardMapping[contributionId]
+                                .communityReward = newCommunityReward;
+                            rewardMapping[contributionId]
+                                .governanceReward = newGovernanceReward;
+                        }
 
-                    contributionCounterOfferMap[contributionId][
-                        counterOfferIds[i]
-                    ].status = 2;
+                        contributionCounterOfferMap[contributionId][
+                            counterOfferIds[i]
+                        ].status = 2;
 
-                    super._counterOfferAction(
-                        rewardMapping[contributionId].ballotId,
-                        counterOfferIds[i],
-                        true
-                    );
-                    emit counterOfferAction(
-                        contributionId,
-                        counterOfferIds[i],
-                        newGovernanceReward,
-                        newCommunityReward,
-                        2
-                    );
+                        super._counterOfferAction(
+                            rewardMapping[contributionId].ballotId,
+                            counterOfferIds[i],
+                            action
+                        );
+                        emit counterOfferAction(
+                            contributionId,
+                            counterOfferIds[i],
+                            newGovernanceReward,
+                            newCommunityReward,
+                            action ? 2 : 3
+                        );
+                    }
                 } else {
-                    super._counterOfferAction(
-                        rewardMapping[contributionId].ballotId,
-                        counterOfferIds[i],
-                        false
-                    );
                     //The counter offer ids are the addresses of the user who proposed the offer
                     contributionCounterOfferMap[contributionId][
                         counterOfferIds[i]
                     ].status = 3;
+                    super._counterOfferAction(
+                        rewardMapping[contributionId].ballotId,
+                        counterOfferIds[i],
+                        action
+                    );
                     emit counterOfferAction(
                         contributionId,
                         counterOfferIds[i],

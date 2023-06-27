@@ -6,7 +6,6 @@ const expect = chai.expect;
 const timeMachine = require("../../utils/helper");
 const setup = require("../../utils/deployContracts");
 const helper = require("../../utils/helper");
-const ERC20SnapshotMock = artifacts.require("ERC20SnapshotMock");
 const { expectEvent, expectRevert } = require("@openzeppelin/test-helpers");
 
 chai.use(chaiBN);
@@ -16,19 +15,8 @@ contract("All Contract Deployment", function() {
     before(setup);
     let snapShot, snapshotId;
     beforeEach(async function() {
-        const initialHolder = await helper.getEthAccount(0);
-        const recipient = await helper.getEthAccount(1);
-        const other = await helper.getEthAccount(2);
-        const initialTokenId = 1;
-        const secondTokenId = 2;
-
-        const initialSupply = new BN(100);
-        const initialSupplySecondToken = new BN(0);
-
-        const uri = "DummyURI";
         snapShot = await timeMachine.takeSnapshot();
         snapshotId = snapShot["result"];
-        this.token = await ERC20SnapshotMock.new(uri, initialHolder, initialSupply);
     });
     afterEach(async function() {
         await timeMachine.revertToSnapshot(snapshotId);
@@ -222,6 +210,11 @@ contract("All Contract Deployment", function() {
         );
         await expect(this.crdTokenContract.AGREEMENTS_CONTRACT_ADDRESS()).eventually.to.be.equal(
             this.agreementContract.address
+        );
+    });
+    it("check if address for tracksContract is set", async function() {
+        await expect(this.tracksContract.CONTROLLER_CONTRACT_ADDRESS()).eventually.to.be.equal(
+            this.controllerContract.address
         );
     });
 });

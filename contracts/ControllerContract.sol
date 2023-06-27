@@ -65,19 +65,7 @@ contract ControllerContract {
             }
         }
         {
-            bool isSymbolInUse = treasuryCoreContract.commTokenSym(
-                commTokenData.symbol
-            );
-            require(
-                isSymbolInUse == false,
-                "INVALID: COMM_TOKEN_SYMBOL_ALREADY_IN_USE"
-            );
-            require(
-                govTokenData.totalSupply <= 1 * 10 ** 9 * 1 ether, //The token supply created shouldn't be more than1 billion
-                "INVALID: GOV_SUPPLY_LIMIT_REACHED"
-            );
-
-            isSymbolInUse = treasuryCoreContract.govTokenSym(
+            bool isSymbolInUse = treasuryCoreContract.govTokenSym(
                 govTokenData.symbol
             );
             require(
@@ -85,12 +73,33 @@ contract ControllerContract {
                 "INVALID: GOV_TOKEN_SYMBOL_ALREADY_IN_USE"
             );
             require(
-                commTokenData.totalSupply <= 1 * 10 ** 9 * 1 ether, //The token supply created shouldn't be more than1 billion
+                govTokenData.totalSupply >= 1,
+                "INVALID: GOV_AT_LEAST_1_TOKEN"
+            );
+            require(
+                govTokenData.totalSupply <= 1 * 10 ** 9 * 1 ether, //The token supply created shouldn't be more than 1 billion
+                "INVALID: GOV_SUPPLY_LIMIT_REACHED"
+            );
+
+            isSymbolInUse = treasuryCoreContract.commTokenSym(
+                commTokenData.symbol
+            );
+            require(
+                isSymbolInUse == false,
+                "INVALID: COMM_TOKEN_SYMBOL_ALREADY_IN_USE"
+            );
+            require(
+                commTokenData.totalSupply >= 1,
+                "INVALID: COMM_AT_LEAST_1_TOKEN"
+            );
+            require(
+                commTokenData.totalSupply <= 1 * 10 ** 9 * 1 ether, //The token supply created shouldn't be more than 1 billion
                 "INVALID: COM_SUPPLY_LIMIT_REACHED"
             );
         }
-        uint256[] memory trackIds = tracksContract.createNewTracks(
-            tracksPayload
+        uint256[] memory trackIds = tracksContract.controllerCreateNewTracks(
+            tracksPayload,
+            msg.sender
         );
         payload.tracks = trackIds;
         uint256 contributionId = contributionsContract

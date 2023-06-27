@@ -72,6 +72,8 @@ contract TreasuryContract is Initializable {
             "INVALID: USER_BALANCE_MORE_THAN_SUPPLY"
         );
 
+        require(newTokenData.totalSupply >= 1, "INVALID: AT_LEAST_1_TOKEN");
+
         require(
             newTokenData.totalSupply <= 1 * 10 ** 9 * 1 ether, //The token supply created shouldn't be more than1 billion
             "INVALID: SUPPLY_LIMIT_REACHED"

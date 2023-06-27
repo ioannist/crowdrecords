@@ -399,8 +399,6 @@ contract BaseVotingContract is Initializable {
         depositMap[ballotId] = votingDeposit;
     }
 
-    event DEBUG(uint value);
-
     /// @dev This function is responsible releasing the ether balance that was taken as deposit
     /// @param ballotId The id of the ballot for which the deposit is made
     function _releaseDeposit(uint256 ballotId) internal {

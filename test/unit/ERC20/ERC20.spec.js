@@ -23,9 +23,7 @@ contract("ERC20 Transfer Test", function() {
     it("Can transfer directly from ERC20 contract", async function() {
         const user2 = await helper.getEthAccount(1);
         await this.crdTokenContract.transfer(user2, "10000");
-        await expect(this.crdTokenContract.balanceOf(user2)).to.eventually.be.bignumber.equal(
-            "10000"
-        );
+        await expect(await this.crdTokenContract.balanceOf(user2)).to.be.bignumber.equal("10000");
     });
 
     it("Can transfer tokens through treasury core contract", async function() {
@@ -33,9 +31,7 @@ contract("ERC20 Transfer Test", function() {
         const user1 = await helper.getEthAccount(0);
         const user2 = await helper.getEthAccount(1);
         await this.treasuryCoreContract.safeTransferFrom(user1, user2, CRDToken, "10000", "0xa165");
-        await expect(this.crdTokenContract.balanceOf(user2)).to.eventually.be.bignumber.equal(
-            "10000"
-        );
+        await expect(await this.crdTokenContract.balanceOf(user2)).to.be.bignumber.equal("10000");
     });
 });
 

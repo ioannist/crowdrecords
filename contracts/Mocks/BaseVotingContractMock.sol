@@ -14,6 +14,10 @@ contract BaseVotingContractMock is BaseVotingContract {
     /// more than 66% of votes or false if user lost
     event BallotResult(uint256 ballotId, bool result, bool minTurnOut);
 
+    /// @dev this event is generated when result of a ballot is declared
+    /// @param ballotId this is the ballot Id which is generated
+    event BallotCreated(uint256 ballotId);
+
     constructor(uint8 votingInterval, address owner) BaseVotingContract(owner) {
         VOTING_BLOCK_PERIOD = votingInterval;
     }
@@ -31,11 +35,10 @@ contract BaseVotingContractMock is BaseVotingContract {
         );
     }
 
-    event Debug(uint256 amount);
-
     function createBallot(bool canOwnerVote, uint256 tokenId) public payable {
         uint256 ballotId = _createVoting(canOwnerVote, tokenId);
         _createDeposit(msg.sender, msg.value, ballotId);
+        emit BallotCreated(ballotId);
     }
 
     function castVote(uint256 ballotId, bool vote) public {

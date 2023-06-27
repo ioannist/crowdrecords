@@ -133,6 +133,9 @@ contract TreasuryCoreContract is
     // 18 decimal points supported
     constructor(address owner) ERC1155("https://crowdrecords.com/{id}") {
         OWNER = owner;
+        // Setting the empty value for tokens as used so that no other user can create token with empty symbol
+        govTokenSym[""] = true;
+        commTokenSym[""] = true;
     }
 
     /// @dev Modifier to check that the person who accesses a specific function is the owner of contract himself.
@@ -489,7 +492,18 @@ contract TreasuryCoreContract is
         uint256 tokenId,
         uint256 amount
     ) external onlyTreasuryContract {
+        require(tokenId > 1, "INV: TOKENID");
         _mint(address(this), tokenId, amount, "New tokens minted");
+    }
+
+    function _mint(
+        address to,
+        uint256 id,
+        uint256 amount,
+        bytes memory data
+    ) internal override {
+        require(id > 1, "INV: TOKENID");
+        super._mint(to, id, amount, data);
     }
 
     function onERC1155Received(

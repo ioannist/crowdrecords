@@ -4,7 +4,6 @@ const helper = require("../../utils/helper");
 const chai = require("chai");
 const BN = require("bn.js");
 const expectEvent = require("@openzeppelin/test-helpers/src/expectEvent");
-const { expectRevert } = require("@openzeppelin/test-helpers");
 const chaiAsPromised = require("chai-as-promised");
 const { web3 } = require("@openzeppelin/test-helpers/src/setup");
 chai.use(chaiAsPromised);
@@ -14,10 +13,6 @@ contract("Records Contract", function() {
     async function createTrack(tracksContract, owner) {
         const tx = await tracksContract.createNewTracks([["fileHash", "fileLink", "Category"]], {
             from: owner,
-        });
-        await expectEvent(tx, "TrackCreated", {
-            filehash: "fileHash",
-            category: "Category",
         });
     }
 
@@ -120,6 +115,37 @@ contract("Records Contract", function() {
         ).to.eventually.be.bignumber.equal(BigInt(+before + +helper.PLATFORM_FEES).toString());
     });
 
+    it("Creating seed contribution and record, with partial platform fee, expect revert", async function() {
+        const user1 = await helper.getEthAccount(0);
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
+        //seed contribution id 1
+        await this.contributionContract.createSeedContribution(
+            [
+                [1, 2, 3],
+                "contribution title",
+                "preview.raw",
+                "preview.hash",
+                "This is the description for the record 1",
+            ],
+            await helper.getEthAccount(8),
+            0,
+            { from: user1 }
+        );
+
+        await expect(
+            this.recordsContract.createNewRecord(
+                ["Test", "image.png", "Cat1", SEED_CONTRIBUTION_ID],
+                await helper.getEthAccount(8),
+                helper.PLATFORM_FEES,
+                {
+                    value: +helper.PLATFORM_FEES - 10000,
+                }
+            )
+        ).to.eventually.be.rejectedWith("INV: INSUFFICIENT_PLATFORM_FEE");
+    });
+
     it("Creating record with invalid seed contribution Id, expect revert", async function() {
         await expect(
             this.recordsContract.createNewRecord(
@@ -211,50 +237,7 @@ contract("Records Contract", function() {
         ).to.eventually.rejectedWith("INVALID: NOT_SEED_CONTRIBUTION");
     });
 
-    it("User create seed contribution, creates new record, tries to create one more record with same see but rejected", async function() {
-        const user1 = await helper.getEthAccount(0);
-
-        await createTrack(this.tracksContract, user1);
-        await createTrack(this.tracksContract, user1);
-        await createTrack(this.tracksContract, user1);
-        //seed contribution id 1
-        await this.contributionContract.createSeedContribution(
-            [
-                [1, 2, 3],
-                "contribution title",
-                "preview.raw",
-                "preview.hash",
-                "This is the description for the record 1",
-            ],
-            await helper.getEthAccount(8),
-            0,
-            { from: user1 }
-        );
-        const tx = await this.recordsContract.createNewRecord(
-            ["Test", "image.png", "Cat1", SEED_CONTRIBUTION_ID],
-            await helper.getEthAccount(8),
-            "0",
-            {
-                value: 0,
-            }
-        );
-        expectEvent(tx, "RecordCreated", {
-            seedId: "1",
-        });
-
-        await expect(
-            this.recordsContract.createNewRecord(
-                ["Test", "image.png", "Cat1", SEED_CONTRIBUTION_ID],
-                await helper.getEthAccount(8),
-                0,
-                {
-                    value: 0,
-                }
-            )
-        ).to.eventually.be.rejectedWith("INVALID: SEED_ALREADY_USED");
-    });
-
-    it("User create seed contribution, creates new record, tries to create one more record with same see but rejected", async function() {
+    it("User create seed contribution, creates new record, tries to create one more record with same seed but rejected", async function() {
         const user1 = await helper.getEthAccount(0);
 
         await createTrack(this.tracksContract, user1);
@@ -532,6 +515,76 @@ contract("Records Contract", function() {
         });
         afterEach(async function() {
             await helper.revertToSnapshot(snapshotId2);
+        });
+
+        it("Try to create newRecordVersion with invalid platform fees", async function() {
+            let actualPlatformFees = helper.PLATFORM_FEES; // This is the actual platform fees that we tell contract to charge from the user
+            let platformFees = +helper.PLATFORM_FEES - +"1000"; // Platform fee less then what it should be
+
+            await expect(
+                this.recordsVotingContract.createNewRecordVersion(
+                    [
+                        "Test",
+                        "image.png",
+                        "Cat1",
+                        RECORD_ID,
+                        [1],
+                        [
+                            await web3.utils.toWei("1000000"),
+                            this.oldRecordVersionOwnerRewardGovernance,
+                            GOVERNANCE_TOKEN_BALANCE_USER1,
+                            "Test",
+                            "image.png",
+                        ],
+                        [
+                            await web3.utils.toWei("1000000"),
+                            this.oldRecordVersionOwnerRewardCommunity,
+                            COMMUNITY_TOKEN_BALANCE_USER1,
+                            "Test",
+                            "image.png",
+                        ],
+                    ],
+                    await helper.getEthAccount(8),
+                    actualPlatformFees,
+                    {
+                        value: +helper.VOTING_DEPOSIT_RECORD_VERSION_CONTRACT + platformFees,
+                    }
+                )
+            ).to.eventually.be.rejectedWith("INV_DEP");
+        });
+
+        it("Creating a new record version request, with invalid record id, expect revert", async function() {
+            const invalidRecordId = 6;
+            await expect(
+                this.recordsVotingContract.createNewRecordVersion(
+                    [
+                        "Test",
+                        "image.png",
+                        "Cat1",
+                        invalidRecordId,
+                        [1],
+                        [
+                            await web3.utils.toWei("1000000"),
+                            this.oldRecordVersionOwnerRewardGovernance,
+                            GOVERNANCE_TOKEN_BALANCE_USER1,
+                            "Test",
+                            "image.png",
+                        ],
+                        [
+                            await web3.utils.toWei("1000000"),
+                            this.oldRecordVersionOwnerRewardCommunity,
+                            COMMUNITY_TOKEN_BALANCE_USER1,
+                            "Test",
+                            "image.png",
+                        ],
+                    ],
+                    await helper.getEthAccount(8),
+                    0,
+                    {
+                        value: helper.VOTING_DEPOSIT_RECORD_VERSION_CONTRACT,
+                    }
+                )
+            ).to.eventually.be.rejectedWith("INVALID: RECORD_NOT_FOUND");
         });
 
         it("Creating a new record version request, without platform fee, VersionRequest event emitted", async function() {

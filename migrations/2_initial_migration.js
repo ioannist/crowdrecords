@@ -127,7 +127,7 @@ module.exports = async (deployer) => {
         this.tracksContract = await deployAndInitializeContract(
             deployer,
             TracksContract,
-            [],
+            [owner],
             tracksAddress
         );
     }, 1000);
@@ -394,6 +394,13 @@ module.exports = async (deployer) => {
     try {
         console.log("initializing recordsContract");
         await this.recordsContract.initialize(this.controllerContract.address);
+    } catch (err) {
+        console.log(err);
+    }
+
+    try {
+        console.log("initializing tracksContract");
+        await tracksContract.initialize(this.controllerContract.address);
     } catch (err) {
         console.log(err);
     }

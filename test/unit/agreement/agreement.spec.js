@@ -1202,17 +1202,6 @@ contract("AgreementContract", function() {
             ).eventually.to.be.bignumber.equal(rewardForUser3.add(new BN(this.baseCRDTokens)));
         });
 
-        async function calculateGasCost(trx) {
-            // Obtain gas used from the receipt
-            const gasUsed = trx.receipt.gasUsed;
-
-            // Obtain gasPrice from the transaction
-            const tx = await web3.eth.getTransaction(trx.tx);
-            const gasPrice = tx.gasPrice;
-
-            return await web3.utils.fromWei((gasPrice * gasUsed).toString(), "gwei");
-        }
-
         it("Giving out the 1000 royalties and logging the gas cost foe conditions : all claim together, 50% claims together 25% claims together and single claim every time.", async function() {
             const agreementOne = 1;
             const rewardForUser2 = new BN(await web3.utils.toWei("55.555555555555555"));
@@ -1262,13 +1251,19 @@ contract("AgreementContract", function() {
                     from: this.user2,
                 });
                 if (i === 0) {
-                    gasCostWithOnePendingPaymentZeroClaimedPayments = await calculateGasCost(trx);
+                    gasCostWithOnePendingPaymentZeroClaimedPayments = await helper.calculateGasCost(
+                        trx
+                    );
                 }
                 if (i === 1) {
-                    gasCostWithOnePendingPaymentOneClaimedPayments = await calculateGasCost(trx);
+                    gasCostWithOnePendingPaymentOneClaimedPayments = await helper.calculateGasCost(
+                        trx
+                    );
                 }
                 if (i === 2) {
-                    gasCostWithOnePendingPaymentTwoClaimedPayments = await calculateGasCost(trx);
+                    gasCostWithOnePendingPaymentTwoClaimedPayments = await helper.calculateGasCost(
+                        trx
+                    );
                 }
 
                 if (i === 2 || i === 4 || i === 7 || i === 9) {
@@ -1278,22 +1273,22 @@ contract("AgreementContract", function() {
                     });
 
                     if (i === 2) {
-                        gasCostWithThreePendingPaymentZeroClaimedPayments = await calculateGasCost(
+                        gasCostWithThreePendingPaymentZeroClaimedPayments = await helper.calculateGasCost(
                             trx
                         );
                     }
                     if (i === 4) {
-                        gasCostWithTwoPendingPaymentAndThreeClaimedPayments = await calculateGasCost(
+                        gasCostWithTwoPendingPaymentAndThreeClaimedPayments = await helper.calculateGasCost(
                             trx
                         );
                     }
                     if (i === 7) {
-                        gasCostWithThreePendingPaymentAndFiveClaimedPayments = await calculateGasCost(
+                        gasCostWithThreePendingPaymentAndFiveClaimedPayments = await helper.calculateGasCost(
                             trx
                         );
                     }
                     if (i === 9) {
-                        gasCostWithTwoPendingPaymentAndEightClaimedPayments = await calculateGasCost(
+                        gasCostWithTwoPendingPaymentAndEightClaimedPayments = await helper.calculateGasCost(
                             trx
                         );
                     }
@@ -1306,12 +1301,12 @@ contract("AgreementContract", function() {
                     });
 
                     if (i === 4) {
-                        gasCostWithFivePendingPaymentZeroClaimedPayments = await calculateGasCost(
+                        gasCostWithFivePendingPaymentZeroClaimedPayments = await helper.calculateGasCost(
                             trx
                         );
                     }
                     if (i === 9) {
-                        gasCostWithFivePendingPaymentFiveClaimedPayments = await calculateGasCost(
+                        gasCostWithFivePendingPaymentFiveClaimedPayments = await helper.calculateGasCost(
                             trx
                         );
                     }
@@ -1323,7 +1318,9 @@ contract("AgreementContract", function() {
                         from: this.user5,
                     });
 
-                    gasCostWithTenPendingPaymentZeroClaimedPayments = await calculateGasCost(trx);
+                    gasCostWithTenPendingPaymentZeroClaimedPayments = await helper.calculateGasCost(
+                        trx
+                    );
                 }
             }
 
@@ -1892,5 +1889,6 @@ contract("AgreementContract", function() {
             ).eventually.to.be.bignumber.equal(user2RewardAmount);
         });
     });
+    //Test the scenario where the total supply of tokens is zero and verify that the contract handles it gracefully.
 });
 

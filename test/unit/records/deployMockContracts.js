@@ -33,7 +33,7 @@ const {
 } = require("../../utils/helper");
 
 async function getMockContractsForRecordTesting() {
-    let tracksContract = await TracksContract.new();
+    let tracksContract = await TracksContract.new(await getEthAccount(0));
     let contributionContract = await ContributionContract.new(await getEthAccount(0));
     let recordsVotingContract = await RecordsVotingContract.new(await getEthAccount(0));
     let recordsContract = await RecordsContract.new(
@@ -152,6 +152,7 @@ async function getMockContractsForRecordTesting() {
         crowdrecordsGovernor.address
     );
     await recordsContract.initialize(controllerContract.address);
+    await tracksContract.initialize(controllerContract.address);
 
     return {
         tracksContractMock: tracksContract,

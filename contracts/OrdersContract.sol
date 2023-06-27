@@ -149,6 +149,11 @@ contract OrdersContract is Initializable {
             "INVALID: GOVERNANCE_TOKEN_ID"
         );
 
+        require(
+            params.communityTokenAmount > 0 || params.governanceTokenAmount > 0,
+            "INVALID: CANNOT_CREATE_0_AMOUNT_ORDER"
+        );
+
         if (params.isLockedInRatio) {
             require(
                 params.communityTokenAmount > 0,

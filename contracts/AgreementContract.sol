@@ -283,6 +283,7 @@ contract AgreementContract is BaseVotingContract {
     /// @param amount this is the amount of royalty is being
     function payRoyaltyAmount(uint256 agreementId, uint256 amount) public {
         require(agreementMap[agreementId].isActive, "INVALID: AGREEMENT_ID");
+        require(amount > 0, "INVALID: AMOUNT_ZERO");
         uint256 recordId = agreementMap[agreementId].recordId;
         royaltyId += 1;
         uint256 tokenId = treasuryContract.getCommunityTokenId(recordId);

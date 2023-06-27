@@ -15,4 +15,9 @@ interface ITracks {
     function createNewTracks(
         TrackPayload[] memory tracksPayload
     ) external returns (uint256[] memory);
+
+    function controllerCreateNewTracks(
+        TrackPayload[] calldata tracksPayload,
+        address owner
+    ) external returns (uint256[] memory);
 }

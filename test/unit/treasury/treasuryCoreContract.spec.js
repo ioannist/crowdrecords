@@ -17,6 +17,9 @@ const { expectRevert } = require("@openzeppelin/test-helpers");
 const chaiAsPromised = require("chai-as-promised");
 chai.use(chaiAsPromised);
 const expect = chai.expect;
+const TreasuryCoreMockContract = artifacts.require(
+    "../../../contracts/Mocks/TreasuryCoreContractMock.sol"
+);
 
 /**
  * For all the test cases the input amount precision is only of 6 decimal digits, anything beyond 6 digits will not be either considered or would throw error in test cases
@@ -75,6 +78,16 @@ contract("Treasury Contract", function() {
         await expect(this.treasuryCoreContract.snapshot()).to.eventually.be.rejectedWith(
             "UNAUTHORIZED: CANNOT_PERFORM_ACTION"
         );
+    });
+
+    it("Treasury cannot mint token with tokenId 1 (CRD Token)", async function() {
+        const sender = await helper.getEthAccount(2);
+        const amount = new BN(10);
+        const tokenId = 1;
+
+        const treasuryCoreMockContract = await TreasuryCoreMockContract.deployed();
+
+        await expect(treasuryCoreMockContract.mintTokensForMe(tokenId, amount, { from: sender }));
     });
 });
 

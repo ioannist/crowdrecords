@@ -149,20 +149,12 @@ contract DilutionContract is BaseVotingContract {
         // and if any request are made then has sufficient time passed or not.
         // If the block number is 0 then it means that no request has been created
         // err: You need to wait sometime for you create new dilution request
-        // require(
-        //     lastDilutionResultMap[tokenId] == 0 ||
-        //         lastDilutionResultMap[tokenId] + REQUEST_INTERVAL <
-        //         block.number,
-        //     "INVALID: WAIT_SOMETIME_BEFORE_NEW_DILUTION_REQUEST"
-        // );
-        //! require doesn't throw error instead consumes all the gas so instead we use revert
-        if (
-            !(lastDilutionResultMap[tokenId] == 0 ||
+        require(
+            lastDilutionResultMap[tokenId] == 0 ||
                 lastDilutionResultMap[tokenId] + REQUEST_INTERVAL <
-                block.number)
-        ) {
-            revert("INVALID: WAIT_SOMETIME_BEFORE_NEW_DILUTION_REQUEST");
-        }
+                block.number,
+            "INVALID: WAIT_SOMETIME_BEFORE_NEW_DILUTION_REQUEST"
+        );
 
         _dilutionIds.increment();
         uint256 dilutionId = _dilutionIds.current();

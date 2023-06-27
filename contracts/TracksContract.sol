@@ -1,12 +1,16 @@
 pragma solidity ^0.8.0;
 
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract TracksContract {
+contract TracksContract is Initializable {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
+
+    address public CONTROLLER_CONTRACT_ADDRESS;
+    address public OWNER;
 
     /// @dev This holds data of individual tracks
     /// @param filehash This is hash of the file
@@ -48,40 +52,101 @@ contract TracksContract {
         address owner
     );
 
+    /// @dev This is emited when a new track is created
+    /// @param trackIds This is the id of the track
+    /// @param trackData This is the data for the tracks creation
+    /// @param owner This is the owner of the tracks
+    event TracksCreated(
+        uint256[] trackIds,
+        TrackPayload[] trackData,
+        address owner
+    );
+
     mapping(uint256 => Tracks) public tracksData;
 
-    constructor() {}
+    constructor(address owner) {
+        OWNER = owner;
+    }
+
+    /// @dev Modifier to check that the person who accesses a specific function is the owner of contract himself.
+    modifier ownerOnly() {
+        require(msg.sender == OWNER, "UNAUTHORIZED: CANNOT_PERFORM_ACTION");
+        _;
+    }
+
+    /// @dev Modifier to restrict the function call from controller contract
+    modifier controllerContractOnly() {
+        require(
+            msg.sender == CONTROLLER_CONTRACT_ADDRESS,
+            "UNAUTHORIZED: CANNOT_PERFORM_ACTION"
+        );
+        _;
+    }
+
+    /// @dev This is to set the address of the contracts
+    /// @param controllerContractAddress this is the address of controller contract
+    function initialize(
+        address controllerContractAddress
+    ) public initializer ownerOnly {
+        CONTROLLER_CONTRACT_ADDRESS = controllerContractAddress;
+    }
+
+    /// @dev This function will create tracks but it would only be called from controller
+    /// @param tracksPayload This is the payload that contains multiple data
+    /// @param owner This is the owner of the tracks
+    function controllerCreateNewTracks(
+        TrackPayload[] calldata tracksPayload,
+        address owner
+    ) public controllerContractOnly returns (uint256[] memory) {
+        return _createNewTracks(tracksPayload, owner);
+    }
 
     /// @dev This function will be called by the user to create multiple tracks
     /// @param tracksPayload This is the payload that contains multiple data
     function createNewTracks(
-        TrackPayload[] memory tracksPayload
+        TrackPayload[] calldata tracksPayload
     ) public returns (uint256[] memory) {
-        uint256[] memory trackIds = new uint256[](tracksPayload.length);
-        for (uint i = 0; i < tracksPayload.length; i++) {
-            _tokenIds.increment();
+        return _createNewTracks(tracksPayload, msg.sender);
+    }
 
-            uint256 newTrackId = _tokenIds.current();
+    /// @dev This function will be called by the user to create multiple tracks
+    /// @param tracksPayload This is the payload that contains multiple data
+    /// @param owner This is the owner of the tracks
+    function _createNewTracks(
+        TrackPayload[] calldata tracksPayload,
+        address owner
+    ) internal returns (uint256[] memory) {
+        require(tracksPayload.length > 0, "No payload");
+        uint256 length = tracksPayload.length;
+        uint256[] memory trackIds = new uint256[](length);
+
+        for (uint i = 0; i < length; ) {
+            _tokenIds.increment();
+            trackIds[i] = _tokenIds.current();
             Tracks memory track = Tracks({
                 filehash: tracksPayload[i].filehash,
                 filelink: tracksPayload[i].filelink,
                 category: tracksPayload[i].category,
                 creationDate: block.timestamp,
-                owner: msg.sender
+                owner: owner
             });
 
-            tracksData[newTrackId] = track;
+            // emit TrackCreated({
+            //     filehash: tracksPayload[i].filehash,
+            //     filelink: tracksPayload[i].filelink,
+            //     category: tracksPayload[i].category,
+            //     trackId: trackIds[i],
+            //     creationDate: track.creationDate,
+            //     owner: owner
+            // });
 
-            emit TrackCreated({
-                filehash: tracksPayload[i].filehash,
-                filelink: tracksPayload[i].filelink,
-                category: tracksPayload[i].category,
-                trackId: newTrackId,
-                creationDate: track.creationDate,
-                owner: msg.sender
-            });
-            trackIds[i] = newTrackId;
+            tracksData[trackIds[i]] = track;
+            unchecked {
+                ++i;
+            }
         }
+
+        emit TracksCreated(trackIds, tracksPayload, owner);
 
         return trackIds;
     }

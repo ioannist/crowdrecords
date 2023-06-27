@@ -253,6 +253,142 @@ contract("Dilution Contract", function() {
             await helper.revertToSnapshot(snapshotId2);
         });
 
+        it("Dilution voting with large number of voters (2000 Voters)", async function() {
+            this.userList = [];
+            this.votesList = [];
+
+            // Creating 2000 users and their respective votes
+            this.userList = helper.generateAccounts(2000);
+            for (let i = 0; i < 2000; i++) {
+                // Assuming votes are randomly true or false
+                this.votesList.push(Math.random() > 0.5);
+            }
+
+            this.dilutionId = "1";
+
+            // Transferring tokens to these users from user1
+            for (let i = 0; i < this.userList.length; i++) {
+                await this.treasuryCoreContract.safeTransferFrom(
+                    this.user1,
+                    this.userList[i],
+                    COMMUNITY_TOKEN_ID,
+                    await web3.utils.toWei("225"),
+                    "0x0"
+                );
+            }
+
+            // Creating a dilution request
+            await this.dilutionContract.createDilutionRequest(
+                RECORD_ID,
+                COMMUNITY_TOKEN_ID,
+                await web3.utils.toWei("450000"),
+                { from: this.user1, value: helper.VOTING_DEPOSIT_DILUTION_CONTRACT }
+            );
+
+            const expectedOutcome =
+                this.votesList.filter((vote) => vote).length > this.votesList.length * 0.66; // We require at least two third to declare someone winner
+
+            // All users casting votes
+            for (let i = 0; i < this.userList.length; i++) {
+                const trx = await this.dilutionContract.castVote(
+                    this.dilutionId,
+                    this.votesList[i],
+                    {
+                        from: this.userList[i],
+                    }
+                );
+                expectEvent(trx, "DilutionVoting", {
+                    dilutionId: this.dilutionId,
+                });
+            }
+
+            // Advancing blocks
+            await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 2);
+
+            // Declare the winner
+            const tx = await this.dilutionContract.declareWinner(this.dilutionId);
+
+            expectEvent(tx, "DilutionResult", {
+                dilutionId: this.dilutionId,
+                result: expectedOutcome,
+            });
+        });
+
+        it("Multiple dilution voting with large number of voters (2000 voters)", async function() {
+            this.userList = [];
+            this.votesList1 = [];
+            this.votesList2 = [];
+
+            // Creating 2000 users and their respective votes for 2 dilution requests
+            this.userList = helper.generateAccounts(2000);
+            for (let i = 0; i < 2000; i++) {
+                // Assuming votes are randomly true or false
+                this.votesList1.push(Math.random() > 0.5);
+                this.votesList2.push(Math.random() > 0.5);
+            }
+
+            this.dilutionId1 = "1";
+            this.dilutionId2 = "2";
+
+            // Transferring tokens to these users from user1
+            for (let i = 0; i < this.userList.length; i++) {
+                await this.treasuryCoreContract.safeTransferFrom(
+                    this.user1,
+                    this.userList[i],
+                    COMMUNITY_TOKEN_ID,
+                    await web3.utils.toWei("225"),
+                    "0x0"
+                );
+            }
+
+            // Creating two dilution requests
+            await this.dilutionContract.createDilutionRequest(
+                RECORD_ID,
+                COMMUNITY_TOKEN_ID,
+                await web3.utils.toWei("450000"),
+                { from: this.user1, value: helper.VOTING_DEPOSIT_DILUTION_CONTRACT }
+            );
+            await this.dilutionContract.createDilutionRequest(
+                RECORD_ID,
+                COMMUNITY_TOKEN_ID,
+                await web3.utils.toWei("450000"),
+                { from: this.user1, value: helper.VOTING_DEPOSIT_DILUTION_CONTRACT }
+            );
+
+            // Calculate the expected outcome for each vote
+            const expectedOutcome1 =
+                this.votesList1.filter((vote) => vote).length > this.votesList1.length * 0.66; // We require at least two third to declare someone winner
+            const expectedOutcome2 =
+                this.votesList2.filter((vote) => vote).length > this.votesList2.length * 0.66; // We require at least two third to declare someone winner
+
+            // All users casting votes on both dilution requests
+            for (let i = 0; i < this.userList.length; i++) {
+                await this.dilutionContract.castVote(this.dilutionId1, this.votesList1[i], {
+                    from: this.userList[i],
+                });
+                await this.dilutionContract.castVote(this.dilutionId2, this.votesList2[i], {
+                    from: this.userList[i],
+                });
+            }
+
+            // Advancing blocks
+            await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 2);
+
+            // Declare the winners
+            const tx1 = await this.dilutionContract.declareWinner(this.dilutionId1);
+            const tx2 = await this.dilutionContract.declareWinner(this.dilutionId2);
+
+            // Verifying the events have the correct results
+            expectEvent(tx1, "DilutionResult", {
+                dilutionId: this.dilutionId1,
+                result: expectedOutcome1,
+            });
+            expectEvent(tx2, "DilutionResult", {
+                dilutionId: this.dilutionId2,
+                result: expectedOutcome2,
+            });
+        });
+
         it("shifting weight of votes, wins the ballot", async function() {
             const afterDilution = await web3.utils.toWei("1000000");
             const txx = await this.dilutionContract.castVote(this.dilutionId, false, {
@@ -422,7 +558,11 @@ contract("Dilution Contract", function() {
                     RECORD_ID,
                     COMMUNITY_TOKEN_ID,
                     await web3.utils.toWei("450000"),
-                    { from: this.user2, value: helper.VOTING_DEPOSIT_DILUTION_CONTRACT }
+                    {
+                        from: this.user2,
+                        value: helper.VOTING_DEPOSIT_DILUTION_CONTRACT,
+                        gas: 10_000_000,
+                    }
                 )
             ).to.eventually.be.rejectedWith("INVALID: WAIT_SOMETIME_BEFORE_NEW_DILUTION_REQUEST");
         });
@@ -455,7 +595,11 @@ contract("Dilution Contract", function() {
                     RECORD_ID,
                     COMMUNITY_TOKEN_ID,
                     await web3.utils.toWei("450000"),
-                    { from: this.user2, value: helper.VOTING_DEPOSIT_DILUTION_CONTRACT }
+                    {
+                        from: this.user2,
+                        value: helper.VOTING_DEPOSIT_DILUTION_CONTRACT,
+                        gas: 10_000_000,
+                    }
                 )
             ).to.eventually.be.rejectedWith("INVALID: WAIT_SOMETIME_BEFORE_NEW_DILUTION_REQUEST");
         });

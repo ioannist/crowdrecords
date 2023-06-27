@@ -10,6 +10,8 @@ contract VotingHubContract {
     address public OWNER;
     ITreasuryCore public iTreasury;
 
+    event VotingContractAdded(address votingContractAddress);
+
     constructor(address owner) {
         OWNER = owner;
     }
@@ -28,6 +30,22 @@ contract VotingHubContract {
             msg.sender == TREASURY_CORE_CONTRACT_ADDRESS,
             "UNAUTHORIZED: ONLY_TREASURY_CORE_CONTRACT"
         );
+        _;
+    }
+
+    // @notice Checks if an address is a smart contract.
+    // @dev This function uses assembly code to access the extcodesize opcode,
+    //   which returns the size of the code stored at an address.
+    //   If the size is greater than zero, the address is a contract.
+    //   This check will fail for contracts that are in the process of being created but have not yet been mined.
+    // @param _address Address to be checked.
+    // @return If the address is a contract, the function proceeds. Otherwise, it throws an error.
+    modifier isContract(address _address) {
+        uint32 size;
+        assembly {
+            size := extcodesize(_address)
+        }
+        require(size > 0, "INVALID: ONLY_CONTRACT_CAN_BE_ADDED");
         _;
     }
 
@@ -90,8 +108,12 @@ contract VotingHubContract {
     /// @notice
     /// @dev This function is to add a voting contract, the added contract will be notified when a token transfer occurs
     /// @param contractAddress address of the voting contract
-    function addVotingContract(address contractAddress) public _ownerOnly {
+    function addVotingContract(
+        address contractAddress
+    ) public _ownerOnly isContract(contractAddress) {
         VOTING_CONTRACTS_ADDRESS.push(contractAddress);
+
+        emit VotingContractAdded(contractAddress);
     }
 
     /// @notice

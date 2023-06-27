@@ -158,6 +158,26 @@ exports.getEthBalanceForAccount = (accountNumber) => {
     });
 };
 
+exports.calculateGasCost = async (trx) => {
+    // Obtain gas used from the receipt
+    const gasUsed = trx.receipt.gasUsed;
+
+    // Obtain gasPrice from the transaction
+    const tx = await web3.eth.getTransaction(trx.tx);
+    const gasPrice = tx.gasPrice;
+
+    return await web3.utils.fromWei((gasPrice * gasUsed).toString(), "gwei");
+};
+
+exports.generateAccounts = async (numAccounts) => {
+    const accounts = [];
+    for (let i = 0; i < numAccounts; i++) {
+        const account = await web3.eth.accounts.create();
+        accounts.push(account);
+    }
+    return accounts;
+};
+
 /**
  *
  * @param {Array} logs

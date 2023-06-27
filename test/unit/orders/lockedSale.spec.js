@@ -107,6 +107,28 @@ contract("Ratio Locked Sales", function() {
         ).to.eventually.be.bignumber.equals(await web3.utils.toWei("1000000"));
     });
 
+    it("Try to create order with community and governance as 0, expect revert", async function() {
+        await this.treasuryCoreContract.setApprovalForAll(this.ordersContract.address, true);
+
+        await expect(
+            this.ordersContract.createBuyOrder(
+                [
+                    true,
+                    RECORD_ID,
+                    COMMUNITY_TOKEN_ID,
+                    await web3.utils.toWei("0"),
+                    await web3.utils.toWei("1"),
+                    GOVERNANCE_TOKEN_ID,
+                    await web3.utils.toWei("0"),
+                    await web3.utils.toWei("2"),
+                ],
+                await helper.getEthAccount(8),
+                helper.PLATFORM_FEES,
+                { value: helper.PLATFORM_FEES }
+            )
+        ).to.eventually.be.rejectedWith("INVALID: CANNOT_CREATE_0_AMOUNT_ORDER");
+    });
+
     it("User can create lock sale request and cancel it", async function() {
         await this.treasuryCoreContract.setApprovalForAll(this.ordersContract.address, true);
 

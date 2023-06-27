@@ -4,6 +4,7 @@ describe("Unit Tests", function() {
     require("./ERC20");
     require("./voting");
     require("./contribution");
+    require("./votingHub");
     require("./records");
     require("./orders");
     require("./agreement");
@@ -11,5 +12,6 @@ describe("Unit Tests", function() {
     require("./treasury");
     require("./governance");
     require("./controller");
+    require("./tracks");
 });
 

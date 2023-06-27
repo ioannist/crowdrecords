@@ -42,7 +42,7 @@ contract("BaseVotingContract", function() {
         );
     });
 
-    it("Creating a voting ballot UNAUTHORIZED: OWNER_CANNOT_VOTE", async function() {
+    it("Creating a voting ballot where owner cannot vote, owner tries to vote, revert with UNAUTHORIZED: OWNER_CANNOT_VOTE", async function() {
         const ballotId = 1;
         await this.baseVotingContractMock.createBallot(false, COMMUNITY_TOKEN_ID, {
             value: helper.VOTING_DEPOSIT_MOCK_CONTRACT,
@@ -62,7 +62,24 @@ contract("BaseVotingContract", function() {
         await this.baseVotingContractMock.castVote(ballotId, true);
     });
 
-    it("Creating a voting ballot, checking is deposit was made", async function() {
+    it("Creating multiple voting ballot and testing that the ballot id is generated in correct order", async function() {
+        const trx1 = await this.baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID, {
+            value: helper.VOTING_DEPOSIT_MOCK_CONTRACT,
+        });
+        expectEvent(trx1, "BallotCreated", { ballotId: "1" });
+
+        const trx2 = await this.baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID, {
+            value: helper.VOTING_DEPOSIT_MOCK_CONTRACT,
+        });
+        expectEvent(trx2, "BallotCreated", { ballotId: "2" });
+
+        const trx3 = await this.baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID, {
+            value: helper.VOTING_DEPOSIT_MOCK_CONTRACT,
+        });
+        expectEvent(trx3, "BallotCreated", { ballotId: "3" });
+    });
+
+    it("Creating a voting ballot, checking if deposit was made", async function() {
         const ballotId = 1;
         const user2 = await helper.getEthAccount(1);
 
@@ -75,6 +92,30 @@ contract("BaseVotingContract", function() {
             ballotId: new BN(ballotId),
             depositAmount: helper.VOTING_DEPOSIT_MOCK_CONTRACT,
         });
+    });
+
+    it("Creating a voting ballot with insufficient deposit", async function() {
+        const user2 = await helper.getEthAccount(1);
+
+        await expect(
+            this.baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID, {
+                from: user2,
+                value: "100", // some random value that is less then deposit value //helper.VOTING_DEPOSIT_MOCK_CONTRACT
+                gas: 10_000_000,
+            })
+        ).to.eventually.be.rejectedWith("INV_DEP");
+    });
+
+    it("Creating a voting ballot with value greater then deposit", async function() {
+        const user2 = await helper.getEthAccount(1);
+
+        await expect(
+            this.baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID, {
+                from: user2,
+                value: +helper.VOTING_DEPOSIT_MOCK_CONTRACT + +10000, // some value greater then the deposit value
+                gas: 10_000_000,
+            })
+        ).to.eventually.be.rejectedWith("INV_DEP");
     });
 
     it("Creating a voting ballot, single voter and declaring winner, ballot win, check for released deposit", async function() {
@@ -146,6 +187,28 @@ contract("BaseVotingContract", function() {
 
         let trx = await this.baseVotingContractMock.declareWinner(ballotId);
         await expectEvent(trx, "BallotResult", { ballotId: new BN(ballotId), result: false });
+    });
+
+    it("Creating a voting ballot, single voter and try to declare winner twice, expect revert", async function() {
+        const ballotId = 1;
+        const user1 = await helper.getEthAccount(0);
+        const user2 = await helper.getEthAccount(1);
+        const user3 = await helper.getEthAccount(2);
+
+        await this.baseVotingContractMock.createBallot(true, COMMUNITY_TOKEN_ID, {
+            from: user2,
+            value: helper.VOTING_DEPOSIT_MOCK_CONTRACT,
+        });
+
+        await this.baseVotingContractMock.castVote(ballotId, true, { from: user1 });
+
+        await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 2);
+
+        let trx = await this.baseVotingContractMock.declareWinner(ballotId);
+        await expectEvent(trx, "BallotResult", { ballotId: new BN(ballotId), result: true });
+        await expect(
+            this.baseVotingContractMock.declareWinner(ballotId)
+        ).to.eventually.be.rejectedWith("INVALID: RESULT_ALREADY_DECLARED");
     });
 
     it("Creating a voting ballot, voting is done more than minTurnOut, ballot win with 67%", async function() {
@@ -1006,7 +1069,7 @@ contract("BaseVotingContract", function() {
         const user3 = await helper.getEthAccount(2);
 
         const ballotId = 1;
-        const tokenId = 1;
+        const tokenId = 2;
         await treasuryCoreContractMock.mintTokensForMe(tokenId, await web3.utils.toWei("450000"), {
             from: user1,
         });

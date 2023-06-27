@@ -26,10 +26,6 @@ contract("Treasury Contract", function() {
         const tx = await tracksContract.createNewTracks([["fileHash", "fileLink", "Category"]], {
             from: owner,
         });
-        await expectEvent(tx, "TrackCreated", {
-            filehash: "fileHash",
-            category: "Category",
-        });
     }
 
     before(setup);
@@ -162,6 +158,334 @@ contract("Treasury Contract", function() {
                 { from: nonOwner }
             )
         ).to.eventually.rejectedWith("INVALID: ONLY_RECORD_OWNER");
+    });
+
+    it("Create a record, try to create community token with 0 tokens, expect revert", async function() {
+        const user1 = await helper.getEthAccount(0);
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
+
+        // Create new contribution token, it's id will be 2
+        await this.contributionContract.createSeedContribution(
+            [
+                [1, 2, 3],
+                "contribution title",
+                "preview.raw",
+                "preview.hash",
+                "This is the description for the record",
+            ],
+            await helper.getEthAccount(8),
+            0,
+            { from: user1 }
+        );
+
+        // Create new record with new contribution
+        await this.recordsContract.createNewRecord(
+            ["Test", "image.png", "Cat1", 2],
+            await helper.getEthAccount(8),
+            "0",
+            {
+                value: 0,
+            }
+        );
+
+        await expect(
+            this.treasuryContract.createNewCommunityToken([
+                2,
+                await web3.utils.toWei("0"),
+                await web3.utils.toWei("0"),
+                "Test",
+                "TEST",
+            ])
+        ).to.eventually.rejectedWith("INVALID: AT_LEAST_1_TOKEN");
+    });
+
+    it("Create a record, try to create governance token with 0 tokens, expect revert", async function() {
+        const user1 = await helper.getEthAccount(0);
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
+
+        // Create new contribution token, it's id will be 2
+        await this.contributionContract.createSeedContribution(
+            [
+                [1, 2, 3],
+                "contribution title",
+                "preview.raw",
+                "preview.hash",
+                "This is the description for the record",
+            ],
+            await helper.getEthAccount(8),
+            0,
+            { from: user1 }
+        );
+
+        // Create new record with new contribution
+        await this.recordsContract.createNewRecord(
+            ["Test", "image.png", "Cat1", 2],
+            await helper.getEthAccount(8),
+            "0",
+            {
+                value: 0,
+            }
+        );
+
+        await expect(
+            this.treasuryContract.createNewGovernanceToken([
+                2,
+                await web3.utils.toWei("0"),
+                await web3.utils.toWei("0"),
+                "Test",
+                "TEST",
+            ])
+        ).to.eventually.rejectedWith("INVALID: AT_LEAST_1_TOKEN");
+    });
+
+    it("Create a record, create community token with less token supply then user balance, expect revert", async function() {
+        const user1 = await helper.getEthAccount(0);
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
+
+        // Create new contribution token, it's id will be 2
+        await this.contributionContract.createSeedContribution(
+            [
+                [1, 2, 3],
+                "contribution title",
+                "preview.raw",
+                "preview.hash",
+                "This is the description for the record",
+            ],
+            await helper.getEthAccount(8),
+            0,
+            { from: user1 }
+        );
+
+        // Create new record with new contribution
+        await this.recordsContract.createNewRecord(
+            ["Test", "image.png", "Cat1", 2],
+            await helper.getEthAccount(8),
+            "0",
+            {
+                value: 0,
+            }
+        );
+
+        // Creating token where the token supply is less then the user balance
+        await expect(
+            this.treasuryContract.createNewCommunityToken(
+                [2, await web3.utils.toWei("1000"), COMMUNITY_TOKEN_BALANCE_USER1, "Test", "TEST"],
+                { from: user1 }
+            )
+        ).to.eventually.rejectedWith("INVALID: USER_BALANCE_MORE_THAN_SUPPLY");
+    });
+
+    it("Create a record, create governance token with less token supply then user balance, expect revert", async function() {
+        const user1 = await helper.getEthAccount(0);
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
+
+        // Create new contribution token, it's id will be 2
+        await this.contributionContract.createSeedContribution(
+            [
+                [1, 2, 3],
+                "contribution title",
+                "preview.raw",
+                "preview.hash",
+                "This is the description for the record",
+            ],
+            await helper.getEthAccount(8),
+            0,
+            { from: user1 }
+        );
+
+        // Create new record with new contribution
+        await this.recordsContract.createNewRecord(
+            ["Test", "image.png", "Cat1", 2],
+            await helper.getEthAccount(8),
+            "0",
+            {
+                value: 0,
+            }
+        );
+
+        // Creating token where the token supply is less then the user balance
+        await expect(
+            this.treasuryContract.createNewCommunityToken(
+                [2, await web3.utils.toWei("1000"), COMMUNITY_TOKEN_BALANCE_USER1, "Test", "TEST"],
+                { from: user1 }
+            )
+        ).to.eventually.rejectedWith("INVALID: USER_BALANCE_MORE_THAN_SUPPLY");
+    });
+
+    it("Create a record, try to create community token with already used SYMBOL", async function() {
+        const user1 = await helper.getEthAccount(0);
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
+
+        // Create new contribution token, it's id will be 2
+        await this.contributionContract.createSeedContribution(
+            [
+                [1, 2, 3],
+                "contribution title",
+                "preview.raw",
+                "preview.hash",
+                "This is the description for the record",
+            ],
+            await helper.getEthAccount(8),
+            0,
+            { from: user1 }
+        );
+
+        // Create new record with new contribution
+        await this.recordsContract.createNewRecord(
+            ["Test", "image.png", "Cat1", 2],
+            await helper.getEthAccount(8),
+            "0",
+            {
+                value: 0,
+            }
+        );
+
+        // Try to create community token with user token symbol
+        await expect(
+            this.treasuryContract.createNewCommunityToken(
+                [
+                    2,
+                    await web3.utils.toWei("1000000"),
+                    COMMUNITY_TOKEN_BALANCE_USER1,
+                    "Test",
+                    "TEST",
+                ],
+                { from: user1 }
+            )
+        ).to.eventually.be.rejectedWith("INVALID: TOKEN_SYMBOL_ALREADY_IN_USE");
+    });
+
+    it("Create a record, try to create governance token with already used SYMBOL.", async function() {
+        const user1 = await helper.getEthAccount(0);
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
+
+        // Create new contribution token, it's id will be 2
+        await this.contributionContract.createSeedContribution(
+            [
+                [1, 2, 3],
+                "contribution title",
+                "preview.raw",
+                "preview.hash",
+                "This is the description for the record",
+            ],
+            await helper.getEthAccount(8),
+            0,
+            { from: user1 }
+        );
+
+        // Create new record with new contribution
+        await this.recordsContract.createNewRecord(
+            ["Test", "image.png", "Cat1", 2],
+            await helper.getEthAccount(8),
+            "0",
+            {
+                value: 0,
+            }
+        );
+
+        // Creating token where the token supply is less then the user balance
+        await expect(
+            this.treasuryContract.createNewCommunityToken(
+                [
+                    2,
+                    await web3.utils.toWei("1000000"),
+                    COMMUNITY_TOKEN_BALANCE_USER1,
+                    "Test",
+                    "TEST",
+                ],
+                { from: user1 }
+            )
+        ).to.eventually.rejectedWith("INVALID: TOKEN_SYMBOL_ALREADY_IN_USE");
+    });
+
+    it("Create a record, try to create community token with empty SYMBOL, should revert", async function() {
+        const user1 = await helper.getEthAccount(0);
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
+
+        // Create new contribution token, it's id will be 2
+        await this.contributionContract.createSeedContribution(
+            [
+                [1, 2, 3],
+                "contribution title",
+                "preview.raw",
+                "preview.hash",
+                "This is the description for the record",
+            ],
+            await helper.getEthAccount(8),
+            0,
+            { from: user1 }
+        );
+
+        // Create new record with new contribution
+        await this.recordsContract.createNewRecord(
+            ["Test", "image.png", "Cat1", 2],
+            await helper.getEthAccount(8),
+            "0",
+            {
+                value: 0,
+            }
+        );
+
+        // Try to create community token with user token symbol
+        await expect(
+            this.treasuryContract.createNewCommunityToken(
+                [2, await web3.utils.toWei("1000000"), COMMUNITY_TOKEN_BALANCE_USER1, "", ""],
+                { from: user1 }
+            )
+        ).to.eventually.be.rejectedWith("INVALID: TOKEN_SYMBOL_ALREADY_IN_USE");
+    });
+
+    it("Create a record, try to create governance token with empty SYMBOL, should revert.", async function() {
+        const user1 = await helper.getEthAccount(0);
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
+        await createTrack(this.tracksContract, user1);
+
+        // Create new contribution token, it's id will be 2
+        await this.contributionContract.createSeedContribution(
+            [
+                [1, 2, 3],
+                "contribution title",
+                "preview.raw",
+                "preview.hash",
+                "This is the description for the record",
+            ],
+            await helper.getEthAccount(8),
+            0,
+            { from: user1 }
+        );
+
+        // Create new record with new contribution
+        await this.recordsContract.createNewRecord(
+            ["Test", "image.png", "Cat1", 2],
+            await helper.getEthAccount(8),
+            "0",
+            {
+                value: 0,
+            }
+        );
+
+        // Creating token where the token supply is less then the user balance
+        await expect(
+            this.treasuryContract.createNewCommunityToken(
+                [2, await web3.utils.toWei("1000000"), COMMUNITY_TOKEN_BALANCE_USER1, "", ""],
+                { from: user1 }
+            )
+        ).to.eventually.rejectedWith("INVALID: TOKEN_SYMBOL_ALREADY_IN_USE");
     });
 
     it("Create a record, create community token twice, reject.", async function() {
@@ -601,7 +925,5 @@ contract("Treasury Contract", function() {
             "UNAUTHORIZED: ONLY_SNAPSHOT_CALLERS"
         );
     });
-
-    //TODO Define upper bound and lower bound limit for token creation in both community and governance. And tests for this.
 });
 

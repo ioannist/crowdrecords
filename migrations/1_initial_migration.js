@@ -54,7 +54,7 @@ module.exports = async (deployer) => {
     );
     sleep(15000);
     let recordsContract = await RecordsContract.deployed();
-    await deployer.deploy(TracksContract);
+    await deployer.deploy(TracksContract, await getEthAccount(0));
     sleep(15000);
     let tracksContract = await TracksContract.deployed();
     await deployer.deploy(CrdTokenContract, await getEthAccount(0));
@@ -176,6 +176,7 @@ module.exports = async (deployer) => {
         crowdrecordsGovernor.address
     );
     await recordsContract.initialize(controllerContract.address);
+    await tracksContract.initialize(controllerContract.address);
 
     console.log(
         "🚀 ~ file: 1_initial_migration.js:179 ~ module.exports= ~ crowdrecordsGovernor:",
