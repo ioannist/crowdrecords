@@ -123,13 +123,13 @@ contract TracksContract is Initializable {
         for (uint i = 0; i < length; ) {
             _tokenIds.increment();
             trackIds[i] = _tokenIds.current();
-            Tracks memory track = Tracks({
-                filehash: tracksPayload[i].filehash,
-                filelink: tracksPayload[i].filelink,
-                category: tracksPayload[i].category,
-                creationDate: block.timestamp,
-                owner: owner
-            });
+            // Tracks memory track = Tracks({
+            //     filehash: tracksPayload[i].filehash,
+            //     filelink: tracksPayload[i].filelink,
+            //     category: tracksPayload[i].category,
+            //     creationDate: block.timestamp,
+            //     owner: owner
+            // });
 
             // emit TrackCreated({
             //     filehash: tracksPayload[i].filehash,
@@ -140,7 +140,14 @@ contract TracksContract is Initializable {
             //     owner: owner
             // });
 
-            tracksData[trackIds[i]] = track;
+            // tracksData[trackIds[i]] = track;
+            tracksData[trackIds[i]] = Tracks({
+                filehash: tracksPayload[i].filehash,
+                filelink: tracksPayload[i].filelink,
+                category: tracksPayload[i].category,
+                creationDate: block.timestamp,
+                owner: owner
+            });
             unchecked {
                 ++i;
             }

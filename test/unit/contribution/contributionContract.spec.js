@@ -515,7 +515,7 @@ contract("Contribution Contract", function() {
                 GOVERNANCE_TOKEN_ID
             );
 
-            expectEvent(tx, "BallotResult", { result: true });
+            expectEvent(tx, "ContributionBallotResult", { result: true });
 
             await expect(
                 this.treasuryContract.balanceOf(contributionOwner, COMMUNITY_TOKEN_ID)
@@ -536,7 +536,7 @@ contract("Contribution Contract", function() {
             await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 1);
 
             let tx = await this.contributionVotingContract.declareWinner(NEW_CONTRIBUTION_1_ID);
-            expectEvent(tx, "BallotResult", { result: false });
+            expectEvent(tx, "ContributionBallotResult", { result: false });
 
             await expect(
                 this.treasuryContract.balanceOf(contributionOwner, COMMUNITY_TOKEN_ID)
@@ -558,7 +558,7 @@ contract("Contribution Contract", function() {
 
             let tx = await this.contributionVotingContract.declareWinner(NEW_CONTRIBUTION_1_ID);
 
-            expectEvent(tx, "BallotResult", { result: true });
+            expectEvent(tx, "ContributionBallotResult", { result: true });
 
             await expect(
                 this.treasuryContract.balanceOf(contributionOwner, COMMUNITY_TOKEN_ID)
@@ -627,7 +627,7 @@ contract("Contribution Contract", function() {
 
             tx = await this.contributionVotingContract.declareWinner(newContributionId);
 
-            expectEvent(tx, "BallotResult", { result: false });
+            expectEvent(tx, "ContributionBallotResult", { result: false });
 
             //The balance of user shouldn't increase and still be as same as it was earlier
             await expect(
@@ -695,7 +695,7 @@ contract("Contribution Contract", function() {
             expect(newReward.governanceReward).to.be.bignumber.equal(rewardGovernanceToken);
 
             // Expect the correct event to be emitted
-            expectEvent(tx, "counterOfferAction", {
+            expectEvent(tx, "CounterOfferAction", {
                 contributionId: NEW_CONTRIBUTION_1_ID.toString(),
                 voterId: counterOfferProposer.toString(),
                 status: "2",
@@ -733,7 +733,7 @@ contract("Contribution Contract", function() {
             expect(newReward.governanceReward).to.be.bignumber.equal(rewardGovernanceToken);
 
             // Expect the correct event to be emitted
-            expectEvent(tx, "counterOfferAction", {
+            expectEvent(tx, "CounterOfferAction", {
                 contributionId: NEW_CONTRIBUTION_1_ID.toString(),
                 voterId: counterOfferProposer.toString(),
                 status: "3",
@@ -898,14 +898,14 @@ contract("Contribution Contract", function() {
                 }
             );
 
-            expectEvent(trx, "counterOfferAction");
+            expectEvent(trx, "CounterOfferAction");
 
             //Incrementing the blocks so that we can declare winner
             await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 1);
 
             let tx = await this.contributionVotingContract.declareWinner(NEW_CONTRIBUTION_1_ID);
 
-            expectEvent(tx, "BallotResult", { result: true });
+            expectEvent(tx, "ContributionBallotResult", { result: true });
 
             await expect(
                 this.treasuryContract.balanceOf(contributionOwner, COMMUNITY_TOKEN_ID)
@@ -938,14 +938,14 @@ contract("Contribution Contract", function() {
                 }
             );
 
-            expectEvent(trx, "counterOfferAction");
+            expectEvent(trx, "CounterOfferAction");
 
             //Incrementing the blocks so that we can declare winner
             await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 1);
 
             let tx = await this.contributionVotingContract.declareWinner(NEW_CONTRIBUTION_1_ID);
 
-            expectEvent(tx, "BallotResult", { result: false });
+            expectEvent(tx, "ContributionBallotResult", { result: false });
 
             await expect(
                 this.treasuryContract.balanceOf(contributionOwner, COMMUNITY_TOKEN_ID)
@@ -1022,14 +1022,14 @@ contract("Contribution Contract", function() {
                 }
             );
 
-            expectEvent(trx, "counterOfferAction");
+            expectEvent(trx, "CounterOfferAction");
 
             //Incrementing the blocks so that we can declare winner
             await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 1);
 
             let tx = await this.contributionVotingContract.declareWinner(NEW_CONTRIBUTION_1_ID);
 
-            expectEvent(tx, "BallotResult", { result: false });
+            expectEvent(tx, "ContributionBallotResult", { result: false });
 
             await expect(
                 this.treasuryContract.balanceOf(contributionOwner, COMMUNITY_TOKEN_ID)
@@ -1106,14 +1106,14 @@ contract("Contribution Contract", function() {
                 }
             );
 
-            expectEvent(trx, "counterOfferAction");
+            expectEvent(trx, "CounterOfferAction");
 
             //Incrementing the blocks so that we can declare winner
             await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 1);
 
             let tx = await this.contributionVotingContract.declareWinner(NEW_CONTRIBUTION_1_ID);
 
-            expectEvent(tx, "BallotResult", { result: true });
+            expectEvent(tx, "ContributionBallotResult", { result: true });
 
             await expect(
                 this.treasuryContract.balanceOf(contributionOwner, COMMUNITY_TOKEN_ID)
@@ -1153,10 +1153,10 @@ contract("Contribution Contract", function() {
                 }
             );
 
-            expectEvent(trx, "counterOfferAction");
+            expectEvent(trx, "CounterOfferAction");
 
             const eventCount = trx.receipt.logs.length;
-            // Here the count of counterOfferAction event should be only 1 as there is only one unique address whose counter offer is to be rejected
+            // Here the count of CounterOfferAction event should be only 1 as there is only one unique address whose counter offer is to be rejected
             expect(eventCount).to.be.equal(1);
 
             //Incrementing the blocks so that we can declare winner
@@ -1164,7 +1164,7 @@ contract("Contribution Contract", function() {
 
             let tx = await this.contributionVotingContract.declareWinner(NEW_CONTRIBUTION_1_ID);
 
-            expectEvent(tx, "BallotResult", { result: true });
+            expectEvent(tx, "ContributionBallotResult", { result: true });
 
             await expect(
                 this.treasuryContract.balanceOf(contributionOwner, COMMUNITY_TOKEN_ID)
@@ -1242,14 +1242,14 @@ contract("Contribution Contract", function() {
                 }
             );
 
-            expectEvent(trx, "counterOfferAction");
+            expectEvent(trx, "CounterOfferAction");
 
             //Incrementing the blocks so that we can declare winner
             await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 1);
 
             let tx = await this.contributionVotingContract.declareWinner(NEW_CONTRIBUTION_1_ID);
 
-            expectEvent(tx, "BallotResult", { result: true });
+            expectEvent(tx, "ContributionBallotResult", { result: true });
 
             await expect(
                 this.treasuryContract.balanceOf(contributionOwner, COMMUNITY_TOKEN_ID)

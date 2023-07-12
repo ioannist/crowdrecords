@@ -97,7 +97,7 @@ contract("AgreementContract", function() {
 
         const winner = await this.agreementContract.declareWinner(agreementId);
 
-        await expectEvent(winner, "BallotResult", {
+        await expectEvent(winner, "AgreementBallotResult", {
             agreementId: new BN(agreementId),
             result: true,
         });
@@ -129,7 +129,7 @@ contract("AgreementContract", function() {
 
         const winner = await this.agreementContract.declareWinner(agreementId);
 
-        await expectEvent(winner, "BallotResult", {
+        await expectEvent(winner, "AgreementBallotResult", {
             agreementId: new BN(agreementId),
             result: false,
         });
@@ -161,7 +161,7 @@ contract("AgreementContract", function() {
 
         const winner = await this.agreementContract.declareWinner(agreementId);
 
-        await expectEvent(winner, "BallotResult", {
+        await expectEvent(winner, "AgreementBallotResult", {
             agreementId: new BN(agreementId),
             result: false,
         });
@@ -204,7 +204,7 @@ contract("AgreementContract", function() {
 
             const winner = await this.agreementContract.declareWinner(this.firstAgreementId);
 
-            await expectEvent(winner, "BallotResult", {
+            await expectEvent(winner, "AgreementBallotResult", {
                 agreementId: new BN(this.firstAgreementId),
                 result: true,
             });
@@ -1452,7 +1452,7 @@ contract("AgreementContract", function() {
 
             const winner = await this.agreementContract.declareWinner(this.newAgreementId);
 
-            await expectEvent(winner, "BallotResult", {
+            await expectEvent(winner, "AgreementBallotResult", {
                 agreementId: new BN(this.newAgreementId),
                 result: true,
             });
@@ -1584,7 +1584,7 @@ contract("AgreementContract", function() {
 
             const winner = await this.agreementContract.declareWinner(this.newAgreementId);
 
-            await expectEvent(winner, "BallotResult", {
+            await expectEvent(winner, "AgreementBallotResult", {
                 agreementId: new BN(this.newAgreementId),
                 result: true,
             });

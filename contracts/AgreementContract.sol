@@ -124,7 +124,7 @@ contract AgreementContract is BaseVotingContract {
     /// @param result this is the status of the result either true if user won that is he received
     /// @param minTurnOut this status indicates if minimum amount of user showed up for voting
     ///  more than 66% of votes or false if user lost
-    event BallotResult(
+    event AgreementBallotResult(
         uint256 agreementId,
         uint256 ballotId,
         bool result,
@@ -264,7 +264,7 @@ contract AgreementContract is BaseVotingContract {
 
         _releaseDeposit(agreementMap[agreementId].ballotId);
 
-        emit BallotResult(
+        emit AgreementBallotResult(
             agreementId,
             agreementMap[agreementId].ballotId,
             result,

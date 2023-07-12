@@ -91,7 +91,7 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
     /// @param newGovernanceReward This is the new reward amount counter offered by the voter
     /// @param newCommunityReward This is the new reward amount counter offered by the voter
     /// @param status This is the status of the counter offer that is => either ACCEPTED = 2 | REJECTED = 3
-    event counterOfferAction(
+    event CounterOfferAction(
         uint256 contributionId,
         address voterId,
         uint256 newGovernanceReward,
@@ -105,7 +105,7 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
     /// @param result this is the status of the result, either true if user won that is
     /// @param minTurnOut this status indicates if minimum amount of user showed up for voting
     /// he received more than 66% of votes or false if user lost
-    event BallotResult(
+    event ContributionBallotResult(
         uint256 contributionId,
         uint256 ballotId,
         bool result,
@@ -330,7 +330,7 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
                             counterOfferIds[i],
                             action
                         );
-                        emit counterOfferAction(
+                        emit CounterOfferAction(
                             contributionId,
                             counterOfferIds[i],
                             newGovernanceReward,
@@ -348,7 +348,7 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
                         counterOfferIds[i],
                         action
                     );
-                    emit counterOfferAction(
+                    emit CounterOfferAction(
                         contributionId,
                         counterOfferIds[i],
                         newGovernanceReward,
@@ -389,7 +389,7 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
         );
         _releaseDeposit(rewardMapping[contributionId].ballotId);
 
-        emit BallotResult(
+        emit ContributionBallotResult(
             contributionId,
             rewardMapping[contributionId].ballotId,
             result,

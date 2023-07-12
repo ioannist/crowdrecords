@@ -1,4 +1,4 @@
-contract("Royalty agreement", function () {
+contract("Royalty agreement", function() {
     require("./agreement.spec");
 });
 
