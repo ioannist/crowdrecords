@@ -1444,7 +1444,7 @@ contract("AgreementContract", function() {
                     value: helper.VOTING_DEPOSIT_AGREEMENT_CONTRACT,
                 }
             );
-            this.newAgreementId = trx.receipt.logs[1].args.agreementId.toString();
+            this.newAgreementId = trx.receipt.logs[0].args.agreementId.toString();
 
             await this.agreementContract.castVoteForAgreement(this.newAgreementId, true);
 
@@ -1576,7 +1576,7 @@ contract("AgreementContract", function() {
                     value: helper.VOTING_DEPOSIT_AGREEMENT_CONTRACT,
                 }
             );
-            this.newAgreementId = trx.receipt.logs[1].args.agreementId.toString();
+            this.newAgreementId = trx.receipt.logs[0].args.agreementId.toString();
 
             await this.agreementContract.castVoteForAgreement(this.newAgreementId, true);
 

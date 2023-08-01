@@ -25,6 +25,7 @@ contract ContributionContract is Initializable {
     /// of all the previous tracks
     /// @param status this is status of the contribution that is (PENDING = 1 | ACCEPTED = 2| REJECTED = 3)
     /// @param description the description of record that is in text format
+    /// @param owner the owner of the contribution
     event ContributionCreated(
         uint256 contributionId,
         uint256[] tracks,
@@ -36,7 +37,8 @@ contract ContributionContract is Initializable {
         bool seedContribution,
         bool roughMix,
         uint256 status,
-        string description
+        string description,
+        address owner
     );
 
     /// @dev This structure will store information of the contribution
@@ -376,7 +378,8 @@ contract ContributionContract is Initializable {
             contribution.seedContribution,
             contribution.roughMix,
             contribution.status,
-            contribution.description
+            contribution.description,
+            contribution.owner
         );
     }
 }

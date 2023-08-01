@@ -6,7 +6,7 @@ import "./interface/IRecords.sol";
 import "./interface/ITreasuryCore.sol";
 
 contract ControllerContract {
-    event setupNewRecordCalled(
+    event SetupNewRecordCalled(
         address caller,
         uint[] tracksId,
         uint seedId,
@@ -15,7 +15,7 @@ contract ControllerContract {
         uint commTokenId
     );
 
-    event createNewContributionCalled(
+    event CreateNewContributionCalled(
         address caller,
         uint[] tracksId,
         uint contributionId
@@ -121,7 +121,7 @@ contract ControllerContract {
         );
 
         {
-            emit setupNewRecordCalled(
+            emit SetupNewRecordCalled(
                 msg.sender,
                 trackIds,
                 contributionId,
@@ -160,7 +160,7 @@ contract ControllerContract {
         );
 
         {
-            emit createNewContributionCalled(
+            emit CreateNewContributionCalled(
                 msg.sender,
                 trackIds,
                 contributionId

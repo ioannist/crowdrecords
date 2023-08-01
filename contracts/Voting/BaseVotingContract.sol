@@ -44,7 +44,7 @@ contract BaseVotingContract is Initializable {
         bool isPresent;
     }
 
-    /// @dev this will be emitted when a deposit is made
+    /* /// @dev this will be emitted when a deposit is made
     /// @param owner This is the owner of the voting deposit
     /// @param ballotId This is the id of the voting ballot
     /// @param depositAmount This is the amount of token that are deposited by the user
@@ -66,7 +66,7 @@ contract BaseVotingContract is Initializable {
         address owner,
         uint256 ballotId,
         uint256 depositAmount
-    );
+    ); */
 
     uint256 public VOTING_DEPOSIT = 1 ether / 100;
     uint256 public VOTING_BLOCK_PERIOD = 25;
@@ -389,13 +389,13 @@ contract BaseVotingContract is Initializable {
             isClaimed: false,
             isPresent: true
         });
-        emit DepositCreated(
-            votingDeposit.owner,
-            votingDeposit.ballotId,
-            votingDeposit.depositAmount,
-            votingDeposit.isClaimed,
-            votingDeposit.isPresent
-        );
+        // emit DepositCreated(
+        //     votingDeposit.owner,
+        //     votingDeposit.ballotId,
+        //     votingDeposit.depositAmount,
+        //     votingDeposit.isClaimed,
+        //     votingDeposit.isPresent
+        // );
         depositMap[ballotId] = votingDeposit;
     }
 
@@ -411,10 +411,10 @@ contract BaseVotingContract is Initializable {
 
         require(sent, "INV_DEP_CLAIM");
 
-        emit DepositClaimed(
-            depositMap[ballotId].owner,
-            ballotId,
-            depositMap[ballotId].depositAmount
-        );
+        // emit DepositClaimed(
+        //     depositMap[ballotId].owner,
+        //     ballotId,
+        //     depositMap[ballotId].depositAmount
+        // );
     }
 }

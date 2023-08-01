@@ -93,7 +93,7 @@ contract("ControllerContract - setupNewRecord", function() {
         );
 
         // Extract the emitted event from the transaction receipt
-        const event = expectEvent(tx, "setupNewRecordCalled");
+        const event = expectEvent(tx, "SetupNewRecordCalled");
 
         await expect(event.args.caller).to.equal(await helper.getEthAccount(0));
         await expect(event.args.tracksId.length).to.equal(this.tracksPayload.length);
@@ -119,7 +119,7 @@ contract("ControllerContract - setupNewRecord", function() {
         );
 
         // Extract the emitted event from the transaction receipt
-        const event = expectEvent(tx, "setupNewRecordCalled");
+        const event = expectEvent(tx, "SetupNewRecordCalled");
 
         const balance = await web3.eth.getBalance(await helper.getEthAccount(8));
         const expectedBalance = BigInt(+before + +helper.PLATFORM_FEES).toString();
@@ -156,7 +156,7 @@ contract("ControllerContract - setupNewRecord", function() {
         );
 
         // Extract the emitted event from the transaction receipt
-        const event = expectEvent(tx, "setupNewRecordCalled");
+        const event = expectEvent(tx, "SetupNewRecordCalled");
 
         const gasCost = await helper.calculateGasCost(tx);
         console.log("🚀 ~ file: controller.spec.js:145 ~ it ~ gasCost:", gasCost);
@@ -453,7 +453,7 @@ contract("ControllerContract - setupNewRecord", function() {
                 { value: 0 }
             );
 
-            expectEvent(tx, "setupNewRecordCalled");
+            expectEvent(tx, "SetupNewRecordCalled");
 
             this.tracksPayloadForContribution = [
                 {
@@ -496,7 +496,7 @@ contract("ControllerContract - setupNewRecord", function() {
             );
 
             // Extract the emitted event from the transaction receipt
-            expectEvent(tx, "createNewContributionCalled");
+            expectEvent(tx, "CreateNewContributionCalled");
         });
 
         it("Should create new contribution, with platform fees", async function() {

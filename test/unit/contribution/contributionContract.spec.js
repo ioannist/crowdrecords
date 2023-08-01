@@ -695,7 +695,7 @@ contract("Contribution Contract", function() {
             expect(newReward.governanceReward).to.be.bignumber.equal(rewardGovernanceToken);
 
             // Expect the correct event to be emitted
-            expectEvent(tx, "CounterOfferAction", {
+            expectEvent(tx, "CounterOfferActionForContribution", {
                 contributionId: NEW_CONTRIBUTION_1_ID.toString(),
                 voterId: counterOfferProposer.toString(),
                 status: "2",
@@ -733,7 +733,7 @@ contract("Contribution Contract", function() {
             expect(newReward.governanceReward).to.be.bignumber.equal(rewardGovernanceToken);
 
             // Expect the correct event to be emitted
-            expectEvent(tx, "CounterOfferAction", {
+            expectEvent(tx, "CounterOfferActionForContribution", {
                 contributionId: NEW_CONTRIBUTION_1_ID.toString(),
                 voterId: counterOfferProposer.toString(),
                 status: "3",
@@ -898,7 +898,7 @@ contract("Contribution Contract", function() {
                 }
             );
 
-            expectEvent(trx, "CounterOfferAction");
+            expectEvent(trx, "CounterOfferActionForContribution");
 
             //Incrementing the blocks so that we can declare winner
             await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 1);
@@ -938,7 +938,7 @@ contract("Contribution Contract", function() {
                 }
             );
 
-            expectEvent(trx, "CounterOfferAction");
+            expectEvent(trx, "CounterOfferActionForContribution");
 
             //Incrementing the blocks so that we can declare winner
             await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 1);
@@ -1022,7 +1022,7 @@ contract("Contribution Contract", function() {
                 }
             );
 
-            expectEvent(trx, "CounterOfferAction");
+            expectEvent(trx, "CounterOfferActionForContribution");
 
             //Incrementing the blocks so that we can declare winner
             await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 1);
@@ -1106,7 +1106,7 @@ contract("Contribution Contract", function() {
                 }
             );
 
-            expectEvent(trx, "CounterOfferAction");
+            expectEvent(trx, "CounterOfferActionForContribution");
 
             //Incrementing the blocks so that we can declare winner
             await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 1);
@@ -1153,7 +1153,7 @@ contract("Contribution Contract", function() {
                 }
             );
 
-            expectEvent(trx, "CounterOfferAction");
+            expectEvent(trx, "CounterOfferActionForContribution");
 
             const eventCount = trx.receipt.logs.length;
             // Here the count of CounterOfferAction event should be only 1 as there is only one unique address whose counter offer is to be rejected
@@ -1242,7 +1242,7 @@ contract("Contribution Contract", function() {
                 }
             );
 
-            expectEvent(trx, "CounterOfferAction");
+            expectEvent(trx, "CounterOfferActionForContribution");
 
             //Incrementing the blocks so that we can declare winner
             await helper.advanceMultipleBlocks(helper.VOTING_INTERVAL_BLOCKS + 1);

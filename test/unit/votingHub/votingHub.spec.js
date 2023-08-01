@@ -1,12 +1,12 @@
+const setup = require("../../utils/deployContracts");
+const helper = require("../../utils/helper");
 const chai = require("chai");
 const BN = require("bn.js");
 const chaiBN = require("chai-bn")(BN);
 const chaiAsPromised = require("chai-as-promised");
+const expectEvent = require("@openzeppelin/test-helpers/src/expectEvent");
 const expect = chai.expect;
 const timeMachine = require("../../utils/helper");
-const setup = require("../../utils/deployContracts");
-const helper = require("../../utils/helper");
-const { expectEvent, expectRevert } = require("@openzeppelin/test-helpers");
 const TreasuryCoreMockContract = artifacts.require(
     "../../../contracts/Mocks/TreasuryCoreContractMock.sol"
 );

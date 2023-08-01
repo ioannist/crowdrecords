@@ -49,6 +49,7 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
     /// @param governanceTokenId This is the id of governance token
     /// @param ballotId This is the ballot id of the reward
     /// @param createdAt time when the ballot was created
+    /// @param depositAmount this is the amount of tokens deposited by user in order to create voting
     event ContributionBallotCreated(
         address requester,
         uint256 contributionId,
@@ -58,7 +59,8 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
         uint256 governanceReward,
         uint256 governanceTokenId,
         uint256 ballotId,
-        uint256 createdAt
+        uint256 createdAt,
+        uint256 depositAmount
     );
 
     /// @dev This is when a vote is given by user.
@@ -91,7 +93,7 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
     /// @param newGovernanceReward This is the new reward amount counter offered by the voter
     /// @param newCommunityReward This is the new reward amount counter offered by the voter
     /// @param status This is the status of the counter offer that is => either ACCEPTED = 2 | REJECTED = 3
-    event CounterOfferAction(
+    event CounterOfferActionForContribution(
         uint256 contributionId,
         address voterId,
         uint256 newGovernanceReward,
@@ -204,7 +206,8 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
             governanceReward: govReward,
             governanceTokenId: govTokenId,
             ballotId: ballotId,
-            createdAt: block.timestamp
+            createdAt: block.timestamp,
+            depositAmount: VOTING_DEPOSIT
         });
 
         rewardMapping[contributionId] = contributionReward;
@@ -330,7 +333,7 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
                             counterOfferIds[i],
                             action
                         );
-                        emit CounterOfferAction(
+                        emit CounterOfferActionForContribution(
                             contributionId,
                             counterOfferIds[i],
                             newGovernanceReward,
@@ -348,7 +351,7 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
                         counterOfferIds[i],
                         action
                     );
-                    emit CounterOfferAction(
+                    emit CounterOfferActionForContribution(
                         contributionId,
                         counterOfferIds[i],
                         newGovernanceReward,
