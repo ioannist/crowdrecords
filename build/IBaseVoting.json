@@ -83,14 +83,14 @@
     "absolutePath": "project:/contracts/interface/IBaseVoting.sol",
     "exportedSymbols": {
       "IBaseVoting": [
-        15078
+        15788
       ]
     },
-    "id": 15079,
+    "id": 15789,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 15047,
+        "id": 15757,
         "literals": [
           "solidity",
           "^",
@@ -107,9 +107,9 @@
         "contractDependencies": [],
         "contractKind": "interface",
         "fullyImplemented": false,
-        "id": 15078,
+        "id": 15788,
         "linearizedBaseContracts": [
-          15078
+          15788
         ],
         "name": "IBaseVoting",
         "nameLocation": "35:11:54",
@@ -117,13 +117,13 @@
         "nodes": [
           {
             "documentation": {
-              "id": 15048,
+              "id": 15758,
               "nodeType": "StructuredDocumentation",
               "src": "53:376:54",
               "text": "@dev This function will be called when either user is transferring the tokens to other account,\n or is receiving tokens from other tokens.\n @param user address of the user whose balance is being changed\n @param previousBalance this is the old balance of the user\n @param newBalance this is the new balance of the user that is after the transfer"
             },
             "functionSelector": "abb7ed7f",
-            "id": 15059,
+            "id": 15769,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
@@ -131,17 +131,17 @@
             "nameLocation": "443:25:54",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 15057,
+              "id": 15767,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 15050,
+                  "id": 15760,
                   "mutability": "mutable",
                   "name": "user",
                   "nameLocation": "486:4:54",
                   "nodeType": "VariableDeclaration",
-                  "scope": 15059,
+                  "scope": 15769,
                   "src": "478:12:54",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -150,7 +150,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 15049,
+                    "id": 15759,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "478:7:54",
@@ -164,12 +164,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 15052,
+                  "id": 15762,
                   "mutability": "mutable",
                   "name": "tokenId",
                   "nameLocation": "508:7:54",
                   "nodeType": "VariableDeclaration",
-                  "scope": 15059,
+                  "scope": 15769,
                   "src": "500:15:54",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -178,7 +178,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 15051,
+                    "id": 15761,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "500:7:54",
@@ -191,12 +191,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 15054,
+                  "id": 15764,
                   "mutability": "mutable",
                   "name": "previousBalance",
                   "nameLocation": "533:15:54",
                   "nodeType": "VariableDeclaration",
-                  "scope": 15059,
+                  "scope": 15769,
                   "src": "525:23:54",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -205,7 +205,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 15053,
+                    "id": 15763,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "525:7:54",
@@ -218,12 +218,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 15056,
+                  "id": 15766,
                   "mutability": "mutable",
                   "name": "newBalance",
                   "nameLocation": "566:10:54",
                   "nodeType": "VariableDeclaration",
-                  "scope": 15059,
+                  "scope": 15769,
                   "src": "558:18:54",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -232,7 +232,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 15055,
+                    "id": 15765,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "558:7:54",
@@ -247,12 +247,12 @@
               "src": "468:114:54"
             },
             "returnParameters": {
-              "id": 15058,
+              "id": 15768,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "591:0:54"
             },
-            "scope": 15078,
+            "scope": 15788,
             "src": "434:158:54",
             "stateMutability": "nonpayable",
             "virtual": false,
@@ -260,13 +260,13 @@
           },
           {
             "documentation": {
-              "id": 15060,
+              "id": 15770,
               "nodeType": "StructuredDocumentation",
               "src": "598:122:54",
               "text": "@dev This function sets the MIN_TURN_OUT percentage\n @param minTurnOut This is the new turnout percentage value"
             },
             "functionSelector": "e1f2e084",
-            "id": 15065,
+            "id": 15775,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
@@ -274,17 +274,17 @@
             "nameLocation": "734:13:54",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 15063,
+              "id": 15773,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 15062,
+                  "id": 15772,
                   "mutability": "mutable",
                   "name": "minTurnOut",
                   "nameLocation": "753:10:54",
                   "nodeType": "VariableDeclaration",
-                  "scope": 15065,
+                  "scope": 15775,
                   "src": "748:15:54",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -293,7 +293,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 15061,
+                    "id": 15771,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
                     "src": "748:4:54",
@@ -308,12 +308,12 @@
               "src": "747:17:54"
             },
             "returnParameters": {
-              "id": 15064,
+              "id": 15774,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "773:0:54"
             },
-            "scope": 15078,
+            "scope": 15788,
             "src": "725:49:54",
             "stateMutability": "nonpayable",
             "virtual": false,
@@ -321,13 +321,13 @@
           },
           {
             "documentation": {
-              "id": 15066,
+              "id": 15776,
               "nodeType": "StructuredDocumentation",
               "src": "780:127:54",
               "text": "@dev This function sets the VOTING_DEPOSIT percentage\n @param depositAmount This is the new turnout percentage value"
             },
             "functionSelector": "6d8cee56",
-            "id": 15071,
+            "id": 15781,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
@@ -335,17 +335,17 @@
             "nameLocation": "921:16:54",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 15069,
+              "id": 15779,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 15068,
+                  "id": 15778,
                   "mutability": "mutable",
                   "name": "depositAmount",
                   "nameLocation": "943:13:54",
                   "nodeType": "VariableDeclaration",
-                  "scope": 15071,
+                  "scope": 15781,
                   "src": "938:18:54",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -354,7 +354,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 15067,
+                    "id": 15777,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
                     "src": "938:4:54",
@@ -369,12 +369,12 @@
               "src": "937:20:54"
             },
             "returnParameters": {
-              "id": 15070,
+              "id": 15780,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "966:0:54"
             },
-            "scope": 15078,
+            "scope": 15788,
             "src": "912:55:54",
             "stateMutability": "nonpayable",
             "virtual": false,
@@ -382,13 +382,13 @@
           },
           {
             "documentation": {
-              "id": 15072,
+              "id": 15782,
               "nodeType": "StructuredDocumentation",
               "src": "973:116:54",
               "text": "@dev This function sets the VOTING_BLOCK_PERIOD percentage\n @param votingPeriod This is the voting period"
             },
             "functionSelector": "ea0217cf",
-            "id": 15077,
+            "id": 15787,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
@@ -396,17 +396,17 @@
             "nameLocation": "1103:15:54",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 15075,
+              "id": 15785,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 15074,
+                  "id": 15784,
                   "mutability": "mutable",
                   "name": "votingPeriod",
                   "nameLocation": "1124:12:54",
                   "nodeType": "VariableDeclaration",
-                  "scope": 15077,
+                  "scope": 15787,
                   "src": "1119:17:54",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -415,7 +415,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 15073,
+                    "id": 15783,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
                     "src": "1119:4:54",
@@ -430,19 +430,19 @@
               "src": "1118:19:54"
             },
             "returnParameters": {
-              "id": 15076,
+              "id": 15786,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1146:0:54"
             },
-            "scope": 15078,
+            "scope": 15788,
             "src": "1094:53:54",
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           }
         ],
-        "scope": 15079,
+        "scope": 15789,
         "src": "25:1124:54",
         "usedErrors": []
       }
@@ -453,14 +453,14 @@
     "absolutePath": "project:/contracts/interface/IBaseVoting.sol",
     "exportedSymbols": {
       "IBaseVoting": [
-        15078
+        15788
       ]
     },
-    "id": 15079,
+    "id": 15789,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 15047,
+        "id": 15757,
         "literals": [
           "solidity",
           "^",
@@ -477,9 +477,9 @@
         "contractDependencies": [],
         "contractKind": "interface",
         "fullyImplemented": false,
-        "id": 15078,
+        "id": 15788,
         "linearizedBaseContracts": [
-          15078
+          15788
         ],
         "name": "IBaseVoting",
         "nameLocation": "35:11:54",
@@ -487,13 +487,13 @@
         "nodes": [
           {
             "documentation": {
-              "id": 15048,
+              "id": 15758,
               "nodeType": "StructuredDocumentation",
               "src": "53:376:54",
               "text": "@dev This function will be called when either user is transferring the tokens to other account,\n or is receiving tokens from other tokens.\n @param user address of the user whose balance is being changed\n @param previousBalance this is the old balance of the user\n @param newBalance this is the new balance of the user that is after the transfer"
             },
             "functionSelector": "abb7ed7f",
-            "id": 15059,
+            "id": 15769,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
@@ -501,17 +501,17 @@
             "nameLocation": "443:25:54",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 15057,
+              "id": 15767,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 15050,
+                  "id": 15760,
                   "mutability": "mutable",
                   "name": "user",
                   "nameLocation": "486:4:54",
                   "nodeType": "VariableDeclaration",
-                  "scope": 15059,
+                  "scope": 15769,
                   "src": "478:12:54",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -520,7 +520,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 15049,
+                    "id": 15759,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "478:7:54",
@@ -534,12 +534,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 15052,
+                  "id": 15762,
                   "mutability": "mutable",
                   "name": "tokenId",
                   "nameLocation": "508:7:54",
                   "nodeType": "VariableDeclaration",
-                  "scope": 15059,
+                  "scope": 15769,
                   "src": "500:15:54",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -548,7 +548,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 15051,
+                    "id": 15761,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "500:7:54",
@@ -561,12 +561,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 15054,
+                  "id": 15764,
                   "mutability": "mutable",
                   "name": "previousBalance",
                   "nameLocation": "533:15:54",
                   "nodeType": "VariableDeclaration",
-                  "scope": 15059,
+                  "scope": 15769,
                   "src": "525:23:54",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -575,7 +575,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 15053,
+                    "id": 15763,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "525:7:54",
@@ -588,12 +588,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 15056,
+                  "id": 15766,
                   "mutability": "mutable",
                   "name": "newBalance",
                   "nameLocation": "566:10:54",
                   "nodeType": "VariableDeclaration",
-                  "scope": 15059,
+                  "scope": 15769,
                   "src": "558:18:54",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -602,7 +602,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 15055,
+                    "id": 15765,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "558:7:54",
@@ -617,12 +617,12 @@
               "src": "468:114:54"
             },
             "returnParameters": {
-              "id": 15058,
+              "id": 15768,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "591:0:54"
             },
-            "scope": 15078,
+            "scope": 15788,
             "src": "434:158:54",
             "stateMutability": "nonpayable",
             "virtual": false,
@@ -630,13 +630,13 @@
           },
           {
             "documentation": {
-              "id": 15060,
+              "id": 15770,
               "nodeType": "StructuredDocumentation",
               "src": "598:122:54",
               "text": "@dev This function sets the MIN_TURN_OUT percentage\n @param minTurnOut This is the new turnout percentage value"
             },
             "functionSelector": "e1f2e084",
-            "id": 15065,
+            "id": 15775,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
@@ -644,17 +644,17 @@
             "nameLocation": "734:13:54",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 15063,
+              "id": 15773,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 15062,
+                  "id": 15772,
                   "mutability": "mutable",
                   "name": "minTurnOut",
                   "nameLocation": "753:10:54",
                   "nodeType": "VariableDeclaration",
-                  "scope": 15065,
+                  "scope": 15775,
                   "src": "748:15:54",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -663,7 +663,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 15061,
+                    "id": 15771,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
                     "src": "748:4:54",
@@ -678,12 +678,12 @@
               "src": "747:17:54"
             },
             "returnParameters": {
-              "id": 15064,
+              "id": 15774,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "773:0:54"
             },
-            "scope": 15078,
+            "scope": 15788,
             "src": "725:49:54",
             "stateMutability": "nonpayable",
             "virtual": false,
@@ -691,13 +691,13 @@
           },
           {
             "documentation": {
-              "id": 15066,
+              "id": 15776,
               "nodeType": "StructuredDocumentation",
               "src": "780:127:54",
               "text": "@dev This function sets the VOTING_DEPOSIT percentage\n @param depositAmount This is the new turnout percentage value"
             },
             "functionSelector": "6d8cee56",
-            "id": 15071,
+            "id": 15781,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
@@ -705,17 +705,17 @@
             "nameLocation": "921:16:54",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 15069,
+              "id": 15779,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 15068,
+                  "id": 15778,
                   "mutability": "mutable",
                   "name": "depositAmount",
                   "nameLocation": "943:13:54",
                   "nodeType": "VariableDeclaration",
-                  "scope": 15071,
+                  "scope": 15781,
                   "src": "938:18:54",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -724,7 +724,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 15067,
+                    "id": 15777,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
                     "src": "938:4:54",
@@ -739,12 +739,12 @@
               "src": "937:20:54"
             },
             "returnParameters": {
-              "id": 15070,
+              "id": 15780,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "966:0:54"
             },
-            "scope": 15078,
+            "scope": 15788,
             "src": "912:55:54",
             "stateMutability": "nonpayable",
             "virtual": false,
@@ -752,13 +752,13 @@
           },
           {
             "documentation": {
-              "id": 15072,
+              "id": 15782,
               "nodeType": "StructuredDocumentation",
               "src": "973:116:54",
               "text": "@dev This function sets the VOTING_BLOCK_PERIOD percentage\n @param votingPeriod This is the voting period"
             },
             "functionSelector": "ea0217cf",
-            "id": 15077,
+            "id": 15787,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
@@ -766,17 +766,17 @@
             "nameLocation": "1103:15:54",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 15075,
+              "id": 15785,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 15074,
+                  "id": 15784,
                   "mutability": "mutable",
                   "name": "votingPeriod",
                   "nameLocation": "1124:12:54",
                   "nodeType": "VariableDeclaration",
-                  "scope": 15077,
+                  "scope": 15787,
                   "src": "1119:17:54",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -785,7 +785,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 15073,
+                    "id": 15783,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
                     "src": "1119:4:54",
@@ -800,19 +800,19 @@
               "src": "1118:19:54"
             },
             "returnParameters": {
-              "id": 15076,
+              "id": 15786,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1146:0:54"
             },
-            "scope": 15078,
+            "scope": 15788,
             "src": "1094:53:54",
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           }
         ],
-        "scope": 15079,
+        "scope": 15789,
         "src": "25:1124:54",
         "usedErrors": []
       }
@@ -825,7 +825,7 @@
   },
   "networks": {},
   "schemaVersion": "3.4.6",
-  "updatedAt": "2023-04-11T15:44:43.783Z",
+  "updatedAt": "2023-06-22T12:30:17.814Z",
   "devdoc": {
     "kind": "dev",
     "methods": {
