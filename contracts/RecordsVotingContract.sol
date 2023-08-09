@@ -105,12 +105,14 @@ contract RecordsVotingContract is BaseVotingContract, IERC1155Receiver {
     /// @param ballotId Id of the ballot where voting is stored
     /// @param createdAt time when the ballot was created
     /// @param depositAmount this is the amount of tokens deposited by user in order to create voting
+    /// @param votingEndBlock this is the block when the voting will end for the ballot
     event NewVersionVotingBallotCreated(
         address requester,
         uint256 versionRequestId,
         uint256 ballotId,
         uint256 createdAt,
-        uint256 depositAmount
+        uint256 depositAmount,
+        uint256 votingEndBlock
     );
 
     /// @dev this event is generated when result of a ballot is declared
@@ -299,7 +301,8 @@ contract RecordsVotingContract is BaseVotingContract, IERC1155Receiver {
                 newVersionRequestId,
                 ballotId,
                 block.timestamp,
-                VOTING_DEPOSIT
+                VOTING_DEPOSIT,
+                votingMap[ballotId].votingEndBlock
             );
         }
 

@@ -697,7 +697,7 @@ contract("Contribution Contract", function() {
             // Expect the correct event to be emitted
             expectEvent(tx, "CounterOfferActionForContribution", {
                 contributionId: NEW_CONTRIBUTION_1_ID.toString(),
-                voterId: counterOfferProposer.toString(),
+                voter: counterOfferProposer.toString(),
                 status: "2",
             });
         });
@@ -735,7 +735,7 @@ contract("Contribution Contract", function() {
             // Expect the correct event to be emitted
             expectEvent(tx, "CounterOfferActionForContribution", {
                 contributionId: NEW_CONTRIBUTION_1_ID.toString(),
-                voterId: counterOfferProposer.toString(),
+                voter: counterOfferProposer.toString(),
                 status: "3",
             });
         });

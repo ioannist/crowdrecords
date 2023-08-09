@@ -50,6 +50,7 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
     /// @param ballotId This is the ballot id of the reward
     /// @param createdAt time when the ballot was created
     /// @param depositAmount this is the amount of tokens deposited by user in order to create voting
+    /// @param votingEndBlock this is the block when the voting will end for the ballot
     event ContributionBallotCreated(
         address requester,
         uint256 contributionId,
@@ -60,7 +61,8 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
         uint256 governanceTokenId,
         uint256 ballotId,
         uint256 createdAt,
-        uint256 depositAmount
+        uint256 depositAmount,
+        uint256 votingEndBlock
     );
 
     /// @dev This is when a vote is given by user.
@@ -77,25 +79,25 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
 
     /// @dev this is event which is created when a user proposes counter offer
     /// @param contributionId This is the id of the contribution that is linked to this ballot
-    /// @param voterId This is the id of the voter who's vote it is
+    /// @param voter This is the voters address, owner of the counter offer
     /// @param newGovernanceReward This is the new reward amount counter offered by the voter
     /// @param newCommunityReward This is the new reward amount counter offered by the voter
     event CounterOfferForContribution(
         uint256 contributionId,
-        address voterId,
+        address voter,
         uint256 newGovernanceReward,
         uint256 newCommunityReward
     );
 
     /// @dev this is event which is created when the owner of the ballot takes action on a specific counter offer
     /// @param contributionId This is the id of the contribution that is linked to this ballot
-    /// @param voterId This is the id of the voter who's vote it is
+    /// @param voter This is the voters address, owner of the counter offer
     /// @param newGovernanceReward This is the new reward amount counter offered by the voter
     /// @param newCommunityReward This is the new reward amount counter offered by the voter
     /// @param status This is the status of the counter offer that is => either ACCEPTED = 2 | REJECTED = 3
     event CounterOfferActionForContribution(
         uint256 contributionId,
-        address voterId,
+        address voter,
         uint256 newGovernanceReward,
         uint256 newCommunityReward,
         uint256 status
@@ -207,7 +209,8 @@ contract ContributionVotingContract is BaseVotingCounterOfferContract {
             governanceTokenId: govTokenId,
             ballotId: ballotId,
             createdAt: block.timestamp,
-            depositAmount: VOTING_DEPOSIT
+            depositAmount: VOTING_DEPOSIT,
+            votingEndBlock: votingMap[ballotId].votingEndBlock
         });
 
         rewardMapping[contributionId] = contributionReward;

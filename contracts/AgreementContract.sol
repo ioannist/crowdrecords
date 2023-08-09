@@ -43,6 +43,7 @@ contract AgreementContract is BaseVotingContract {
     /// @param creationTime This is the creation time of the contract
     /// @param isPresent This is to check if agreement is present or not
     /// @param depositAmount this is the amount of tokens deposited by user in order to create voting
+    /// @param votingEndBlock this is the block when the voting will end for the ballot
     event AgreementCreated(
         address requester,
         string title,
@@ -54,7 +55,8 @@ contract AgreementContract is BaseVotingContract {
         string contractHash,
         uint256 creationTime,
         bool isPresent,
-        uint256 depositAmount
+        uint256 depositAmount,
+        uint256 votingEndBlock
     );
 
     /// @dev This evet is emitted when as royalty payment is done by a user for a royalty agreement.
@@ -233,7 +235,8 @@ contract AgreementContract is BaseVotingContract {
             contractHash: contractHash,
             creationTime: block.timestamp,
             isPresent: true,
-            depositAmount: VOTING_DEPOSIT
+            depositAmount: VOTING_DEPOSIT,
+            votingEndBlock: votingMap[ballotId].votingEndBlock
         });
 
         agreementMap[ballotId] = agreement;

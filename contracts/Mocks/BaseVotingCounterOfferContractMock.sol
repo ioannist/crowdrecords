@@ -24,6 +24,30 @@ contract BaseVotingCounterOfferContractMock is BaseVotingCounterOfferContract {
     /// @param result this is the result of the counter offer that is true for accepted and false for rejected
     event CounterOfferResult(uint256 ballotId, address creator, bool result);
 
+    /// @dev this will be emitted when a deposit is made
+    /// @param owner This is the owner of the voting deposit
+    /// @param ballotId This is the id of the voting ballot
+    /// @param depositAmount This is the amount of token that are deposited by the user
+    /// @param isClaimed This represents if a deposit has been claimed or not
+    /// @param isPresent This represents if a deposit has been actually created or not
+    event DepositCreated(
+        address owner,
+        uint256 ballotId,
+        uint256 depositAmount,
+        bool isClaimed,
+        bool isPresent
+    );
+
+    /// @dev this will be emitted when the user makes claim
+    /// @param owner This is the owner of the voting deposit
+    /// @param ballotId This is the id of the voting ballot
+    /// @param depositAmount This is the amount of token that are deposited by the user
+    event DepositClaimed(
+        address owner,
+        uint256 ballotId,
+        uint256 depositAmount
+    );
+
     constructor(
         uint8 votingInterval,
         address owner
@@ -47,6 +71,14 @@ contract BaseVotingCounterOfferContractMock is BaseVotingCounterOfferContract {
     function createBallot(bool canOwnerVote, uint256 tokenId) public payable {
         uint256 ballotId = _createVoting(canOwnerVote, tokenId);
         _createDeposit(msg.sender, msg.value, ballotId);
+        VotingDeposit memory votingDeposit = depositMap[ballotId];
+        emit DepositCreated(
+            votingDeposit.owner,
+            votingDeposit.ballotId,
+            votingDeposit.depositAmount,
+            votingDeposit.isClaimed,
+            votingDeposit.isPresent
+        );
     }
 
     function castVote(uint256 ballotId, bool vote) public {
@@ -69,7 +101,12 @@ contract BaseVotingCounterOfferContractMock is BaseVotingCounterOfferContract {
 
     function declareWinner(uint256 ballotId) public {
         (bool result, bool minTurnOut) = _declareWinner(ballotId);
-        emit BallotResult(ballotId, result, minTurnOut);
         _releaseDeposit(ballotId);
+        emit DepositClaimed(
+            depositMap[ballotId].owner,
+            ballotId,
+            depositMap[ballotId].depositAmount
+        );
+        emit BallotResult(ballotId, result, minTurnOut);
     }
 }

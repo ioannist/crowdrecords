@@ -34,6 +34,7 @@ contract DilutionContract is BaseVotingContract {
     /// @param tokenId token that is to be minted
     /// @param amount the amount of tokens to be minted
     /// @param depositAmount this is the amount of tokens deposited by user in order to create voting
+    /// @param votingEndBlock this is the block when the voting will end for the ballot
     event DilutionRequestCreated(
         address requester,
         uint256 recordId,
@@ -41,7 +42,8 @@ contract DilutionContract is BaseVotingContract {
         uint256 ballotId,
         uint256 tokenId,
         uint256 amount,
-        uint256 depositAmount
+        uint256 depositAmount,
+        uint256 votingEndBlock
     );
 
     /// @dev This is when a vote is given by user.
@@ -181,7 +183,8 @@ contract DilutionContract is BaseVotingContract {
             ballotId: dilutionRequest.ballotId,
             tokenId: dilutionRequest.tokenId,
             amount: dilutionRequest.amount,
-            depositAmount: VOTING_DEPOSIT
+            depositAmount: VOTING_DEPOSIT,
+            votingEndBlock: votingMap[ballotId].votingEndBlock
         });
 
         dilutionRequestMap[dilutionId] = dilutionRequest;
