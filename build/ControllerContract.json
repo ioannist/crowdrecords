@@ -106,7 +106,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [],
@@ -119,7 +120,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [],
@@ -132,7 +134,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [
@@ -295,7 +298,8 @@
       "name": "setupNewRecord",
       "outputs": [],
       "stateMutability": "payable",
-      "type": "function"
+      "type": "function",
+      "payable": true
     },
     {
       "inputs": [
@@ -387,7 +391,8 @@
       "name": "createNewContribution",
       "outputs": [],
       "stateMutability": "payable",
-      "type": "function"
+      "type": "function",
+      "payable": true
     }
   ],
   "metadata": "{\"compiler\":{\"version\":\"0.8.12+commit.f00d7308\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_tracksContract\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_contributionsContract\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_recordsContract\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_treasuryCoreContract\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"caller\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256[]\",\"name\":\"tracksId\",\"type\":\"uint256[]\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"contributionId\",\"type\":\"uint256\"}],\"name\":\"CreateNewContributionCalled\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"caller\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256[]\",\"name\":\"tracksId\",\"type\":\"uint256[]\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"seedId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"recordId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"govTokenId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"commTokenId\",\"type\":\"uint256\"}],\"name\":\"SetupNewRecordCalled\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"contributionsContract\",\"outputs\":[{\"internalType\":\"contract IContribution\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"string\",\"name\":\"filehash\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"filelink\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"category\",\"type\":\"string\"}],\"internalType\":\"struct ITracks.TrackPayload[]\",\"name\":\"tracksPayload\",\"type\":\"tuple[]\"},{\"components\":[{\"internalType\":\"uint256[]\",\"name\":\"tracks\",\"type\":\"uint256[]\"},{\"internalType\":\"string\",\"name\":\"title\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"previewFile\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"previewFileHash\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"recordId\",\"type\":\"uint256\"},{\"internalType\":\"bool\",\"name\":\"roughMix\",\"type\":\"bool\"},{\"internalType\":\"string\",\"name\":\"description\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"communityReward\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"governanceReward\",\"type\":\"uint256\"}],\"internalType\":\"struct IContribution.NewContributionPayload\",\"name\":\"payload\",\"type\":\"tuple\"},{\"internalType\":\"address payable\",\"name\":\"platformWallet\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"platformFee\",\"type\":\"uint256\"}],\"name\":\"createNewContribution\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"recordsContract\",\"outputs\":[{\"internalType\":\"contract IRecords\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"string\",\"name\":\"filehash\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"filelink\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"category\",\"type\":\"string\"}],\"internalType\":\"struct ITracks.TrackPayload[]\",\"name\":\"tracksPayload\",\"type\":\"tuple[]\"},{\"components\":[{\"internalType\":\"uint256[]\",\"name\":\"tracks\",\"type\":\"uint256[]\"},{\"internalType\":\"string\",\"name\":\"title\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"previewFile\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"previewFileHash\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"description\",\"type\":\"string\"}],\"internalType\":\"struct IContribution.SeedContributionPayload\",\"name\":\"payload\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"image\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"recordCategory\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"seedId\",\"type\":\"uint256\"}],\"internalType\":\"struct IRecords.NewRecordPayload\",\"name\":\"recordPayload\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"uint256\",\"name\":\"recordId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"totalSupply\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"userBalance\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"symbol\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"image\",\"type\":\"string\"}],\"internalType\":\"struct ITreasuryCore.NewTokenData\",\"name\":\"govTokenData\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"uint256\",\"name\":\"recordId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"totalSupply\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"userBalance\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"symbol\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"image\",\"type\":\"string\"}],\"internalType\":\"struct ITreasuryCore.NewTokenData\",\"name\":\"commTokenData\",\"type\":\"tuple\"},{\"internalType\":\"address payable\",\"name\":\"platformWallet\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"platformFee\",\"type\":\"uint256\"}],\"name\":\"setupNewRecord\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"tracksContract\",\"outputs\":[{\"internalType\":\"contract ITracks\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{\"createNewContribution((string,string,string)[],(uint256[],string,string,string,uint256,bool,string,uint256,uint256),address,uint256)\":{\"params\":{\"payload\":\"Data required to create new contribution\",\"platformFee\":\"this is the incentive amount for the UI maintainer\",\"platformWallet\":\"this is the UI providers wallet\",\"tracksPayload\":\"Data required to create tracks\"}},\"setupNewRecord((string,string,string)[],(uint256[],string,string,string,string),(string,string,string,uint256),(uint256,uint256,uint256,string,string),(uint256,uint256,uint256,string,string),address,uint256)\":{\"params\":{\"commTokenData\":\"Data required to create a community token\",\"govTokenData\":\"Data required to create a governance token\",\"payload\":\"Data required to create seed contributions\",\"platformFee\":\"this is the incentive amount for the UI maintainer\",\"platformWallet\":\"this is the UI providers wallet\",\"recordPayload\":\"Data required to create record\",\"tracksPayload\":\"Data required to create tracks\"}}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{\"createNewContribution((string,string,string)[],(uint256[],string,string,string,uint256,bool,string,uint256,uint256),address,uint256)\":{\"notice\":\"This function is created to make the contribution creation flow simple, it will take the tracks and contribution data as parameter and then call the underlying functions.\"},\"setupNewRecord((string,string,string)[],(uint256[],string,string,string,string),(string,string,string,uint256),(uint256,uint256,uint256,string,string),(uint256,uint256,uint256,string,string),address,uint256)\":{\"notice\":\"This function is created to make the record creation flow simpler, this function takes all the required arguments which are needed to create a new record, that includes the tracks data, contribution data, record data and tokens data it make serial calls to the other contracts that are individually responsible for creation of tracks, seed contribution, record and new tokens.\"}},\"version\":1}},\"settings\":{\"compilationTarget\":{\"project:/contracts/ControllerContract.sol\":\"ControllerContract\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":438000},\"remappings\":[]},\"sources\":{\"project:/contracts/ControllerContract.sol\":{\"keccak256\":\"0xddc9f16b5fda159458fb6a6b32364a9e46236e8d6014e4488dd51d830d696824\",\"urls\":[\"bzz-raw://8bf1bbda1214ce3aa5f62cff1786d2080dc64cfa85ae816110132ea20ca199e4\",\"dweb:/ipfs/QmcjWHMTjSXU5dWVzV8R5sGkU77TbXRUgoqe67mkYpihWY\"]},\"project:/contracts/interface/IContribution.sol\":{\"keccak256\":\"0x0bd09ca3e738e30f6461454da4225846796a06afc1e82bb0dd23beae829ae3fc\",\"urls\":[\"bzz-raw://2259c2a26b3a213638d0ed2d9363f55fdc2cdac9814842ed81f5632c6eb0f931\",\"dweb:/ipfs/QmSJHtv8cKZkvpUNjZFPzMvGxbugUoWT9kvJp7qazFoR2p\"]},\"project:/contracts/interface/IRecords.sol\":{\"keccak256\":\"0x81e5ecad08c6fa5d104facfb3ededc08b5c20cd03eeea29991d5244d53dd15ec\",\"urls\":[\"bzz-raw://0d8d03aca400350fb30bd9af78d302ede74d3e800f0e74b5be81b135b2a8038b\",\"dweb:/ipfs/Qmeve7EYdE4TTjb3qGfdHJvNhkeB3YitN2QSDeZhj9xFFx\"]},\"project:/contracts/interface/ITracks.sol\":{\"keccak256\":\"0x1b5130a711461e3f8494ba4c35fd38b06ef421ef1ebf8ef71ee6d3375e7c55af\",\"urls\":[\"bzz-raw://c9721038507c7004753c45d0c0e1f78fc6ee4cd8b66d75ccc8d4433683294df5\",\"dweb:/ipfs/QmZhMzCmvUcAkuz3ZCesKZfYFHztz1gens3JZJGEKZmtFA\"]},\"project:/contracts/interface/ITreasuryCore.sol\":{\"keccak256\":\"0x700b922975e94b92a5e643f4807d373b2a52d7c33b6a783fa821d6ab577781e3\",\"urls\":[\"bzz-raw://ad1a4498363fb9ef35d4edc90182794fac6e6b49e850c25e9d31b81f2559230f\",\"dweb:/ipfs/QmNiDa3wYE33szEhAyHBaK8Bg7WgnrX65FQUAfrGgUpLQ1\"]}},\"version\":1}",
@@ -29251,7 +29256,8 @@
   },
   "networks": {},
   "schemaVersion": "3.4.6",
-  "updatedAt": "2023-07-30T18:56:00.887Z",
+  "updatedAt": "2023-09-04T11:48:55.402Z",
+  "networkType": "ethereum",
   "devdoc": {
     "kind": "dev",
     "methods": {

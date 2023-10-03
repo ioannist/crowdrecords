@@ -264,7 +264,7 @@ contract TreasuryContract is Initializable {
         return tokenId;
     }
 
-    /// @dev This function creats new community tokens for specified record
+    /// @dev This function creates new community tokens for specified record
     /// @param recordId This is the id of the record to which the token belongs to
     /// @param tokenId This is the id of the which is to be minted
     /// @param tokenAmount This is the amount that is to be minted

@@ -1,5 +1,5 @@
 contract("Orders", function() {
-    // require("./notLockedSale.spec");
+    require("./notLockedSale.spec");
     require("./lockedSale.spec");
 });
 

@@ -85,6 +85,7 @@ contract OrdersContract is Initializable {
     );
 
     /// @dev this is event which is created when a user purchases any sale order
+    /// @param purchaseId this is the id for individual purchase that is made by user
     /// @param saleId this is the Id of the sale order
     /// @param seller this is the address of the person who sold the tokens in exchange for the crd
     /// @param buyer this is the address of the owner or the sale order
@@ -107,7 +108,8 @@ contract OrdersContract is Initializable {
         uint256 governanceTokenId,
         uint256 governanceTokenAmount,
         uint256 governanceTokenCRD,
-        uint256 amountTransferred
+        uint256 amountTransferred,
+        uint256 purchaseId
     );
 
     /// @dev this event is emmited when user closes his/her sale order
@@ -124,6 +126,7 @@ contract OrdersContract is Initializable {
     ITreasuryCore public treasuryCoreContract;
     mapping(uint256 => Order) public orderBook;
     uint256 orderId = 0;
+    uint256 purchaseId = 0;
 
     constructor(address owner) {
         OWNER = owner;
@@ -336,6 +339,7 @@ contract OrdersContract is Initializable {
         require(orderBook[saleId].isClosed == false, "INVALID: ORDER_CLOSED");
 
         Order storage order = orderBook[saleId];
+        ++purchaseId;
 
         //This will check if the amount to purchase is less or equal than the order that is generated
         require(
@@ -408,7 +412,8 @@ contract OrdersContract is Initializable {
             governanceTokenId: order.governanceTokenId,
             governanceTokenAmount: governanceTokenAmount,
             governanceTokenCRD: costArr[1],
-            amountTransferred: costArr[0] + costArr[1]
+            amountTransferred: costArr[0] + costArr[1],
+            purchaseId: purchaseId
         });
 
         order.communityTokenAmount =
